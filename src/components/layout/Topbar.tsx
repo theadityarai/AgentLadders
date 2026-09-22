@@ -326,6 +326,28 @@ export function Topbar() {
           )}
         </div>
         
+        {/* Super Admin HQ shortcut */}
+        {((session?.user as any)?.role === 'SUPER_ADMIN' || session?.user?.email === 'aditya@agentladders.com' || session?.user?.email === 'admin@agentladders.com') && (
+          <Link href="/admin" style={{ textDecoration: 'none' }} title="Platform Super Admin Portal">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(15,23,42,0.2)'
+            }}>
+              <span>🛡️</span>
+              <span>Super Admin</span>
+            </div>
+          </Link>
+        )}
+
         {/* Settings Icon Link */}
         <Link href="/dashboard/settings" style={{ textDecoration: 'none', color: 'inherit' }} title="Agency Settings">
           <div style={{ color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '20px', padding: '6px' }}>

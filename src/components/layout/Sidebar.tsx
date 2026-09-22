@@ -4,8 +4,14 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { useSession } from 'next-auth/react';
+
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  const user = session?.user as any;
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN' || user?.email === 'aditya@agentladders.com' || user?.email === 'admin@agentladders.com';
 
   const isCurrent = (path: string) => pathname === path;
 
@@ -153,7 +159,31 @@ export function Sidebar() {
         <NavItem href="/dashboard/support" label="Support Tickets" icon="🎧" />
       </div>
 
-      <div style={{ padding: '12px', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--surface-color)' }}>
+      <div style={{ padding: '12px', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--surface-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        {isSuperAdmin && (
+          <Link href="/admin" style={{ textDecoration: 'none' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              padding: '9px 14px',
+              margin: '0 0 4px',
+              borderRadius: '8px',
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(15, 23, 42, 0.2)',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1e293b'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#0f172a'}
+            >
+              <span style={{ marginRight: '8px', fontSize: '15px' }}>🛡️</span>
+              <span>Super Admin HQ</span>
+            </div>
+          </Link>
+        )}
         <NavItem href="/dashboard/settings" label="Settings" icon="⚙️" />
       </div>
     </aside>

@@ -30,13 +30,24 @@ export default function LoginPage() {
       setError(res.error);
     } else {
       const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-      const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
-      router.push(callbackUrl);
+      const callbackUrl = searchParams?.get('callbackUrl');
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else if (email.toLowerCase().includes('aditya@agentladders.com') || email.toLowerCase().includes('admin@agentladders.com')) {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     }
   };
 
-  const fillDemoAccount = () => {
+  const fillSuperAdmin = () => {
     setEmail('aditya@agentladders.com');
+    setPassword('admin123');
+  };
+
+  const fillAgencyAdmin = () => {
+    setEmail('marcus@vancerealty.com');
     setPassword('admin123');
   };
 
@@ -76,26 +87,50 @@ export default function LoginPage() {
           <div className={styles.formHeader}>
             <h1>Welcome back</h1>
             <p>Enter your credentials to access your dashboard.</p>
-            <button
-              type="button"
-              onClick={fillDemoAccount}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                marginTop: '12px',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                backgroundColor: '#eff6ff',
-                border: '1px solid #bfdbfe',
-                color: '#1d4ed8',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              <span>🔑</span> Fill Demo Login (aditya@agentladders.com / admin123)
-            </button>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '14px' }}>
+              <button
+                type="button"
+                onClick={fillSuperAdmin}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '7px 12px',
+                  borderRadius: '6px',
+                  backgroundColor: '#0f172a',
+                  border: '1px solid #1e293b',
+                  color: '#ffffff',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span>🛡️</span> Fill Super Admin (aditya@agentladders.com)
+              </button>
+
+              <button
+                type="button"
+                onClick={fillAgencyAdmin}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '7px 12px',
+                  borderRadius: '6px',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  color: '#1d4ed8',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span>🏢</span> Fill Agency Admin (marcus@vancerealty.com)
+              </button>
+            </div>
           </div>
 
           {error && (

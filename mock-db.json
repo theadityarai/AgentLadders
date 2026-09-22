@@ -13,10 +13,64 @@
       "id": "usr_bt71mcv1",
       "name": "Aditya",
       "email": "aditya@agentladders.com",
-      "passwordHash": "\\.",
-      "role": "OWNER",
+      "passwordHash": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "role": "SUPER_ADMIN",
       "agencyId": "ag_ql21vxnd",
-      "password": "\\."
+      "password": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK"
+    },
+    {
+      "id": "usr_super_admin",
+      "name": "Super Admin",
+      "email": "admin@agentladders.com",
+      "password": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "passwordHash": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "role": "SUPER_ADMIN",
+      "agencyId": "ag_ql21vxnd"
+    },
+    {
+      "id": "usr_ag_vance_01",
+      "name": "Marcus Vance",
+      "email": "marcus@vancerealty.com",
+      "password": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "passwordHash": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "role": "OWNER",
+      "agencyId": "ag_vance_01"
+    },
+    {
+      "id": "usr_ag_skyline_02",
+      "name": "Eleanor Thorne",
+      "email": "eleanor@skylinecap.co.uk",
+      "password": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "passwordHash": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "role": "OWNER",
+      "agencyId": "ag_skyline_02"
+    },
+    {
+      "id": "usr_ag_coastal_03",
+      "name": "Liam Hemsworth",
+      "email": "liam@coastalestates.com.au",
+      "password": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "passwordHash": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "role": "OWNER",
+      "agencyId": "ag_coastal_03"
+    },
+    {
+      "id": "usr_ag_apex_04",
+      "name": "Tariq Al-Mansoor",
+      "email": "tariq@apexprime.ae",
+      "password": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "passwordHash": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "role": "OWNER",
+      "agencyId": "ag_apex_04"
+    },
+    {
+      "id": "usr_ag_horizon_05",
+      "name": "Sarah Jenkins",
+      "email": "sarah@horizonrealty.ca",
+      "password": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "passwordHash": "$2b$10$tv8QpEQxsKTGJOpB41.0FOxHb83qDeXAbuFm54qyPL6ua35bioRMK",
+      "role": "OWNER",
+      "agencyId": "ag_horizon_05"
     }
   ],
   "agencies": [
@@ -51,7 +105,9 @@
           "inApp": true,
           "email": true
         }
-      }
+      },
+      "status": "Active",
+      "createdAt": "2026-08-01T10:00:00.000Z"
     },
     {
       "id": "ag_0l04re04",
@@ -85,7 +141,144 @@
           "email": true
         }
       },
-      "createdAt": "2026-09-22T10:22:05.159Z"
+      "createdAt": "2026-09-22T10:22:05.159Z",
+      "status": "Active"
+    },
+    {
+      "id": "ag_vance_01",
+      "name": "Vance Luxury Realty",
+      "country": "United States",
+      "currency": "USD",
+      "plan": "Enterprise",
+      "status": "Active",
+      "propertyTypes": [
+        "Luxury Villa",
+        "Penthouse",
+        "Mansion",
+        "Estate"
+      ],
+      "leadSources": [
+        "Private Referral",
+        "Luxury Portfolio",
+        "Architectural Digest"
+      ],
+      "notificationPrefs": {
+        "New lead assigned": {
+          "inApp": true,
+          "email": true
+        }
+      },
+      "createdAt": "2026-08-10T08:00:00.000Z",
+      "ownerName": "Marcus Vance",
+      "ownerEmail": "marcus@vancerealty.com"
+    },
+    {
+      "id": "ag_skyline_02",
+      "name": "Skyline Commercial Capital",
+      "country": "United Kingdom",
+      "currency": "GBP",
+      "plan": "Enterprise",
+      "status": "Active",
+      "propertyTypes": [
+        "Office Tower",
+        "Retail Park",
+        "Industrial Hub"
+      ],
+      "leadSources": [
+        "Institutional Broker",
+        "Direct Pitch",
+        "Financial Times"
+      ],
+      "notificationPrefs": {
+        "New lead assigned": {
+          "inApp": true,
+          "email": true
+        }
+      },
+      "createdAt": "2026-08-18T10:30:00.000Z",
+      "ownerName": "Eleanor Thorne",
+      "ownerEmail": "eleanor@skylinecap.co.uk"
+    },
+    {
+      "id": "ag_coastal_03",
+      "name": "Coastal Estates International",
+      "country": "Australia",
+      "currency": "AUD",
+      "plan": "Professional",
+      "status": "Active",
+      "propertyTypes": [
+        "Beachfront House",
+        "Coastal Villa",
+        "Waterfront Penthouse"
+      ],
+      "leadSources": [
+        "Domain.com.au",
+        "Realestate.com.au",
+        "Referral"
+      ],
+      "notificationPrefs": {
+        "New lead assigned": {
+          "inApp": true,
+          "email": true
+        }
+      },
+      "createdAt": "2026-09-01T14:15:00.000Z",
+      "ownerName": "Liam Hemsworth",
+      "ownerEmail": "liam@coastalestates.com.au"
+    },
+    {
+      "id": "ag_apex_04",
+      "name": "Apex Prime Properties",
+      "country": "UAE",
+      "currency": "AED",
+      "plan": "Professional",
+      "status": "Suspended",
+      "propertyTypes": [
+        "Downtown Apartment",
+        "Palm Villa",
+        "Marina Suite"
+      ],
+      "leadSources": [
+        "PropertyFinder",
+        "Bayut",
+        "Dubai Walk-in"
+      ],
+      "notificationPrefs": {
+        "New lead assigned": {
+          "inApp": true,
+          "email": true
+        }
+      },
+      "createdAt": "2026-08-25T11:00:00.000Z",
+      "ownerName": "Tariq Al-Mansoor",
+      "ownerEmail": "tariq@apexprime.ae"
+    },
+    {
+      "id": "ag_horizon_05",
+      "name": "Horizon Real Estate Partners",
+      "country": "Canada",
+      "currency": "CAD",
+      "plan": "Starter",
+      "status": "Trial",
+      "propertyTypes": [
+        "Condo",
+        "Townhouse",
+        "Suburban Home"
+      ],
+      "leadSources": [
+        "Realtor.ca",
+        "Facebook Ads",
+        "Open House"
+      ],
+      "notificationPrefs": {
+        "New lead assigned": {
+          "inApp": true,
+          "email": true
+        }
+      },
+      "createdAt": "2026-09-15T09:45:00.000Z",
+      "ownerName": "Sarah Jenkins",
+      "ownerEmail": "sarah@horizonrealty.ca"
     }
   ],
   "notifications": [
@@ -162,6 +355,146 @@
       "price": 1250000,
       "status": "Sold",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "prop_ag_vance_01_1",
+      "agencyId": "ag_vance_01",
+      "title": "Vance Luxury Realty Flagship Listing",
+      "type": "Luxury Villa",
+      "price": 1850000,
+      "location": "Beverly Hills, CA",
+      "status": "Available",
+      "bedrooms": 4,
+      "bathrooms": 4,
+      "areaSqFt": 3800,
+      "sharesCount": 12,
+      "createdAt": "2026-08-10T08:00:00.000Z"
+    },
+    {
+      "id": "prop_ag_vance_01_2",
+      "agencyId": "ag_vance_01",
+      "title": "Vance Luxury Realty Luxury Residence",
+      "type": "Penthouse",
+      "price": 3200000,
+      "location": "Exclusive Enclave",
+      "status": "Under Contract",
+      "bedrooms": 5,
+      "bathrooms": 6,
+      "areaSqFt": 5200,
+      "sharesCount": 28,
+      "createdAt": "2026-08-10T08:00:00.000Z"
+    },
+    {
+      "id": "prop_ag_skyline_02_1",
+      "agencyId": "ag_skyline_02",
+      "title": "Skyline Commercial Capital Flagship Listing",
+      "type": "Office Tower",
+      "price": 1850000,
+      "location": "Mayfair, London",
+      "status": "Available",
+      "bedrooms": 4,
+      "bathrooms": 4,
+      "areaSqFt": 3800,
+      "sharesCount": 12,
+      "createdAt": "2026-08-18T10:30:00.000Z"
+    },
+    {
+      "id": "prop_ag_skyline_02_2",
+      "agencyId": "ag_skyline_02",
+      "title": "Skyline Commercial Capital Luxury Residence",
+      "type": "Retail Park",
+      "price": 3200000,
+      "location": "Exclusive Enclave",
+      "status": "Under Contract",
+      "bedrooms": 5,
+      "bathrooms": 6,
+      "areaSqFt": 5200,
+      "sharesCount": 28,
+      "createdAt": "2026-08-18T10:30:00.000Z"
+    },
+    {
+      "id": "prop_ag_coastal_03_1",
+      "agencyId": "ag_coastal_03",
+      "title": "Coastal Estates International Flagship Listing",
+      "type": "Beachfront House",
+      "price": 1850000,
+      "location": "Prime District",
+      "status": "Available",
+      "bedrooms": 4,
+      "bathrooms": 4,
+      "areaSqFt": 3800,
+      "sharesCount": 12,
+      "createdAt": "2026-09-01T14:15:00.000Z"
+    },
+    {
+      "id": "prop_ag_coastal_03_2",
+      "agencyId": "ag_coastal_03",
+      "title": "Coastal Estates International Luxury Residence",
+      "type": "Coastal Villa",
+      "price": 3200000,
+      "location": "Exclusive Enclave",
+      "status": "Under Contract",
+      "bedrooms": 5,
+      "bathrooms": 6,
+      "areaSqFt": 5200,
+      "sharesCount": 28,
+      "createdAt": "2026-09-01T14:15:00.000Z"
+    },
+    {
+      "id": "prop_ag_apex_04_1",
+      "agencyId": "ag_apex_04",
+      "title": "Apex Prime Properties Flagship Listing",
+      "type": "Downtown Apartment",
+      "price": 1850000,
+      "location": "Prime District",
+      "status": "Available",
+      "bedrooms": 4,
+      "bathrooms": 4,
+      "areaSqFt": 3800,
+      "sharesCount": 12,
+      "createdAt": "2026-08-25T11:00:00.000Z"
+    },
+    {
+      "id": "prop_ag_apex_04_2",
+      "agencyId": "ag_apex_04",
+      "title": "Apex Prime Properties Luxury Residence",
+      "type": "Palm Villa",
+      "price": 3200000,
+      "location": "Exclusive Enclave",
+      "status": "Under Contract",
+      "bedrooms": 5,
+      "bathrooms": 6,
+      "areaSqFt": 5200,
+      "sharesCount": 28,
+      "createdAt": "2026-08-25T11:00:00.000Z"
+    },
+    {
+      "id": "prop_ag_horizon_05_1",
+      "agencyId": "ag_horizon_05",
+      "title": "Horizon Real Estate Partners Flagship Listing",
+      "type": "Condo",
+      "price": 1850000,
+      "location": "Prime District",
+      "status": "Available",
+      "bedrooms": 4,
+      "bathrooms": 4,
+      "areaSqFt": 3800,
+      "sharesCount": 12,
+      "createdAt": "2026-09-15T09:45:00.000Z"
+    },
+    {
+      "id": "prop_ag_horizon_05_2",
+      "agencyId": "ag_horizon_05",
+      "title": "Horizon Real Estate Partners Luxury Residence",
+      "type": "Townhouse",
+      "price": 3200000,
+      "location": "Exclusive Enclave",
+      "status": "Under Contract",
+      "bedrooms": 5,
+      "bathrooms": 6,
+      "areaSqFt": 5200,
+      "sharesCount": 28,
+      "createdAt": "2026-09-15T09:45:00.000Z"
     }
   ],
   "leads": [
@@ -258,6 +591,66 @@
       "stage": "Closed Won",
       "expectedCloseDate": "2026-07-20",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "deal_ag_vance_01_1",
+      "agencyId": "ag_vance_01",
+      "title": "Acquisition of Vance Luxury Realty Flagship",
+      "amount": 1850000,
+      "stage": "Closed Won",
+      "probability": 100,
+      "commissionAmount": 46250,
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-09-10",
+      "createdAt": "2026-08-10T08:00:00.000Z"
+    },
+    {
+      "id": "deal_ag_skyline_02_1",
+      "agencyId": "ag_skyline_02",
+      "title": "Acquisition of Skyline Commercial Capital Flagship",
+      "amount": 1850000,
+      "stage": "Closed Won",
+      "probability": 100,
+      "commissionAmount": 46250,
+      "assignedBroker": "Eleanor Thorne",
+      "expectedCloseDate": "2026-09-10",
+      "createdAt": "2026-08-18T10:30:00.000Z"
+    },
+    {
+      "id": "deal_ag_coastal_03_1",
+      "agencyId": "ag_coastal_03",
+      "title": "Acquisition of Coastal Estates International Flagship",
+      "amount": 1850000,
+      "stage": "Closed Won",
+      "probability": 100,
+      "commissionAmount": 46250,
+      "assignedBroker": "Liam Hemsworth",
+      "expectedCloseDate": "2026-09-10",
+      "createdAt": "2026-09-01T14:15:00.000Z"
+    },
+    {
+      "id": "deal_ag_apex_04_1",
+      "agencyId": "ag_apex_04",
+      "title": "Acquisition of Apex Prime Properties Flagship",
+      "amount": 1850000,
+      "stage": "Closed Won",
+      "probability": 100,
+      "commissionAmount": 46250,
+      "assignedBroker": "Tariq Al-Mansoor",
+      "expectedCloseDate": "2026-09-10",
+      "createdAt": "2026-08-25T11:00:00.000Z"
+    },
+    {
+      "id": "deal_ag_horizon_05_1",
+      "agencyId": "ag_horizon_05",
+      "title": "Acquisition of Horizon Real Estate Partners Flagship",
+      "amount": 1850000,
+      "stage": "Closed Won",
+      "probability": 100,
+      "commissionAmount": 46250,
+      "assignedBroker": "Sarah Jenkins",
+      "expectedCloseDate": "2026-09-10",
+      "createdAt": "2026-09-15T09:45:00.000Z"
     }
   ],
   "clients": [

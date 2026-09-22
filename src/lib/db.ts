@@ -20,10 +20,15 @@ export interface Agency {
   country: string;
   currency: string;
   plan?: string;
+  status?: string;
+  ownerName?: string;
+  ownerEmail?: string;
   propertyTypes?: string[];
   leadSources?: string[];
   notificationPrefs?: Record<string, { inApp: boolean; email: boolean }>;
   createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
 }
 
 export interface Notification {
