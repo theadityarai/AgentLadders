@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     const db = getDb();
-    const existingUser = db.users.find(u => u.email === email);
+    const existingUser = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     
     if (existingUser) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 });
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     db.users.push({
       id: userId,
       name,
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       passwordHash: hashedPassword,
       role: 'OWNER',
