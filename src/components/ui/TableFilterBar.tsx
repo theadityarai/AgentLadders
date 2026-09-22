@@ -18,8 +18,8 @@ interface TableFilterBarProps {
   onSearchChange: (query: string) => void;
   searchPlaceholder?: string;
   filters?: FilterConfig[];
-  totalCount: number;
-  filteredCount: number;
+  totalCount?: number;
+  filteredCount?: number;
   onReset?: () => void;
 }
 
@@ -158,18 +158,20 @@ export function TableFilterBar({
       </div>
 
       {/* Right side: Showing X of Y count badge */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{
-          fontSize: '12px',
-          color: '#64748b',
-          backgroundColor: '#f1f5f9',
-          padding: '4px 10px',
-          borderRadius: '9999px',
-          fontWeight: 500
-        }}>
-          Showing <strong style={{ color: '#0f172a' }}>{filteredCount}</strong> of {totalCount} {totalCount === 1 ? 'record' : 'records'}
-        </span>
-      </div>
+      {totalCount !== undefined && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            fontSize: '12px',
+            color: '#64748b',
+            backgroundColor: '#f1f5f9',
+            padding: '4px 10px',
+            borderRadius: '9999px',
+            fontWeight: 500
+          }}>
+            Showing <strong style={{ color: '#0f172a' }}>{filteredCount ?? totalCount}</strong> of {totalCount} {totalCount === 1 ? 'record' : 'records'}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

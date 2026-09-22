@@ -1,9 +1,11 @@
 import React from 'react';
 
 export interface Column<T> {
-  key: keyof T | string;
-  label: string;
+  key?: keyof T | string;
+  label?: string;
+  header?: string;
   render?: (row: T) => React.ReactNode;
+  accessor?: (row: T) => React.ReactNode;
 }
 
 interface DataTableProps<T> {
@@ -12,6 +14,7 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void;
   emptyMessage?: string;
   onResetFilters?: () => void;
+  loading?: boolean;
 }
 
 export function DataTable<T extends Record<string, unknown>>({ 
@@ -19,8 +22,27 @@ export function DataTable<T extends Record<string, unknown>>({
   columns, 
   onRowClick, 
   emptyMessage = 'No matching records found.', 
-  onResetFilters 
+  onResetFilters,
+  loading = false
 }: DataTableProps<T>) {
+  if (loading) {
+    return (
+      <div style={{
+        padding: '50px 24px',
+        textAlign: 'center',
+        backgroundColor: '#ffffff',
+        borderRadius: '12px',
+        margin: '0 24px',
+        border: '1px solid #e2e8f0',
+        color: '#64748b',
+        fontSize: '14px',
+        fontWeight: 500
+      }}>
+        Loading records...
+      </div>
+    );
+  }
+
   if (!data || data.length === 0) {
     return (
       <div style={{
@@ -85,7 +107,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     letterSpacing: '0.05em' 
                   }}
                 >
-                  {col.label}
+                  {col.header ?? col.label}
                 </th>
               ))}
             </tr>
@@ -105,7 +127,11 @@ export function DataTable<T extends Record<string, unknown>>({
               >
                 {columns.map((col, colIndex) => (
                   <td key={colIndex} style={{ padding: '16px 20px', color: '#1e293b' }}>
-                    {col.render ? col.render(row) : (row[col.key as keyof T] as React.ReactNode)}
+                    {col.render 
+                      ? col.render(row) 
+                      : col.accessor 
+                        ? col.accessor(row) 
+                        : (col.key ? (row[col.key as keyof T] as React.ReactNode) : null)}
                   </td>
                 ))}
               </tr>

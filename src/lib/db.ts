@@ -47,12 +47,20 @@ export interface Property {
   agencyId: string;
   title: string;
   type: string;
+  purpose?: 'For Sale' | 'For Rent';
   location: string;
   price: number;
   status: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  areaSqFt?: number;
+  bedrooms?: number | string;
+  bathrooms?: number | string;
+  areaSqFt?: number | string;
+  carpetAreaSqFt?: number | string;
+  furnishing?: 'Unfurnished' | 'Semi-Furnished' | 'Fully Furnished';
+  parking?: number | string;
+  amenities?: string[];
+  sellerName?: string;
+  sellerPhone?: string;
+  keyLocationNotes?: string;
   listingType?: string;
   ownerName?: string;
   description?: string;
@@ -67,6 +75,8 @@ export interface Property {
   agentPhone?: string;
   agentEmail?: string;
   createdAt: string;
+  updatedAt?: string;
+  [key: string]: unknown;
 }
 
 export interface Lead {
@@ -78,6 +88,13 @@ export interface Lead {
   status: string;
   source: string;
   leadType?: string;
+  leadPurpose?: 'Buy' | 'Rent';
+  propertyTypeNeeded?: string;
+  bedroomsNeeded?: string;
+  budgetMin?: number | string;
+  budgetMax?: number | string;
+  financingStatus?: string;
+  urgency?: string;
   requirement?: string;
   budget?: string;
   locationPreference?: string;
@@ -86,6 +103,8 @@ export interface Lead {
   nextFollowUp?: string;
   notes?: string;
   createdAt: string;
+  updatedAt?: string;
+  [key: string]: unknown;
 }
 
 export interface Deal {

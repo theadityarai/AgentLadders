@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
@@ -20,14 +19,24 @@ interface Deal {
   probability?: number;
   dealType?: string;
   commissionRate?: string;
+  commissionAmount?: number;
   assignedBroker?: string;
   notes?: string;
 }
 
-const STAGES = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won', 'Closed Lost'];
+const STAGES = [
+  'Prospecting',
+  'Site Visit Done',
+  'Offer Submitted',
+  'Under Contract',
+  'Closed Won',
+  'Closed Lost'
+];
 
 export default function DealsPage() {
   const [data, setData] = useState<Deal[]>([]);
+  const [properties, setProperties] = useState<{ id: string; title: string; price: number }[]>([]);
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
@@ -35,14 +44,15 @@ export default function DealsPage() {
   const initialForm = {
     title: '',
     amount: '',
-    stage: 'Negotiation',
+    stage: 'Offer Submitted',
     clientName: '',
     propertyName: '',
     dealType: 'Sale Acquisition',
-    probability: '50',
+    probability: '75',
     commissionRate: '2.5%',
+    commissionAmount: 0,
     assignedBroker: 'Marcus Vance',
-    expectedCloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    expectedCloseDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     notes: ''
   };
   const [form, setForm] = useState(initialForm);
@@ -55,33 +65,76 @@ export default function DealsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [stageFilter, setStageFilter] = useState('All');
 
-  const loadDeals = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/deals');
-      const json = await res.json();
-      if (json.deals) setData(json.deals);
+      const [dealsRes, propsRes, clientsRes] = await Promise.all([
+        fetch('/api/deals'),
+        fetch('/api/properties'),
+        fetch('/api/clients')
+      ]);
+
+      const dealsJson = await dealsRes.json();
+      const propsJson = await propsRes.json();
+      const clientsJson = await clientsRes.json();
+
+      if (dealsJson.deals) setData(dealsJson.deals);
+      if (propsJson.properties) setProperties(propsJson.properties);
+      if (clientsJson.clients) setClients(clientsJson.clients);
     } catch (err) {
-      console.error('Failed to load deals', err);
+      console.error('Failed to load deals data', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadDeals();
+    loadData();
   }, []);
+
+  const handlePropertySelect = (propTitle: string) => {
+    const selectedProp = properties.find(p => p.title === propTitle);
+    setForm(prev => {
+      const price = selectedProp ? String(selectedProp.price) : prev.amount;
+      const autoTitle = prev.clientName ? `${prev.clientName} - ${propTitle}` : propTitle;
+      return {
+        ...prev,
+        propertyName: propTitle,
+        amount: price,
+        title: autoTitle
+      };
+    });
+  };
+
+  const handleClientSelect = (cName: string) => {
+    setForm(prev => {
+      const autoTitle = prev.propertyName ? `${cName} - ${prev.propertyName}` : prev.title || cName;
+      return {
+        ...prev,
+        clientName: cName,
+        title: autoTitle
+      };
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const dealPrice = parseFloat(form.amount) || 0;
+    const commPct = parseFloat(form.commissionRate) || 2.5;
+    const commVal = Math.round(dealPrice * (commPct / 100));
+
     await fetch('/api/deals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify({
+        ...form,
+        amount: dealPrice,
+        commissionAmount: commVal
+      })
     });
     setShowModal(false);
     setForm(initialForm);
-    loadDeals();
+    loadData();
   };
 
   const handleOpenEdit = (deal: Deal) => {
@@ -91,25 +144,34 @@ export default function DealsPage() {
   const handleUpdateDeal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDeal) return;
+
+    const dealPrice = parseFloat(String(editingDeal.amount)) || 0;
+    const commPct = parseFloat(String(editingDeal.commissionRate)) || 2.5;
+    const commVal = Math.round(dealPrice * (commPct / 100));
+
+    const updated = {
+      ...editingDeal,
+      amount: dealPrice,
+      commissionAmount: commVal
+    };
+
     const res = await fetch('/api/deals', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editingDeal)
+      body: JSON.stringify(updated)
     });
     if (res.ok) {
-      const json = await res.json();
-      setData(prev => prev.map(d => d.id === editingDeal.id ? json.deal : d));
+      setData(prev => prev.map(d => d.id === editingDeal.id ? { ...d, ...updated } : d));
       setEditingDeal(null);
     }
   };
 
-  const handleStageChange = async (id: string, newStage: string) => {
-    // Optimistic update
-    setData(prev => prev.map(d => d.id === id ? { ...d, stage: newStage } : d));
+  const handleQuickStageChange = async (dealId: string, newStage: string) => {
+    setData(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d));
     await fetch('/api/deals', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, stage: newStage })
+      body: JSON.stringify({ id: dealId, stage: newStage })
     });
   };
 
@@ -129,119 +191,105 @@ export default function DealsPage() {
   };
 
   const filteredData = useMemo(() => {
-    return data.filter(deal => {
-      const matchesSearch = 
-        !searchQuery.trim() ||
-        deal.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        deal.clientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        deal.propertyName?.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesStage = stageFilter === 'All' || deal.stage === stageFilter;
+    return data.filter(item => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.clientName && item.clientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.propertyName && item.propertyName.toLowerCase().includes(searchQuery.toLowerCase()));
 
+      const matchesStage = stageFilter === 'All' || item.stage === stageFilter;
       return matchesSearch && matchesStage;
     });
   }, [data, searchQuery, stageFilter]);
 
-  const handleResetFilters = () => {
-    setSearchQuery('');
-    setStageFilter('All');
-  };
-
   const columns: Column<Deal>[] = [
-    { 
-      key: 'title', 
-      label: 'Deal Title',
-      render: (r) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '34px', height: '34px', borderRadius: '6px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>
-            💼
-          </div>
-          <div>
-            <div style={{ fontWeight: 600, color: '#0f172a' }}>{r.title}</div>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>👤 {r.clientName || 'Private Client'} &middot; 🏡 {r.propertyName || 'Portfolio Asset'}</div>
+    {
+      header: 'Deal Title & Context',
+      accessor: (row) => (
+        <div>
+          <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>{row.title}</div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+            🏢 {row.propertyName || 'Exclusive Listing'} &bull; 👤 {row.clientName || 'Private Buyer'}
           </div>
         </div>
       )
     },
-    { 
-      key: 'amount', 
-      label: 'Deal Value', 
-      render: (r) => <span style={{ fontWeight: 700, color: '#0f172a' }}>${r.amount.toLocaleString()}</span> 
-    },
-    { 
-      key: 'probability',
-      label: 'Win Rate',
-      render: (r) => (
-        <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#f0fdf4', color: '#166534' }}>
-          {r.probability ? `${r.probability}%` : '50%'}
-        </span>
-      )
-    },
-    { 
-      key: 'stage', 
-      label: 'Pipeline Stage', 
-      render: (r) => (
-        <select
-          value={r.stage}
-          onChange={(e) => handleStageChange(r.id, e.target.value)}
-          style={{
-            padding: '4px 8px',
-            fontSize: '12px',
-            fontWeight: 600,
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-            backgroundColor: r.stage === 'Closed Won' ? '#dcfce7' : r.stage === 'Closed Lost' ? '#fee2e2' : '#f8fafc',
-            color: r.stage === 'Closed Won' ? '#166534' : r.stage === 'Closed Lost' ? '#991b1b' : '#334155',
-            cursor: 'pointer'
-          }}
-        >
-          {STAGES.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-      )
-    },
-    { key: 'expectedCloseDate', label: 'Expected Close' },
     {
-      key: 'actions',
-      label: 'Actions',
-      render: (r) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <button
-            onClick={() => handleOpenEdit(r)}
+      header: 'Deal Value & Commission',
+      accessor: (row) => {
+        const commAmt = row.commissionAmount || Math.round(row.amount * 0.025);
+        return (
+          <div>
+            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14.5px' }}>
+              ${row.amount?.toLocaleString()}
+            </div>
+            <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, marginTop: '2px' }}>
+              Commission: ${commAmt?.toLocaleString()} ({row.commissionRate || '2.5%'})
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      header: 'Pipeline Stage',
+      accessor: (row) => {
+        const isWon = row.stage === 'Closed Won';
+        const isLost = row.stage === 'Closed Lost';
+        return (
+          <select
+            value={row.stage}
+            onChange={(e) => handleQuickStageChange(row.id, e.target.value)}
             style={{
               padding: '6px 10px',
-              fontSize: '12px',
-              fontWeight: 500,
-              backgroundColor: '#eff6ff',
-              border: '1px solid #bfdbfe',
               borderRadius: '6px',
-              cursor: 'pointer',
-              color: '#1d4ed8',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '3px'
+              border: '1px solid #cbd5e1',
+              fontSize: '12px',
+              fontWeight: 700,
+              backgroundColor: isWon ? '#ecfdf5' : isLost ? '#fef2f2' : '#eff6ff',
+              color: isWon ? '#047857' : isLost ? '#b91c1c' : '#1d4ed8',
+              cursor: 'pointer'
             }}
-            title="Edit Deal Details"
+          >
+            {STAGES.map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        );
+      }
+    },
+    {
+      header: 'Close Target & Broker',
+      accessor: (row) => (
+        <div>
+          <div style={{ fontSize: '12.5px', fontWeight: 600, color: '#1e293b' }}>
+            📅 {row.expectedCloseDate || 'Within 30 days'}
+          </div>
+          <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>
+            Broker: {row.assignedBroker || 'Marcus Vance'}
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Actions',
+      accessor: (row) => (
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleOpenEdit(row)}
+            style={{ fontSize: '11.5px', padding: '3px 8px' }}
           >
             ✏️ Edit
-          </button>
-          <button
-            onClick={() => handleDelete(r.id, r.title)}
-            style={{
-              padding: '6px 10px',
-              fontSize: '12px',
-              fontWeight: 500,
-              backgroundColor: '#fff1f2',
-              border: '1px solid #fecdd3',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              color: '#e11d48'
-            }}
-            title="Delete Deal"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(row.id, row.title)}
+            style={{ color: '#ef4444', fontSize: '12px', padding: '3px 6px' }}
           >
-            🗑️ Delete
-          </button>
+            🗑️
+          </Button>
         </div>
       )
     }
@@ -249,253 +297,269 @@ export default function DealsPage() {
 
   return (
     <>
-      <PageHeader 
-        title="Deals & Pipelines" 
-        subtitle="Track negotiation stages, expected closing dates, and agency commission pipeline" 
-        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ New Deal</Button>} 
+      <PageHeader
+        title="Deals Pipeline"
+        subtitle="Active sale negotiations, lease transactions, commission projections, and target closing dates"
+        actions={
+          <Button variant="primary" onClick={() => setShowModal(true)}>
+            + New Deal
+          </Button>
+        }
       />
 
+      {/* FILTER BAR */}
       <TableFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search active deals by title, client, or property..."
-        totalCount={data.length}
-        filteredCount={filteredData.length}
-        onReset={handleResetFilters}
+        searchPlaceholder="Search deals by title, property, or client..."
         filters={[
           {
             key: 'stage',
-            label: 'Pipeline Stage',
+            label: 'Stage',
             value: stageFilter,
-            onChange: setStageFilter,
             options: [
               { label: 'All Stages', value: 'All' },
               ...STAGES.map(s => ({ label: s, value: s }))
-            ]
+            ],
+            onChange: setStageFilter
           }
         ]}
+        onReset={() => {
+          setSearchQuery('');
+          setStageFilter('All');
+        }}
       />
 
-      <div style={{ padding: '0 24px 24px' }}>
-        <DataTable columns={columns} data={filteredData} />
-      </div>
+      {/* DATA TABLE */}
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        loading={loading}
+        emptyMessage="No deals found. Click '+ New Deal' to track an active transaction."
+      />
 
-      {/* CREATE DEAL MODAL */}
+      {/* MODAL: ADD DEAL */}
       {showModal && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: '20px'
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '640px',
             maxHeight: '90vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+            border: '1px solid #e2e8f0'
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Create New Deal</h3>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Deal Title *</label>
-                <input
-                  required
-                  placeholder="e.g. Marina Penthouse Sale"
-                  value={form.title}
-                  onChange={e => setForm({ ...form, title: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Initiate Real Estate Deal</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Link property inventory, client buyer, and track commission</p>
               </div>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+            </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                
+                {/* Property Dropdown */}
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Deal Value ($) *</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Linked Property</label>
+                  <select
+                    value={form.propertyName}
+                    onChange={e => handlePropertySelect(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  >
+                    <option value="">-- Select Property --</option>
+                    {properties.map(p => (
+                      <option key={p.id} value={p.title}>{p.title} (${p.price?.toLocaleString()})</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Client Dropdown */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Linked Client / Buyer</label>
+                  <select
+                    value={form.clientName}
+                    onChange={e => handleClientSelect(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  >
+                    <option value="">-- Select Client --</option>
+                    {clients.map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Deal Title *</label>
                   <input
+                    type="text"
                     required
-                    type="number"
-                    placeholder="1250000"
-                    value={form.amount}
-                    onChange={e => setForm({ ...form, amount: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    placeholder="e.g. Acquisition of Beverly Hills Penthouse"
+                    value={form.title}
+                    onChange={e => setForm({ ...form, title: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Pipeline Stage</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Agreed Deal Value ($) *</label>
+                  <input
+                    type="number"
+                    required
+                    placeholder="e.g. 2400000"
+                    value={form.amount}
+                    onChange={e => setForm({ ...form, amount: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Commission Split</label>
+                  <select
+                    value={form.commissionRate}
+                    onChange={e => setForm({ ...form, commissionRate: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  >
+                    <option value="2.0%">2.0% ($40,000 / $2M)</option>
+                    <option value="2.5%">2.5% Standard ($50,000 / $2M)</option>
+                    <option value="3.0%">3.0% ($60,000 / $2M)</option>
+                    <option value="5.0%">5.0% Commercial ($100,000 / $2M)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Current Deal Stage</label>
                   <select
                     value={form.stage}
                     onChange={e => setForm({ ...form, stage: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
                     {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Associated Client</label>
-                  <input
-                    placeholder="Client Name"
-                    value={form.clientName}
-                    onChange={e => setForm({ ...form, clientName: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Associated Property</label>
-                  <input
-                    placeholder="Property Name"
-                    value={form.propertyName}
-                    onChange={e => setForm({ ...form, propertyName: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Win Probability (%)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={form.probability}
-                    onChange={e => setForm({ ...form, probability: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expected Close Date</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Target Closing Date</label>
                   <input
                     type="date"
                     value={form.expectedCloseDate}
                     onChange={e => setForm({ ...form, expectedCloseDate: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Create Deal</Button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <Button variant="outline" type="button" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button variant="primary" type="submit">Save Real Estate Deal</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* EDIT DEAL MODAL */}
+      {/* MODAL: EDIT DEAL */}
       {editingDeal && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: '20px'
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '640px',
             maxHeight: '90vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+            border: '1px solid #e2e8f0'
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Deal: {editingDeal.title}</h3>
-            <form onSubmit={handleUpdateDeal} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Deal Title *</label>
-                <input
-                  required
-                  value={editingDeal.title || ''}
-                  onChange={e => setEditingDeal({ ...editingDeal, title: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Edit Deal: {editingDeal.title}</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Update value, stage, and close timeline</p>
               </div>
+              <button onClick={() => setEditingDeal(null)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+            </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Deal Value ($) *</label>
+            <form onSubmit={handleUpdateDeal} style={{ padding: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Deal Title</label>
                   <input
+                    type="text"
                     required
-                    type="number"
-                    value={editingDeal.amount || ''}
-                    onChange={e => setEditingDeal({ ...editingDeal, amount: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    value={editingDeal.title}
+                    onChange={e => setEditingDeal({ ...editingDeal, title: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Pipeline Stage</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Deal Value ($)</label>
+                  <input
+                    type="number"
+                    value={editingDeal.amount}
+                    onChange={e => setEditingDeal({ ...editingDeal, amount: parseFloat(e.target.value) || 0 })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Commission Rate</label>
+                  <input
+                    type="text"
+                    value={editingDeal.commissionRate || '2.5%'}
+                    onChange={e => setEditingDeal({ ...editingDeal, commissionRate: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Stage</label>
                   <select
                     value={editingDeal.stage}
                     onChange={e => setEditingDeal({ ...editingDeal, stage: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
                     {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Associated Client</label>
-                  <input
-                    value={editingDeal.clientName || ''}
-                    onChange={e => setEditingDeal({ ...editingDeal, clientName: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Associated Property</label>
-                  <input
-                    value={editingDeal.propertyName || ''}
-                    onChange={e => setEditingDeal({ ...editingDeal, propertyName: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Win Probability (%)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={editingDeal.probability ?? 50}
-                    onChange={e => setEditingDeal({ ...editingDeal, probability: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expected Close Date</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Target Closing Date</label>
                   <input
                     type="date"
-                    value={editingDeal.expectedCloseDate || ''}
+                    value={editingDeal.expectedCloseDate}
                     onChange={e => setEditingDeal({ ...editingDeal, expectedCloseDate: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <Button type="button" variant="ghost" onClick={() => setEditingDeal(null)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Changes</Button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <Button variant="outline" type="button" onClick={() => setEditingDeal(null)}>Cancel</Button>
+                <Button variant="primary" type="submit">Save Changes</Button>
               </div>
             </form>
           </div>
@@ -506,15 +570,10 @@ export default function DealsPage() {
       <ConfirmModal
         isOpen={!!dealToDelete}
         title="Delete Deal"
-        message={
-          <>
-            Are you sure you want to delete the deal <strong>&ldquo;{dealToDelete?.title}&rdquo;</strong>?
-            This will permanently remove it from your pipeline.
-          </>
-        }
-        confirmText={isDeleting ? 'Deleting...' : 'Delete Deal'}
-        cancelText="Cancel"
+        message={`Are you sure you want to permanently delete "${dealToDelete?.title}"?`}
+        confirmText="Delete Deal"
         danger={true}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDealToDelete(null)}
       />

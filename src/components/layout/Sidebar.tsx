@@ -124,39 +124,35 @@ export function Sidebar() {
       </div>
 
       <div style={{ flex: 1, padding: '8px 0 20px' }}>
-        <Section title="Overview" />
+        <Section title="Command Center" />
         <NavItem href="/dashboard" label="Dashboard" icon="📊" />
         <NavItem href="/dashboard/analytics" label="Analytics" icon="📈" />
         
-        <Section title="Ingestion & CRM" stage="Stage 1" />
-        <NavItem href="/dashboard/leads" label="Leads" icon="🎯" />
-        <NavItem href="/dashboard/clients" label="Clients" icon="👥" />
-        <NavItem href="/dashboard/companies" label="Companies" icon="🏢" />
-        <NavItem href="/dashboard/owners" label="Owners" icon="🏠" />
-        <NavItem href="/dashboard/marketing" label="Marketing & Ads" icon="📣" />
-        <NavItem href="/dashboard/brokerage" label="Brokerage" icon="🤝" />
+        <Section title="Clients & CRM" stage="CRM" />
+        <NavItem href="/dashboard/leads" label="Leads Pipeline" icon="🎯" />
+        <NavItem href="/dashboard/clients" label="Clients Directory" icon="👥" />
+        <NavItem href="/dashboard/owners" label="Property Owners" icon="🏠" />
 
-        <Section title="Inventory & Feeds" stage="Stage 2" />
+        <Section title="Inventory" stage="Core" />
         <NavItem href="/dashboard/properties" label="Properties" icon="🏢" />
-        <NavItem href="/dashboard/listings" label="Listings" icon="📋" />
 
-        <Section title="Showings & Activity" stage="Stage 3" />
+        <Section title="Showings & Ops" stage="Field" />
         <NavItem href="/dashboard/site-visits" label="Site Visits" icon="📍" />
-        <NavItem href="/dashboard/calendar" label="Calendar" icon="📅" />
+        <NavItem href="/dashboard/calendar" label="Calendar & Tours" icon="📅" />
         <NavItem href="/dashboard/tasks" label="Tasks" icon="✅" />
-        <NavItem href="/dashboard/timeline" label="Timeline" icon="📜" />
+        <NavItem href="/dashboard/timeline" label="Activity Timeline" icon="📜" />
 
-        <Section title="Deals & Finance" stage="Stage 4" />
-        <NavItem href="/dashboard/deals" label="Deals" icon="💰" />
+        <Section title="Deals & Finance" stage="Revenue" />
+        <NavItem href="/dashboard/deals" label="Deals Pipeline" icon="💰" />
         <NavItem href="/dashboard/invoices" label="Invoices" icon="🧾" />
         <NavItem href="/dashboard/payments" label="Payments" icon="💳" />
         <NavItem href="/dashboard/expenses" label="Expenses" icon="📉" />
 
-        <Section title="Assets & Reporting" />
+        <Section title="Governance" />
         <NavItem href="/dashboard/documents" label="Documents" icon="📂" />
         <NavItem href="/dashboard/reports" label="Reports" icon="📊" />
-        <NavItem href="/dashboard/audit-logs" label="Audit & Recycle" icon="🛡️" />
-        <NavItem href="/dashboard/support" label="Support Tickets" icon="🎧" />
+        <NavItem href="/dashboard/audit-logs" label="Audit & Logs" icon="🛡️" />
+        <NavItem href="/dashboard/support" label="Support" icon="🎧" />
       </div>
 
       <div style={{ padding: '12px', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--surface-color)', display: 'flex', flexDirection: 'column', gap: '4px' }}>

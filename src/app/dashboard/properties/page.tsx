@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ShareModal } from '@/components/ui/ShareModal';
@@ -15,12 +14,19 @@ interface Property {
   id: string;
   title: string;
   type: string;
+  purpose?: 'For Sale' | 'For Rent';
   location: string;
   price: number;
   status: string;
   bedrooms?: number | string;
   bathrooms?: number | string;
   areaSqFt?: number | string;
+  carpetAreaSqFt?: number | string;
+  furnishing?: string;
+  parking?: number | string;
+  sellerName?: string;
+  sellerPhone?: string;
+  keyLocationNotes?: string;
   listingType?: string;
   ownerName?: string;
   description?: string;
@@ -30,7 +36,7 @@ interface Property {
 }
 
 const PROPERTY_STATUSES = ['Available', 'Under Offer', 'Sold', 'Rented'];
-const PROPERTY_TYPES = ['Villa', 'Apartment', 'Penthouse', 'Townhouse', 'Commercial Office', 'Plot'];
+const PROPERTY_TYPES = ['Apartment', 'Villa', 'Penthouse', 'Townhouse', 'Commercial Office', 'Plot'];
 
 export default function PropertiesPage() {
   const [data, setData] = useState<Property[]>([]);
@@ -41,15 +47,20 @@ export default function PropertiesPage() {
 
   const initialForm = {
     title: '',
-    type: 'Villa',
-    listingType: 'For Sale',
+    purpose: 'For Sale',
+    type: 'Apartment',
     location: '',
     price: '',
-    bedrooms: '4',
-    bathrooms: '3',
-    areaSqFt: '2800',
+    bedrooms: '3',
+    bathrooms: '2',
+    areaSqFt: '1800',
+    carpetAreaSqFt: '1450',
+    furnishing: 'Semi-Furnished',
+    parking: '1',
+    sellerName: '',
+    sellerPhone: '',
+    keyLocationNotes: 'Keys with building concierge; call 2 hours before showing.',
     status: 'Available',
-    ownerName: '',
     description: ''
   };
   const [form, setForm] = useState(initialForm);
@@ -60,7 +71,7 @@ export default function PropertiesPage() {
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState('All');
+  const [purposeFilter, setPurposeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
 
   const loadProperties = async () => {
@@ -85,15 +96,18 @@ export default function PropertiesPage() {
     await fetch('/api/properties', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify({
+        ...form,
+        listingType: form.purpose
+      })
     });
     setShowModal(false);
     setForm(initialForm);
     loadProperties();
   };
 
-  const handleOpenEdit = (prop: Property) => {
-    setEditingProperty(prop);
+  const handleOpenEdit = (property: Property) => {
+    setEditingProperty(property);
   };
 
   const handleUpdateProperty = async (e: React.FormEvent) => {
@@ -105,18 +119,17 @@ export default function PropertiesPage() {
       body: JSON.stringify(editingProperty)
     });
     if (res.ok) {
-      const json = await res.json();
-      setData(prev => prev.map(p => p.id === editingProperty.id ? json.property : p));
+      setData(prev => prev.map(p => p.id === editingProperty.id ? { ...p, ...editingProperty } : p));
       setEditingProperty(null);
     }
   };
 
-  const handleStatusChange = async (id: string, newStatus: string) => {
-    setData(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
+  const handleQuickStatusChange = async (propertyId: string, newStatus: string) => {
+    setData(prev => prev.map(p => p.id === propertyId ? { ...p, status: newStatus } : p));
     await fetch('/api/properties', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status: newStatus })
+      body: JSON.stringify({ id: propertyId, status: newStatus })
     });
   };
 
@@ -136,165 +149,156 @@ export default function PropertiesPage() {
   };
 
   const filteredData = useMemo(() => {
-    return data.filter(prop => {
-      const matchesSearch = 
-        !searchQuery.trim() ||
-        prop.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prop.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prop.type?.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesType = typeFilter === 'All' || prop.type === typeFilter;
-      const matchesStatus = statusFilter === 'All' || prop.status === statusFilter;
+    return data.filter(item => {
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.type.toLowerCase().includes(searchQuery.toLowerCase());
 
-      return matchesSearch && matchesType && matchesStatus;
+      const matchesPurpose = purposeFilter === 'All' || item.purpose === purposeFilter || item.listingType === purposeFilter;
+      const matchesStatus = statusFilter === 'All' || item.status.toLowerCase() === statusFilter.toLowerCase();
+
+      return matchesSearch && matchesPurpose && matchesStatus;
     });
-  }, [data, searchQuery, typeFilter, statusFilter]);
-
-  const handleResetFilters = () => {
-    setSearchQuery('');
-    setTypeFilter('All');
-    setStatusFilter('All');
-  };
+  }, [data, searchQuery, purposeFilter, statusFilter]);
 
   const columns: Column<Property>[] = [
-    { 
-      key: 'title', 
-      label: 'Property Details',
-      render: (r) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '34px', height: '34px', borderRadius: '6px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
-            🏡
-          </div>
+    {
+      header: 'Property & Purpose',
+      accessor: (row) => {
+        const isRent = row.purpose === 'For Rent' || row.listingType === 'For Rent';
+        return (
           <div>
-            <div style={{ fontWeight: 600, color: '#1e293b' }}>{r.title}</div>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>{r.location}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+              <span style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '2px 6px',
+                borderRadius: '4px',
+                backgroundColor: isRent ? '#f3e8ff' : '#ecfdf5',
+                color: isRent ? '#7e22ce' : '#047857',
+                border: `1px solid ${isRent ? '#d8b4fe' : '#a7f3d0'}`
+              }}>
+                {isRent ? 'For Rent' : 'For Sale'}
+              </span>
+              <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>{row.type}</span>
+            </div>
+            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>{row.title}</div>
+            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>📍 {row.location}</div>
+          </div>
+        );
+      }
+    },
+    {
+      header: 'Price & Furnishing',
+      accessor: (row) => (
+        <div>
+          <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
+            ${row.price?.toLocaleString()}
+          </div>
+          <div style={{ fontSize: '11.5px', color: '#2563eb', fontWeight: 600, marginTop: '2px' }}>
+            {row.furnishing || 'Semi-Furnished'}
           </div>
         </div>
-      )
-    },
-    { 
-      key: 'type', 
-      label: 'Type',
-      render: (r) => (
-        <span style={{ padding: '4px 10px', borderRadius: '9999px', fontSize: '12px', fontWeight: 500, backgroundColor: '#f1f5f9', color: '#334155' }}>
-          {r.type}
-        </span>
       )
     },
     {
-      key: 'specs',
-      label: 'Specs',
-      render: (r) => (
-        <div style={{ fontSize: '12px', color: '#475569', display: 'flex', gap: '8px' }}>
-          <span>🛏️ {r.bedrooms || 3} Beds</span>
-          <span>🛁 {r.bathrooms || 2} Baths</span>
-          <span>📐 {r.areaSqFt ? `${r.areaSqFt.toLocaleString()} sqft` : '2,200 sqft'}</span>
+      header: 'Specifications',
+      accessor: (row) => (
+        <div>
+          <div style={{ fontWeight: 600, color: '#1e293b', fontSize: '13px' }}>
+            {row.bedrooms || 3} Beds &bull; {row.bathrooms || 2} Baths
+          </div>
+          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+            Built: {row.areaSqFt || 1800} sq ft {row.carpetAreaSqFt ? `(Carpet: ${row.carpetAreaSqFt} sq ft)` : ''}
+          </div>
         </div>
       )
     },
-    { 
-      key: 'price', 
-      label: 'Asking Price', 
-      render: (r) => <span style={{ fontWeight: 700, color: '#0f172a' }}>${r.price.toLocaleString()}</span> 
+    {
+      header: 'Showing Instructions',
+      accessor: (row) => (
+        <div style={{ maxWidth: '200px' }}>
+          <div style={{ fontSize: '12px', color: '#334155', fontWeight: 500, lineHeight: 1.3 }}>
+            {row.keyLocationNotes || (row.ownerName ? `Contact: ${row.ownerName}` : 'Keys with concierge')}
+          </div>
+          {row.sellerPhone && (
+            <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+              📞 {row.sellerPhone}
+            </div>
+          )}
+        </div>
+      )
     },
-    { 
-      key: 'status', 
-      label: 'Status', 
-      render: (r) => (
+    {
+      header: 'Inventory Status',
+      accessor: (row) => (
         <select
-          value={r.status}
-          onChange={(e) => handleStatusChange(r.id, e.target.value)}
+          value={row.status}
+          onChange={(e) => handleQuickStatusChange(row.id, e.target.value)}
           style={{
-            padding: '4px 8px',
-            fontSize: '12px',
-            fontWeight: 600,
+            padding: '5px 10px',
             borderRadius: '6px',
             border: '1px solid #cbd5e1',
-            backgroundColor: r.status === 'Available' ? '#dcfce7' : r.status === 'Under Offer' ? '#fef3c7' : '#f1f5f9',
-            color: r.status === 'Available' ? '#166534' : r.status === 'Under Offer' ? '#b45309' : '#334155',
+            fontSize: '12px',
+            fontWeight: 600,
+            backgroundColor: row.status === 'Available' ? '#ecfdf5' : row.status === 'Sold' ? '#f1f5f9' : '#fffbeb',
+            color: row.status === 'Available' ? '#047857' : row.status === 'Sold' ? '#475569' : '#b45309',
             cursor: 'pointer'
           }}
         >
-          {PROPERTY_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          {PROPERTY_STATUSES.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
         </select>
       )
     },
     {
-      key: 'actions',
-      label: 'Actions',
-      render: (r) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      header: 'Actions',
+      accessor: (row) => (
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          
+          {/* Share Button */}
           <button
-            onClick={() => setPropertyToShare(r)}
+            type="button"
+            onClick={() => setPropertyToShare(row)}
             style={{
-              padding: '6px 10px',
-              fontSize: '12px',
-              fontWeight: 600,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 9px',
+              fontSize: '11.5px',
+              fontWeight: 700,
               backgroundColor: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              borderRadius: '6px',
-              cursor: 'pointer',
               color: '#1d4ed8',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-            title="Share on WhatsApp, Telegram, Email, etc."
-          >
-            <span>📲</span> Share
-          </button>
-          <Link
-            href={`/p/${r.publicToken || r.id}`}
-            target="_blank"
-            style={{
-              padding: '6px 10px',
-              fontSize: '12px',
-              fontWeight: 600,
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              color: '#334155',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-            title="Open Public Showcase Webpage"
-          >
-            <span>↗</span> Page
-          </Link>
-          <button
-            onClick={() => handleOpenEdit(r)}
-            style={{
-              padding: '6px 10px',
-              fontSize: '12px',
-              fontWeight: 500,
-              backgroundColor: '#eff6ff',
               border: '1px solid #bfdbfe',
               borderRadius: '6px',
-              cursor: 'pointer',
-              color: '#1d4ed8'
+              cursor: 'pointer'
             }}
-            title="Edit Property"
+            title="Share via WhatsApp, Telegram, QR code, or client link"
           >
-            ✏️
+            <span>🔗</span> Share
           </button>
-          <button
-            onClick={() => handleDelete(r.id, r.title)}
-            style={{
-              padding: '6px 10px',
-              fontSize: '12px',
-              fontWeight: 500,
-              backgroundColor: '#fff1f2',
-              border: '1px solid #fecdd3',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              color: '#e11d48'
-            }}
-            title="Delete Property"
+
+          {/* Edit Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleOpenEdit(row)}
+            style={{ fontSize: '11.5px', padding: '3px 8px' }}
+          >
+            ✏️ Edit
+          </Button>
+
+          {/* Delete Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDelete(row.id, row.title)}
+            style={{ color: '#ef4444', fontSize: '12px', padding: '3px 6px' }}
           >
             🗑️
-          </button>
+          </Button>
         </div>
       )
     }
@@ -302,326 +306,419 @@ export default function PropertiesPage() {
 
   return (
     <>
-      <PageHeader 
-        title="Properties & Inventory" 
-        subtitle="Manage available listings, specifications, marketing materials, and client shares" 
-        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Add Property</Button>} 
+      <PageHeader
+        title="Properties Inventory"
+        subtitle="Exclusive agency listings, architectural specifications, showing notes, and multi-channel marketing"
+        actions={
+          <Button variant="primary" onClick={() => setShowModal(true)}>
+            + Add Property Listing
+          </Button>
+        }
       />
 
+      {/* FILTER BAR */}
       <TableFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder="Search properties by title, location, or type..."
-        totalCount={data.length}
-        filteredCount={filteredData.length}
-        onReset={handleResetFilters}
         filters={[
           {
-            key: 'type',
-            label: 'Property Type',
-            value: typeFilter,
-            onChange: setTypeFilter,
+            key: 'purpose',
+            label: 'Purpose',
+            value: purposeFilter,
             options: [
-              { label: 'All Types', value: 'All' },
-              ...PROPERTY_TYPES.map(t => ({ label: t, value: t }))
-            ]
+              { label: 'All (Sale & Rent)', value: 'All' },
+              { label: 'For Sale', value: 'For Sale' },
+              { label: 'For Rent', value: 'For Rent' }
+            ],
+            onChange: setPurposeFilter
           },
           {
             key: 'status',
-            label: 'Availability',
+            label: 'Status',
             value: statusFilter,
-            onChange: setStatusFilter,
             options: [
               { label: 'All Statuses', value: 'All' },
               ...PROPERTY_STATUSES.map(s => ({ label: s, value: s }))
-            ]
+            ],
+            onChange: setStatusFilter
           }
         ]}
+        onReset={() => {
+          setSearchQuery('');
+          setPurposeFilter('All');
+          setStatusFilter('All');
+        }}
       />
 
-      <div style={{ padding: '0 24px 24px' }}>
-        <DataTable columns={columns} data={filteredData} />
-      </div>
+      {/* DATA TABLE */}
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        loading={loading}
+        emptyMessage="No properties match your filter. Click '+ Add Property Listing' to onboard an inventory unit."
+      />
 
-      {/* CREATE PROPERTY MODAL */}
+      {/* MODAL: ADD PROPERTY */}
       {showModal && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: '20px'
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '560px',
-            maxWidth: '90%',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '720px',
             maxHeight: '90vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+            border: '1px solid #e2e8f0'
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Add New Property</h3>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Title *</label>
-                <input
-                  required
-                  placeholder="e.g. Royal Atlantis Luxury Penthouse"
-                  value={form.title}
-                  onChange={e => setForm({ ...form, title: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Onboard Property Listing</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Complete architectural specs and client showing coordination</p>
               </div>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+            </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+              
+              {/* SECTION 1: IDENTITY */}
+              <div style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                1. Property Identity & Pricing
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Listing Title *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Skyline Signature Penthouse with Private Terrace"
+                    value={form.title}
+                    onChange={e => setForm({ ...form, title: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Type</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Transaction Purpose</label>
+                  <select
+                    value={form.purpose}
+                    onChange={e => setForm({ ...form, purpose: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  >
+                    <option value="For Sale">For Sale</option>
+                    <option value="For Rent">For Rent</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Property Type</label>
                   <select
                     value={form.type}
                     onChange={e => setForm({ ...form, type: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
                     {PROPERTY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Listing Type</label>
-                  <select
-                    value={form.listingType}
-                    onChange={e => setForm({ ...form, listingType: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    <option>For Sale</option>
-                    <option>For Rent</option>
-                  </select>
-                </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Asking Price ($) *</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Asking Price ($) *</label>
                   <input
-                    required
                     type="number"
-                    placeholder="2500000"
+                    required
+                    placeholder="e.g. 2400000"
                     value={form.price}
                     onChange={e => setForm({ ...form, price: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Location / Community *</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Locality / Area *</label>
                   <input
+                    type="text"
                     required
-                    placeholder="e.g. Palm Jumeirah, Dubai"
+                    placeholder="e.g. Beverly Hills, CA"
                     value={form.location}
                     onChange={e => setForm({ ...form, location: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              {/* SECTION 2: SPECS */}
+              <div style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                2. Architectural Specifications
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', marginBottom: '20px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Bedrooms</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Bedrooms</label>
                   <input
                     type="number"
                     value={form.bedrooms}
                     onChange={e => setForm({ ...form, bedrooms: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Bathrooms</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Bathrooms</label>
                   <input
                     type="number"
                     value={form.bathrooms}
                     onChange={e => setForm({ ...form, bathrooms: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Area (Sq. Ft.)</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Parking Spots</label>
+                  <input
+                    type="number"
+                    value={form.parking}
+                    onChange={e => setForm({ ...form, parking: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Built-up Sq Ft</label>
                   <input
                     type="number"
                     value={form.areaSqFt}
                     onChange={e => setForm({ ...form, areaSqFt: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Status</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Carpet Area Sq Ft</label>
+                  <input
+                    type="number"
+                    value={form.carpetAreaSqFt}
+                    onChange={e => setForm({ ...form, carpetAreaSqFt: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Furnishing</label>
                   <select
-                    value={form.status}
-                    onChange={e => setForm({ ...form, status: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    value={form.furnishing}
+                    onChange={e => setForm({ ...form, furnishing: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
-                    {PROPERTY_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                    <option>Fully Furnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Unfurnished / Bare Shell</option>
                   </select>
                 </div>
+              </div>
+
+              {/* SECTION 3: SHOWINGS & SELLER */}
+              <div style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+                3. Showing Instructions & Owner Coordination
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Owner / Landlord</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Seller / Landlord Name</label>
                   <input
-                    placeholder="e.g. Al Habtoor Group"
-                    value={form.ownerName}
-                    onChange={e => setForm({ ...form, ownerName: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    type="text"
+                    placeholder="e.g. Richard Hendricks"
+                    value={form.sellerName}
+                    onChange={e => setForm({ ...form, sellerName: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Seller Phone</label>
+                  <input
+                    type="tel"
+                    placeholder="e.g. +1 (555) 234-5678"
+                    value={form.sellerPhone}
+                    onChange={e => setForm({ ...form, sellerPhone: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Key & Viewing Coordination Notes</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Keys with front desk. Call 2 hours in advance. Do not disturb tenants on weekdays."
+                    value={form.keyLocationNotes}
+                    onChange={e => setForm({ ...form, keyLocationNotes: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
-              <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Description</label>
-                <textarea
-                  rows={3}
-                  placeholder="Architectural specs, panoramic sea views, smart home features..."
-                  value={form.description}
-                  onChange={e => setForm({ ...form, description: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Add Property</Button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <Button variant="outline" type="button" onClick={() => setShowModal(false)}>Cancel</Button>
+                <Button variant="primary" type="submit">Save Property</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* EDIT PROPERTY MODAL */}
+      {/* MODAL: EDIT PROPERTY */}
       {editingProperty && (
         <div style={{
           position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1000,
+          padding: '20px'
         }}>
           <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '560px',
-            maxWidth: '90%',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            width: '100%',
+            maxWidth: '720px',
             maxHeight: '90vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+            border: '1px solid #e2e8f0'
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Property: {editingProperty.title}</h3>
-            <form onSubmit={handleUpdateProperty} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Title *</label>
-                <input
-                  required
-                  value={editingProperty.title || ''}
-                  onChange={e => setEditingProperty({ ...editingProperty, title: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Edit Property: {editingProperty.title}</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Update pricing, specs, and status</p>
               </div>
+              <button onClick={() => setEditingProperty(null)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+            </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <form onSubmit={handleUpdateProperty} style={{ padding: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingProperty.title}
+                    onChange={e => setEditingProperty({ ...editingProperty, title: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Type</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Purpose</label>
+                  <select
+                    value={editingProperty.purpose || editingProperty.listingType || 'For Sale'}
+                    onChange={e => setEditingProperty({ ...editingProperty, purpose: e.target.value as any, listingType: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  >
+                    <option value="For Sale">For Sale</option>
+                    <option value="For Rent">For Rent</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Type</label>
                   <select
                     value={editingProperty.type}
                     onChange={e => setEditingProperty({ ...editingProperty, type: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
                     {PROPERTY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
+
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Status</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Price ($)</label>
+                  <input
+                    type="number"
+                    value={editingProperty.price}
+                    onChange={e => setEditingProperty({ ...editingProperty, price: parseFloat(e.target.value) || 0 })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Location</label>
+                  <input
+                    type="text"
+                    value={editingProperty.location}
+                    onChange={e => setEditingProperty({ ...editingProperty, location: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Bedrooms</label>
+                  <input
+                    type="number"
+                    value={editingProperty.bedrooms || 3}
+                    onChange={e => setEditingProperty({ ...editingProperty, bedrooms: parseInt(e.target.value) || 0 })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Bathrooms</label>
+                  <input
+                    type="number"
+                    value={editingProperty.bathrooms || 2}
+                    onChange={e => setEditingProperty({ ...editingProperty, bathrooms: parseInt(e.target.value) || 0 })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Furnishing</label>
+                  <select
+                    value={editingProperty.furnishing || 'Semi-Furnished'}
+                    onChange={e => setEditingProperty({ ...editingProperty, furnishing: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  >
+                    <option>Fully Furnished</option>
+                    <option>Semi-Furnished</option>
+                    <option>Unfurnished / Bare Shell</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
                   <select
                     value={editingProperty.status}
                     onChange={e => setEditingProperty({ ...editingProperty, status: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
                     {PROPERTY_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-              </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Asking Price ($) *</label>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Key & Showing Notes</label>
                   <input
-                    required
-                    type="number"
-                    value={editingProperty.price || ''}
-                    onChange={e => setEditingProperty({ ...editingProperty, price: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Location / Community *</label>
-                  <input
-                    required
-                    value={editingProperty.location || ''}
-                    onChange={e => setEditingProperty({ ...editingProperty, location: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    type="text"
+                    value={editingProperty.keyLocationNotes || ''}
+                    onChange={e => setEditingProperty({ ...editingProperty, keyLocationNotes: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Bedrooms</label>
-                  <input
-                    type="number"
-                    value={editingProperty.bedrooms || ''}
-                    onChange={e => setEditingProperty({ ...editingProperty, bedrooms: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Bathrooms</label>
-                  <input
-                    type="number"
-                    value={editingProperty.bathrooms || ''}
-                    onChange={e => setEditingProperty({ ...editingProperty, bathrooms: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Area (Sq. Ft.)</label>
-                  <input
-                    type="number"
-                    value={editingProperty.areaSqFt || ''}
-                    onChange={e => setEditingProperty({ ...editingProperty, areaSqFt: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Description</label>
-                <textarea
-                  rows={3}
-                  value={editingProperty.description || ''}
-                  onChange={e => setEditingProperty({ ...editingProperty, description: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <Button type="button" variant="ghost" onClick={() => setEditingProperty(null)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Changes</Button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <Button variant="outline" type="button" onClick={() => setEditingProperty(null)}>Cancel</Button>
+                <Button variant="primary" type="submit">Save Changes</Button>
               </div>
             </form>
           </div>
@@ -650,15 +747,10 @@ export default function PropertiesPage() {
       <ConfirmModal
         isOpen={!!propertyToDelete}
         title="Delete Property"
-        message={
-          <>
-            Are you sure you want to delete the property <strong>&ldquo;{propertyToDelete?.title}&rdquo;</strong>?
-            This will remove the listing and all syndication links.
-          </>
-        }
-        confirmText={isDeleting ? 'Deleting...' : 'Delete Property'}
-        cancelText="Cancel"
+        message={`Are you sure you want to permanently delete "${propertyToDelete?.title}"?`}
+        confirmText="Delete Property"
         danger={true}
+        isLoading={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setPropertyToDelete(null)}
       />

@@ -43,13 +43,13 @@ export default function DashboardPage() {
     },
     {
       step: '02',
-      title: 'Inventory & Listings',
-      desc: 'Manage luxury listings, property specs, syndication portals & legal contracts',
-      badge: 'Portfolio',
+      title: 'Property Portfolio',
+      desc: 'Manage luxury listings, property specs, public tour links & marketing flyers',
+      badge: 'Inventory',
       badgeColor: '#059669',
       badgeBg: '#ecfdf5',
       primaryAction: { label: '+ Add Property', href: '/dashboard/properties' },
-      secondaryAction: { label: 'Portal Listings', href: '/dashboard/listings' },
+      secondaryAction: { label: 'View Inventory', href: '/dashboard/properties' },
       icon: '🏢'
     },
     {
