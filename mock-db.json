@@ -324,7 +324,76 @@
       "publicToken": "tok_vp76qx9n0i",
       "privacyMode": "Public",
       "sharesCount": 1,
-      "updatedAt": "2026-09-22T13:05:41.635Z"
+      "updatedAt": "2026-09-22T13:05:41.635Z",
+      "purpose": "For Sale",
+      "carpetAreaSqFt": 1500,
+      "furnishing": "Fully Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_1_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Luxury Villa in Beverly Hills - Main Facade"
+        },
+        {
+          "id": "m_prop_1_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_1_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_1_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_1_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_1_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_1_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_2",
@@ -334,7 +403,76 @@
       "location": "Manhattan, NY",
       "price": 2850000,
       "status": "Under Offer",
-      "createdAt": "2026-09-21T13:40:15.322Z"
+      "createdAt": "2026-09-21T13:40:15.322Z",
+      "purpose": "For Rent",
+      "carpetAreaSqFt": 1500,
+      "furnishing": "Semi-Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_2_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Downtown Sky Penthouse - Main Facade"
+        },
+        {
+          "id": "m_prop_2_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_2_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_2_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_2_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_2_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_2_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_3",
@@ -344,7 +482,76 @@
       "location": "Miami Beach, FL",
       "price": 1650000,
       "status": "Available",
-      "createdAt": "2026-09-21T13:40:15.322Z"
+      "createdAt": "2026-09-21T13:40:15.322Z",
+      "purpose": "For Sale",
+      "carpetAreaSqFt": 1500,
+      "furnishing": "Unfurnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_3_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Modern Waterfront Residence - Main Facade"
+        },
+        {
+          "id": "m_prop_3_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_3_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_3_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_3_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_3_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_3_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_4",
@@ -354,7 +561,76 @@
       "location": "Palo Alto, CA",
       "price": 1250000,
       "status": "Sold",
-      "createdAt": "2026-09-21T13:40:15.322Z"
+      "createdAt": "2026-09-21T13:40:15.322Z",
+      "purpose": "For Rent",
+      "carpetAreaSqFt": 1500,
+      "furnishing": "Fully Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_4_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Silicon Valley Executive Condo - Main Facade"
+        },
+        {
+          "id": "m_prop_4_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_4_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_4_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_4_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_4_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_4_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_vance_01_1",
@@ -367,8 +643,79 @@
       "bedrooms": 4,
       "bathrooms": 4,
       "areaSqFt": 3800,
-      "sharesCount": 12,
-      "createdAt": "2026-08-10T08:00:00.000Z"
+      "sharesCount": 13,
+      "createdAt": "2026-08-10T08:00:00.000Z",
+      "publicToken": "tok_3lkxify14a",
+      "privacyMode": "Public",
+      "purpose": "For Sale",
+      "carpetAreaSqFt": 3040,
+      "furnishing": "Semi-Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_vance_01_1_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Vance Luxury Realty Flagship Listing - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_vance_01_1_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_vance_01_1_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_vance_01_1_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_vance_01_1_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_vance_01_1_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_vance_01_1_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_vance_01_2",
@@ -382,7 +729,76 @@
       "bathrooms": 6,
       "areaSqFt": 5200,
       "sharesCount": 28,
-      "createdAt": "2026-08-10T08:00:00.000Z"
+      "createdAt": "2026-08-10T08:00:00.000Z",
+      "purpose": "For Rent",
+      "carpetAreaSqFt": 4160,
+      "furnishing": "Unfurnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_vance_01_2_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Vance Luxury Realty Luxury Residence - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_vance_01_2_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_vance_01_2_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_vance_01_2_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_vance_01_2_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_vance_01_2_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_vance_01_2_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_skyline_02_1",
@@ -396,7 +812,76 @@
       "bathrooms": 4,
       "areaSqFt": 3800,
       "sharesCount": 12,
-      "createdAt": "2026-08-18T10:30:00.000Z"
+      "createdAt": "2026-08-18T10:30:00.000Z",
+      "purpose": "For Sale",
+      "carpetAreaSqFt": 3040,
+      "furnishing": "Fully Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_skyline_02_1_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Skyline Commercial Capital Flagship Listing - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_1_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_1_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_1_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_1_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_1_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_skyline_02_1_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_skyline_02_2",
@@ -410,7 +895,76 @@
       "bathrooms": 6,
       "areaSqFt": 5200,
       "sharesCount": 28,
-      "createdAt": "2026-08-18T10:30:00.000Z"
+      "createdAt": "2026-08-18T10:30:00.000Z",
+      "purpose": "For Rent",
+      "carpetAreaSqFt": 4160,
+      "furnishing": "Semi-Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_skyline_02_2_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Skyline Commercial Capital Luxury Residence - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_2_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_2_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_2_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_2_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_skyline_02_2_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_skyline_02_2_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_coastal_03_1",
@@ -424,7 +978,76 @@
       "bathrooms": 4,
       "areaSqFt": 3800,
       "sharesCount": 12,
-      "createdAt": "2026-09-01T14:15:00.000Z"
+      "createdAt": "2026-09-01T14:15:00.000Z",
+      "purpose": "For Sale",
+      "carpetAreaSqFt": 3040,
+      "furnishing": "Unfurnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_coastal_03_1_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Coastal Estates International Flagship Listing - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_1_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_1_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_1_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_1_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_1_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_coastal_03_1_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_coastal_03_2",
@@ -438,7 +1061,76 @@
       "bathrooms": 6,
       "areaSqFt": 5200,
       "sharesCount": 28,
-      "createdAt": "2026-09-01T14:15:00.000Z"
+      "createdAt": "2026-09-01T14:15:00.000Z",
+      "purpose": "For Rent",
+      "carpetAreaSqFt": 4160,
+      "furnishing": "Fully Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_coastal_03_2_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Coastal Estates International Luxury Residence - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_2_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_2_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_2_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_2_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_coastal_03_2_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_coastal_03_2_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_apex_04_1",
@@ -452,7 +1144,76 @@
       "bathrooms": 4,
       "areaSqFt": 3800,
       "sharesCount": 12,
-      "createdAt": "2026-08-25T11:00:00.000Z"
+      "createdAt": "2026-08-25T11:00:00.000Z",
+      "purpose": "For Sale",
+      "carpetAreaSqFt": 3040,
+      "furnishing": "Semi-Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_apex_04_1_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Apex Prime Properties Flagship Listing - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_apex_04_1_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_apex_04_1_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_apex_04_1_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_apex_04_1_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_apex_04_1_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_apex_04_1_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_apex_04_2",
@@ -466,7 +1227,76 @@
       "bathrooms": 6,
       "areaSqFt": 5200,
       "sharesCount": 28,
-      "createdAt": "2026-08-25T11:00:00.000Z"
+      "createdAt": "2026-08-25T11:00:00.000Z",
+      "purpose": "For Rent",
+      "carpetAreaSqFt": 4160,
+      "furnishing": "Unfurnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_apex_04_2_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Apex Prime Properties Luxury Residence - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_apex_04_2_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_apex_04_2_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_apex_04_2_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_apex_04_2_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_apex_04_2_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_apex_04_2_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_horizon_05_1",
@@ -480,7 +1310,76 @@
       "bathrooms": 4,
       "areaSqFt": 3800,
       "sharesCount": 12,
-      "createdAt": "2026-09-15T09:45:00.000Z"
+      "createdAt": "2026-09-15T09:45:00.000Z",
+      "purpose": "For Sale",
+      "carpetAreaSqFt": 3040,
+      "furnishing": "Fully Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_horizon_05_1_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Horizon Real Estate Partners Flagship Listing - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_1_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_1_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_1_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_1_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_1_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_horizon_05_1_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     },
     {
       "id": "prop_ag_horizon_05_2",
@@ -494,7 +1393,76 @@
       "bathrooms": 6,
       "areaSqFt": 5200,
       "sharesCount": 28,
-      "createdAt": "2026-09-15T09:45:00.000Z"
+      "createdAt": "2026-09-15T09:45:00.000Z",
+      "purpose": "For Rent",
+      "carpetAreaSqFt": 4160,
+      "furnishing": "Semi-Furnished",
+      "parking": 2,
+      "sellerName": "Verified Property Owner",
+      "sellerPhone": "+1 (555) 234-9876",
+      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
+      "media": [
+        {
+          "id": "m_prop_ag_horizon_05_2_1",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Horizon Real Estate Partners Luxury Residence - Main Facade"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_2_2",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Open Living & Entertainment Hall"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_2_3",
+          "url": "/images/luxury_bedroom.jpg",
+          "tag": "Master Bedroom",
+          "isCover": false,
+          "caption": "Spacious Master Bedroom Suite"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_2_4",
+          "url": "/images/luxury_kitchen.jpg",
+          "tag": "Kitchen",
+          "isCover": false,
+          "caption": "Designer Modular Kitchen"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_2_5",
+          "url": "/images/luxury_washroom.jpg",
+          "tag": "Washroom",
+          "isCover": false,
+          "caption": "Designer Luxury Bathroom"
+        },
+        {
+          "id": "m_prop_ag_horizon_05_2_6",
+          "url": "/images/hero_dashboard.jpg",
+          "tag": "Balcony",
+          "isCover": false,
+          "caption": "Private Balcony with Skyline View"
+        }
+      ],
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg",
+        "/images/luxury_kitchen.jpg",
+        "/images/luxury_washroom.jpg",
+        "/images/hero_dashboard.jpg"
+      ],
+      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
+      "videos": [
+        {
+          "id": "v_prop_ag_horizon_05_2_1",
+          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
+          "title": "4K Architectural Walkthrough Tour",
+          "type": "video"
+        }
+      ]
     }
   ],
   "leads": [
@@ -1010,6 +1978,17 @@
   ],
   "activities": [
     {
+      "id": "act_9bp5g73",
+      "agencyId": "ag_vance_01",
+      "actor": "Marcus Vance",
+      "type": "Property Share",
+      "relatedEntity": "Property",
+      "relatedId": "prop_ag_vance_01_1",
+      "summary": "Shared \"Vance Luxury Realty Flagship Listing\" on WhatsApp",
+      "details": "Channel: WhatsApp, Privacy Mode: Public, Link: http://localhost:3000/p/tok_3lkxify14a",
+      "createdAt": "2026-09-22T16:36:00.323Z"
+    },
+    {
       "id": "act_o307uzo",
       "agencyId": "ag_ql21vxnd",
       "actor": "Aditya",
@@ -1092,6 +2071,17 @@
     }
   ],
   "auditLogs": [
+    {
+      "id": "aud_0zfsizp",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "SHARE",
+      "entity": "Property",
+      "entityId": "prop_ag_vance_01_1",
+      "details": "Shared property \"Vance Luxury Realty Flagship Listing\" via WhatsApp",
+      "createdAt": "2026-09-22T16:36:00.323Z"
+    },
     {
       "id": "aud_jjtwcy1",
       "agencyId": "ag_ql21vxnd",
@@ -1203,6 +2193,17 @@
     }
   ],
   "sharedLinks": [
+    {
+      "id": "sh_w3jomyd",
+      "agencyId": "ag_vance_01",
+      "propertyId": "prop_ag_vance_01_1",
+      "propertyTitle": "Vance Luxury Realty Flagship Listing",
+      "channel": "WhatsApp",
+      "publicUrl": "http://localhost:3000/p/tok_3lkxify14a",
+      "sharedBy": "Marcus Vance",
+      "privacyMode": "Public",
+      "createdAt": "2026-09-22T16:36:00.323Z"
+    },
     {
       "id": "sh_vmuv08k",
       "agencyId": "ag_ql21vxnd",

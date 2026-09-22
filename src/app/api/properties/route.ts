@@ -51,6 +51,18 @@ export async function POST(req: Request) {
     keyLocationNotes: data.keyLocationNotes || '',
     ownerName: data.ownerName || data.sellerName || '',
     description: data.description || '',
+    media: data.media || (data.images ? data.images.map((img: string, i: number) => ({
+      id: 'm_' + Math.random().toString(36).substring(2, 8),
+      url: img,
+      tag: i === 0 ? 'Exterior / Facade' : (i === 1 ? 'Hall / Living Area' : 'Property Photo'),
+      isCover: i === 0
+    })) : []),
+    images: (data.media && data.media.length > 0) 
+      ? data.media.map((m: any) => m.url) 
+      : (data.images && data.images.length > 0 ? data.images : ['/images/property_hero.jpg']),
+    videos: data.videos || [],
+    videoTourUrl: data.videoTourUrl || '',
+    virtualTourUrl: data.virtualTourUrl || '',
     createdAt: new Date().toISOString()
   };
 
@@ -83,6 +95,13 @@ export async function PUT(req: Request) {
     bedrooms: data.bedrooms !== undefined ? parseInt(data.bedrooms) || 0 : db.properties[index].bedrooms,
     bathrooms: data.bathrooms !== undefined ? parseInt(data.bathrooms) || 0 : db.properties[index].bathrooms,
     areaSqFt: data.areaSqFt !== undefined ? parseInt(data.areaSqFt) || 0 : db.properties[index].areaSqFt,
+    media: data.media !== undefined ? data.media : db.properties[index].media,
+    images: data.images !== undefined 
+      ? data.images 
+      : (data.media ? data.media.map((m: any) => m.url) : db.properties[index].images),
+    videos: data.videos !== undefined ? data.videos : db.properties[index].videos,
+    videoTourUrl: data.videoTourUrl !== undefined ? data.videoTourUrl : db.properties[index].videoTourUrl,
+    virtualTourUrl: data.virtualTourUrl !== undefined ? data.virtualTourUrl : db.properties[index].virtualTourUrl,
     updatedAt: new Date().toISOString()
   };
 

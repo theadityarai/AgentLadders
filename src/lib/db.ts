@@ -42,6 +42,21 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface PropertyMedia {
+  id: string;
+  url: string;
+  tag: string; // e.g. "Hall", "Master Bedroom", "Washroom", "Kitchen", "Balcony", "Floor Plan", or freetext
+  caption?: string;
+  isCover?: boolean;
+}
+
+export interface PropertyVideo {
+  id: string;
+  url: string;
+  title?: string;
+  type?: 'video' | '360_tour';
+}
+
 export interface Property {
   id: string;
   agencyId: string;
@@ -65,6 +80,10 @@ export interface Property {
   ownerName?: string;
   description?: string;
   images?: string[];
+  media?: PropertyMedia[];
+  videos?: PropertyVideo[];
+  videoTourUrl?: string;
+  virtualTourUrl?: string;
   features?: string[];
   publicToken?: string;
   privacyMode?: 'Public' | 'Restricted' | 'Private';
@@ -514,7 +533,20 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         listingType: 'For Sale',
         ownerName: 'Sterling Global Trust',
         description: 'Spectacular modern architectural estate nestled on a private cul-de-sac in prestigious Beverly Hills. Featuring soaring double-height ceilings, seamless indoor-outdoor glass walls, infinity-edge heated pool, chef kitchen with custom marble, and expansive entertainer terrace with panoramic canyon views.',
-        images: ['/images/property_hero.jpg', '/images/deal_closing.jpg', '/images/hero_dashboard.jpg'],
+        images: ['/images/property_hero.jpg', '/images/deal_closing.jpg', '/images/luxury_bedroom.jpg', '/images/luxury_kitchen.jpg', '/images/luxury_washroom.jpg', '/images/hero_dashboard.jpg'],
+        media: [
+          { id: 'm_1', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: true, caption: 'Grand Modern Architectural Facade' },
+          { id: 'm_2', url: '/images/deal_closing.jpg', tag: 'Hall / Living Area', isCover: false, caption: 'Soaring Double-Height Great Room' },
+          { id: 'm_3', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Presidential Master Suite with Skyline Panorama' },
+          { id: 'm_4', url: '/images/luxury_kitchen.jpg', tag: 'Kitchen', isCover: false, caption: 'Chef Kitchen with Calacatta Marble Waterfall Island' },
+          { id: 'm_5', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Spa Washroom with Freestanding Soaking Tub' },
+          { id: 'm_6', url: '/images/hero_dashboard.jpg', tag: 'Balcony', isCover: false, caption: 'Sunset Lounge & Entertainer Terrace' }
+        ],
+        videoTourUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+        virtualTourUrl: 'https://my.matterport.com/show/?m=sample360',
+        videos: [
+          { id: 'v_1', url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4', title: '4K Cinematic Estate Tour', type: 'video' }
+        ],
         features: ['Private Infinity Pool', 'Smart Home Automation', 'Wine Cellar', 'Gated Security 24/7', 'Outdoor Kitchen', 'Designer Furnishings', 'Private Elevator'],
         publicToken: 'tok_beverly_hills_4500k',
         privacyMode: 'Public',
@@ -537,10 +569,20 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         bedrooms: 3,
         bathrooms: 3,
         areaSqFt: 3100,
+        carpetAreaSqFt: 2580,
+        furnishing: 'Fully Furnished',
+        parking: 2,
         listingType: 'For Sale',
         ownerName: 'Vance Skyline Properties',
         description: 'Trophy duplex penthouse offering 360-degree unobstructed views of the Manhattan skyline and Hudson River. Features direct elevator landing, wrap-around rooftop terrace, gas fireplace, and bespoke Italian millwork throughout.',
-        images: ['/images/deal_closing.jpg', '/images/property_hero.jpg'],
+        images: ['/images/deal_closing.jpg', '/images/luxury_kitchen.jpg', '/images/luxury_bedroom.jpg', '/images/luxury_washroom.jpg'],
+        media: [
+          { id: 'm_21', url: '/images/deal_closing.jpg', tag: 'Hall / Living Area', isCover: true, caption: 'Open Concept Great Hall' },
+          { id: 'm_22', url: '/images/luxury_kitchen.jpg', tag: 'Kitchen', isCover: false, caption: 'Custom Italian Minimalist Kitchen' },
+          { id: 'm_23', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Primary Bedroom with Hardwood Floors' },
+          { id: 'm_24', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Ensuite Marble Bathroom' }
+        ],
+        videoTourUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
         features: ['Wrap-around Terrace', 'Direct Keyed Elevator', 'Floor-to-Ceiling Glass', 'Valet Parking', 'Concierge 24/7'],
         publicToken: 'tok_sky_penthouse_2850k',
         privacyMode: 'Public',
@@ -563,10 +605,18 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         bedrooms: 4,
         bathrooms: 4,
         areaSqFt: 3800,
+        carpetAreaSqFt: 3150,
+        furnishing: 'Semi-Furnished',
+        parking: 3,
         listingType: 'For Sale',
         ownerName: 'Apex Capital Holdings',
         description: 'Contemporary waterfront sanctuary situated on the Venetian Islands. Boasting deep water dockage, private boat slip, floor-to-ceiling glass corridors, resort-style pool with cabana, and immediate access to Biscayne Bay.',
-        images: ['/images/hero_dashboard.jpg', '/images/property_hero.jpg'],
+        images: ['/images/hero_dashboard.jpg', '/images/property_hero.jpg', '/images/luxury_washroom.jpg'],
+        media: [
+          { id: 'm_31', url: '/images/hero_dashboard.jpg', tag: 'Balcony', isCover: true, caption: 'Bayfront Pool & Patio' },
+          { id: 'm_32', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: false, caption: 'Waterfront Elevation' },
+          { id: 'm_33', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Primary Spa Bath' }
+        ],
         features: ['Private Boat Dock', 'Biscayne Bay Access', 'Resort Pool & Spa', 'Solar Panels', 'Impact Glass'],
         publicToken: 'tok_waterfront_miami_1650k',
         privacyMode: 'Public',
@@ -589,10 +639,17 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         bedrooms: 2,
         bathrooms: 2,
         areaSqFt: 1850,
+        carpetAreaSqFt: 1520,
+        furnishing: 'Fully Furnished',
+        parking: 1,
         listingType: 'For Sale',
         ownerName: 'Palo Alto Ventures Ltd',
         description: 'Turnkey executive residence in the vibrant heart of downtown Palo Alto. Modern minimalist finishes, private balcony overlooking tree-lined courtyard, and electric vehicle charging bays.',
-        images: ['/images/property_hero.jpg'],
+        images: ['/images/property_hero.jpg', '/images/luxury_bedroom.jpg'],
+        media: [
+          { id: 'm_41', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: true, caption: 'Building Facade' },
+          { id: 'm_42', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Executive Suite' }
+        ],
         features: ['EV Charging Stations', 'Private Balcony', 'High-Speed Fiber', 'Fitness Center'],
         publicToken: 'tok_silicon_valley_1250k',
         privacyMode: 'Restricted',

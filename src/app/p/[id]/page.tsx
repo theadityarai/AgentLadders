@@ -5,6 +5,21 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
+export interface PublicPropertyMedia {
+  id: string;
+  url: string;
+  tag: string;
+  isCover?: boolean;
+  caption?: string;
+}
+
+export interface PublicPropertyVideo {
+  id: string;
+  url: string;
+  title?: string;
+  type?: string;
+}
+
 interface PublicProperty {
   id: string;
   title: string;
@@ -15,9 +30,17 @@ interface PublicProperty {
   bedrooms: number;
   bathrooms: number;
   areaSqFt: number;
+  carpetAreaSqFt?: number;
+  furnishing?: string;
+  parking?: number;
+  purpose?: string;
   listingType: string;
   description: string;
   images: string[];
+  media?: PublicPropertyMedia[];
+  videos?: PublicPropertyVideo[];
+  videoTourUrl?: string;
+  virtualTourUrl?: string;
   features: string[];
   publicToken: string;
   privacyMode: string;
@@ -37,6 +60,9 @@ export default function PublicPropertyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeTag, setActiveTag] = useState<string>('All');
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   // Inquiry form states
   const [form, setForm] = useState({
@@ -252,56 +278,315 @@ export default function PublicPropertyPage() {
           </div>
         </div>
 
-        {/* Hero Gallery Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', borderRadius: '16px', overflow: 'hidden', marginBottom: '32px', backgroundColor: '#000' }}>
-          {/* Main Large Showcase Image */}
-          <div style={{ position: 'relative', minHeight: '440px', backgroundColor: '#1e293b' }}>
-            <Image
-              src={images[activeImageIndex] || images[0]}
-              alt={property.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 66vw"
-              priority
-              style={{ objectFit: 'cover' }}
-            />
-            <div style={{ position: 'absolute', bottom: '16px', left: '16px', backgroundColor: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', padding: '6px 12px', borderRadius: '8px', color: '#fff', fontSize: '12px', fontWeight: 600 }}>
-              Photo {activeImageIndex + 1} of {images.length}
-            </div>
-          </div>
+        {/* Room Tag Filter Bar */}
+        {(() => {
+          const mediaList: PublicPropertyMedia[] = (property.media && property.media.length > 0)
+            ? property.media
+            : (property.images || []).map((img, i) => ({
+                id: `img_${i}`,
+                url: img,
+                tag: i === 0 ? 'Exterior / Facade' : (i === 1 ? 'Hall / Living Area' : 'Property Photo'),
+                isCover: i === 0,
+                caption: ''
+              }));
+          const uniqueTags = Array.from(new Set(mediaList.map(m => m.tag))).filter(Boolean);
+          const displayedMedia = activeTag === 'All'
+            ? mediaList
+            : mediaList.filter(m => m.tag === activeTag);
+          const currentMedia = displayedMedia[activeImageIndex] || displayedMedia[0] || mediaList[0];
 
-          {/* Side Thumbnails Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '12px', backgroundColor: '#0f172a', justifyContent: 'center' }}>
-            {images.map((img, idx) => (
-              <div
-                key={idx}
-                onClick={() => setActiveImageIndex(idx)}
-                style={{
-                  position: 'relative',
-                  height: '130px',
-                  borderRadius: '10px',
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  border: activeImageIndex === idx ? '3px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)',
-                  opacity: activeImageIndex === idx ? 1 : 0.7,
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <Image
-                  src={img}
-                  alt={`Thumbnail ${idx + 1}`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  style={{ objectFit: 'cover' }}
-                />
+          return (
+            <>
+              {/* Filter Tabs */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <button
+                  type="button"
+                  onClick={() => { setActiveTag('All'); setActiveImageIndex(0); }}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontSize: '12.5px',
+                    fontWeight: 700,
+                    border: activeTag === 'All' ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                    backgroundColor: activeTag === 'All' ? '#2563eb' : '#ffffff',
+                    color: activeTag === 'All' ? '#ffffff' : '#475569',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  All Photos ({mediaList.length})
+                </button>
+                {uniqueTags.map(tag => {
+                  const count = mediaList.filter(m => m.tag === tag).length;
+                  const isSelected = activeTag === tag;
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => { setActiveTag(tag); setActiveImageIndex(0); }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '20px',
+                        fontSize: '12.5px',
+                        fontWeight: isSelected ? 700 : 500,
+                        border: isSelected ? '2px solid #2563eb' : '1px solid #cbd5e1',
+                        backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
+                        color: isSelected ? '#1d4ed8' : '#334155',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <span>🏷️</span> {tag} <span style={{ opacity: 0.7, fontSize: '11px' }}>({count})</span>
+                    </button>
+                  );
+                })}
+                {property.videoTourUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setVideoModalOpen(true)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      fontSize: '12.5px',
+                      fontWeight: 700,
+                      border: '1px solid #f43f5e',
+                      backgroundColor: '#fff1f2',
+                      color: '#e11d48',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      marginLeft: 'auto'
+                    }}
+                  >
+                    <span>🎥</span> Watch 4K Video Tour
+                  </button>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+
+              {/* Hero Gallery Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: displayedMedia.length > 1 ? '2.2fr 1fr' : '1fr', gap: '16px', borderRadius: '16px', overflow: 'hidden', marginBottom: '32px', backgroundColor: '#0f172a' }}>
+                {/* Main Large Showcase Image */}
+                <div style={{ position: 'relative', minHeight: '460px', backgroundColor: '#1e293b', cursor: 'pointer' }} onClick={() => setLightboxOpen(true)}>
+                  <Image
+                    src={currentMedia?.url || '/images/property_hero.jpg'}
+                    alt={property.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 66vw"
+                    priority
+                    style={{ objectFit: 'cover' }}
+                  />
+                  
+                  {/* Room Tag Badge */}
+                  {currentMedia?.tag && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '16px',
+                      left: '16px',
+                      backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                      backdropFilter: 'blur(8px)',
+                      padding: '6px 14px',
+                      borderRadius: '8px',
+                      color: '#ffffff',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      border: '1px solid rgba(255,255,255,0.25)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.3)'
+                    }}>
+                      <span>🏷️</span> {currentMedia.tag}
+                    </div>
+                  )}
+
+                  {/* Expand Lightbox Button */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+                    backdropFilter: 'blur(8px)',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <span>⛶</span> Full Screen
+                  </div>
+
+                  {/* Caption & Counter */}
+                  <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', padding: '6px 14px', borderRadius: '8px', color: '#fff', fontSize: '13px', fontWeight: 500 }}>
+                      {currentMedia?.caption || currentMedia?.tag || `Photo ${activeImageIndex + 1}`}
+                    </div>
+                    <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', padding: '6px 12px', borderRadius: '8px', color: '#94a3b8', fontSize: '12px', fontWeight: 600 }}>
+                      {activeImageIndex + 1} of {displayedMedia.length}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Side Thumbnails Column */}
+                {displayedMedia.length > 1 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', backgroundColor: '#0f172a', justifyContent: 'center', maxHeight: '480px', overflowY: 'auto' }}>
+                    {displayedMedia.map((m, idx) => (
+                      <div
+                        key={m.id || idx}
+                        onClick={() => setActiveImageIndex(idx)}
+                        style={{
+                          position: 'relative',
+                          height: '98px',
+                          borderRadius: '10px',
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          border: activeImageIndex === idx ? '3px solid #3b82f6' : '1px solid rgba(255,255,255,0.15)',
+                          opacity: activeImageIndex === idx ? 1 : 0.65,
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <Image
+                          src={m.url}
+                          alt={m.tag || `Thumbnail ${idx + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '4px',
+                          left: '4px',
+                          backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          color: '#fff',
+                          fontSize: '10px',
+                          fontWeight: 700
+                        }}>
+                          {m.tag}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* LIGHTBOX MODAL */}
+              {lightboxOpen && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                  zIndex: 9999,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '20px'
+                }}>
+                  {/* Top Bar */}
+                  <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', color: '#fff' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ backgroundColor: '#2563eb', padding: '4px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: 700 }}>
+                        🏷️ {currentMedia?.tag || 'Property Photo'}
+                      </span>
+                      <span style={{ fontSize: '14px', color: '#cbd5e1' }}>
+                        {currentMedia?.caption || property.title}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setLightboxOpen(false)}
+                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '32px', cursor: 'pointer', padding: '0 8px' }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                  {/* Lightbox Image Container */}
+                  <div style={{ position: 'relative', width: '100%', maxWidth: '1200px', height: '70vh' }}>
+                    <Image
+                      src={currentMedia?.url || '/images/property_hero.jpg'}
+                      alt={currentMedia?.tag || property.title}
+                      fill
+                      style={{ objectFit: 'contain' }}
+                    />
+                  </div>
+
+                  {/* Lightbox Controls */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '16px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setActiveImageIndex(prev => prev > 0 ? prev - 1 : displayedMedia.length - 1)}
+                      style={{ padding: '8px 18px', backgroundColor: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
+                    >
+                      &larr; Previous
+                    </button>
+                    <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: 600 }}>
+                      {activeImageIndex + 1} / {displayedMedia.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveImageIndex(prev => prev < displayedMedia.length - 1 ? prev + 1 : 0)}
+                      style={{ padding: '8px 18px', backgroundColor: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
+                    >
+                      Next &rarr;
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* VIDEO TOUR MODAL */}
+              {videoModalOpen && property.videoTourUrl && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundColor: 'rgba(0, 0, 0, 0.92)',
+                  zIndex: 9999,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '24px'
+                }}>
+                  <div style={{ width: '100%', maxWidth: '960px', backgroundColor: '#0f172a', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '16px' }}>
+                        <span>🎥</span> 4K Architectural Video Walkthrough &bull; {property.title}
+                      </div>
+                      <button
+                        onClick={() => setVideoModalOpen(false)}
+                        style={{ background: 'none', border: 'none', color: '#fff', fontSize: '26px', cursor: 'pointer' }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
+                      <iframe
+                        src={property.videoTourUrl.includes('watch?v=') 
+                          ? property.videoTourUrl.replace('watch?v=', 'embed/') 
+                          : property.videoTourUrl}
+                        title="Video Tour"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* Specifications Ribbon */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
           gap: '16px',
           backgroundColor: '#ffffff',
           padding: '20px 24px',
@@ -312,23 +597,33 @@ export default function PublicPropertyPage() {
         }}>
           <div>
             <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Bedrooms</span>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🛏️ {property.bedrooms} Beds</div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🛏️ {property.bedrooms} Beds</div>
           </div>
           <div>
             <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Bathrooms</span>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🛁 {property.bathrooms} Baths</div>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🛁 {property.bathrooms} Baths</div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Total Area</span>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>📐 {property.areaSqFt.toLocaleString()} sqft</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Built-Up Area</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>📐 {property.areaSqFt?.toLocaleString()} sqft</div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Property Type</span>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🏛️ {property.type}</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Carpet Area</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#2563eb', marginTop: '2px' }}>
+              📐 {property.carpetAreaSqFt ? property.carpetAreaSqFt.toLocaleString() : Math.round(Number(property.areaSqFt) * 0.8).toLocaleString()} sqft
+            </div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Market Status</span>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#16a34a', marginTop: '2px' }}>🟢 {property.status}</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Furnishing</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🪑 {property.furnishing || 'Semi-Furnished'}</div>
+          </div>
+          <div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Parking</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🚗 {property.parking ?? 1} Bays</div>
+          </div>
+          <div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Status</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#16a34a', marginTop: '2px' }}>🟢 {property.status}</div>
           </div>
         </div>
 
