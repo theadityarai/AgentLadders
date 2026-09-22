@@ -1,0 +1,15 @@
+.card {
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.defaultBg {
+  background-color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #f1f5f9; /* slate-100 */
+}
+
+.padding {
+  padding: var(--spacing-6);
+}

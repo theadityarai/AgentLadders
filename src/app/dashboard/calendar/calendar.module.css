@@ -1,0 +1,73 @@
+.calendarGrid {
+  display: flex;
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-md);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.timeColumn {
+  width: 72px;
+  flex-shrink: 0;
+  border-right: 1px solid #e2e8f0;
+}
+
+.cornerCell {
+  height: 48px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.timeCell {
+  height: 60px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 4px 8px 0 0;
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid #f8fafc;
+}
+
+.dayColumn {
+  flex: 1;
+  border-right: 1px solid #f1f5f9;
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}
+
+.dayHeader {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #fafbfc;
+}
+
+.dayBody {
+  position: relative;
+}
+
+.hourSlot {
+  height: 60px;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.event {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: white;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  z-index: 2;
+}

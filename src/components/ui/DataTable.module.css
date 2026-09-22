@@ -1,0 +1,94 @@
+.tableContainer {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius-md);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.tableToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.filterInput {
+  padding: 8px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  width: 280px;
+  transition: border-color 0.2s;
+}
+
+.filterInput:focus {
+  border-color: var(--color-accent);
+}
+
+.rowCount {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  text-align: left;
+  padding: 12px 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  background-color: #fafbfc;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.th.sortable {
+  cursor: pointer;
+}
+
+.th.sortable:hover {
+  color: var(--color-text-dark);
+}
+
+.sortArrow {
+  font-size: 0.75rem;
+}
+
+.td {
+  padding: 14px 20px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: var(--color-text-dark);
+}
+
+.row {
+  transition: background-color 0.15s;
+}
+
+.row:hover {
+  background-color: #f8fafc;
+}
+
+.row.clickable {
+  cursor: pointer;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}

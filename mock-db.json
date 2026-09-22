@@ -1,0 +1,534 @@
+{
+  "users": [
+    {
+      "id": "usr_nntlkcy7",
+      "name": "Adi",
+      "email": "adityarai366@gmail.com",
+      "password": "$2b$10$F0KgKrvJC0SiZTrtGMjy3.6n/LP6U7YbmMUjgcUzMKE4xlNuxJORO",
+      "role": "OWNER",
+      "agencyId": "ag_ql21vxnd"
+    }
+  ],
+  "agencies": [
+    {
+      "id": "ag_ql21vxnd",
+      "name": "View Agency",
+      "country": "India",
+      "currency": "INR",
+      "plan": "Professional",
+      "propertyTypes": [
+        "Apartment",
+        "House",
+        "Villa",
+        "Commercial"
+      ],
+      "leadSources": [
+        "Website",
+        "Referral",
+        "Zillow",
+        "Walk-in"
+      ],
+      "notificationPrefs": {
+        "New lead assigned": {
+          "inApp": true,
+          "email": true
+        },
+        "Task reminder": {
+          "inApp": true,
+          "email": false
+        },
+        "Site visit reminder": {
+          "inApp": true,
+          "email": true
+        }
+      }
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif_00ctc4s0",
+      "title": "Welcome to AgentLadders",
+      "message": "Your agency account has been created successfully.",
+      "read": true,
+      "userId": "usr_nntlkcy7",
+      "createdAt": "2026-09-21T11:34:10.173Z"
+    }
+  ],
+  "properties": [
+    {
+      "id": "prop_1",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Luxury Villa in Beverly Hills",
+      "type": "Villa",
+      "location": "Los Angeles, CA",
+      "price": 4500000,
+      "status": "Available",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "prop_2",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Downtown Sky Penthouse",
+      "type": "Apartment",
+      "location": "Manhattan, NY",
+      "price": 2850000,
+      "status": "Under Offer",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "prop_3",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Modern Waterfront Residence",
+      "type": "House",
+      "location": "Miami Beach, FL",
+      "price": 1650000,
+      "status": "Available",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "prop_4",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Silicon Valley Executive Condo",
+      "type": "Apartment",
+      "location": "Palo Alto, CA",
+      "price": 1250000,
+      "status": "Sold",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "leads": [
+    {
+      "id": "lead_1",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Brooklyn Lean",
+      "email": "brooklyn@example.com",
+      "phone": "+1 (555) 234-5678",
+      "status": "Qualified",
+      "source": "Website",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "lead_2",
+      "agencyId": "ag_ql21vxnd",
+      "name": "James Wilson",
+      "email": "james.w@example.com",
+      "phone": "+1 (555) 345-6789",
+      "status": "New",
+      "source": "Referral",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "lead_3",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Sarah Connor",
+      "email": "sarah.c@example.com",
+      "phone": "+1 (555) 456-7890",
+      "status": "Contacted",
+      "source": "Zillow",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "lead_4",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Alexander Wright",
+      "email": "alex.wright@horizon.com",
+      "phone": "+1 (555) 789-0123",
+      "status": "Qualified",
+      "source": "Property Finder",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "deals": [
+    {
+      "id": "deal_1",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Beverly Hills Luxury Villa Purchase",
+      "amount": 4500000,
+      "stage": "Closed Won",
+      "expectedCloseDate": "2026-08-15",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "deal_2",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Downtown Penthouse Corporate Lease",
+      "amount": 180000,
+      "stage": "Negotiation",
+      "expectedCloseDate": "2026-10-01",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "deal_3",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Miami Waterfront Acquisition",
+      "amount": 1650000,
+      "stage": "Proposal",
+      "expectedCloseDate": "2026-11-15",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "deal_4",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Silicon Valley Condo Sale",
+      "amount": 1250000,
+      "stage": "Closed Won",
+      "expectedCloseDate": "2026-07-20",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "clients": [
+    {
+      "id": "cli_1",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Jonathan Reynolds",
+      "email": "jreynolds@invest.org",
+      "phone": "+1 (555) 890-1234",
+      "type": "Buyer",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "cli_2",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Sophia Martinez",
+      "email": "smartinez@designlab.co",
+      "phone": "+1 (555) 901-2345",
+      "type": "Renter",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "cli_3",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Oliver Zhang",
+      "email": "oliver.zhang@capital.hk",
+      "phone": "+1 (555) 012-3456",
+      "type": "Investor",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "companies": [
+    {
+      "id": "comp_1",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Apex Horizon Capital",
+      "industry": "Private Equity / Real Estate",
+      "website": "https://apexhorizon.example.com",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "comp_2",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Sterling Development Group",
+      "industry": "Commercial Property Development",
+      "website": "https://sterlingdev.example.com",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "comp_3",
+      "agencyId": "ag_ql21vxnd",
+      "name": "OmniGlobal Hospitality",
+      "industry": "Hotels & Serviced Residences",
+      "website": "https://omniglobal.example.com",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "owners": [
+    {
+      "id": "own_1",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Richard Davenport",
+      "email": "richard@davenport.co",
+      "phone": "+1 (555) 111-2233",
+      "propertiesCount": 4,
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "own_2",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Eleanor Vance",
+      "email": "evance@estateholdings.com",
+      "phone": "+1 (555) 222-3344",
+      "propertiesCount": 2,
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "own_3",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Robert Chen",
+      "email": "rchen@pacificridge.io",
+      "phone": "+1 (555) 333-4455",
+      "propertiesCount": 6,
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "brokers": [
+    {
+      "id": "brk_1",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Marcus Vance",
+      "agency": "Vance & Partners Luxury Real Estate",
+      "commissionSplit": "70/30",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "brk_2",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Elena Rostova",
+      "agency": "Metropolitan Commercial Realty",
+      "commissionSplit": "50/50",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "brk_3",
+      "agencyId": "ag_ql21vxnd",
+      "name": "David Sterling",
+      "agency": "Prime Coastal Estates",
+      "commissionSplit": "60/40",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "invoices": [
+    {
+      "id": "inv_1",
+      "agencyId": "ag_ql21vxnd",
+      "number": "INV-2026-001",
+      "clientName": "Jonathan Reynolds",
+      "amount": 90000,
+      "status": "Paid",
+      "dueDate": "2026-08-30",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "inv_2",
+      "agencyId": "ag_ql21vxnd",
+      "number": "INV-2026-002",
+      "clientName": "Sophia Martinez",
+      "amount": 18000,
+      "status": "Pending",
+      "dueDate": "2026-10-15",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "inv_3",
+      "agencyId": "ag_ql21vxnd",
+      "number": "INV-2026-003",
+      "clientName": "Apex Horizon Capital",
+      "amount": 45000,
+      "status": "Overdue",
+      "dueDate": "2026-09-10",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay_1",
+      "agencyId": "ag_ql21vxnd",
+      "reference": "TXN-984210",
+      "invoiceNumber": "INV-2026-001",
+      "amount": 90000,
+      "method": "Bank Transfer",
+      "status": "Completed",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "pay_2",
+      "agencyId": "ag_ql21vxnd",
+      "reference": "TXN-984211",
+      "invoiceNumber": "INV-2026-002",
+      "amount": 5000,
+      "method": "Credit Card",
+      "status": "Processing",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "exp_1",
+      "agencyId": "ag_ql21vxnd",
+      "category": "Marketing",
+      "description": "Zillow & Bayut Premium Featured Placement",
+      "amount": 2400,
+      "date": "2026-09-05",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "exp_2",
+      "agencyId": "ag_ql21vxnd",
+      "category": "Software",
+      "description": "Matterport 3D Virtual Tour Hosting",
+      "amount": 350,
+      "date": "2026-09-10",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "exp_3",
+      "agencyId": "ag_ql21vxnd",
+      "category": "Office",
+      "description": "Agency Client Hospitality & Escrow Closing Dinner",
+      "amount": 720,
+      "date": "2026-09-18",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "tsk_1",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Prepare Escrow & Title Documents for Beverly Hills Villa",
+      "assignedTo": "Adi",
+      "dueDate": "2026-09-23",
+      "status": "Pending",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "tsk_2",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Finalize Lease Agreement with Sophia Martinez",
+      "assignedTo": "Adi",
+      "dueDate": "2026-09-25",
+      "status": "In Progress",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "tsk_3",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Inspect Miami Waterfront property before buyer handover",
+      "assignedTo": "Marcus Vance",
+      "dueDate": "2026-09-27",
+      "status": "Completed",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "calendarEvents": [
+    {
+      "id": "cal_1",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Exclusive Viewing: Downtown Sky Penthouse",
+      "date": "2026-09-21",
+      "time": "11:00 AM",
+      "type": "Viewing",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "cal_2",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Contract Signing: Brooklyn Lean & Escrow Agent",
+      "date": "2026-09-22",
+      "time": "02:30 PM",
+      "type": "Meeting",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "cal_3",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Follow-up Call with Marcus Vance (Split Review)",
+      "date": "2026-09-24",
+      "time": "10:00 AM",
+      "type": "Call",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "siteVisits": [
+    {
+      "id": "vis_1",
+      "agencyId": "ag_ql21vxnd",
+      "property": "Luxury Villa in Beverly Hills",
+      "client": "Jonathan Reynolds",
+      "date": "2026-09-21",
+      "status": "Scheduled",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "vis_2",
+      "agencyId": "ag_ql21vxnd",
+      "property": "Downtown Sky Penthouse",
+      "client": "Sophia Martinez",
+      "date": "2026-09-19",
+      "status": "Completed",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "vis_3",
+      "agencyId": "ag_ql21vxnd",
+      "property": "Modern Waterfront Residence",
+      "client": "Oliver Zhang",
+      "date": "2026-09-24",
+      "status": "Scheduled",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "listings": [
+    {
+      "id": "list_1",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Luxury Villa in Beverly Hills",
+      "platform": "Property Finder",
+      "status": "Active",
+      "views": 1420,
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "list_2",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Downtown Sky Penthouse",
+      "platform": "Bayut",
+      "status": "Active",
+      "views": 890,
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "list_3",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Modern Waterfront Residence",
+      "platform": "Zillow",
+      "status": "Active",
+      "views": 2310,
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "list_4",
+      "agencyId": "ag_ql21vxnd",
+      "title": "Silicon Valley Executive Condo",
+      "platform": "Company Website",
+      "status": "Draft",
+      "views": 150,
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc_y69vsjdd",
+      "agencyId": "ag_ql21vxnd",
+      "name": "sw",
+      "type": "PDF",
+      "size": "1.2 MB",
+      "uploadedBy": "Adi",
+      "createdAt": "2026-09-21T13:30:53.654Z"
+    }
+  ],
+  "reports": [
+    {
+      "id": "rep_1",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Q3 Agency Commission & Deal Performance",
+      "type": "Financial",
+      "frequency": "Quarterly",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "rep_2",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Lead Acquisition & Portal ROI Audit",
+      "type": "Sales",
+      "frequency": "Monthly",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "rep_3",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Active Inventory Valuation & Absorption Rate",
+      "type": "Performance",
+      "frequency": "Weekly",
+      "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ]
+}
