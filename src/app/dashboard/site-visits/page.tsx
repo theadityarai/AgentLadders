@@ -14,13 +14,21 @@ interface SiteVisit {
   property: string;
   client: string;
   date: string;
+  timeSlot?: string;
+  accompaniedBy?: string;
   status: string;
+  feedback?: string;
+  notes?: string;
 }
+
+const VISIT_STATUSES = ['Scheduled', 'Completed', 'Cancelled', 'No Show'];
 
 export default function SiteVisitsPage() {
   const [data, setData] = useState<SiteVisit[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingVisit, setEditingVisit] = useState<SiteVisit | null>(null);
+
   const initialForm = {
     property: '',
     client: '',
@@ -70,6 +78,34 @@ export default function SiteVisitsPage() {
     loadVisits();
   };
 
+  const handleOpenEdit = (visit: SiteVisit) => {
+    setEditingVisit(visit);
+  };
+
+  const handleUpdateVisit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingVisit) return;
+    const res = await fetch('/api/site-visits', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingVisit)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setData(prev => prev.map(v => v.id === editingVisit.id ? json.visit : v));
+      setEditingVisit(null);
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    setData(prev => prev.map(v => v.id === id ? { ...v, status: newStatus } : v));
+    await fetch('/api/site-visits', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status: newStatus })
+    });
+  };
+
   const handleDelete = (id: string, property: string) => {
     setVisitToDelete({ id, property });
   };
@@ -106,40 +142,89 @@ export default function SiteVisitsPage() {
   const columns: Column<SiteVisit>[] = [
     { 
       key: 'date', 
-      label: 'Scheduled Date',
+      label: 'Scheduled Date & Time',
       render: (r) => (
-        <span style={{ fontWeight: 600, color: '#0f172a' }}>
-          🗓️ {r.date}
-        </span>
+        <div>
+          <span style={{ fontWeight: 600, color: '#0f172a' }}>🗓️ {r.date}</span>
+          <div style={{ fontSize: '12px', color: '#64748b' }}>🕒 {r.timeSlot || '11:00 AM'}</div>
+        </div>
       )
     },
     { 
       key: 'property', 
-      label: 'Property',
-      render: (r) => <span style={{ fontWeight: 600, color: '#1e293b' }}>{r.property}</span>
+      label: 'Property', 
+      render: (r) => <span style={{ fontWeight: 600, color: '#1e293b' }}>🏡 {r.property}</span> 
     },
-    { key: 'client', label: 'Prospective Client' },
-    { key: 'status', label: 'Visit Status', render: (r) => <StatusBadge status={r.status} /> },
+    { 
+      key: 'client', 
+      label: 'Client & Broker',
+      render: (r) => (
+        <div>
+          <div style={{ fontWeight: 500, color: '#0f172a' }}>👤 {r.client}</div>
+          <div style={{ fontSize: '11px', color: '#64748b' }}>Host: {r.accompaniedBy || 'Marcus Vance'}</div>
+        </div>
+      )
+    },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      render: (r) => (
+        <select
+          value={r.status}
+          onChange={(e) => handleStatusChange(r.id, e.target.value)}
+          style={{
+            padding: '4px 8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            borderRadius: '6px',
+            border: '1px solid #cbd5e1',
+            backgroundColor: r.status === 'Completed' ? '#dcfce7' : r.status === 'Cancelled' ? '#fee2e2' : '#eff6ff',
+            color: r.status === 'Completed' ? '#166534' : r.status === 'Cancelled' ? '#991b1b' : '#1d4ed8',
+            cursor: 'pointer'
+          }}
+        >
+          {VISIT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+      )
+    },
     {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <button
-          onClick={() => handleDelete(r.id, r.property)}
-          style={{
-            padding: '6px 10px',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: '#fff1f2',
-            border: '1px solid #fecdd3',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#e11d48'
-          }}
-          title="Delete Visit"
-        >
-          🗑️ Delete
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Visit"
+          >
+            ✏️ Edit
+          </button>
+          <button
+            onClick={() => handleDelete(r.id, r.property)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#e11d48'
+            }}
+            title="Cancel & Delete Visit"
+          >
+            🗑️
+          </button>
+        </div>
       )
     }
   ];
@@ -147,15 +232,15 @@ export default function SiteVisitsPage() {
   return (
     <>
       <PageHeader 
-        title="Site Visits & Property Viewings" 
-        subtitle="Schedule and track on-site walkthroughs with buyers and tenants" 
+        title="Site Visits & Showings" 
+        subtitle="Schedule property viewings, log attendee feedback, and manage showings calendar" 
         actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Schedule Visit</Button>} 
       />
 
       <TableFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search site visits by property name or client..."
+        searchPlaceholder="Search visits by property or client name..."
         totalCount={data.length}
         filteredCount={filteredData.length}
         onReset={handleResetFilters}
@@ -167,107 +252,235 @@ export default function SiteVisitsPage() {
             onChange: setStatusFilter,
             options: [
               { label: 'All Statuses', value: 'All' },
-              { label: 'Scheduled', value: 'Scheduled' },
-              { label: 'Completed', value: 'Completed' },
-              { label: 'Cancelled', value: 'Cancelled' }
+              ...VISIT_STATUSES.map(s => ({ label: s, value: s }))
             ]
           }
         ]}
       />
-      
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading visits...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No site visits matched your filters"
-          onResetFilters={handleResetFilters}
-        />
-      )}
 
+      <div style={{ padding: '0 24px 24px' }}>
+        <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* CREATE VISIT MODAL */}
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid #e2e8f0' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Schedule Site Visit</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Schedule Property Showing</h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>Coordinate on-site client walkthroughs, agent escorts, and capture feedback</p>
-              </div>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
-            </div>
-
-            <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Property Asset / Address *</label>
-                  <input required value={form.property} onChange={e => setForm({...form, property: e.target.value})} placeholder="e.g. Luxury Villa in Beverly Hills" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Client / Buyer Full Name *</label>
-                  <input required value={form.client} onChange={e => setForm({...form, client: e.target.value})} placeholder="e.g. Jonathan Reynolds" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Walkthrough Date *</label>
-                  <input required type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Time Slot</label>
-                  <select value={form.timeSlot} onChange={e => setForm({...form, timeSlot: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option>09:30 AM</option>
-                    <option>11:00 AM</option>
-                    <option>01:30 PM</option>
-                    <option>03:00 PM</option>
-                    <option>05:00 PM (Sunset Viewing)</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Showing Status</label>
-                  <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option>Scheduled</option>
-                    <option>Confirmed</option>
-                    <option>Completed</option>
-                    <option>Rescheduled</option>
-                    <option>Cancelled</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Escorting Agent / Broker</label>
-                  <input value={form.accompaniedBy} onChange={e => setForm({...form, accompaniedBy: e.target.value})} placeholder="e.g. Marcus Vance" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Initial Client Impression / Outcome</label>
-                  <select value={form.feedback} onChange={e => setForm({...form, feedback: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option value="">Awaiting Showing</option>
-                    <option value="Very Interested - Preparing Offer">Very Interested - Preparing Offer</option>
-                    <option value="Liked Layout - Considering Price">Liked Layout - Considering Price</option>
-                    <option value="Requested 2nd Showing with Family">Requested 2nd Showing with Family</option>
-                    <option value="Not Interested - Location Mismatch">Not Interested - Location Mismatch</option>
-                  </select>
-                </div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Title *</label>
+                <input
+                  required
+                  placeholder="e.g. Palm Jumeirah Signature Villa"
+                  value={form.property}
+                  onChange={e => setForm({ ...form, property: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Visit Notes & Access Instructions</label>
-                <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Lockbox code, security gate check-in, owner notification status..." style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', resize: 'vertical' }} />
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Prospective Client *</label>
+                <input
+                  required
+                  placeholder="e.g. Eleanor Vance"
+                  value={form.client}
+                  onChange={e => setForm({ ...form, client: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
+                  <input
+                    required
+                    type="date"
+                    value={form.date}
+                    onChange={e => setForm({ ...form, date: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Time Slot *</label>
+                  <input
+                    required
+                    placeholder="11:00 AM"
+                    value={form.timeSlot}
+                    onChange={e => setForm({ ...form, timeSlot: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Hosting Broker</label>
+                  <input
+                    value={form.accompaniedBy}
+                    onChange={e => setForm({ ...form, accompaniedBy: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Status</label>
+                  <select
+                    value={form.status}
+                    onChange={e => setForm({ ...form, status: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {VISIT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Notes & Instructions</label>
+                <textarea
+                  rows={2}
+                  placeholder="Gate security code, client interest specifics..."
+                  value={form.notes}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Confirm Visit</Button>
+                <Button type="submit" variant="primary">Schedule Visit</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
+      {/* EDIT VISIT MODAL */}
+      {editingVisit && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Showing</h3>
+            <form onSubmit={handleUpdateVisit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Property Title *</label>
+                <input
+                  required
+                  value={editingVisit.property || ''}
+                  onChange={e => setEditingVisit({ ...editingVisit, property: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Prospective Client *</label>
+                <input
+                  required
+                  value={editingVisit.client || ''}
+                  onChange={e => setEditingVisit({ ...editingVisit, client: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
+                  <input
+                    required
+                    type="date"
+                    value={editingVisit.date || ''}
+                    onChange={e => setEditingVisit({ ...editingVisit, date: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Time Slot *</label>
+                  <input
+                    required
+                    value={editingVisit.timeSlot || ''}
+                    onChange={e => setEditingVisit({ ...editingVisit, timeSlot: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Hosting Broker</label>
+                  <input
+                    value={editingVisit.accompaniedBy || ''}
+                    onChange={e => setEditingVisit({ ...editingVisit, accompaniedBy: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Status</label>
+                  <select
+                    value={editingVisit.status}
+                    onChange={e => setEditingVisit({ ...editingVisit, status: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {VISIT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Attendee Feedback & Notes</label>
+                <textarea
+                  rows={2}
+                  value={editingVisit.feedback || editingVisit.notes || ''}
+                  onChange={e => setEditingVisit({ ...editingVisit, feedback: e.target.value, notes: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <Button type="button" variant="ghost" onClick={() => setEditingVisit(null)}>Cancel</Button>
+                <Button type="submit" variant="primary">Save Changes</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM CANCEL / DELETE MODAL */}
       <ConfirmModal
         isOpen={!!visitToDelete}
         title="Cancel Site Visit"
@@ -276,8 +489,9 @@ export default function SiteVisitsPage() {
             Are you sure you want to cancel and remove the scheduled walkthrough for <strong>&ldquo;{visitToDelete?.property}&rdquo;</strong>?
           </>
         }
-        confirmText="Remove Visit"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? 'Deleting...' : 'Confirm Cancellation'}
+        cancelText="Cancel"
+        danger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setVisitToDelete(null)}
       />

@@ -45,24 +45,28 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           fontSize: fontSize,
           fontWeight: 500,
           borderRadius: 'var(--radius-md)',
-          cursor: 'pointer',
+          cursor: props.disabled ? 'not-allowed' : 'pointer',
+          opacity: props.disabled ? 0.55 : 1,
+          pointerEvents: props.disabled ? 'none' : 'auto',
           transition: 'var(--transition)',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           outline: 'none',
-          boxShadow: variant === 'primary' || variant === 'danger' ? 'var(--shadow-sm)' : 'none',
+          boxShadow: (variant === 'primary' || variant === 'danger') && !props.disabled ? 'var(--shadow-sm)' : 'none',
           ...style
         }}
         onMouseEnter={(e) => {
+          if (props.disabled) return;
           e.currentTarget.style.backgroundColor = hoverBg;
-          if(variant === 'primary' || variant === 'danger') {
+          if (variant === 'primary' || variant === 'danger') {
             e.currentTarget.style.boxShadow = 'var(--shadow-md)';
           }
         }}
         onMouseLeave={(e) => {
+          if (props.disabled) return;
           e.currentTarget.style.backgroundColor = bgColor;
-          if(variant === 'primary' || variant === 'danger') {
+          if (variant === 'primary' || variant === 'danger') {
             e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
           }
         }}

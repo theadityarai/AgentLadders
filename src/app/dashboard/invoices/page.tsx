@@ -17,10 +17,12 @@ interface Invoice {
   status: string;
   dueDate: string;
   dealRef?: string;
-  taxRate?: number;
+  taxRate?: number | string;
   issueDate?: string;
   notes?: string;
 }
+
+const INVOICE_STATUSES = ['Pending', 'Paid', 'Overdue', 'Cancelled'];
 
 const initialForm = {
   number: '',
@@ -29,7 +31,7 @@ const initialForm = {
   amount: '',
   taxRate: '5',
   issueDate: new Date().toISOString().split('T')[0],
-  dueDate: '',
+  dueDate: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
   status: 'Pending',
   notes: ''
 };
@@ -38,6 +40,7 @@ export default function InvoicesPage() {
   const [data, setData] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [form, setForm] = useState(initialForm);
 
   // Delete modal state
@@ -79,6 +82,71 @@ export default function InvoicesPage() {
     setShowModal(false);
     setForm(initialForm);
     loadInvoices();
+  };
+
+  const handleOpenEdit = (inv: Invoice) => {
+    setEditingInvoice(inv);
+  };
+
+  const handleUpdateInvoice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingInvoice) return;
+    const res = await fetch('/api/invoices', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingInvoice)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setData(prev => prev.map(i => i.id === editingInvoice.id ? json.invoice : i));
+      setEditingInvoice(null);
+    }
+  };
+
+  const handleTogglePaid = async (inv: Invoice) => {
+    const nextStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
+    setData(prev => prev.map(i => i.id === inv.id ? { ...i, status: nextStatus } : i));
+    await fetch('/api/invoices', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: inv.id, status: nextStatus })
+    });
+  };
+
+  const handleDownloadInvoice = (inv: Invoice) => {
+    const content = 
+      `=================================================================\n` +
+      `                   AGENTLADDERS OFFICIAL TAX INVOICE             \n` +
+      `=================================================================\n` +
+      `Invoice #: ${inv.number}\n` +
+      `Issue Date: ${inv.issueDate || 'N/A'}\n` +
+      `Due Date:   ${inv.dueDate}\n` +
+      `Status:     ${inv.status.toUpperCase()}\n` +
+      `-----------------------------------------------------------------\n` +
+      `BILL TO:\n` +
+      `Client Name: ${inv.clientName}\n` +
+      `Deal Reference: ${inv.dealRef || 'Real Estate Brokerage Service'}\n` +
+      `-----------------------------------------------------------------\n` +
+      `DESCRIPTION                                               AMOUNT\n` +
+      `-----------------------------------------------------------------\n` +
+      `Agency Brokerage / Advisory Commission             $${inv.amount.toLocaleString()}\n` +
+      `Tax Rate: 5%\n` +
+      `-----------------------------------------------------------------\n` +
+      `TOTAL PAYABLE:                                     $${inv.amount.toLocaleString()}\n` +
+      `=================================================================\n` +
+      `Notes: ${inv.notes || 'Payment due strictly upon invoice receipt. Thank you for your business.'}\n` +
+      `Remittance: Bank Wire Transfer to AgentLadders Escrow Account\n` +
+      `=================================================================\n`;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Invoice_${inv.number}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleDelete = (id: string, number: string) => {
@@ -154,22 +222,78 @@ export default function InvoicesPage() {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <button
-          onClick={() => handleDelete(r.id, r.number)}
-          style={{
-            padding: '6px 10px',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: '#fff1f2',
-            border: '1px solid #fecdd3',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#e11d48'
-          }}
-          title="Delete Invoice"
-        >
-          🗑️ Delete
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={() => handleTogglePaid(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 600,
+              backgroundColor: r.status === 'Paid' ? '#eff6ff' : '#f0fdf4',
+              border: `1px solid ${r.status === 'Paid' ? '#bfdbfe' : '#bbf7d0'}`,
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: r.status === 'Paid' ? '#1d4ed8' : '#15803d',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title={r.status === 'Paid' ? 'Mark as Pending' : 'Mark as Paid'}
+          >
+            {r.status === 'Paid' ? '↩ Reopen' : '✓ Mark Paid'}
+          </button>
+          <button
+            onClick={() => handleDownloadInvoice(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#334155',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title="Download Tax Invoice"
+          >
+            📥 PDF
+          </button>
+          <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Invoice"
+          >
+            ✏️
+          </button>
+          <button
+            onClick={() => handleDelete(r.id, r.number)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#e11d48'
+            }}
+            title="Delete Invoice"
+          >
+            🗑️
+          </button>
+        </div>
       )
     }
   ];
@@ -197,230 +321,252 @@ export default function InvoicesPage() {
             onChange: setStatusFilter,
             options: [
               { label: 'All Statuses', value: 'All' },
-              { label: 'Pending', value: 'Pending' },
-              { label: 'Paid', value: 'Paid' },
-              { label: 'Overdue', value: 'Overdue' }
+              ...INVOICE_STATUSES.map(s => ({ label: s, value: s }))
             ]
           }
         ]}
       />
-      
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading invoices...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No invoices matched your billing filters"
-          onResetFilters={handleResetFilters}
-        />
-      )}
 
+      <div style={{ padding: '0 24px 24px' }}>
+        <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* CREATE INVOICE MODAL */}
       {showModal && (
         <div style={{
           position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
-          padding: '20px'
+          zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '680px',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
             maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            border: '1px solid #e2e8f0'
+            overflowY: 'auto'
           }}>
-            {/* Modal Header */}
-            <div style={{
-              padding: '24px 28px',
-              borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'linear-gradient(to right, #f8fafc, #ffffff)'
-            }}>
-              <div>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  🧾 Generate Client Invoice
-                </h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>
-                  Issue professional commission statements and escrow billing
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                  borderRadius: '6px'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} style={{ padding: '24px 28px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Create New Invoice</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Invoice Number *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice # *</label>
                   <input
                     required
+                    placeholder="INV-2026-001"
                     value={form.number}
-                    onChange={e => setForm({...form, number: e.target.value})}
-                    placeholder="e.g. INV-2026-004"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                    onChange={e => setForm({ ...form, number: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Client / Payer Name *
-                  </label>
-                  <input
-                    required
-                    value={form.clientName}
-                    onChange={e => setForm({...form, clientName: e.target.value})}
-                    placeholder="e.g. Jonathan Reynolds"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Linked Deal Reference
-                  </label>
-                  <input
-                    value={form.dealRef}
-                    onChange={e => setForm({...form, dealRef: e.target.value})}
-                    placeholder="e.g. DEAL-2026-001 (Marina Penthouse)"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Invoice Amount ($) *
-                  </label>
-                  <input
-                    required
-                    type="number"
-                    value={form.amount}
-                    onChange={e => setForm({...form, amount: e.target.value})}
-                    placeholder="e.g. 90000"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Tax Rate (% VAT)
-                  </label>
-                  <input
-                    type="number"
-                    value={form.taxRate}
-                    onChange={e => setForm({...form, taxRate: e.target.value})}
-                    placeholder="5"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Billing Status
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Billing Status</label>
                   <select
                     value={form.status}
-                    onChange={e => setForm({...form, status: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    onChange={e => setForm({ ...form, status: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   >
-                    <option value="Pending">Pending (Sent)</option>
-                    <option value="Paid">Paid in Full</option>
-                    <option value="Overdue">Overdue</option>
+                    {INVOICE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
+              </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Issue Date
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Client / Payee *</label>
                   <input
-                    type="date"
-                    value={form.issueDate}
-                    onChange={e => setForm({...form, issueDate: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                    required
+                    placeholder="e.g. Acme Holdings Ltd"
+                    value={form.clientName}
+                    onChange={e => setForm({ ...form, clientName: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Due Date *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Deal Reference</label>
+                  <input
+                    placeholder="e.g. Marina Penthouse Closing"
+                    value={form.dealRef}
+                    onChange={e => setForm({ ...form, dealRef: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount ($) *</label>
+                  <input
+                    required
+                    type="number"
+                    placeholder="45000"
+                    value={form.amount}
+                    onChange={e => setForm({ ...form, amount: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Due Date *</label>
                   <input
                     required
                     type="date"
                     value={form.dueDate}
-                    onChange={e => setForm({...form, dueDate: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Payment Instructions & Notes
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={form.notes}
-                    onChange={e => setForm({...form, notes: e.target.value})}
-                    placeholder="Wire instructions: Bank of America, Escrow Account #... Due within 14 days."
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', resize: 'vertical' }}
+                    onChange={e => setForm({ ...form, dueDate: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px',
-                marginTop: '24px',
-                paddingTop: '20px',
-                borderTop: '1px solid #e2e8f0'
-              }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Instructions & Notes</label>
+                <textarea
+                  rows={3}
+                  placeholder="Wire transfer instructions, escrow details..."
+                  value={form.notes}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Invoice</Button>
+                <Button type="submit" variant="primary">Create Invoice</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
+      {/* EDIT INVOICE MODAL */}
+      {editingInvoice && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Invoice: {editingInvoice.number}</h3>
+            <form onSubmit={handleUpdateInvoice} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice # *</label>
+                  <input
+                    required
+                    value={editingInvoice.number || ''}
+                    onChange={e => setEditingInvoice({ ...editingInvoice, number: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Billing Status</label>
+                  <select
+                    value={editingInvoice.status}
+                    onChange={e => setEditingInvoice({ ...editingInvoice, status: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {INVOICE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Client / Payee *</label>
+                  <input
+                    required
+                    value={editingInvoice.clientName || ''}
+                    onChange={e => setEditingInvoice({ ...editingInvoice, clientName: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Deal Reference</label>
+                  <input
+                    value={editingInvoice.dealRef || ''}
+                    onChange={e => setEditingInvoice({ ...editingInvoice, dealRef: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount ($) *</label>
+                  <input
+                    required
+                    type="number"
+                    value={editingInvoice.amount || ''}
+                    onChange={e => setEditingInvoice({ ...editingInvoice, amount: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Due Date *</label>
+                  <input
+                    required
+                    type="date"
+                    value={editingInvoice.dueDate || ''}
+                    onChange={e => setEditingInvoice({ ...editingInvoice, dueDate: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Instructions & Notes</label>
+                <textarea
+                  rows={3}
+                  value={editingInvoice.notes || ''}
+                  onChange={e => setEditingInvoice({ ...editingInvoice, notes: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <Button type="button" variant="ghost" onClick={() => setEditingInvoice(null)}>Cancel</Button>
+                <Button type="submit" variant="primary">Save Changes</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE MODAL */}
       <ConfirmModal
         isOpen={!!invoiceToDelete}
-        title="Delete Billing Invoice"
+        title="Delete Invoice"
         message={
           <>
-            Are you sure you want to delete invoice <strong>&ldquo;{invoiceToDelete?.number}&rdquo;</strong>? 
-            This billing record will be removed from your accounts receivable.
+            Are you sure you want to delete invoice <strong>&ldquo;{invoiceToDelete?.number}&rdquo;</strong>?
+            This will permanently remove the invoice from billing records.
           </>
         }
-        confirmText="Delete Invoice"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? 'Deleting...' : 'Delete Invoice'}
+        cancelText="Cancel"
+        danger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setInvoiceToDelete(null)}
       />

@@ -55,6 +55,33 @@ export async function POST(req: Request) {
   return NextResponse.json({ success: true, lead: newLead });
 }
 
+export async function PUT(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const db = getDb();
+  const user = db.users.find(u => u.id === (session.user as any).id);
+  if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  const data = await req.json();
+  if (!data.id) return NextResponse.json({ error: 'Missing lead id' }, { status: 400 });
+
+  if (!db.leads) db.leads = [];
+  const index = db.leads.findIndex(l => l.id === data.id && l.agencyId === user.agencyId);
+  if (index === -1) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
+
+  const updatedLead = {
+    ...db.leads[index],
+    ...data,
+    updatedAt: new Date().toISOString()
+  };
+
+  db.leads[index] = updatedLead;
+  saveDb(db);
+
+  return NextResponse.json({ success: true, lead: updatedLead });
+}
+
 export async function DELETE(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -14,23 +14,32 @@ interface Owner {
   email: string;
   phone: string;
   propertiesCount: number;
+  ownerType?: string;
+  ownershipShare?: string;
+  primaryProperty?: string;
+  taxId?: string;
+  notes?: string;
 }
+
+const OWNER_TYPES = ['Individual Owner', 'Family Trust', 'Corporate Landlord', 'Property Fund'];
+
+const initialForm = {
+  name: '',
+  email: '',
+  phone: '',
+  propertiesCount: '1',
+  ownerType: 'Individual Owner',
+  ownershipShare: '100%',
+  primaryProperty: '',
+  taxId: '',
+  notes: ''
+};
 
 export default function OwnersPage() {
   const [data, setData] = useState<Owner[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const initialForm = {
-    name: '',
-    email: '',
-    phone: '',
-    propertiesCount: '1',
-    ownerType: 'Individual Owner',
-    ownershipShare: '100%',
-    primaryProperty: '',
-    taxId: '',
-    notes: ''
-  };
+  const [editingOwner, setEditingOwner] = useState<Owner | null>(null);
   const [form, setForm] = useState(initialForm);
 
   // Delete modal state
@@ -63,11 +72,33 @@ export default function OwnersPage() {
     await fetch('/api/owners', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify({
+        ...form,
+        propertiesCount: parseInt(form.propertiesCount) || 1
+      })
     });
     setShowModal(false);
     setForm(initialForm);
     loadOwners();
+  };
+
+  const handleOpenEdit = (owner: Owner) => {
+    setEditingOwner(owner);
+  };
+
+  const handleUpdateOwner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOwner) return;
+    const res = await fetch('/api/owners', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingOwner)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setData(prev => prev.map(o => o.id === editingOwner.id ? json.owner : o));
+      setEditingOwner(null);
+    }
   };
 
   const handleDelete = (id: string, name: string) => {
@@ -122,6 +153,7 @@ export default function OwnersPage() {
           </div>
           <div>
             <div style={{ fontWeight: 600, color: '#0f172a' }}>{r.name}</div>
+            {r.ownerType && <div style={{ fontSize: '11px', color: '#64748b' }}>{r.ownerType}</div>}
           </div>
         </div>
       )
@@ -141,22 +173,40 @@ export default function OwnersPage() {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <button
-          onClick={() => handleDelete(r.id, r.name)}
-          style={{
-            padding: '6px 10px',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: '#fff1f2',
-            border: '1px solid #fecdd3',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#e11d48'
-          }}
-          title="Delete Owner"
-        >
-          🗑️ Delete
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Owner"
+          >
+            ✏️ Edit
+          </button>
+          <button
+            onClick={() => handleDelete(r.id, r.name)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#e11d48'
+            }}
+            title="Delete Owner"
+          >
+            🗑️
+          </button>
+        </div>
       )
     }
   ];
@@ -164,8 +214,8 @@ export default function OwnersPage() {
   return (
     <>
       <PageHeader 
-        title="Landlord & Owner Management" 
-        subtitle="Manage property owners, title holders, and portfolio landlords" 
+        title="Property Owners & Landlords" 
+        subtitle="Manage landlord accounts, title deeds, and property management representation" 
         actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Add Owner</Button>} 
       />
 
@@ -179,121 +229,257 @@ export default function OwnersPage() {
         filters={[
           {
             key: 'portfolio',
-            label: 'Portfolio',
+            label: 'Portfolio Size',
             value: portfolioFilter,
             onChange: setPortfolioFilter,
             options: [
               { label: 'All Portfolios', value: 'All' },
-              { label: 'Single Unit (1)', value: 'single' },
-              { label: 'Multi-Unit (2 - 4)', value: 'multi' },
-              { label: 'Portfolio Holder (5+)', value: 'portfolio' }
+              { label: 'Single Asset (1 Property)', value: 'single' },
+              { label: 'Multi-Asset (2-4 Properties)', value: 'multi' },
+              { label: 'Large Portfolio (5+ Properties)', value: 'portfolio' }
             ]
           }
         ]}
       />
-      
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading owners...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No property owners matched your filters"
-          onResetFilters={handleResetFilters}
-        />
-      )}
 
+      <div style={{ padding: '0 24px 24px' }}>
+        <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* CREATE OWNER MODAL */}
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid #e2e8f0' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Add Property Owner</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Register Property Owner / Landlord</h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>Maintain master asset ownership records and portfolio management details</p>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Owner Name *</label>
+                <input
+                  required
+                  placeholder="e.g. Sheikh Rashid Al Maktoum"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
-            </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Owner Full Name *</label>
-                  <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Richard Davenport" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Email Address *</label>
+                  <input
+                    required
+                    type="email"
+                    placeholder="rashid@example.com"
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Entity Category</label>
-                  <select value={form.ownerType} onChange={e => setForm({...form, ownerType: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option>Individual Owner</option>
-                    <option>Property Development Co</option>
-                    <option>Family Office</option>
-                    <option>Investment Trust / Fund</option>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Phone Number *</label>
+                  <input
+                    required
+                    placeholder="+971 50 789 0123"
+                    value={form.phone}
+                    onChange={e => setForm({ ...form, phone: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Owner Type</label>
+                  <select
+                    value={form.ownerType}
+                    onChange={e => setForm({ ...form, ownerType: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {OWNER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Email Address *</label>
-                  <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="owner@example.com" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Contact Phone / Mobile *</label>
-                  <input required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+1 (555) 123-4567" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Portfolio Property Count *</label>
-                  <input required type="number" min="1" value={form.propertiesCount} onChange={e => setForm({...form, propertiesCount: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Ownership Equity Share</label>
-                  <select value={form.ownershipShare} onChange={e => setForm({...form, ownershipShare: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option>100% Sole Owner</option>
-                    <option>50% Joint Partner</option>
-                    <option>Fractional Syndicate</option>
-                  </select>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Properties Count</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={form.propertiesCount}
+                    onChange={e => setForm({ ...form, propertiesCount: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Primary Asset / Address</label>
-                  <input value={form.primaryProperty} onChange={e => setForm({...form, primaryProperty: e.target.value})} placeholder="e.g. Beverly Hills Villa, Unit 4A" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>National ID / Tax ID</label>
+                  <input
+                    placeholder="784-1985-1234567-1"
+                    value={form.taxId}
+                    onChange={e => setForm({ ...form, taxId: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Tax ID / Land Title Registration</label>
-                  <input value={form.taxId} onChange={e => setForm({...form, taxId: e.target.value})} placeholder="e.g. TAX-99482-USA" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Primary Asset</label>
+                  <input
+                    placeholder="e.g. Marina Gate Penthouse"
+                    value={form.primaryProperty}
+                    onChange={e => setForm({ ...form, primaryProperty: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Owner Notes & Bank Routing Info</label>
-                <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Rental payout instructions, Power of Attorney details, management agreement terms..." style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', resize: 'vertical' }} />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Owner</Button>
+                <Button type="submit" variant="primary">Add Owner</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
+      {/* EDIT OWNER MODAL */}
+      {editingOwner && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Owner: {editingOwner.name}</h3>
+            <form onSubmit={handleUpdateOwner} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Owner Name *</label>
+                <input
+                  required
+                  value={editingOwner.name || ''}
+                  onChange={e => setEditingOwner({ ...editingOwner, name: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Email Address *</label>
+                  <input
+                    required
+                    type="email"
+                    value={editingOwner.email || ''}
+                    onChange={e => setEditingOwner({ ...editingOwner, email: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Phone Number *</label>
+                  <input
+                    required
+                    value={editingOwner.phone || ''}
+                    onChange={e => setEditingOwner({ ...editingOwner, phone: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Owner Type</label>
+                  <select
+                    value={editingOwner.ownerType || 'Individual Owner'}
+                    onChange={e => setEditingOwner({ ...editingOwner, ownerType: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {OWNER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Properties Count</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editingOwner.propertiesCount || 1}
+                    onChange={e => setEditingOwner({ ...editingOwner, propertiesCount: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>National ID / Tax ID</label>
+                  <input
+                    value={editingOwner.taxId || ''}
+                    onChange={e => setEditingOwner({ ...editingOwner, taxId: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Primary Asset</label>
+                  <input
+                    value={editingOwner.primaryProperty || ''}
+                    onChange={e => setEditingOwner({ ...editingOwner, primaryProperty: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <Button type="button" variant="ghost" onClick={() => setEditingOwner(null)}>Cancel</Button>
+                <Button type="submit" variant="primary">Save Changes</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE MODAL */}
       <ConfirmModal
         isOpen={!!ownerToDelete}
-        title="Delete Property Owner"
+        title="Delete Owner"
         message={
           <>
-            Are you sure you want to delete owner <strong>&ldquo;{ownerToDelete?.name}&rdquo;</strong>? 
-            Their landlord profile and property linkages will be removed.
+            Are you sure you want to delete owner <strong>&ldquo;{ownerToDelete?.name}&rdquo;</strong>?
+            This will remove their ownership record.
           </>
         }
-        confirmText="Delete Owner"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? 'Deleting...' : 'Delete Owner'}
+        cancelText="Cancel"
+        danger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setOwnerToDelete(null)}
       />

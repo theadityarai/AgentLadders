@@ -4,9 +4,19 @@
       "id": "usr_nntlkcy7",
       "name": "Adi",
       "email": "adityarai366@gmail.com",
-      "password": "$2b$10$F0KgKrvJC0SiZTrtGMjy3.6n/LP6U7YbmMUjgcUzMKE4xlNuxJORO",
+      "password": "\\.",
       "role": "OWNER",
-      "agencyId": "ag_ql21vxnd"
+      "agencyId": "ag_ql21vxnd",
+      "passwordHash": "\\."
+    },
+    {
+      "id": "usr_bt71mcv1",
+      "name": "Aditya",
+      "email": "aditya@agentladders.com",
+      "passwordHash": "\\.",
+      "role": "OWNER",
+      "agencyId": "ag_ql21vxnd",
+      "password": "\\."
     }
   ],
   "agencies": [
@@ -42,9 +52,53 @@
           "email": true
         }
       }
+    },
+    {
+      "id": "ag_0l04re04",
+      "name": "AgentLadders",
+      "country": "United States",
+      "currency": "USD",
+      "plan": "Professional",
+      "propertyTypes": [
+        "Apartment",
+        "House",
+        "Villa",
+        "Commercial"
+      ],
+      "leadSources": [
+        "Website",
+        "Referral",
+        "Zillow",
+        "Walk-in"
+      ],
+      "notificationPrefs": {
+        "New lead assigned": {
+          "inApp": true,
+          "email": true
+        },
+        "Task reminder": {
+          "inApp": true,
+          "email": false
+        },
+        "Site visit reminder": {
+          "inApp": true,
+          "email": true
+        }
+      },
+      "createdAt": "2026-09-22T10:22:05.159Z"
     }
   ],
   "notifications": [
+    {
+      "id": "notif_7kmpeli",
+      "agencyId": "ag_ql21vxnd",
+      "userId": "all",
+      "title": "🚨 New Property Inquiry & Lead Captured",
+      "message": "Victoria Sterling just submitted an inquiry for \"Luxury Villa in Beverly Hills\". Lead automatically added to CRM pipeline.",
+      "type": "lead",
+      "read": false,
+      "createdAt": "2026-09-22T09:07:30.495Z"
+    },
     {
       "id": "notif_00ctc4s0",
       "title": "Welcome to AgentLadders",
@@ -52,6 +106,15 @@
       "read": true,
       "userId": "usr_nntlkcy7",
       "createdAt": "2026-09-21T11:34:10.173Z"
+    },
+    {
+      "id": "notif_hfkmz55k",
+      "title": "Welcome to AgentLadders",
+      "message": "Your agency account has been created successfully.",
+      "type": "info",
+      "read": false,
+      "userId": "usr_bt71mcv1",
+      "createdAt": "2026-09-22T10:22:05.170Z"
     }
   ],
   "properties": [
@@ -63,7 +126,11 @@
       "location": "Los Angeles, CA",
       "price": 4500000,
       "status": "Available",
-      "createdAt": "2026-09-21T13:40:15.322Z"
+      "createdAt": "2026-09-21T13:40:15.322Z",
+      "viewsCount": 2,
+      "publicToken": "tok_vp76qx9n0i",
+      "privacyMode": "Public",
+      "sharesCount": 1
     },
     {
       "id": "prop_2",
@@ -97,6 +164,22 @@
     }
   ],
   "leads": [
+    {
+      "id": "lead_7zfmzve",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Victoria Sterling",
+      "email": "victoria@sterlingholdings.com",
+      "phone": "+1 (310) 992-1144",
+      "status": "New",
+      "source": "Public Property Page",
+      "leadType": "Buyer",
+      "requirement": "Luxury Villa in Beverly Hills (Los Angeles, CA)",
+      "budget": "$45,00,000",
+      "priority": "High",
+      "assignedTo": "Aditya Rai",
+      "notes": "Client Message: \"Requesting private viewing this weekend.\"",
+      "createdAt": "2026-09-22T09:07:30.495Z"
+    },
     {
       "id": "lead_1",
       "agencyId": "ag_ql21vxnd",
@@ -529,6 +612,213 @@
       "type": "Performance",
       "frequency": "Weekly",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    }
+  ],
+  "activities": [
+    {
+      "id": "act_o307uzo",
+      "agencyId": "ag_ql21vxnd",
+      "actor": "Aditya",
+      "type": "Property Share",
+      "relatedEntity": "Property",
+      "relatedId": "prop_1",
+      "summary": "Shared \"Luxury Villa in Beverly Hills\" on QR Code",
+      "details": "Channel: QR Code, Privacy Mode: Public, Link: http://localhost:3000/p/tok_vp76qx9n0i",
+      "createdAt": "2026-09-22T11:04:38.241Z"
+    },
+    {
+      "id": "act_h8bmrhf",
+      "agencyId": "ag_ql21vxnd",
+      "actor": "Public Client",
+      "type": "WhatsApp",
+      "relatedEntity": "Lead",
+      "relatedId": "lead_7zfmzve",
+      "summary": "Inquiry received from Victoria Sterling for Luxury Villa in Beverly Hills",
+      "details": "Client email: victoria@sterlingholdings.com, phone: +1 (310) 992-1144. Message: Requesting private viewing this weekend.",
+      "createdAt": "2026-09-22T09:07:30.495Z"
+    }
+  ],
+  "marketingCampaigns": [
+    {
+      "id": "mkt_1",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Ultra-Luxury Villa Showcase Q3",
+      "platform": "Meta Ads",
+      "status": "Active",
+      "budget": 3500,
+      "spend": 2150,
+      "leadsGenerated": 42,
+      "dealsClosed": 2,
+      "utmSource": "instagram_reels_luxury",
+      "startDate": "2026-09-01",
+      "createdAt": "2026-09-22T10:47:39.948Z"
+    },
+    {
+      "id": "mkt_2",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Property Finder Verified Featured Boost",
+      "platform": "Property Finder",
+      "status": "Active",
+      "budget": 5000,
+      "spend": 3800,
+      "leadsGenerated": 68,
+      "dealsClosed": 4,
+      "utmSource": "property_finder_featured",
+      "startDate": "2026-08-15",
+      "createdAt": "2026-09-22T10:47:39.948Z"
+    },
+    {
+      "id": "mkt_3",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Google Search High-Intent Buyers",
+      "platform": "Google Ads",
+      "status": "Active",
+      "budget": 2800,
+      "spend": 1940,
+      "leadsGenerated": 31,
+      "dealsClosed": 1,
+      "utmSource": "google_search_penthouses",
+      "startDate": "2026-09-05",
+      "createdAt": "2026-09-22T10:47:39.948Z"
+    },
+    {
+      "id": "mkt_4",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Private Investor WhatsApp Broadcast VIP",
+      "platform": "WhatsApp Broadcast",
+      "status": "Completed",
+      "budget": 400,
+      "spend": 250,
+      "leadsGenerated": 19,
+      "dealsClosed": 2,
+      "utmSource": "whatsapp_vip_network",
+      "startDate": "2026-09-10",
+      "endDate": "2026-09-15",
+      "createdAt": "2026-09-22T10:47:39.948Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "aud_jjtwcy1",
+      "agencyId": "ag_ql21vxnd",
+      "userId": "usr_bt71mcv1",
+      "userName": "Aditya",
+      "action": "SHARE",
+      "entity": "Property",
+      "entityId": "prop_1",
+      "details": "Shared property \"Luxury Villa in Beverly Hills\" via QR Code",
+      "createdAt": "2026-09-22T11:04:38.241Z"
+    },
+    {
+      "id": "aud_1",
+      "agencyId": "ag_ql21vxnd",
+      "userId": "usr_1",
+      "userName": "Aditya Rai",
+      "action": "LOGIN",
+      "entity": "Session",
+      "entityId": "ses_1",
+      "details": "Successful authenticated login from web console",
+      "ipAddress": "192.168.1.1",
+      "createdAt": "2026-09-22T09:47:39.949Z"
+    },
+    {
+      "id": "aud_2",
+      "agencyId": "ag_ql21vxnd",
+      "userId": "usr_1",
+      "userName": "Aditya Rai",
+      "action": "UPDATE",
+      "entity": "Property",
+      "entityId": "prop_1",
+      "details": "Updated listing price and uploaded 3 new hero photos",
+      "ipAddress": "192.168.1.1",
+      "createdAt": "2026-09-22T08:47:39.949Z"
+    },
+    {
+      "id": "aud_3",
+      "agencyId": "ag_ql21vxnd",
+      "userId": "usr_1",
+      "userName": "Aditya Rai",
+      "action": "SHARE",
+      "entity": "Property",
+      "entityId": "prop_1",
+      "details": "Shared public property link via WhatsApp channel",
+      "ipAddress": "192.168.1.1",
+      "createdAt": "2026-09-22T07:47:39.949Z"
+    },
+    {
+      "id": "aud_4",
+      "agencyId": "ag_ql21vxnd",
+      "userId": "usr_1",
+      "userName": "Aditya Rai",
+      "action": "CREATE",
+      "entity": "Deal",
+      "entityId": "deal_1",
+      "details": "Created new Deal: Luxury Villa in Beverly Hills ($4.5M)",
+      "ipAddress": "192.168.1.1",
+      "createdAt": "2026-09-21T10:47:39.949Z"
+    }
+  ],
+  "recycleBin": [],
+  "supportTickets": [
+    {
+      "id": "tic_1",
+      "agencyId": "ag_ql21vxnd",
+      "ticketNumber": "TICK-4091",
+      "subject": "Custom Domain SSL for Agency Public Properties",
+      "category": "Integrations",
+      "priority": "Medium",
+      "status": "In Review",
+      "createdByName": "Aditya Rai",
+      "messages": [
+        {
+          "id": "msg_1",
+          "sender": "Aditya Rai",
+          "isStaff": false,
+          "text": "Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.",
+          "timestamp": "2026-09-21T10:47:39.949Z"
+        },
+        {
+          "id": "msg_2",
+          "sender": "AgentLadders Support",
+          "isStaff": true,
+          "text": "Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.",
+          "timestamp": "2026-09-21T22:47:39.949Z"
+        }
+      ],
+      "createdAt": "2026-09-21T10:47:39.949Z"
+    },
+    {
+      "id": "tic_2",
+      "agencyId": "ag_ql21vxnd",
+      "ticketNumber": "TICK-4092",
+      "subject": "Automated WhatsApp Webhook Sync Verification",
+      "category": "CRM Feature",
+      "priority": "High",
+      "status": "Resolved",
+      "createdByName": "Aditya Rai",
+      "messages": [
+        {
+          "id": "msg_3",
+          "sender": "Aditya Rai",
+          "isStaff": false,
+          "text": "All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table. Verified perfectly.",
+          "timestamp": "2026-09-20T10:47:39.949Z"
+        }
+      ],
+      "createdAt": "2026-09-20T10:47:39.949Z"
+    }
+  ],
+  "sharedLinks": [
+    {
+      "id": "sh_vmuv08k",
+      "agencyId": "ag_ql21vxnd",
+      "propertyId": "prop_1",
+      "propertyTitle": "Luxury Villa in Beverly Hills",
+      "channel": "QR Code",
+      "publicUrl": "http://localhost:3000/p/tok_vp76qx9n0i",
+      "sharedBy": "Aditya",
+      "privacyMode": "Public",
+      "createdAt": "2026-09-22T11:04:38.241Z"
     }
   ]
 }

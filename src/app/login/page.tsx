@@ -29,8 +29,15 @@ export default function LoginPage() {
     if (res?.error) {
       setError(res.error);
     } else {
-      router.push('/dashboard');
+      const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard';
+      router.push(callbackUrl);
     }
+  };
+
+  const fillDemoAccount = () => {
+    setEmail('aditya@agentladders.com');
+    setPassword('admin123');
   };
 
   return (
@@ -69,6 +76,26 @@ export default function LoginPage() {
           <div className={styles.formHeader}>
             <h1>Welcome back</h1>
             <p>Enter your credentials to access your dashboard.</p>
+            <button
+              type="button"
+              onClick={fillDemoAccount}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                marginTop: '12px',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                color: '#1d4ed8',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <span>🔑</span> Fill Demo Login (aditya@agentladders.com / admin123)
+            </button>
           </div>
 
           {error && (

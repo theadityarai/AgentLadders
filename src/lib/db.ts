@@ -28,6 +28,7 @@ export interface Agency {
 
 export interface Notification {
   id: string;
+  agencyId?: string;
   userId: string;
   title?: string;
   message: string;
@@ -50,6 +51,16 @@ export interface Property {
   listingType?: string;
   ownerName?: string;
   description?: string;
+  images?: string[];
+  features?: string[];
+  publicToken?: string;
+  privacyMode?: 'Public' | 'Restricted' | 'Private';
+  isPublic?: boolean;
+  sharesCount?: number;
+  viewsCount?: number;
+  agentName?: string;
+  agentPhone?: string;
+  agentEmail?: string;
   createdAt: string;
 }
 
@@ -273,6 +284,89 @@ export interface Report {
   createdAt: string;
 }
 
+export interface ActivityItem {
+  id: string;
+  agencyId: string;
+  actor: string;
+  type: 'Call' | 'Email' | 'WhatsApp' | 'Site Visit' | 'Deal Update' | 'Property Share' | 'Note' | 'Document';
+  relatedEntity: string;
+  relatedId?: string;
+  summary: string;
+  details?: string;
+  createdAt: string;
+}
+
+export interface MarketingCampaign {
+  id: string;
+  agencyId: string;
+  name: string;
+  platform: 'Property Finder' | 'Bayut' | 'Meta Ads' | 'Google Ads' | 'WhatsApp Broadcast' | 'Direct Referral';
+  status: 'Active' | 'Paused' | 'Completed';
+  budget: number;
+  spend: number;
+  leadsGenerated: number;
+  dealsClosed: number;
+  utmSource?: string;
+  startDate: string;
+  endDate?: string;
+  createdAt: string;
+}
+
+export interface AuditLogItem {
+  id: string;
+  agencyId: string;
+  userId: string;
+  userName: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'RESTORE' | 'SHARE' | 'LOGIN';
+  entity: string;
+  entityId: string;
+  details: string;
+  ipAddress?: string;
+  createdAt: string;
+}
+
+export interface RecycleItem {
+  id: string;
+  agencyId: string;
+  entityType: 'Lead' | 'Property' | 'Deal' | 'Client' | 'Document';
+  originalId: string;
+  name: string;
+  data: unknown;
+  deletedBy: string;
+  deletedAt: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  agencyId: string;
+  ticketNumber: string;
+  subject: string;
+  category: 'Billing' | 'CRM Feature' | 'Integrations' | 'Bug Report' | 'General';
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
+  status: 'Open' | 'In Review' | 'Resolved';
+  createdByName: string;
+  messages: Array<{
+    id: string;
+    sender: string;
+    isStaff: boolean;
+    text: string;
+    timestamp: string;
+  }>;
+  createdAt: string;
+}
+
+export interface PropertyShareRecord {
+  id: string;
+  agencyId: string;
+  propertyId: string;
+  propertyTitle: string;
+  channel: 'WhatsApp' | 'Telegram' | 'Email' | 'SMS' | 'LinkedIn' | 'X' | 'Copy Link' | 'QR Code';
+  publicUrl: string;
+  sharedBy: string;
+  privacyMode: string;
+  createdAt: string;
+}
+
 export interface DB {
   users: User[];
   agencies: Agency[];
@@ -293,6 +387,12 @@ export interface DB {
   listings: Listing[];
   documents: DocumentItem[];
   reports: Report[];
+  activities: ActivityItem[];
+  marketingCampaigns: MarketingCampaign[];
+  auditLogs: AuditLogItem[];
+  recycleBin: RecycleItem[];
+  supportTickets: SupportTicket[];
+  sharedLinks: PropertyShareRecord[];
 }
 
 // Ensure the data directory exists
@@ -348,6 +448,12 @@ export function getDb(): DB {
   db.listings = db.listings || [];
   db.documents = db.documents || [];
   db.reports = db.reports || [];
+  db.activities = db.activities || [];
+  db.marketingCampaigns = db.marketingCampaigns || [];
+  db.auditLogs = db.auditLogs || [];
+  db.recycleBin = db.recycleBin || [];
+  db.supportTickets = db.supportTickets || [];
+  db.sharedLinks = db.sharedLinks || [];
 
   return db as DB;
 }
@@ -370,10 +476,110 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
   // 1. Properties
   if (!db.properties.some(p => p.agencyId === agencyId)) {
     db.properties.push(
-      { id: 'prop_1', agencyId, title: 'Luxury Villa in Beverly Hills', type: 'Villa', location: 'Los Angeles, CA', price: 4500000, status: 'Available', createdAt: now },
-      { id: 'prop_2', agencyId, title: 'Downtown Sky Penthouse', type: 'Apartment', location: 'Manhattan, NY', price: 2850000, status: 'Under Offer', createdAt: now },
-      { id: 'prop_3', agencyId, title: 'Modern Waterfront Residence', type: 'House', location: 'Miami Beach, FL', price: 1650000, status: 'Available', createdAt: now },
-      { id: 'prop_4', agencyId, title: 'Silicon Valley Executive Condo', type: 'Apartment', location: 'Palo Alto, CA', price: 1250000, status: 'Sold', createdAt: now }
+      { 
+        id: 'prop_1', 
+        agencyId, 
+        title: 'Luxury Villa in Beverly Hills', 
+        type: 'Villa', 
+        location: 'Beverly Hills, Los Angeles, CA', 
+        price: 4500000, 
+        status: 'Available', 
+        bedrooms: 5,
+        bathrooms: 6,
+        areaSqFt: 6200,
+        listingType: 'For Sale',
+        ownerName: 'Sterling Global Trust',
+        description: 'Spectacular modern architectural estate nestled on a private cul-de-sac in prestigious Beverly Hills. Featuring soaring double-height ceilings, seamless indoor-outdoor glass walls, infinity-edge heated pool, chef kitchen with custom marble, and expansive entertainer terrace with panoramic canyon views.',
+        images: ['/images/property_hero.jpg', '/images/deal_closing.jpg', '/images/hero_dashboard.jpg'],
+        features: ['Private Infinity Pool', 'Smart Home Automation', 'Wine Cellar', 'Gated Security 24/7', 'Outdoor Kitchen', 'Designer Furnishings', 'Private Elevator'],
+        publicToken: 'tok_beverly_hills_4500k',
+        privacyMode: 'Public',
+        isPublic: true,
+        sharesCount: 18,
+        viewsCount: 142,
+        agentName: 'Aditya Rai',
+        agentPhone: '+1 (310) 849-2041',
+        agentEmail: 'aditya@agentladders.com',
+        createdAt: now 
+      },
+      { 
+        id: 'prop_2', 
+        agencyId, 
+        title: 'Downtown Sky Penthouse', 
+        type: 'Apartment', 
+        location: 'Tribeca, Manhattan, NY', 
+        price: 2850000, 
+        status: 'Under Offer', 
+        bedrooms: 3,
+        bathrooms: 3,
+        areaSqFt: 3100,
+        listingType: 'For Sale',
+        ownerName: 'Vance Skyline Properties',
+        description: 'Trophy duplex penthouse offering 360-degree unobstructed views of the Manhattan skyline and Hudson River. Features direct elevator landing, wrap-around rooftop terrace, gas fireplace, and bespoke Italian millwork throughout.',
+        images: ['/images/deal_closing.jpg', '/images/property_hero.jpg'],
+        features: ['Wrap-around Terrace', 'Direct Keyed Elevator', 'Floor-to-Ceiling Glass', 'Valet Parking', 'Concierge 24/7'],
+        publicToken: 'tok_sky_penthouse_2850k',
+        privacyMode: 'Public',
+        isPublic: true,
+        sharesCount: 12,
+        viewsCount: 98,
+        agentName: 'Marcus Vance',
+        agentPhone: '+1 (212) 555-0199',
+        agentEmail: 'marcus@agentladders.com',
+        createdAt: now 
+      },
+      { 
+        id: 'prop_3', 
+        agencyId, 
+        title: 'Modern Waterfront Residence', 
+        type: 'House', 
+        location: 'Venetian Islands, Miami Beach, FL', 
+        price: 1650000, 
+        status: 'Available', 
+        bedrooms: 4,
+        bathrooms: 4,
+        areaSqFt: 3800,
+        listingType: 'For Sale',
+        ownerName: 'Apex Capital Holdings',
+        description: 'Contemporary waterfront sanctuary situated on the Venetian Islands. Boasting deep water dockage, private boat slip, floor-to-ceiling glass corridors, resort-style pool with cabana, and immediate access to Biscayne Bay.',
+        images: ['/images/hero_dashboard.jpg', '/images/property_hero.jpg'],
+        features: ['Private Boat Dock', 'Biscayne Bay Access', 'Resort Pool & Spa', 'Solar Panels', 'Impact Glass'],
+        publicToken: 'tok_waterfront_miami_1650k',
+        privacyMode: 'Public',
+        isPublic: true,
+        sharesCount: 24,
+        viewsCount: 215,
+        agentName: 'Elena Rostova',
+        agentPhone: '+1 (305) 555-0144',
+        agentEmail: 'elena@agentladders.com',
+        createdAt: now 
+      },
+      { 
+        id: 'prop_4', 
+        agencyId, 
+        title: 'Silicon Valley Executive Condo', 
+        type: 'Apartment', 
+        location: 'University Ave, Palo Alto, CA', 
+        price: 1250000, 
+        status: 'Sold', 
+        bedrooms: 2,
+        bathrooms: 2,
+        areaSqFt: 1850,
+        listingType: 'For Sale',
+        ownerName: 'Palo Alto Ventures Ltd',
+        description: 'Turnkey executive residence in the vibrant heart of downtown Palo Alto. Modern minimalist finishes, private balcony overlooking tree-lined courtyard, and electric vehicle charging bays.',
+        images: ['/images/property_hero.jpg'],
+        features: ['EV Charging Stations', 'Private Balcony', 'High-Speed Fiber', 'Fitness Center'],
+        publicToken: 'tok_silicon_valley_1250k',
+        privacyMode: 'Restricted',
+        isPublic: true,
+        sharesCount: 7,
+        viewsCount: 64,
+        agentName: 'Aditya Rai',
+        agentPhone: '+1 (310) 849-2041',
+        agentEmail: 'aditya@agentladders.com',
+        createdAt: now 
+      }
     );
   }
 
@@ -514,5 +720,81 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
     );
   }
 
+  // 17. Communication Timeline & Activities
+  if (!db.activities || !db.activities.some(a => a.agencyId === agencyId)) {
+    db.activities = db.activities || [];
+    db.activities.push(
+      { id: 'act_1', agencyId, actor: 'Aditya Rai', type: 'WhatsApp', relatedEntity: 'Lead', relatedId: 'lead_1', summary: 'Shared Beverly Hills Villa brochure via WhatsApp', details: 'Client responded positively and requested private viewing on Saturday at 2:00 PM.', createdAt: new Date(Date.now() - 3600000 * 2).toISOString() },
+      { id: 'act_2', agencyId, actor: 'Aditya Rai', type: 'Call', relatedEntity: 'Client', relatedId: 'cli_1', summary: 'Escrow closing terms discussion with Jonathan Reynolds', details: 'Confirmed 10% wire deposit received in escrow bank account.', createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
+      { id: 'act_3', agencyId, actor: 'Marcus Vance', type: 'Site Visit', relatedEntity: 'Property', relatedId: 'prop_2', summary: 'Conducted VIP Sunset Tour at Downtown Sky Penthouse', details: 'Client loved unobstructed skyline views, negotiating parking bay inclusion.', createdAt: new Date(Date.now() - 3600000 * 18).toISOString() },
+      { id: 'act_4', agencyId, actor: 'Elena Rostova', type: 'Deal Update', relatedEntity: 'Deal', relatedId: 'deal_1', summary: 'Moved Beverly Hills Villa deal to Negotiation stage', details: 'Counter-offer delivered at $4,420,000 with 30-day closing condition.', createdAt: new Date(Date.now() - 3600000 * 26).toISOString() },
+      { id: 'act_5', agencyId, actor: 'System', type: 'Property Share', relatedEntity: 'Property', relatedId: 'prop_1', summary: 'Public webpage link generated and shared on Telegram', details: 'Unique token tok_beverly_hills_4500k viewed 14 times.', createdAt: new Date(Date.now() - 3600000 * 30).toISOString() }
+    );
+  }
+
+  // 18. Marketing & Lead Sources
+  if (!db.marketingCampaigns || !db.marketingCampaigns.some(m => m.agencyId === agencyId)) {
+    db.marketingCampaigns = db.marketingCampaigns || [];
+    db.marketingCampaigns.push(
+      { id: 'mkt_1', agencyId, name: 'Ultra-Luxury Villa Showcase Q3', platform: 'Meta Ads', status: 'Active', budget: 3500, spend: 2150, leadsGenerated: 42, dealsClosed: 2, utmSource: 'instagram_reels_luxury', startDate: '2026-09-01', createdAt: now },
+      { id: 'mkt_2', agencyId, name: 'Property Finder Verified Featured Boost', platform: 'Property Finder', status: 'Active', budget: 5000, spend: 3800, leadsGenerated: 68, dealsClosed: 4, utmSource: 'property_finder_featured', startDate: '2026-08-15', createdAt: now },
+      { id: 'mkt_3', agencyId, name: 'Google Search High-Intent Buyers', platform: 'Google Ads', status: 'Active', budget: 2800, spend: 1940, leadsGenerated: 31, dealsClosed: 1, utmSource: 'google_search_penthouses', startDate: '2026-09-05', createdAt: now },
+      { id: 'mkt_4', agencyId, name: 'Private Investor WhatsApp Broadcast VIP', platform: 'WhatsApp Broadcast', status: 'Completed', budget: 400, spend: 250, leadsGenerated: 19, dealsClosed: 2, utmSource: 'whatsapp_vip_network', startDate: '2026-09-10', endDate: '2026-09-15', createdAt: now }
+    );
+  }
+
+  // 19. Audit Logs
+  if (!db.auditLogs || !db.auditLogs.some(a => a.agencyId === agencyId)) {
+    db.auditLogs = db.auditLogs || [];
+    db.auditLogs.push(
+      { id: 'aud_1', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'LOGIN', entity: 'Session', entityId: 'ses_1', details: 'Successful authenticated login from web console', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 3600000).toISOString() },
+      { id: 'aud_2', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'UPDATE', entity: 'Property', entityId: 'prop_1', details: 'Updated listing price and uploaded 3 new hero photos', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 7200000).toISOString() },
+      { id: 'aud_3', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'SHARE', entity: 'Property', entityId: 'prop_1', details: 'Shared public property link via WhatsApp channel', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 10800000).toISOString() },
+      { id: 'aud_4', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'CREATE', entity: 'Deal', entityId: 'deal_1', details: 'Created new Deal: Luxury Villa in Beverly Hills ($4.5M)', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 86400000).toISOString() }
+    );
+  }
+
+  // 20. Support Tickets
+  if (!db.supportTickets || !db.supportTickets.some(s => s.agencyId === agencyId)) {
+    db.supportTickets = db.supportTickets || [];
+    db.supportTickets.push(
+      { 
+        id: 'tic_1', 
+        agencyId, 
+        ticketNumber: 'TICK-4091', 
+        subject: 'Custom Domain SSL for Agency Public Properties', 
+        category: 'Integrations', 
+        priority: 'Medium', 
+        status: 'In Review', 
+        createdByName: 'Aditya Rai', 
+        messages: [
+          { id: 'msg_1', sender: 'Aditya Rai', isStaff: false, text: 'Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.', timestamp: new Date(Date.now() - 86400000).toISOString() },
+          { id: 'msg_2', sender: 'AgentLadders Support', isStaff: true, text: 'Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.', timestamp: new Date(Date.now() - 43200000).toISOString() }
+        ],
+        createdAt: new Date(Date.now() - 86400000).toISOString() 
+      },
+      { 
+        id: 'tic_2', 
+        agencyId, 
+        ticketNumber: 'TICK-4092', 
+        subject: 'Automated WhatsApp Webhook Sync Verification', 
+        category: 'CRM Feature', 
+        priority: 'High', 
+        status: 'Resolved', 
+        createdByName: 'Aditya Rai', 
+        messages: [
+          { id: 'msg_3', sender: 'Aditya Rai', isStaff: false, text: 'All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table. Verified perfectly.', timestamp: new Date(Date.now() - 172800000).toISOString() }
+        ],
+        createdAt: new Date(Date.now() - 172800000).toISOString() 
+      }
+    );
+  }
+
+  saveDb(db);
+}
+
+export function seedAgencyData(agencyId: string) {
+  const db = getDb();
+  generateDummyDataForAgency(agencyId, db);
   saveDb(db);
 }

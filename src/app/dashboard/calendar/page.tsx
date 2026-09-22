@@ -19,9 +19,11 @@ interface CalendarEvent {
   notes?: string;
 }
 
+const EVENT_TYPES = ['Viewing', 'Meeting', 'Closing', 'Internal Training', 'Inspection'];
+
 const initialForm = {
   title: '',
-  date: '',
+  date: new Date().toISOString().split('T')[0],
   time: '10:00 AM',
   type: 'Viewing',
   location: '',
@@ -33,6 +35,7 @@ export default function CalendarPage() {
   const [data, setData] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [form, setForm] = useState(initialForm);
 
   // Delete modal state
@@ -70,6 +73,25 @@ export default function CalendarPage() {
     setShowModal(false);
     setForm(initialForm);
     loadEvents();
+  };
+
+  const handleOpenEdit = (evt: CalendarEvent) => {
+    setEditingEvent(evt);
+  };
+
+  const handleUpdateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent) return;
+    const res = await fetch('/api/calendar', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingEvent)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setData(prev => prev.map(c => c.id === editingEvent.id ? json.event : c));
+      setEditingEvent(null);
+    }
   };
 
   const handleDelete = (id: string, title: string) => {
@@ -170,22 +192,40 @@ export default function CalendarPage() {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <button
-          onClick={() => handleDelete(r.id, r.title)}
-          style={{
-            padding: '6px 10px',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: '#fff1f2',
-            border: '1px solid #fecdd3',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#e11d48'
-          }}
-          title="Delete Event"
-        >
-          🗑️ Delete
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Event"
+          >
+            ✏️ Edit
+          </button>
+          <button
+            onClick={() => handleDelete(r.id, r.title)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#e11d48'
+            }}
+            title="Cancel Event"
+          >
+            🗑️
+          </button>
+        </div>
       )
     }
   ];
@@ -193,15 +233,15 @@ export default function CalendarPage() {
   return (
     <>
       <PageHeader 
-        title="Agency Calendar" 
-        subtitle="Schedule property viewings, contract signings, and client meetings" 
-        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Add Event</Button>} 
+        title="Schedule & Calendar" 
+        subtitle="Manage showing appointments, client walkthroughs, and team meetings" 
+        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Schedule Event</Button>} 
       />
 
       <TableFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search calendar events by title, location, or attendee..."
+        searchPlaceholder="Search events by title, venue, or attendees..."
         totalCount={data.length}
         filteredCount={filteredData.length}
         onReset={handleResetFilters}
@@ -213,205 +253,245 @@ export default function CalendarPage() {
             onChange: setTypeFilter,
             options: [
               { label: 'All Types', value: 'All' },
-              { label: 'Viewing', value: 'Viewing' },
-              { label: 'Meeting', value: 'Meeting' },
-              { label: 'Call', value: 'Call' },
-              { label: 'Reminder', value: 'Reminder' }
+              ...EVENT_TYPES.map(t => ({ label: t, value: t }))
             ]
           }
         ]}
       />
-      
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading calendar...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No calendar events match your filters"
-          onResetFilters={handleResetFilters}
-        />
-      )}
 
+      <div style={{ padding: '0 24px 24px' }}>
+        <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* CREATE EVENT MODAL */}
       {showModal && (
         <div style={{
           position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
-          padding: '20px'
+          zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '680px',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
             maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            border: '1px solid #e2e8f0'
+            overflowY: 'auto'
           }}>
-            {/* Modal Header */}
-            <div style={{
-              padding: '24px 28px',
-              borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'linear-gradient(to right, #f8fafc, #ffffff)'
-            }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Schedule Calendar Event</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  📅 Schedule Calendar Event
-                </h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>
-                  Organize showings, investor calls, and closing sessions
-                </p>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Title *</label>
+                <input
+                  required
+                  placeholder="e.g. VIP Showing: Downtown Penthouse"
+                  value={form.title}
+                  onChange={e => setForm({ ...form, title: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                  borderRadius: '6px'
-                }}
-              >
-                ✕
-              </button>
-            </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px 28px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Event Title *
-                  </label>
-                  <input
-                    required
-                    value={form.title}
-                    onChange={e => setForm({...form, title: e.target.value})}
-                    placeholder="e.g. VIP Penthouse Showing & Escrow Consultation"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Event Date *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
                   <input
                     required
                     type="date"
                     value={form.date}
-                    onChange={e => setForm({...form, date: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                    onChange={e => setForm({ ...form, date: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Time Slot *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Time Slot *</label>
                   <input
                     required
+                    placeholder="10:00 AM"
                     value={form.time}
-                    onChange={e => setForm({...form, time: e.target.value})}
-                    placeholder="e.g. 10:00 AM - 11:30 AM"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Event Type
-                  </label>
-                  <select
-                    value={form.type}
-                    onChange={e => setForm({...form, type: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                  >
-                    <option value="Viewing">Property Viewing</option>
-                    <option value="Meeting">Client / Owner Meeting</option>
-                    <option value="Call">Conference / Video Call</option>
-                    <option value="Reminder">Action Item Reminder</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Venue / Meeting URL
-                  </label>
-                  <input
-                    value={form.location}
-                    onChange={e => setForm({...form, location: e.target.value})}
-                    placeholder="e.g. Unit 402 or Google Meet link"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Participants & Attendees
-                  </label>
-                  <input
-                    value={form.attendees}
-                    onChange={e => setForm({...form, attendees: e.target.value})}
-                    placeholder="e.g. Sarah Jenkins (Client), Michael Torres (Broker)"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Agenda & Special Instructions
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={form.notes}
-                    onChange={e => setForm({...form, notes: e.target.value})}
-                    placeholder="Key discussion points, gate access code, or documents to review..."
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', resize: 'vertical' }}
+                    onChange={e => setForm({ ...form, time: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px',
-                marginTop: '24px',
-                paddingTop: '20px',
-                borderTop: '1px solid #e2e8f0'
-              }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Type</label>
+                  <select
+                    value={form.type}
+                    onChange={e => setForm({ ...form, type: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Location / Venue</label>
+                  <input
+                    placeholder="e.g. Burj Khalifa Suite 80"
+                    value={form.location}
+                    onChange={e => setForm({ ...form, location: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Attendees</label>
+                <input
+                  placeholder="e.g. Marcus Vance, John Doe, Client Legal Advisor"
+                  value={form.attendees}
+                  onChange={e => setForm({ ...form, attendees: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Notes</label>
+                <textarea
+                  rows={2}
+                  placeholder="Meeting agenda, key talking points..."
+                  value={form.notes}
+                  onChange={e => setForm({ ...form, notes: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Event</Button>
+                <Button type="submit" variant="primary">Schedule Event</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
+      {/* EDIT EVENT MODAL */}
+      {editingEvent && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Event: {editingEvent.title}</h3>
+            <form onSubmit={handleUpdateEvent} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Title *</label>
+                <input
+                  required
+                  value={editingEvent.title || ''}
+                  onChange={e => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
+                  <input
+                    required
+                    type="date"
+                    value={editingEvent.date || ''}
+                    onChange={e => setEditingEvent({ ...editingEvent, date: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Time Slot *</label>
+                  <input
+                    required
+                    value={editingEvent.time || ''}
+                    onChange={e => setEditingEvent({ ...editingEvent, time: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Type</label>
+                  <select
+                    value={editingEvent.type}
+                    onChange={e => setEditingEvent({ ...editingEvent, type: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Location / Venue</label>
+                  <input
+                    value={editingEvent.location || ''}
+                    onChange={e => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Attendees</label>
+                <input
+                  value={editingEvent.attendees || ''}
+                  onChange={e => setEditingEvent({ ...editingEvent, attendees: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Notes</label>
+                <textarea
+                  rows={2}
+                  value={editingEvent.notes || ''}
+                  onChange={e => setEditingEvent({ ...editingEvent, notes: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', resize: 'vertical' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <Button type="button" variant="ghost" onClick={() => setEditingEvent(null)}>Cancel</Button>
+                <Button type="submit" variant="primary">Save Changes</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE MODAL */}
       <ConfirmModal
         isOpen={!!eventToDelete}
-        title="Remove Calendar Event"
+        title="Cancel Calendar Event"
         message={
           <>
-            Are you sure you want to remove event <strong>&ldquo;{eventToDelete?.title}&rdquo;</strong> from your schedule? 
-            Any associated agent reminders will be cancelled.
+            Are you sure you want to cancel the event <strong>&ldquo;{eventToDelete?.title}&rdquo;</strong>?
           </>
         }
-        confirmText="Remove Event"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? 'Deleting...' : 'Cancel Event'}
+        cancelText="Cancel"
+        danger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setEventToDelete(null)}
       />

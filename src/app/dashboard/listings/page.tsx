@@ -7,6 +7,8 @@ import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { ShareModal } from '@/components/ui/ShareModal';
+import Link from 'next/link';
 
 interface Listing {
   [key: string]: unknown;
@@ -19,7 +21,13 @@ interface Listing {
   featured?: boolean;
   expiryDate?: string;
   externalUrl?: string;
+  publicToken?: string;
+  privacyMode?: string;
+  sharesCount?: number;
 }
+
+const LISTING_STATUSES = ['Active', 'Paused', 'Expired', 'Draft'];
+const PLATFORMS = ['Property Finder', 'Bayut', 'Dubizzle', 'Zillow', 'Rightmove'];
 
 const initialForm = {
   title: '',
@@ -35,6 +43,8 @@ export default function ListingsPage() {
   const [data, setData] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [listingToShare, setListingToShare] = useState<Listing | null>(null);
   const [form, setForm] = useState(initialForm);
 
   // Delete modal state
@@ -77,6 +87,34 @@ export default function ListingsPage() {
     setShowModal(false);
     setForm(initialForm);
     loadListings();
+  };
+
+  const handleOpenEdit = (listing: Listing) => {
+    setEditingListing(listing);
+  };
+
+  const handleUpdateListing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingListing) return;
+    const res = await fetch('/api/listings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingListing)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setData(prev => prev.map(l => l.id === editingListing.id ? json.listing : l));
+      setEditingListing(null);
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    setData(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+    await fetch('/api/listings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status: newStatus })
+    });
   };
 
   const handleDelete = (id: string, title: string) => {
@@ -157,27 +195,105 @@ export default function ListingsPage() {
       label: 'Traffic Views', 
       render: (r) => <span style={{ fontWeight: 600, color: '#0f172a' }}>👀 {r.views.toLocaleString()}</span> 
     },
-    { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status} /> },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      render: (r) => (
+        <select
+          value={r.status}
+          onChange={(e) => handleStatusChange(r.id, e.target.value)}
+          style={{
+            padding: '4px 8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            borderRadius: '6px',
+            border: '1px solid #cbd5e1',
+            backgroundColor: r.status === 'Active' ? '#dcfce7' : r.status === 'Paused' ? '#fef3c7' : '#f1f5f9',
+            color: r.status === 'Active' ? '#166534' : r.status === 'Paused' ? '#b45309' : '#334155',
+            cursor: 'pointer'
+          }}
+        >
+          {LISTING_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+      )
+    },
     {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <button
-          onClick={() => handleDelete(r.id, r.title)}
-          style={{
-            padding: '6px 10px',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: '#fff1f2',
-            border: '1px solid #fecdd3',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#e11d48'
-          }}
-          title="Delete Listing"
-        >
-          🗑️ Delete
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={() => setListingToShare(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 600,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title="Share on WhatsApp, Telegram, Email, etc."
+          >
+            <span>📲</span> Share
+          </button>
+          <Link
+            href={`/p/${r.publicToken || r.id}`}
+            target="_blank"
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 600,
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              color: '#334155',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title="Open Public Showcase Webpage"
+          >
+            <span>↗</span> Page
+          </Link>
+          <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Listing"
+          >
+            ✏️
+          </button>
+          <button
+            onClick={() => handleDelete(r.id, r.title)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#e11d48'
+            }}
+            title="Delete Listing"
+          >
+            🗑️
+          </button>
+        </div>
       )
     }
   ];
@@ -185,30 +301,27 @@ export default function ListingsPage() {
   return (
     <>
       <PageHeader 
-        title="Syndicated Portal Listings" 
-        subtitle="Manage multi-portal feeds, active listings, and digital syndication across Property Finder, Bayut, and Zillow" 
-        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Publish Listing</Button>} 
+        title="Portal Listings & Syndication" 
+        subtitle="Manage syndication across Property Finder, Bayut, and external luxury portals" 
+        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ New Listing</Button>} 
       />
 
       <TableFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search syndicated listings by property title or portal..."
+        searchPlaceholder="Search listings by title or syndication portal..."
         totalCount={data.length}
         filteredCount={filteredData.length}
         onReset={handleResetFilters}
         filters={[
           {
             key: 'platform',
-            label: 'Portal Feed',
+            label: 'Portal',
             value: platformFilter,
             onChange: setPlatformFilter,
             options: [
               { label: 'All Portals', value: 'All' },
-              { label: 'Property Finder', value: 'Property Finder' },
-              { label: 'Bayut', value: 'Bayut' },
-              { label: 'Zillow', value: 'Zillow' },
-              { label: 'Company Website', value: 'Company Website' }
+              ...PLATFORMS.map(p => ({ label: p, value: p }))
             ]
           },
           {
@@ -218,207 +331,231 @@ export default function ListingsPage() {
             onChange: setStatusFilter,
             options: [
               { label: 'All Statuses', value: 'All' },
-              { label: 'Active', value: 'Active' },
-              { label: 'Draft', value: 'Draft' },
-              { label: 'Expired', value: 'Expired' }
+              ...LISTING_STATUSES.map(s => ({ label: s, value: s }))
             ]
           }
         ]}
       />
-      
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading listings...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No listings matched your criteria"
-          onResetFilters={handleResetFilters}
-        />
-      )}
 
+      <div style={{ padding: '0 24px 24px' }}>
+        <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* CREATE LISTING MODAL */}
       {showModal && (
         <div style={{
           position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
-          padding: '20px'
+          zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '680px',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
             maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            border: '1px solid #e2e8f0'
+            overflowY: 'auto'
           }}>
-            {/* Modal Header */}
-            <div style={{
-              padding: '24px 28px',
-              borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'linear-gradient(to right, #f8fafc, #ffffff)'
-            }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Create New Portal Listing</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  🌐 Publish Portal Listing
-                </h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>
-                  Distribute property feed to external listing portals and marketplace feeds
-                </p>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Listing Title *</label>
+                <input
+                  required
+                  placeholder="e.g. Marina View Luxury 4BHK"
+                  value={form.title}
+                  onChange={e => setForm({ ...form, title: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                  borderRadius: '6px'
-                }}
-              >
-                ✕
-              </button>
-            </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px 28px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Listing Headline / Title *
-                  </label>
-                  <input
-                    required
-                    value={form.title}
-                    onChange={e => setForm({...form, title: e.target.value})}
-                    placeholder="e.g. Ultra-Luxury 4BR Sky Villa with Panoramic Marina Skyline Views"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Target Portal Feed *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Syndication Portal</label>
                   <select
                     value={form.platform}
-                    onChange={e => setForm({...form, platform: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    onChange={e => setForm({ ...form, platform: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   >
-                    <option value="Property Finder">Property Finder</option>
-                    <option value="Bayut">Bayut</option>
-                    <option value="Zillow">Zillow</option>
-                    <option value="Realtor.com">Realtor.com</option>
-                    <option value="Company Website">Company Website</option>
+                    {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Feed Status *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Status</label>
                   <select
                     value={form.status}
-                    onChange={e => setForm({...form, status: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    onChange={e => setForm({ ...form, status: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   >
-                    <option value="Active">Active (Live Feed)</option>
-                    <option value="Draft">Draft (Pending Approval)</option>
-                    <option value="Expired">Expired</option>
+                    {LISTING_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Public Asking Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={form.price}
-                    onChange={e => setForm({...form, price: e.target.value})}
-                    placeholder="e.g. 1850000"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Syndication Expiration Date
-                  </label>
-                  <input
-                    type="date"
-                    value={form.expiryDate}
-                    onChange={e => setForm({...form, expiryDate: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    External Listing Portal URL
-                  </label>
-                  <input
-                    type="url"
-                    value={form.externalUrl}
-                    onChange={e => setForm({...form, externalUrl: e.target.value})}
-                    placeholder="https://www.propertyfinder.ae/en/listing/..."
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 500, color: '#1e293b' }}>
-                    <input
-                      type="checkbox"
-                      checked={form.featured}
-                      onChange={e => setForm({...form, featured: e.target.checked})}
-                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                    />
-                    Mark as Premium Featured Listing (Prioritized in search results & banner rotation)
-                  </label>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px',
-                marginTop: '24px',
-                paddingTop: '20px',
-                borderTop: '1px solid #e2e8f0'
-              }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Listed Price ($)</label>
+                  <input
+                    type="number"
+                    placeholder="1850000"
+                    value={form.price}
+                    onChange={e => setForm({ ...form, price: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Portal External URL</label>
+                  <input
+                    placeholder="https://propertyfinder.ae/..."
+                    value={form.externalUrl}
+                    onChange={e => setForm({ ...form, externalUrl: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Publish Listing</Button>
+                <Button type="submit" variant="primary">Create Listing</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
+      {/* EDIT LISTING MODAL */}
+      {editingListing && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Listing: {editingListing.title}</h3>
+            <form onSubmit={handleUpdateListing} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Listing Title *</label>
+                <input
+                  required
+                  value={editingListing.title || ''}
+                  onChange={e => setEditingListing({ ...editingListing, title: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Syndication Portal</label>
+                  <select
+                    value={editingListing.platform}
+                    onChange={e => setEditingListing({ ...editingListing, platform: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {PLATFORMS.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Status</label>
+                  <select
+                    value={editingListing.status}
+                    onChange={e => setEditingListing({ ...editingListing, status: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {LISTING_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Listed Price ($)</label>
+                  <input
+                    type="number"
+                    value={editingListing.price || ''}
+                    onChange={e => setEditingListing({ ...editingListing, price: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Portal External URL</label>
+                  <input
+                    value={editingListing.externalUrl || ''}
+                    onChange={e => setEditingListing({ ...editingListing, externalUrl: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <Button type="button" variant="ghost" onClick={() => setEditingListing(null)}>Cancel</Button>
+                <Button type="submit" variant="primary">Save Changes</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* SHARE MODAL */}
+      {listingToShare && (
+        <ShareModal
+          isOpen={!!listingToShare}
+          property={{
+            id: listingToShare.id,
+            title: listingToShare.title,
+            price: listingToShare.price,
+            location: listingToShare.platform,
+            publicToken: listingToShare.publicToken || listingToShare.id,
+            privacyMode: listingToShare.privacyMode || 'public'
+          }}
+          propertyId={listingToShare.id}
+          propertyTitle={listingToShare.title}
+          publicToken={listingToShare.publicToken || listingToShare.id}
+          price={listingToShare.price}
+          location={listingToShare.platform}
+          currentPrivacyMode={listingToShare.privacyMode || 'public'}
+          onClose={() => setListingToShare(null)}
+          onUpdatePrivacy={(newMode) => {
+            setData(prev => prev.map(l => l.id === listingToShare.id ? { ...l, privacyMode: newMode } : l));
+          }}
+        />
+      )}
+
+      {/* CONFIRM DELETE MODAL */}
       <ConfirmModal
         isOpen={!!listingToDelete}
-        title="Remove Syndicated Listing"
+        title="Delete Listing"
         message={
           <>
-            Are you sure you want to delete listing <strong>&ldquo;{listingToDelete?.title}&rdquo;</strong>? 
-            This portal publication will be withdrawn and deleted.
+            Are you sure you want to remove the portal listing <strong>&ldquo;{listingToDelete?.title}&rdquo;</strong>?
+            This will unsyndicate it from the partner portal.
           </>
         }
-        confirmText="Delete Listing"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? 'Deleting...' : 'Delete Listing'}
+        cancelText="Cancel"
+        danger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setListingToDelete(null)}
       />

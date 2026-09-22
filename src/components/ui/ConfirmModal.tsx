@@ -9,6 +9,7 @@ export interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   variant?: 'danger' | 'primary' | 'warning';
+  danger?: boolean;
   isLoading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -21,10 +22,12 @@ export function ConfirmModal({
   confirmText = 'Delete',
   cancelText = 'Cancel',
   variant = 'danger',
+  danger,
   isLoading = false,
   onConfirm,
   onCancel
 }: ConfirmModalProps) {
+  const actualVariant = danger !== undefined ? (danger ? 'danger' : 'primary') : variant;
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -38,8 +41,8 @@ export function ConfirmModal({
 
   if (!isOpen) return null;
 
-  const isDanger = variant === 'danger';
-  const isWarning = variant === 'warning';
+  const isDanger = actualVariant === 'danger';
+  const isWarning = actualVariant === 'warning';
 
   const iconBg = isDanger ? '#fee2e2' : isWarning ? '#fef3c7' : '#eff6ff';
   const iconColor = isDanger ? '#dc2626' : isWarning ? '#d97706' : '#2563eb';

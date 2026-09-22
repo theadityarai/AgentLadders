@@ -20,6 +20,9 @@ interface Expense {
   receiptRef?: string;
 }
 
+const CATEGORIES = ['Marketing', 'Office & Utilities', 'Travel & Transport', 'Legal & Compliance', 'Software & IT', 'Entertaining & Events'];
+const PAYMENT_METHODS = ['Corporate Card', 'Bank Wire Transfer', 'Cheque', 'Petty Cash'];
+
 const initialForm = {
   category: 'Marketing',
   description: '',
@@ -35,6 +38,7 @@ export default function ExpensesPage() {
   const [data, setData] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [form, setForm] = useState(initialForm);
 
   // Delete modal state
@@ -75,6 +79,54 @@ export default function ExpensesPage() {
     setShowModal(false);
     setForm(initialForm);
     loadExpenses();
+  };
+
+  const handleOpenEdit = (exp: Expense) => {
+    setEditingExpense(exp);
+  };
+
+  const handleUpdateExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingExpense) return;
+    const res = await fetch('/api/expenses', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingExpense)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setData(prev => prev.map(e => e.id === editingExpense.id ? json.expense : e));
+      setEditingExpense(null);
+    }
+  };
+
+  const handleDownloadVoucher = (exp: Expense) => {
+    const content = 
+      `=================================================================\n` +
+      `             AGENTLADDERS OFFICIAL EXPENSE VOUCHER               \n` +
+      `=================================================================\n` +
+      `Voucher ID:    ${exp.id}\n` +
+      `Receipt Ref:   ${exp.receiptRef || 'RCPT-' + exp.id.slice(-6).toUpperCase()}\n` +
+      `Date:          ${exp.date}\n` +
+      `Category:      ${exp.category}\n` +
+      `Description:   ${exp.description}\n` +
+      `Vendor:        ${exp.vendor || 'Authorized Supplier'}\n` +
+      `Payment Mode:  ${exp.paymentMethod || 'Corporate Card'}\n` +
+      `Tax Eligible:  ${exp.taxDeductible ? 'YES (VAT Deductible)' : 'NO'}\n` +
+      `-----------------------------------------------------------------\n` +
+      `TOTAL CHARGED: $${exp.amount.toLocaleString()}\n` +
+      `=================================================================\n` +
+      `Approved by Agency Finance & Auditing Controller\n`;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Expense_Voucher_${exp.id}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleDelete = (id: string, description: string) => {
@@ -136,40 +188,84 @@ export default function ExpensesPage() {
       render: (r) => (
         <div>
           <div style={{ fontWeight: 600, color: '#1e293b' }}>{r.description}</div>
-          {r.receiptRef && <div style={{ fontSize: '11px', color: '#64748b' }}>Receipt: {r.receiptRef}</div>}
+          <div style={{ fontSize: '11px', color: '#64748b' }}>
+            {r.vendor && <span>🏢 {r.vendor} &middot; </span>}
+            Receipt: {r.receiptRef || 'Verified'}
+          </div>
         </div>
       )
     },
-    {
-      key: 'vendor',
-      label: 'Vendor / Payee',
-      render: (r) => <span style={{ fontSize: '13px', color: '#334155' }}>{r.vendor || 'General Overhead'}</span>
-    },
     { 
       key: 'amount', 
-      label: 'Amount Paid', 
-      render: (r) => <span style={{ fontWeight: 700, color: '#dc2626' }}>-${r.amount.toLocaleString()}</span> 
+      label: 'Amount', 
+      render: (r) => <span style={{ fontWeight: 700, color: '#e11d48' }}>-${r.amount.toLocaleString()}</span> 
+    },
+    {
+      key: 'paymentMethod',
+      label: 'Paid Via',
+      render: (r) => (
+        <span style={{ fontSize: '12px', color: '#475569' }}>
+          💳 {r.paymentMethod || 'Corporate Card'}
+        </span>
+      )
     },
     {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <button
-          onClick={() => handleDelete(r.id, r.description)}
-          style={{
-            padding: '6px 10px',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: '#fff1f2',
-            border: '1px solid #fecdd3',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#e11d48'
-          }}
-          title="Delete Expense"
-        >
-          🗑️ Delete
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={() => handleDownloadVoucher(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#334155',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title="Download Voucher"
+          >
+            🧾 Voucher
+          </button>
+          <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Expense"
+          >
+            ✏️
+          </button>
+          <button
+            onClick={() => handleDelete(r.id, r.description)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#e11d48'
+            }}
+            title="Delete Expense"
+          >
+            🗑️
+          </button>
+        </div>
       )
     }
   ];
@@ -177,8 +273,8 @@ export default function ExpensesPage() {
   return (
     <>
       <PageHeader 
-        title="Agency Operating Expenses" 
-        subtitle="Track marketing campaigns, portal subscriptions, office overhead, and operational costs" 
+        title="Operating Expenses" 
+        subtitle="Track marketing spend, portal fees, office operations, and company expenditures" 
         actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Add Expense</Button>} 
       />
 
@@ -197,223 +293,251 @@ export default function ExpensesPage() {
             onChange: setCategoryFilter,
             options: [
               { label: 'All Categories', value: 'All' },
-              { label: 'Marketing', value: 'Marketing' },
-              { label: 'Software', value: 'Software' },
-              { label: 'Office Overhead', value: 'Office' },
-              { label: 'Travel & Viewings', value: 'Travel' }
+              ...CATEGORIES.map(c => ({ label: c, value: c }))
             ]
           }
         ]}
       />
-      
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading expenses...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No expenses matched your search"
-          onResetFilters={handleResetFilters}
-        />
-      )}
 
+      <div style={{ padding: '0 24px 24px' }}>
+        <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* CREATE EXPENSE MODAL */}
       {showModal && (
         <div style={{
           position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 100,
-          padding: '20px'
+          zIndex: 1000
         }}>
           <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '680px',
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
             maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            border: '1px solid #e2e8f0'
+            overflowY: 'auto'
           }}>
-            {/* Modal Header */}
-            <div style={{
-              padding: '24px 28px',
-              borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              background: 'linear-gradient(to right, #f8fafc, #ffffff)'
-            }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Record Operating Expense</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  💸 Add Operating Expense
-                </h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>
-                  Record agency overhead, portal advertising, and operational costs
-                </p>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expense Description *</label>
+                <input
+                  required
+                  placeholder="e.g. Property Finder Premier Syndication Tier"
+                  value={form.description}
+                  onChange={e => setForm({ ...form, description: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '20px',
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  padding: '4px 8px',
-                  borderRadius: '6px'
-                }}
-              >
-                ✕
-              </button>
-            </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px 28px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Category *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
                   <select
                     value={form.category}
-                    onChange={e => setForm({...form, category: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    onChange={e => setForm({ ...form, category: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   >
-                    <option value="Marketing">Portal Marketing & Ads</option>
-                    <option value="Software">Software & Subscriptions</option>
-                    <option value="Office">Office Overhead & Rent</option>
-                    <option value="Travel">Client Travel & Transport</option>
-                    <option value="Legal">Legal & Professional Fees</option>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Expense Date *
-                  </label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                  <input
+                    required
+                    type="number"
+                    placeholder="3400"
+                    value={form.amount}
+                    onChange={e => setForm({ ...form, amount: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
+                  <input
+                    placeholder="e.g. Property Finder Group"
+                    value={form.vendor}
+                    onChange={e => setForm({ ...form, vendor: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
                   <input
                     required
                     type="date"
                     value={form.date}
-                    onChange={e => setForm({...form, date: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                    onChange={e => setForm({ ...form, date: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Vendor / Payee *
-                  </label>
-                  <input
-                    required
-                    value={form.vendor}
-                    onChange={e => setForm({...form, vendor: e.target.value})}
-                    placeholder="e.g. Property Finder MENA / AWS Cloud"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Amount Paid ($) *
-                  </label>
-                  <input
-                    required
-                    type="number"
-                    value={form.amount}
-                    onChange={e => setForm({...form, amount: e.target.value})}
-                    placeholder="e.g. 2400"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Expense Description *
-                  </label>
-                  <input
-                    required
-                    value={form.description}
-                    onChange={e => setForm({...form, description: e.target.value})}
-                    placeholder="e.g. Featured Developer Banner Placement & Lead Boost Campaign"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Payment Method
-                  </label>
-                  <select
-                    value={form.paymentMethod}
-                    onChange={e => setForm({...form, paymentMethod: e.target.value})}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                  >
-                    <option value="Corporate Card">Agency Corporate Card</option>
-                    <option value="Bank Wire">Direct Wire Transfer</option>
-                    <option value="Petty Cash">Petty Cash</option>
-                    <option value="Founder Reimbursement">Founder Reimbursement</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Receipt / Invoice Ref
-                  </label>
-                  <input
-                    value={form.receiptRef}
-                    onChange={e => setForm({...form, receiptRef: e.target.value})}
-                    placeholder="e.g. RCPT-2026-9810"
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 500, color: '#1e293b' }}>
-                    <input
-                      type="checkbox"
-                      checked={form.taxDeductible}
-                      onChange={e => setForm({...form, taxDeductible: e.target.checked})}
-                      style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                    />
-                    Tax Deductible Business Expense (Include in annual corporate tax filings)
-                  </label>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px',
-                marginTop: '24px',
-                paddingTop: '20px',
-                borderTop: '1px solid #e2e8f0'
-              }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
+                  <select
+                    value={form.paymentMethod}
+                    onChange={e => setForm({ ...form, paymentMethod: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>
+                  <input
+                    placeholder="RCPT-883492"
+                    value={form.receiptRef}
+                    onChange={e => setForm({ ...form, receiptRef: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Expense</Button>
+                <Button type="submit" variant="primary">Record Expense</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
+      {/* EDIT EXPENSE MODAL */}
+      {editingExpense && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Expense: {editingExpense.description}</h3>
+            <form onSubmit={handleUpdateExpense} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expense Description *</label>
+                <input
+                  required
+                  value={editingExpense.description || ''}
+                  onChange={e => setEditingExpense({ ...editingExpense, description: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
+                  <select
+                    value={editingExpense.category}
+                    onChange={e => setEditingExpense({ ...editingExpense, category: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                  <input
+                    required
+                    type="number"
+                    value={editingExpense.amount || ''}
+                    onChange={e => setEditingExpense({ ...editingExpense, amount: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
+                  <input
+                    value={editingExpense.vendor || ''}
+                    onChange={e => setEditingExpense({ ...editingExpense, vendor: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
+                  <input
+                    required
+                    type="date"
+                    value={editingExpense.date || ''}
+                    onChange={e => setEditingExpense({ ...editingExpense, date: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
+                  <select
+                    value={editingExpense.paymentMethod || 'Corporate Card'}
+                    onChange={e => setEditingExpense({ ...editingExpense, paymentMethod: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>
+                  <input
+                    value={editingExpense.receiptRef || ''}
+                    onChange={e => setEditingExpense({ ...editingExpense, receiptRef: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <Button type="button" variant="ghost" onClick={() => setEditingExpense(null)}>Cancel</Button>
+                <Button type="submit" variant="primary">Save Changes</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE MODAL */}
       <ConfirmModal
         isOpen={!!expenseToDelete}
-        title="Delete Expense Record"
+        title="Delete Expense"
         message={
           <>
-            Are you sure you want to delete expense <strong>&ldquo;{expenseToDelete?.description}&rdquo;</strong>? 
-            This expenditure entry will be permanently removed from your financial ledger.
+            Are you sure you want to delete expense record <strong>&ldquo;{expenseToDelete?.description}&rdquo;</strong>?
+            This will remove the transaction from accounting reports.
           </>
         }
-        confirmText="Delete Expense"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? 'Deleting...' : 'Delete Expense'}
+        cancelText="Cancel"
+        danger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setExpenseToDelete(null)}
       />

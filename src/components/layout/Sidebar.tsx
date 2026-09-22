@@ -127,6 +127,7 @@ export function Sidebar() {
         <NavItem href="/dashboard/clients" label="Clients" icon="👥" />
         <NavItem href="/dashboard/companies" label="Companies" icon="🏢" />
         <NavItem href="/dashboard/owners" label="Owners" icon="🏠" />
+        <NavItem href="/dashboard/marketing" label="Marketing & Ads" icon="📣" />
         <NavItem href="/dashboard/brokerage" label="Brokerage" icon="🤝" />
 
         <Section title="Inventory & Feeds" stage="Stage 2" />
@@ -137,6 +138,7 @@ export function Sidebar() {
         <NavItem href="/dashboard/site-visits" label="Site Visits" icon="📍" />
         <NavItem href="/dashboard/calendar" label="Calendar" icon="📅" />
         <NavItem href="/dashboard/tasks" label="Tasks" icon="✅" />
+        <NavItem href="/dashboard/timeline" label="Timeline" icon="📜" />
 
         <Section title="Deals & Finance" stage="Stage 4" />
         <NavItem href="/dashboard/deals" label="Deals" icon="💰" />
@@ -147,6 +149,8 @@ export function Sidebar() {
         <Section title="Assets & Reporting" />
         <NavItem href="/dashboard/documents" label="Documents" icon="📂" />
         <NavItem href="/dashboard/reports" label="Reports" icon="📊" />
+        <NavItem href="/dashboard/audit-logs" label="Audit & Recycle" icon="🛡️" />
+        <NavItem href="/dashboard/support" label="Support Tickets" icon="🎧" />
       </div>
 
       <div style={{ padding: '12px', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--surface-color)' }}>

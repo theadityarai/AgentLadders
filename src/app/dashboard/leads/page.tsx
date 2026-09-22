@@ -26,10 +26,15 @@ interface Lead {
   notes?: string;
 }
 
+const LEAD_STATUSES = ['New', 'Contacted', 'Qualified', 'Lost'];
+
 export default function LeadsPage() {
   const [data, setData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [convertFeedback, setConvertFeedback] = useState<string | null>(null);
+
   const initialForm = {
     name: '',
     email: '',
@@ -84,6 +89,62 @@ export default function LeadsPage() {
     loadLeads();
   };
 
+  const handleOpenEdit = (lead: Lead) => {
+    setEditingLead(lead);
+  };
+
+  const handleUpdateLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLead) return;
+    const res = await fetch('/api/leads', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editingLead)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      setData(prev => prev.map(l => l.id === editingLead.id ? json.lead : l));
+      setEditingLead(null);
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    setData(prev => prev.map(l => l.id === id ? { ...l, status: newStatus } : l));
+    await fetch('/api/leads', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status: newStatus })
+    });
+  };
+
+  const handleConvertToClient = async (lead: Lead) => {
+    try {
+      // 1. Create client record
+      await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+          type: lead.leadType || 'Buyer',
+          requirement: lead.requirement || 'Primary Residence',
+          budget: lead.budget || 'Undisclosed',
+          preferredLocation: lead.locationPreference || 'Dubai',
+          notes: `Converted from Lead ID: ${lead.id}. ${lead.notes || ''}`
+        })
+      });
+
+      // 2. Mark lead as Qualified
+      handleStatusChange(lead.id, 'Qualified');
+
+      setConvertFeedback(`Successfully converted "${lead.name}" to CRM Client!`);
+      setTimeout(() => setConvertFeedback(null), 4000);
+    } catch (err) {
+      console.error('Failed to convert lead', err);
+    }
+  };
+
   const handleDelete = (id: string, name: string) => {
     setLeadToDelete({ id, name });
   };
@@ -131,11 +192,11 @@ export default function LeadsPage() {
           </div>
           <div>
             <div style={{ fontWeight: 600, color: '#0f172a' }}>{r.name}</div>
+            <div style={{ fontSize: '11px', color: '#64748b' }}>{r.email}</div>
           </div>
         </div>
       )
     },
-    { key: 'email', label: 'Email' },
     { key: 'phone', label: 'Phone' },
     { 
       key: 'requirement', 
@@ -164,27 +225,87 @@ export default function LeadsPage() {
         </span>
       )
     },
-    { key: 'status', label: 'Status', render: (r) => <StatusBadge status={r.status} /> },
+    { 
+      key: 'status', 
+      label: 'Status', 
+      render: (r) => (
+        <select
+          value={r.status}
+          onChange={(e) => handleStatusChange(r.id, e.target.value)}
+          style={{
+            padding: '4px 8px',
+            fontSize: '12px',
+            fontWeight: 600,
+            borderRadius: '6px',
+            border: '1px solid #cbd5e1',
+            backgroundColor: r.status === 'Qualified' ? '#dcfce7' : r.status === 'Lost' ? '#fee2e2' : '#eff6ff',
+            color: r.status === 'Qualified' ? '#166534' : r.status === 'Lost' ? '#991b1b' : '#1d4ed8',
+            cursor: 'pointer'
+          }}
+        >
+          {LEAD_STATUSES.map(s => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      )
+    },
     {
       key: 'actions',
       label: 'Actions',
       render: (r) => (
-        <button
-          onClick={() => handleDelete(r.id, r.name)}
-          style={{
-            padding: '6px 10px',
-            fontSize: '12px',
-            fontWeight: 500,
-            backgroundColor: '#fff1f2',
-            border: '1px solid #fecdd3',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#e11d48'
-          }}
-          title="Delete Lead"
-        >
-          🗑️ Delete
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={() => handleConvertToClient(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 600,
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#15803d',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+            title="Promote Lead to Active Client"
+          >
+            👤 Client
+          </button>
+          <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Lead"
+          >
+            ✏️ Edit
+          </button>
+          <button
+            onClick={() => handleDelete(r.id, r.name)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#fff1f2',
+              border: '1px solid #fecdd3',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#e11d48'
+            }}
+            title="Delete Lead"
+          >
+            🗑️
+          </button>
+        </div>
       )
     }
   ];
@@ -196,6 +317,25 @@ export default function LeadsPage() {
         subtitle="Track, qualify, and convert buyer and tenant inquiries" 
         actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Add Lead</Button>} 
       />
+
+      {convertFeedback && (
+        <div style={{
+          margin: '0 24px 16px',
+          padding: '12px 16px',
+          backgroundColor: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '8px',
+          color: '#15803d',
+          fontWeight: 600,
+          fontSize: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <span>✨ {convertFeedback}</span>
+          <button onClick={() => setConvertFeedback(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#15803d' }}>✕</button>
+        </div>
+      )}
 
       <TableFilterBar
         searchQuery={searchQuery}
@@ -212,10 +352,7 @@ export default function LeadsPage() {
             onChange: setStatusFilter,
             options: [
               { label: 'All Statuses', value: 'All' },
-              { label: 'New', value: 'New' },
-              { label: 'Contacted', value: 'Contacted' },
-              { label: 'Qualified', value: 'Qualified' },
-              { label: 'Lost', value: 'Lost' }
+              ...LEAD_STATUSES.map(s => ({ label: s, value: s }))
             ]
           },
           {
@@ -229,150 +366,260 @@ export default function LeadsPage() {
               { label: 'Referral', value: 'Referral' },
               { label: 'Zillow', value: 'Zillow' },
               { label: 'Property Finder', value: 'Property Finder' },
-              { label: 'Direct', value: 'Direct' }
+              { label: 'Social Media', value: 'Social Media' },
+              { label: 'Walk-in', value: 'Walk-in' }
             ]
           }
         ]}
       />
-      
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading leads...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No leads matched your filters"
-          onResetFilters={handleResetFilters}
-        />
-      )}
 
+      <div style={{ padding: '0 24px 24px' }}>
+        <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* CREATE LEAD MODAL */}
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid #e2e8f0' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Add New Lead</h3>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Add New Inbound Lead</h2>
-                <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>Capture prospect requirements, budget, and follow-up timeline</p>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Full Name *</label>
+                <input
+                  required
+                  placeholder="e.g. John Doe"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
               </div>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
-            </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Full Name *</label>
-                  <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="e.g. Brooklyn Lean" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Email Address *</label>
+                  <input
+                    required
+                    type="email"
+                    placeholder="john@example.com"
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Lead Type</label>
-                  <select value={form.leadType} onChange={e => setForm({...form, leadType: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Phone Number *</label>
+                  <input
+                    required
+                    placeholder="+971 50 123 4567"
+                    value={form.phone}
+                    onChange={e => setForm({ ...form, phone: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Lead Type</label>
+                  <select
+                    value={form.leadType}
+                    onChange={e => setForm({ ...form, leadType: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
                     <option>Buyer</option>
-                    <option>Seller</option>
                     <option>Tenant</option>
-                    <option>Landlord</option>
                     <option>Investor</option>
                   </select>
                 </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Email Address</label>
-                  <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="lead@example.com" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Phone / Mobile</label>
-                  <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="+1 (555) 012-3456" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Property Requirement</label>
-                  <input value={form.requirement} onChange={e => setForm({...form, requirement: e.target.value})} placeholder="e.g. 3BHK Penthouse or Villa" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Target Budget ($)</label>
-                  <input value={form.budget} onChange={e => setForm({...form, budget: e.target.value})} placeholder="e.g. $1,250,000" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Preferred Neighborhood / City</label>
-                  <input value={form.locationPreference} onChange={e => setForm({...form, locationPreference: e.target.value})} placeholder="e.g. Beverly Hills, Downtown" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Acquisition Source</label>
-                  <select value={form.source} onChange={e => setForm({...form, source: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Source</label>
+                  <select
+                    value={form.source}
+                    onChange={e => setForm({ ...form, source: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
                     <option>Direct</option>
                     <option>Website</option>
                     <option>Referral</option>
-                    <option>Portal</option>
-                    <option>Zillow</option>
                     <option>Property Finder</option>
+                    <option>Zillow</option>
+                    <option>Social Media</option>
                   </select>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Pipeline Status</label>
-                  <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option>New</option>
-                    <option>Contacted</option>
-                    <option>Qualified</option>
-                    <option>Nurturing</option>
-                    <option>Negotiation</option>
-                    <option>Converted</option>
-                    <option>Lost</option>
-                  </select>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Target Requirement</label>
+                  <input
+                    placeholder="e.g. 3BHK Penthouse"
+                    value={form.requirement}
+                    onChange={e => setForm({ ...form, requirement: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Priority Level</label>
-                  <select value={form.priority} onChange={e => setForm({...form, priority: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option>High</option>
-                    <option>Medium</option>
-                    <option>Low</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Assigned Agent</label>
-                  <input value={form.assignedTo} onChange={e => setForm({...form, assignedTo: e.target.value})} placeholder="e.g. Marcus Vance" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Estimated Budget</label>
+                  <input
+                    placeholder="e.g. $1.5M - $2M"
+                    value={form.budget}
+                    onChange={e => setForm({ ...form, budget: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Next Follow-Up Date</label>
-                <input type="date" value={form.nextFollowUp} onChange={e => setForm({...form, nextFollowUp: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Client Notes & Special Inquiries</label>
-                <textarea rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Add initial discovery notes, financing status, or urgency..." style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', resize: 'vertical' }} />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Lead</Button>
+                <Button type="submit" variant="primary">Create Lead</Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Custom Confirmation Modal */}
+      {/* EDIT LEAD MODAL */}
+      {editingLead && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '540px',
+            maxWidth: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Lead: {editingLead.name}</h3>
+            <form onSubmit={handleUpdateLead} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Full Name *</label>
+                <input
+                  required
+                  value={editingLead.name || ''}
+                  onChange={e => setEditingLead({ ...editingLead, name: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Email Address *</label>
+                  <input
+                    required
+                    type="email"
+                    value={editingLead.email || ''}
+                    onChange={e => setEditingLead({ ...editingLead, email: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Phone Number *</label>
+                  <input
+                    required
+                    value={editingLead.phone || ''}
+                    onChange={e => setEditingLead({ ...editingLead, phone: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Lead Status</label>
+                  <select
+                    value={editingLead.status}
+                    onChange={e => setEditingLead({ ...editingLead, status: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    {LEAD_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Lead Type</label>
+                  <select
+                    value={editingLead.leadType || 'Buyer'}
+                    onChange={e => setEditingLead({ ...editingLead, leadType: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    <option>Buyer</option>
+                    <option>Tenant</option>
+                    <option>Investor</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Target Requirement</label>
+                  <input
+                    value={editingLead.requirement || ''}
+                    onChange={e => setEditingLead({ ...editingLead, requirement: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Estimated Budget</label>
+                  <input
+                    value={editingLead.budget || ''}
+                    onChange={e => setEditingLead({ ...editingLead, budget: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+                <Button type="button" variant="ghost" onClick={() => setEditingLead(null)}>Cancel</Button>
+                <Button type="submit" variant="primary">Save Changes</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE MODAL */}
       <ConfirmModal
         isOpen={!!leadToDelete}
         title="Delete Lead"
         message={
           <>
-            Are you sure you want to delete lead <strong>&ldquo;{leadToDelete?.name}&rdquo;</strong>? 
-            This inquiry record will be permanently removed from your agency CRM.
+            Are you sure you want to delete lead <strong>&ldquo;{leadToDelete?.name}&rdquo;</strong>?
+            This action cannot be undone.
           </>
         }
-        confirmText="Delete Lead"
-        isLoading={isDeleting}
+        confirmText={isDeleting ? 'Deleting...' : 'Delete Lead'}
+        cancelText="Cancel"
+        danger={true}
         onConfirm={handleConfirmDelete}
         onCancel={() => setLeadToDelete(null)}
       />

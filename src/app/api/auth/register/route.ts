@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb, saveDb } from '@/lib/db';
+import { getDb, saveDb, seedAgencyData } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
@@ -41,6 +41,7 @@ export async function POST(req: Request) {
       id: userId,
       name,
       email,
+      password: hashedPassword,
       passwordHash: hashedPassword,
       role: 'OWNER',
       agencyId,
@@ -58,6 +59,9 @@ export async function POST(req: Request) {
     });
 
     saveDb(db);
+
+    // Automatically seed full suite of real estate data for new agency
+    seedAgencyData(agencyId);
 
     return NextResponse.json({ success: true, agencyId });
   } catch (error: any) {

@@ -1,0 +1,95 @@
+import { NextResponse } from 'next/server';
+import { getDb, saveDb } from '@/lib/db';
+
+export async function POST(req: Request) {
+  try {
+    const data = await req.json();
+    const { propertyId, name, email, phone, preferredDate, message } = data;
+
+    if (!name || (!email && !phone)) {
+      return NextResponse.json({ error: 'Name and either email or phone number are required.' }, { status: 400 });
+    }
+
+    const db = getDb();
+    // Find property to identify target agency
+    const prop = db.properties.find(p => p.id === propertyId || p.publicToken === propertyId);
+    const agencyId = prop ? prop.agencyId : (db.agencies[0]?.id || 'ag_default');
+    const now = new Date().toISOString();
+
+    // 1. Create a new qualified Lead in the CRM
+    const newLeadId = 'lead_' + Math.random().toString(36).substring(2, 9);
+    const newLead = {
+      id: newLeadId,
+      agencyId,
+      name,
+      email: email || 'inquiry@lead.com',
+      phone: phone || 'Unspecified',
+      status: 'New',
+      source: 'Public Property Page',
+      leadType: 'Buyer',
+      requirement: prop ? `${prop.title} (${prop.location})` : 'General Property Inquiry',
+      budget: prop ? `$${prop.price.toLocaleString()}` : '$1,000,000+',
+      priority: 'High',
+      assignedTo: prop?.agentName || 'Aditya Rai',
+      notes: message ? `Client Message: "${message}"` : 'Inquiry submitted via public property webpage.',
+      createdAt: now
+    };
+
+    db.leads = db.leads || [];
+    db.leads.unshift(newLead);
+
+    // 2. If client specified a tour date, schedule a Site Visit
+    if (preferredDate) {
+      db.siteVisits = db.siteVisits || [];
+      db.siteVisits.unshift({
+        id: 'vis_' + Math.random().toString(36).substring(2, 9),
+        agencyId,
+        property: prop ? prop.title : 'Property Showcase',
+        client: name,
+        date: preferredDate,
+        timeSlot: '11:00 AM',
+        accompaniedBy: prop?.agentName || 'Aditya Rai',
+        status: 'Scheduled',
+        notes: `Online tour booking from public webpage. Phone: ${phone || 'N/A'}. Notes: ${message || 'None'}.`,
+        createdAt: now
+      });
+    }
+
+    // 3. Log activity in communication timeline
+    db.activities = db.activities || [];
+    db.activities.unshift({
+      id: 'act_' + Math.random().toString(36).substring(2, 9),
+      agencyId,
+      actor: 'Public Client',
+      type: preferredDate ? 'Site Visit' : 'WhatsApp',
+      relatedEntity: 'Lead',
+      relatedId: newLeadId,
+      summary: `Inquiry received from ${name} for ${prop ? prop.title : 'Property'}`,
+      details: `Client email: ${email}, phone: ${phone}. ${preferredDate ? `Requested tour on ${preferredDate}. ` : ''}Message: ${message || 'No additional note.'}`,
+      createdAt: now
+    });
+
+    // 4. Create in-app agency notification
+    db.notifications = db.notifications || [];
+    db.notifications.unshift({
+      id: 'notif_' + Math.random().toString(36).substring(2, 9),
+      agencyId,
+      userId: 'all',
+      title: '🚨 New Property Inquiry & Lead Captured',
+      message: `${name} just submitted an inquiry for "${prop ? prop.title : 'Luxury Property'}". Lead automatically added to CRM pipeline.`,
+      type: 'lead',
+      read: false,
+      createdAt: now
+    });
+
+    saveDb(db);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Thank you! Your private showing request has been received. Our dedicated property advisor will contact you shortly.'
+    });
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: 'Failed to process inquiry: ' + errorMsg }, { status: 500 });
+  }
+}
