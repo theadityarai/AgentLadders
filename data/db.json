@@ -715,7 +715,8 @@
           "title": "4K Architectural Walkthrough Tour",
           "type": "video"
         }
-      ]
+      ],
+      "updatedAt": "2026-09-28T12:36:35.577Z"
     },
     {
       "id": "prop_ag_vance_01_2",
@@ -1521,6 +1522,46 @@
       "status": "Qualified",
       "source": "Property Finder",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "lead_1",
+      "agencyId": "ag_vance_01",
+      "name": "Brooklyn Lean",
+      "email": "brooklyn@example.com",
+      "phone": "+1 (555) 234-5678",
+      "status": "Qualified",
+      "source": "Website",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "lead_2",
+      "agencyId": "ag_vance_01",
+      "name": "James Wilson",
+      "email": "james.w@example.com",
+      "phone": "+1 (555) 345-6789",
+      "status": "New",
+      "source": "Referral",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "lead_3",
+      "agencyId": "ag_vance_01",
+      "name": "Sarah Connor",
+      "email": "sarah.c@example.com",
+      "phone": "+1 (555) 456-7890",
+      "status": "Contacted",
+      "source": "Zillow",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "lead_4",
+      "agencyId": "ag_vance_01",
+      "name": "Alexander Wright",
+      "email": "alex.wright@horizon.com",
+      "phone": "+1 (555) 789-0123",
+      "status": "Qualified",
+      "source": "Property Finder",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "deals": [
@@ -1648,6 +1689,33 @@
       "phone": "+1 (555) 012-3456",
       "type": "Investor",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "cli_1",
+      "agencyId": "ag_vance_01",
+      "name": "Jonathan Reynolds",
+      "email": "jreynolds@invest.org",
+      "phone": "+1 (555) 890-1234",
+      "type": "Buyer",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "cli_2",
+      "agencyId": "ag_vance_01",
+      "name": "Sophia Martinez",
+      "email": "smartinez@designlab.co",
+      "phone": "+1 (555) 901-2345",
+      "type": "Renter",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "cli_3",
+      "agencyId": "ag_vance_01",
+      "name": "Oliver Zhang",
+      "email": "oliver.zhang@capital.hk",
+      "phone": "+1 (555) 012-3456",
+      "type": "Investor",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "companies": [
@@ -1674,6 +1742,30 @@
       "industry": "Hotels & Serviced Residences",
       "website": "https://omniglobal.example.com",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "comp_1",
+      "agencyId": "ag_vance_01",
+      "name": "Apex Horizon Capital",
+      "industry": "Private Equity / Real Estate",
+      "website": "https://apexhorizon.example.com",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "comp_2",
+      "agencyId": "ag_vance_01",
+      "name": "Sterling Development Group",
+      "industry": "Commercial Property Development",
+      "website": "https://sterlingdev.example.com",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "comp_3",
+      "agencyId": "ag_vance_01",
+      "name": "OmniGlobal Hospitality",
+      "industry": "Hotels & Serviced Residences",
+      "website": "https://omniglobal.example.com",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "owners": [
@@ -1703,6 +1795,33 @@
       "phone": "+1 (555) 333-4455",
       "propertiesCount": 6,
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "own_1",
+      "agencyId": "ag_vance_01",
+      "name": "Richard Davenport",
+      "email": "richard@davenport.co",
+      "phone": "+1 (555) 111-2233",
+      "propertiesCount": 4,
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "own_2",
+      "agencyId": "ag_vance_01",
+      "name": "Eleanor Vance",
+      "email": "evance@estateholdings.com",
+      "phone": "+1 (555) 222-3344",
+      "propertiesCount": 2,
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "own_3",
+      "agencyId": "ag_vance_01",
+      "name": "Robert Chen",
+      "email": "rchen@pacificridge.io",
+      "phone": "+1 (555) 333-4455",
+      "propertiesCount": 6,
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "brokers": [
@@ -1729,6 +1848,30 @@
       "agency": "Prime Coastal Estates",
       "commissionSplit": "60/40",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "brk_1",
+      "agencyId": "ag_vance_01",
+      "name": "Marcus Vance",
+      "agency": "Vance & Partners Luxury Real Estate",
+      "commissionSplit": "70/30",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "brk_2",
+      "agencyId": "ag_vance_01",
+      "name": "Elena Rostova",
+      "agency": "Metropolitan Commercial Realty",
+      "commissionSplit": "50/50",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "brk_3",
+      "agencyId": "ag_vance_01",
+      "name": "David Sterling",
+      "agency": "Prime Coastal Estates",
+      "commissionSplit": "60/40",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "invoices": [
@@ -1761,6 +1904,36 @@
       "status": "Overdue",
       "dueDate": "2026-09-10",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "inv_1",
+      "agencyId": "ag_vance_01",
+      "number": "INV-2026-001",
+      "clientName": "Jonathan Reynolds",
+      "amount": 90000,
+      "status": "Paid",
+      "dueDate": "2026-08-30",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "inv_2",
+      "agencyId": "ag_vance_01",
+      "number": "INV-2026-002",
+      "clientName": "Sophia Martinez",
+      "amount": 18000,
+      "status": "Pending",
+      "dueDate": "2026-10-15",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "inv_3",
+      "agencyId": "ag_vance_01",
+      "number": "INV-2026-003",
+      "clientName": "Apex Horizon Capital",
+      "amount": 45000,
+      "status": "Overdue",
+      "dueDate": "2026-09-10",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "payments": [
@@ -1783,6 +1956,26 @@
       "method": "Credit Card",
       "status": "Processing",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "pay_1",
+      "agencyId": "ag_vance_01",
+      "reference": "TXN-984210",
+      "invoiceNumber": "INV-2026-001",
+      "amount": 90000,
+      "method": "Bank Transfer",
+      "status": "Completed",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "pay_2",
+      "agencyId": "ag_vance_01",
+      "reference": "TXN-984211",
+      "invoiceNumber": "INV-2026-002",
+      "amount": 5000,
+      "method": "Credit Card",
+      "status": "Processing",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "expenses": [
@@ -1812,6 +2005,33 @@
       "amount": 720,
       "date": "2026-09-18",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "exp_1",
+      "agencyId": "ag_vance_01",
+      "category": "Marketing",
+      "description": "Zillow & Bayut Premium Featured Placement",
+      "amount": 2400,
+      "date": "2026-09-05",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "exp_2",
+      "agencyId": "ag_vance_01",
+      "category": "Software",
+      "description": "Matterport 3D Virtual Tour Hosting",
+      "amount": 350,
+      "date": "2026-09-10",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "exp_3",
+      "agencyId": "ag_vance_01",
+      "category": "Office",
+      "description": "Agency Client Hospitality & Escrow Closing Dinner",
+      "amount": 720,
+      "date": "2026-09-18",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "tasks": [
@@ -1841,6 +2061,33 @@
       "dueDate": "2026-09-27",
       "status": "Completed",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "tsk_1",
+      "agencyId": "ag_vance_01",
+      "title": "Prepare Escrow & Title Documents for Beverly Hills Villa",
+      "assignedTo": "Adi",
+      "dueDate": "2026-09-24",
+      "status": "Pending",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "tsk_2",
+      "agencyId": "ag_vance_01",
+      "title": "Finalize Lease Agreement with Sophia Martinez",
+      "assignedTo": "Adi",
+      "dueDate": "2026-09-26",
+      "status": "In Progress",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "tsk_3",
+      "agencyId": "ag_vance_01",
+      "title": "Inspect Miami Waterfront property before buyer handover",
+      "assignedTo": "Marcus Vance",
+      "dueDate": "2026-09-28",
+      "status": "Completed",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "calendarEvents": [
@@ -1870,6 +2117,33 @@
       "time": "10:00 AM",
       "type": "Call",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "cal_1",
+      "agencyId": "ag_vance_01",
+      "title": "Exclusive Viewing: Downtown Sky Penthouse",
+      "date": "2026-09-22",
+      "time": "11:00 AM",
+      "type": "Viewing",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "cal_2",
+      "agencyId": "ag_vance_01",
+      "title": "Contract Signing: Brooklyn Lean & Escrow Agent",
+      "date": "2026-09-23",
+      "time": "02:30 PM",
+      "type": "Meeting",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "cal_3",
+      "agencyId": "ag_vance_01",
+      "title": "Follow-up Call with Marcus Vance (Split Review)",
+      "date": "2026-09-25",
+      "time": "10:00 AM",
+      "type": "Call",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "siteVisits": [
@@ -1899,6 +2173,33 @@
       "date": "2026-09-24",
       "status": "Scheduled",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "vis_1",
+      "agencyId": "ag_vance_01",
+      "property": "Luxury Villa in Beverly Hills",
+      "client": "Jonathan Reynolds",
+      "date": "2026-09-22",
+      "status": "Scheduled",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "vis_2",
+      "agencyId": "ag_vance_01",
+      "property": "Downtown Sky Penthouse",
+      "client": "Sophia Martinez",
+      "date": "2026-09-20",
+      "status": "Completed",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "vis_3",
+      "agencyId": "ag_vance_01",
+      "property": "Modern Waterfront Residence",
+      "client": "Oliver Zhang",
+      "date": "2026-09-25",
+      "status": "Scheduled",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "listings": [
@@ -1937,6 +2238,42 @@
       "status": "Draft",
       "views": 150,
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "list_1",
+      "agencyId": "ag_vance_01",
+      "title": "Luxury Villa in Beverly Hills",
+      "platform": "Property Finder",
+      "status": "Active",
+      "views": 1420,
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "list_2",
+      "agencyId": "ag_vance_01",
+      "title": "Downtown Sky Penthouse",
+      "platform": "Bayut",
+      "status": "Active",
+      "views": 890,
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "list_3",
+      "agencyId": "ag_vance_01",
+      "title": "Modern Waterfront Residence",
+      "platform": "Zillow",
+      "status": "Active",
+      "views": 2310,
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "list_4",
+      "agencyId": "ag_vance_01",
+      "title": "Silicon Valley Executive Condo",
+      "platform": "Company Website",
+      "status": "Draft",
+      "views": 150,
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "documents": [
@@ -1948,6 +2285,36 @@
       "size": "1.2 MB",
       "uploadedBy": "Adi",
       "createdAt": "2026-09-21T13:30:53.654Z"
+    },
+    {
+      "id": "doc_1",
+      "agencyId": "ag_vance_01",
+      "name": "Sales_Purchase_Agreement_Villa_4B.pdf",
+      "type": "Sales Contract",
+      "category": "Contracts",
+      "size": "2.4 MB",
+      "uploadedBy": "Adi",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "doc_2",
+      "agencyId": "ag_vance_01",
+      "name": "Title_Deed_Certificate_Downtown_Sky.pdf",
+      "type": "Title Deed",
+      "category": "Title Deeds",
+      "size": "1.8 MB",
+      "uploadedBy": "Adi",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "doc_3",
+      "agencyId": "ag_vance_01",
+      "name": "Client_KYC_Passport_Jonathan_Reynolds.pdf",
+      "type": "KYC / Passport",
+      "category": "KYC Documents",
+      "size": "850 KB",
+      "uploadedBy": "Adi",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "reports": [
@@ -1974,6 +2341,30 @@
       "type": "Performance",
       "frequency": "Weekly",
       "createdAt": "2026-09-21T13:40:15.322Z"
+    },
+    {
+      "id": "rep_1",
+      "agencyId": "ag_vance_01",
+      "name": "Q3 Agency Commission & Deal Performance",
+      "type": "Financial",
+      "frequency": "Quarterly",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "rep_2",
+      "agencyId": "ag_vance_01",
+      "name": "Lead Acquisition & Portal ROI Audit",
+      "type": "Sales",
+      "frequency": "Monthly",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "rep_3",
+      "agencyId": "ag_vance_01",
+      "name": "Active Inventory Valuation & Absorption Rate",
+      "type": "Performance",
+      "frequency": "Weekly",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "activities": [
@@ -2068,6 +2459,63 @@
       "startDate": "2026-09-10",
       "endDate": "2026-09-15",
       "createdAt": "2026-09-22T10:47:39.948Z"
+    },
+    {
+      "id": "mkt_1",
+      "agencyId": "ag_vance_01",
+      "name": "Ultra-Luxury Villa Showcase Q3",
+      "platform": "Meta Ads",
+      "status": "Active",
+      "budget": 3500,
+      "spend": 2150,
+      "leadsGenerated": 42,
+      "dealsClosed": 2,
+      "utmSource": "instagram_reels_luxury",
+      "startDate": "2026-09-01",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "mkt_2",
+      "agencyId": "ag_vance_01",
+      "name": "Property Finder Verified Featured Boost",
+      "platform": "Property Finder",
+      "status": "Active",
+      "budget": 5000,
+      "spend": 3800,
+      "leadsGenerated": 68,
+      "dealsClosed": 4,
+      "utmSource": "property_finder_featured",
+      "startDate": "2026-08-15",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "mkt_3",
+      "agencyId": "ag_vance_01",
+      "name": "Google Search High-Intent Buyers",
+      "platform": "Google Ads",
+      "status": "Active",
+      "budget": 2800,
+      "spend": 1940,
+      "leadsGenerated": 31,
+      "dealsClosed": 1,
+      "utmSource": "google_search_penthouses",
+      "startDate": "2026-09-05",
+      "createdAt": "2026-09-22T16:55:32.971Z"
+    },
+    {
+      "id": "mkt_4",
+      "agencyId": "ag_vance_01",
+      "name": "Private Investor WhatsApp Broadcast VIP",
+      "platform": "WhatsApp Broadcast",
+      "status": "Completed",
+      "budget": 400,
+      "spend": 250,
+      "leadsGenerated": 19,
+      "dealsClosed": 2,
+      "utmSource": "whatsapp_vip_network",
+      "startDate": "2026-09-10",
+      "endDate": "2026-09-15",
+      "createdAt": "2026-09-22T16:55:32.971Z"
     }
   ],
   "auditLogs": [
@@ -2190,6 +2638,53 @@
         }
       ],
       "createdAt": "2026-09-20T10:47:39.949Z"
+    },
+    {
+      "id": "tic_1",
+      "agencyId": "ag_vance_01",
+      "ticketNumber": "TICK-4091",
+      "subject": "Custom Domain SSL for Agency Public Properties",
+      "category": "Integrations",
+      "priority": "Medium",
+      "status": "In Review",
+      "createdByName": "Aditya Rai",
+      "messages": [
+        {
+          "id": "msg_1",
+          "sender": "Aditya Rai",
+          "isStaff": false,
+          "text": "Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.",
+          "timestamp": "2026-09-21T16:55:32.973Z"
+        },
+        {
+          "id": "msg_2",
+          "sender": "AgentLadders Support",
+          "isStaff": true,
+          "text": "Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.",
+          "timestamp": "2026-09-22T04:55:32.973Z"
+        }
+      ],
+      "createdAt": "2026-09-21T16:55:32.973Z"
+    },
+    {
+      "id": "tic_2",
+      "agencyId": "ag_vance_01",
+      "ticketNumber": "TICK-4092",
+      "subject": "Automated WhatsApp Webhook Sync Verification",
+      "category": "CRM Feature",
+      "priority": "High",
+      "status": "Resolved",
+      "createdByName": "Aditya Rai",
+      "messages": [
+        {
+          "id": "msg_3",
+          "sender": "Aditya Rai",
+          "isStaff": false,
+          "text": "All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table. Verified perfectly.",
+          "timestamp": "2026-09-20T16:55:32.973Z"
+        }
+      ],
+      "createdAt": "2026-09-20T16:55:32.973Z"
     }
   ],
   "sharedLinks": [
