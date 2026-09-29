@@ -16,7 +16,7 @@ export async function GET() {
   }
 
   const agencyVisits = (db.siteVisits || []).filter(s => s.agencyId === user.agencyId);
-  return NextResponse.json({ visits: agencyVisits });
+  return NextResponse.json({ siteVisits: agencyVisits, visits: agencyVisits });
 }
 
 export async function POST(req: Request) {
@@ -34,9 +34,10 @@ export async function POST(req: Request) {
     agencyId: user.agencyId,
     property: data.property || 'Property Tour',
     client: data.client || 'Client',
+    clientPhone: data.clientPhone || '',
     date: data.date || new Date().toISOString().split('T')[0],
-    timeSlot: data.timeSlot || '11:00 AM',
-    accompaniedBy: data.accompaniedBy || 'Marcus Vance',
+    timeSlot: data.timeSlot || '11:30 AM - 12:30 PM',
+    accompaniedBy: data.accompaniedBy || user.name || 'Aditya Rai',
     status: data.status || 'Scheduled',
     feedback: data.feedback || '',
     notes: data.notes || '',

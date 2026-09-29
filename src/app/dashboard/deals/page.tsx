@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { formatINR } from '@/lib/formatters';
 
 interface Deal {
   [key: string]: unknown;
@@ -25,12 +26,12 @@ interface Deal {
 }
 
 const STAGES = [
-  'Prospecting',
-  'Site Visit Done',
-  'Offer Submitted',
-  'Under Contract',
-  'Closed Won',
-  'Closed Lost'
+  'Token / Bayana Received',
+  'Agreement to Sale (ATS)',
+  'Home Loan Sanctioned',
+  'Stamp Duty & Registration',
+  'Handover & Possession (Closed Won)',
+  'Deal Fell Through (Closed Lost)'
 ];
 
 export default function DealsPage() {
@@ -44,14 +45,14 @@ export default function DealsPage() {
   const initialForm = {
     title: '',
     amount: '',
-    stage: 'Offer Submitted',
+    stage: 'Token / Bayana Received',
     clientName: '',
     propertyName: '',
-    dealType: 'Sale Acquisition',
-    probability: '75',
-    commissionRate: '2.5%',
+    dealType: 'Outright Sale',
+    probability: '85',
+    commissionRate: '2.0%',
     commissionAmount: 0,
-    assignedBroker: 'Marcus Vance',
+    assignedBroker: 'Aditya Rai',
     expectedCloseDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     notes: ''
   };
@@ -215,16 +216,16 @@ export default function DealsPage() {
       )
     },
     {
-      header: 'Deal Value & Commission',
+      header: 'Deal Value & Brokerage',
       accessor: (row) => {
-        const commAmt = row.commissionAmount || Math.round(row.amount * 0.025);
+        const commAmt = row.commissionAmount || Math.round(row.amount * 0.02);
         return (
           <div>
             <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14.5px' }}>
-              ${row.amount?.toLocaleString()}
+              {formatINR(row.amount)}
             </div>
-            <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, marginTop: '2px' }}>
-              Commission: ${commAmt?.toLocaleString()} ({row.commissionRate || '2.5%'})
+            <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 700, marginTop: '2px' }}>
+              Brokerage: {formatINR(commAmt)} ({row.commissionRate || '2.0%'})
             </div>
           </div>
         );
@@ -382,7 +383,7 @@ export default function DealsPage() {
                   >
                     <option value="">-- Select Property --</option>
                     {properties.map(p => (
-                      <option key={p.id} value={p.title}>{p.title} (${p.price?.toLocaleString()})</option>
+                      <option key={p.id} value={p.title}>{p.title} ({formatINR(p.price)})</option>
                     ))}
                   </select>
                 </div>
@@ -407,7 +408,7 @@ export default function DealsPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Acquisition of Beverly Hills Penthouse"
+                    placeholder="e.g. Vikram Malhotra - Lodha Park Worli 4 BHK Outright Sale"
                     value={form.title}
                     onChange={e => setForm({ ...form, title: e.target.value })}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
@@ -415,28 +416,33 @@ export default function DealsPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Agreed Deal Value ($) *</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Agreed Deal Value (₹) *</label>
                   <input
                     type="number"
                     required
-                    placeholder="e.g. 2400000"
+                    placeholder="e.g. 85000000 for ₹8.50 Cr"
                     value={form.amount}
                     onChange={e => setForm({ ...form, amount: e.target.value })}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   />
+                  {form.amount && (
+                    <div style={{ fontSize: '11.5px', color: '#2563eb', fontWeight: 700, marginTop: '2px' }}>
+                      Indian Format: {formatINR(Number(form.amount) || 0)}
+                    </div>
+                  )}
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Commission Split</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Brokerage Commission</label>
                   <select
                     value={form.commissionRate}
                     onChange={e => setForm({ ...form, commissionRate: e.target.value })}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
-                    <option value="2.0%">2.0% ($40,000 / $2M)</option>
-                    <option value="2.5%">2.5% Standard ($50,000 / $2M)</option>
-                    <option value="3.0%">3.0% ($60,000 / $2M)</option>
-                    <option value="5.0%">5.0% Commercial ($100,000 / $2M)</option>
+                    <option value="1.0%">1.0% (Single Side Commission)</option>
+                    <option value="2.0%">2.0% Standard (Buyer 1% + Seller 1%)</option>
+                    <option value="3.0%">3.0% (Buyer 2% + Seller 1%)</option>
+                    <option value="4.0%">4.0% Commercial / Builder CP</option>
                   </select>
                 </div>
 

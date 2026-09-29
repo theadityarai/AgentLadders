@@ -70,12 +70,12 @@ export default function LoginPage() {
           />
           <div className={styles.testimonial}>
             <p className={styles.quote}>
-              &ldquo;AgentLadders replaced 5 separate tools for our agency. Deal flow visibility is unmatched.&rdquo;
+              &ldquo;AgentLadders transformed our brokerage workflow. Instant buyer matching and 1-click WhatsApp site visits have made closing high-ticket deals seamless.&rdquo;
             </p>
-            <span className={styles.author}>— Marcus Vance, Principal Broker at Vance Real Estate</span>
+            <span className={styles.author}>— Rajesh Singhania, Managing Director at Apex Luxury Realty, Mumbai</span>
             <div className={styles.statPills}>
-              <div className={styles.statPill}><strong>12K+</strong> Leads Managed</div>
-              <div className={styles.statPill}><strong>$48M</strong> Deals Closed</div>
+              <div className={styles.statPill}><strong>15,000+</strong> Active Buyers</div>
+              <div className={styles.statPill}><strong>₹450+ Cr</strong> Deals Closed</div>
             </div>
           </div>
         </div>

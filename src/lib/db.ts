@@ -62,14 +62,24 @@ export interface Property {
   agencyId: string;
   title: string;
   type: string;
+  bhk?: string;
   purpose?: 'For Sale' | 'For Rent';
+  city?: string;
+  locality?: string;
+  subLocality?: string;
   location: string;
   price: number;
+  maintenanceMonthly?: number;
   status: string;
   bedrooms?: number | string;
   bathrooms?: number | string;
   areaSqFt?: number | string;
   carpetAreaSqFt?: number | string;
+  floor?: string;
+  vastuFacing?: string;
+  reraId?: string;
+  possessionStatus?: string;
+  possessionDate?: string;
   furnishing?: 'Unfurnished' | 'Semi-Furnished' | 'Fully Furnished';
   parking?: number | string;
   amenities?: string[];
@@ -108,12 +118,17 @@ export interface Lead {
   source: string;
   leadType?: string;
   leadPurpose?: 'Buy' | 'Rent';
+  city?: string;
+  preferredLocalities?: string[] | string;
+  bhkNeeded?: string | string[];
   propertyTypeNeeded?: string;
   bedroomsNeeded?: string;
   budgetMin?: number | string;
   budgetMax?: number | string;
+  carpetAreaMin?: number | string;
   financingStatus?: string;
   urgency?: string;
+  vastuPreference?: string;
   requirement?: string;
   budget?: string;
   locationPreference?: string;
@@ -134,15 +149,23 @@ export interface Deal {
   propertyName?: string;
   leadId?: string;
   clientName?: string;
-  dealType?: string;
+  dealType?: 'Outright Sale' | 'Rental Lease' | 'Builder CP Booking';
   amount: number;
   stage: string;
+  buyerCommissionPercent?: number;
+  sellerCommissionPercent?: number;
+  totalCommission?: number;
+  coBrokerSplit?: boolean;
+  netReceivable?: number;
   probability?: number;
   commissionRate?: string;
   commissionAmount?: number;
   assignedBroker?: string;
   expectedCloseDate: string;
+  closingDate?: string;
+  notes?: string;
   createdAt: string;
+  [key: string]: unknown;
 }
 
 export interface Client {
@@ -277,14 +300,18 @@ export interface SiteVisit {
   id: string;
   agencyId: string;
   property: string;
+  propertyId?: string;
   client: string;
+  leadId?: string;
   date: string;
   timeSlot?: string;
   accompaniedBy?: string;
   status: string;
   feedback?: string;
+  interestLevel?: string;
   notes?: string;
   createdAt: string;
+  [key: string]: unknown;
 }
 
 export interface Listing {
@@ -516,288 +543,614 @@ export function saveDb(db: DB) {
 export function generateDummyDataForAgency(agencyId: string, db: DB) {
   const now = new Date().toISOString();
 
-  // 1. Properties
+  // 1. Properties (Authentic Indian Luxury & Prime Inventory)
   if (!db.properties.some(p => p.agencyId === agencyId)) {
     db.properties.push(
       { 
         id: 'prop_1', 
         agencyId, 
-        title: 'Luxury Villa in Beverly Hills', 
-        type: 'Villa', 
-        location: 'Beverly Hills, Los Angeles, CA', 
-        price: 4500000, 
+        title: '4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park', 
+        type: 'Apartment', 
+        bhk: '4 BHK',
+        purpose: 'For Sale',
+        city: 'Mumbai',
+        locality: 'Worli',
+        location: 'Worli Sea Face, Mumbai, Maharashtra', 
+        price: 85000000, // ₹8.50 Cr
         status: 'Available', 
-        bedrooms: 5,
-        bathrooms: 6,
-        areaSqFt: 6200,
+        bedrooms: 4,
+        bathrooms: 5,
+        areaSqFt: 3100,
+        carpetAreaSqFt: 2450,
+        floor: '42nd of 55 Floors',
+        vastuFacing: 'East',
+        reraId: 'P51900001339',
+        possessionStatus: 'Ready to Move',
+        furnishing: 'Fully Furnished',
+        parking: '3 Reserved Covered',
+        maintenanceMonthly: 38000,
         listingType: 'For Sale',
-        ownerName: 'Sterling Global Trust',
-        description: 'Spectacular modern architectural estate nestled on a private cul-de-sac in prestigious Beverly Hills. Featuring soaring double-height ceilings, seamless indoor-outdoor glass walls, infinity-edge heated pool, chef kitchen with custom marble, and expansive entertainer terrace with panoramic canyon views.',
+        sellerName: 'Sunil & Neeta Singhania',
+        sellerPhone: '+91 98201 54321',
+        keyLocationNotes: 'Keys with caretaker Ramesh at Tower C gate. Society requires 2 hrs prior intimation.',
+        ownerName: 'Sunil Singhania',
+        description: 'Spectacular 4 BHK palatial residence with unobstructed Arabian Sea views at Lodha Park Worli. Features Italian marble flooring, 11 ft clear ceiling height, private elevator lobby, Poggenpohl designer modular kitchen, servant room with separate washroom, and 7-acre private society park with Olympic-size pool.',
         images: ['/images/property_hero.jpg', '/images/deal_closing.jpg', '/images/luxury_bedroom.jpg', '/images/luxury_kitchen.jpg', '/images/luxury_washroom.jpg', '/images/hero_dashboard.jpg'],
         media: [
-          { id: 'm_1', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: true, caption: 'Grand Modern Architectural Facade' },
-          { id: 'm_2', url: '/images/deal_closing.jpg', tag: 'Hall / Living Area', isCover: false, caption: 'Soaring Double-Height Great Room' },
-          { id: 'm_3', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Presidential Master Suite with Skyline Panorama' },
-          { id: 'm_4', url: '/images/luxury_kitchen.jpg', tag: 'Kitchen', isCover: false, caption: 'Chef Kitchen with Calacatta Marble Waterfall Island' },
-          { id: 'm_5', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Spa Washroom with Freestanding Soaking Tub' },
-          { id: 'm_6', url: '/images/hero_dashboard.jpg', tag: 'Balcony', isCover: false, caption: 'Sunset Lounge & Entertainer Terrace' }
+          { id: 'm_1', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: true, caption: 'Iconic Worli Skyline & Tower Facade' },
+          { id: 'm_2', url: '/images/deal_closing.jpg', tag: 'Hall / Living Area', isCover: false, caption: 'Double-Height Living Room with Sea Panorama' },
+          { id: 'm_3', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Presidential Master Suite with Walk-in Closet' },
+          { id: 'm_4', url: '/images/luxury_kitchen.jpg', tag: 'Kitchen', isCover: false, caption: 'German Poggenpohl Modular Kitchen' },
+          { id: 'm_5', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Spa Bathroom with Kohler European Fittings' },
+          { id: 'm_6', url: '/images/hero_dashboard.jpg', tag: 'Balcony', isCover: false, caption: 'Expansive Sea-Facing Balcony Deck' }
         ],
         videoTourUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
         virtualTourUrl: 'https://my.matterport.com/show/?m=sample360',
         videos: [
-          { id: 'v_1', url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4', title: '4K Cinematic Estate Tour', type: 'video' }
+          { id: 'v_1', url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4', title: '4K Cinematic Walkthrough - Lodha Park Worli', type: 'video' }
         ],
-        features: ['Private Infinity Pool', 'Smart Home Automation', 'Wine Cellar', 'Gated Security 24/7', 'Outdoor Kitchen', 'Designer Furnishings', 'Private Elevator'],
-        publicToken: 'tok_beverly_hills_4500k',
+        features: ['Arabian Sea View', 'RERA Approved', 'Vastu Compliant', 'Private Elevator Lobby', '3 Covered Car Parks', 'Olympic Size Pool & 50,000 sqft Clubhouse', '100% DG Power Backup'],
+        publicToken: 'tok_lodha_worli_850cr',
         privacyMode: 'Public',
         isPublic: true,
-        sharesCount: 18,
-        viewsCount: 142,
+        sharesCount: 34,
+        viewsCount: 285,
         agentName: 'Aditya Rai',
-        agentPhone: '+1 (310) 849-2041',
+        agentPhone: '+91 98200 12345',
         agentEmail: 'aditya@agentladders.com',
         createdAt: now 
       },
       { 
         id: 'prop_2', 
         agencyId, 
-        title: 'Downtown Sky Penthouse', 
+        title: '3 BHK High-Rise Golf Course Apartment, DLF The Camellias', 
         type: 'Apartment', 
-        location: 'Tribeca, Manhattan, NY', 
-        price: 2850000, 
-        status: 'Under Offer', 
+        bhk: '3 BHK',
+        purpose: 'For Sale',
+        city: 'Gurgaon (Delhi NCR)',
+        locality: 'Golf Course Road',
+        location: 'DLF Phase 5, Golf Course Road, Gurgaon, Haryana', 
+        price: 145000000, // ₹14.50 Cr
+        status: 'Available', 
         bedrooms: 3,
-        bathrooms: 3,
-        areaSqFt: 3100,
-        carpetAreaSqFt: 2580,
-        furnishing: 'Fully Furnished',
-        parking: 2,
+        bathrooms: 4,
+        areaSqFt: 4600,
+        carpetAreaSqFt: 3850,
+        floor: '28th of 35 Floors',
+        vastuFacing: 'North-East',
+        reraId: 'HRERA-PKL-GGM-1085-2019',
+        possessionStatus: 'Ready to Move',
+        furnishing: 'Semi-Furnished',
+        parking: '3 Reserved Stilt',
+        maintenanceMonthly: 52000,
         listingType: 'For Sale',
-        ownerName: 'Vance Skyline Properties',
-        description: 'Trophy duplex penthouse offering 360-degree unobstructed views of the Manhattan skyline and Hudson River. Features direct elevator landing, wrap-around rooftop terrace, gas fireplace, and bespoke Italian millwork throughout.',
+        sellerName: 'Rajeev Mehra (CMD, Mehra Exports)',
+        sellerPhone: '+91 98110 98765',
+        keyLocationNotes: 'Biometric lock. Call owner 3 hours before confirming site visit.',
+        ownerName: 'Rajeev Mehra',
+        description: 'Trophy 3 BHK residence at India’s most prestigious address: DLF The Camellias, overlooking the lush greens of the Arnold Palmer Golf Course. Features soaring 12 ft ceilings, sound-insulated double-glazed facade, automated VRV climate control, concierge 24/7, and access to the world-renowned Camellias Club.',
         images: ['/images/deal_closing.jpg', '/images/luxury_kitchen.jpg', '/images/luxury_bedroom.jpg', '/images/luxury_washroom.jpg'],
         media: [
-          { id: 'm_21', url: '/images/deal_closing.jpg', tag: 'Hall / Living Area', isCover: true, caption: 'Open Concept Great Hall' },
-          { id: 'm_22', url: '/images/luxury_kitchen.jpg', tag: 'Kitchen', isCover: false, caption: 'Custom Italian Minimalist Kitchen' },
-          { id: 'm_23', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Primary Bedroom with Hardwood Floors' },
-          { id: 'm_24', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Ensuite Marble Bathroom' }
+          { id: 'm_21', url: '/images/deal_closing.jpg', tag: 'Hall / Living Area', isCover: true, caption: 'Magnificent Living Lounge Overlooking Golf Course' },
+          { id: 'm_22', url: '/images/luxury_kitchen.jpg', tag: 'Kitchen', isCover: false, caption: 'Custom Italian Minimalist Kitchen with Miele Appliances' },
+          { id: 'm_23', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Primary Master Suite with Teakwood Flooring' },
+          { id: 'm_24', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Ensuite Italian Marble Bathroom' }
         ],
         videoTourUrl: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-        features: ['Wrap-around Terrace', 'Direct Keyed Elevator', 'Floor-to-Ceiling Glass', 'Valet Parking', 'Concierge 24/7'],
-        publicToken: 'tok_sky_penthouse_2850k',
+        features: ['Golf Course Views', 'RERA Approved', 'Club Camellias Membership', 'Helipad Access', '3 Dedicated Parking Bays', 'Valet & Concierge 24/7'],
+        publicToken: 'tok_dlf_camellias_145cr',
         privacyMode: 'Public',
         isPublic: true,
-        sharesCount: 12,
-        viewsCount: 98,
-        agentName: 'Marcus Vance',
-        agentPhone: '+1 (212) 555-0199',
-        agentEmail: 'marcus@agentladders.com',
+        sharesCount: 42,
+        viewsCount: 410,
+        agentName: 'Aditya Rai',
+        agentPhone: '+91 98200 12345',
+        agentEmail: 'aditya@agentladders.com',
         createdAt: now 
       },
       { 
         id: 'prop_3', 
         agencyId, 
-        title: 'Modern Waterfront Residence', 
-        type: 'House', 
-        location: 'Venetian Islands, Miami Beach, FL', 
-        price: 1650000, 
+        title: '3 BHK Prime Garden Flat, Prestige Kingfisher', 
+        type: 'Apartment', 
+        bhk: '3 BHK',
+        purpose: 'For Sale',
+        city: 'Bengaluru',
+        locality: 'Indiranagar',
+        location: '100 Feet Road, Indiranagar, Bengaluru, Karnataka', 
+        price: 38500000, // ₹3.85 Cr
         status: 'Available', 
-        bedrooms: 4,
-        bathrooms: 4,
-        areaSqFt: 3800,
-        carpetAreaSqFt: 3150,
+        bedrooms: 3,
+        bathrooms: 3,
+        areaSqFt: 2280,
+        carpetAreaSqFt: 1850,
+        floor: '8th of 16 Floors',
+        vastuFacing: 'East',
+        reraId: 'PRM/KA/RERA/1251/310/PR/170915/000234',
+        possessionStatus: 'Ready to Move',
         furnishing: 'Semi-Furnished',
-        parking: 3,
+        parking: '2 Covered',
+        maintenanceMonthly: 12500,
         listingType: 'For Sale',
-        ownerName: 'Apex Capital Holdings',
-        description: 'Contemporary waterfront sanctuary situated on the Venetian Islands. Boasting deep water dockage, private boat slip, floor-to-ceiling glass corridors, resort-style pool with cabana, and immediate access to Biscayne Bay.',
+        sellerName: 'Karthik Venkataraman',
+        sellerPhone: '+91 98450 11223',
+        keyLocationNotes: 'Security guard at reception tower 2 has keys.',
+        ownerName: 'Karthik Venkataraman',
+        description: 'Vastu compliant spacious 3 BHK apartment in the epicenter of Indiranagar. Premium woodwork done, large modular kitchen, 2 dedicated car parks, 100% DG backup, and clubhouse amenities. Walking distance to Metro station.',
         images: ['/images/hero_dashboard.jpg', '/images/property_hero.jpg', '/images/luxury_washroom.jpg'],
         media: [
-          { id: 'm_31', url: '/images/hero_dashboard.jpg', tag: 'Balcony', isCover: true, caption: 'Bayfront Pool & Patio' },
-          { id: 'm_32', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: false, caption: 'Waterfront Elevation' },
+          { id: 'm_31', url: '/images/hero_dashboard.jpg', tag: 'Balcony', isCover: true, caption: 'Balcony overlooking green canopy' },
+          { id: 'm_32', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: false, caption: 'Tower Facade' },
           { id: 'm_33', url: '/images/luxury_washroom.jpg', tag: 'Washroom', isCover: false, caption: 'Primary Spa Bath' }
         ],
-        features: ['Private Boat Dock', 'Biscayne Bay Access', 'Resort Pool & Spa', 'Solar Panels', 'Impact Glass'],
-        publicToken: 'tok_waterfront_miami_1650k',
+        features: ['East Facing Vastu', 'Walking Distance to Metro', '2 Car Parks', '100% Power Backup', 'Swimming Pool & Gym'],
+        publicToken: 'tok_prestige_indiranagar_385cr',
         privacyMode: 'Public',
         isPublic: true,
-        sharesCount: 24,
-        viewsCount: 215,
-        agentName: 'Elena Rostova',
-        agentPhone: '+1 (305) 555-0144',
-        agentEmail: 'elena@agentladders.com',
+        sharesCount: 19,
+        viewsCount: 175,
+        agentName: 'Aditya Rai',
+        agentPhone: '+91 98200 12345',
+        agentEmail: 'aditya@agentladders.com',
         createdAt: now 
       },
       { 
         id: 'prop_4', 
         agencyId, 
-        title: 'Silicon Valley Executive Condo', 
+        title: '2 BHK Smart Corner Home, Godrej Sky Greens', 
         type: 'Apartment', 
-        location: 'University Ave, Palo Alto, CA', 
-        price: 1250000, 
-        status: 'Sold', 
+        bhk: '2 BHK',
+        purpose: 'For Sale',
+        city: 'Pune',
+        locality: 'Kharadi',
+        location: 'Near EON Free Zone, Kharadi, Pune, Maharashtra', 
+        price: 9200000, // ₹92 Lakhs
+        status: 'Available', 
         bedrooms: 2,
         bathrooms: 2,
-        areaSqFt: 1850,
-        carpetAreaSqFt: 1520,
-        furnishing: 'Fully Furnished',
-        parking: 1,
+        areaSqFt: 1080,
+        carpetAreaSqFt: 840,
+        floor: '14th of 22 Floors',
+        vastuFacing: 'North',
+        reraId: 'P52100021482',
+        possessionStatus: 'Under Construction (Dec 2026)',
+        furnishing: 'Unfurnished',
+        parking: '1 Covered',
+        maintenanceMonthly: 4500,
         listingType: 'For Sale',
-        ownerName: 'Palo Alto Ventures Ltd',
-        description: 'Turnkey executive residence in the vibrant heart of downtown Palo Alto. Modern minimalist finishes, private balcony overlooking tree-lined courtyard, and electric vehicle charging bays.',
+        sellerName: 'Adarsh Shinde (Direct Builder Allottee)',
+        sellerPhone: '+91 97654 33221',
+        keyLocationNotes: 'Sample flat open for visits 10 AM to 6 PM daily.',
+        ownerName: 'Adarsh Shinde',
+        description: 'Brand new 2 BHK corner unit in prime IT corridor Kharadi. Zero wastage floor plan, clubhouse, amphitheater, walking distance to World Trade Center and EON IT Park.',
         images: ['/images/property_hero.jpg', '/images/luxury_bedroom.jpg'],
         media: [
           { id: 'm_41', url: '/images/property_hero.jpg', tag: 'Exterior / Facade', isCover: true, caption: 'Building Facade' },
-          { id: 'm_42', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Executive Suite' }
+          { id: 'm_42', url: '/images/luxury_bedroom.jpg', tag: 'Master Bedroom', isCover: false, caption: 'Master Bedroom with large window' }
         ],
-        features: ['EV Charging Stations', 'Private Balcony', 'High-Speed Fiber', 'Fitness Center'],
-        publicToken: 'tok_silicon_valley_1250k',
-        privacyMode: 'Restricted',
+        features: ['IT Park Corridor', 'Zero Wastage Plan', 'High Rental Yield ~5.5%', 'Gated Community 24/7'],
+        publicToken: 'tok_godrej_kharadi_92l',
+        privacyMode: 'Public',
         isPublic: true,
-        sharesCount: 7,
-        viewsCount: 64,
+        sharesCount: 15,
+        viewsCount: 130,
         agentName: 'Aditya Rai',
-        agentPhone: '+1 (310) 849-2041',
+        agentPhone: '+91 98200 12345',
         agentEmail: 'aditya@agentladders.com',
         createdAt: now 
+      },
+      {
+        id: 'prop_5',
+        agencyId,
+        title: '3 BHK Corporate Rental, Central Park Resorts',
+        type: 'Apartment',
+        bhk: '3 BHK',
+        purpose: 'For Rent',
+        city: 'Gurgaon (Delhi NCR)',
+        locality: 'Sector 48',
+        location: 'Sohna Road, Sector 48, Gurgaon, Haryana',
+        price: 120000, // ₹1.20 Lakh / month
+        status: 'Available',
+        bedrooms: 3,
+        bathrooms: 3,
+        areaSqFt: 2650,
+        carpetAreaSqFt: 2150,
+        floor: '18th Floor',
+        vastuFacing: 'East',
+        reraId: 'HRERA-145-2018',
+        possessionStatus: 'Ready to Move',
+        furnishing: 'Fully Furnished',
+        parking: '2 Covered',
+        maintenanceMonthly: 12000,
+        listingType: 'For Rent',
+        sellerName: 'Col. Sanjiv Dewan',
+        sellerPhone: '+91 98101 22334',
+        keyLocationNotes: 'Available for immediate MNC / expat family lease.',
+        ownerName: 'Col. Sanjiv Dewan',
+        description: 'Resort-style living in Central Park 2. Fully furnished with 55-inch smart TVs, imported leather recliners, golf carts within campus, heated swimming pool, 24/7 room service.',
+        images: ['/images/deal_closing.jpg', '/images/luxury_kitchen.jpg'],
+        media: [
+          { id: 'm_51', url: '/images/deal_closing.jpg', tag: 'Hall / Living Area', isCover: true, caption: 'Designer Furnished Living Room' },
+          { id: 'm_52', url: '/images/luxury_kitchen.jpg', tag: 'Kitchen', isCover: false, caption: 'Fully Equipped Kitchen' }
+        ],
+        features: ['5-Star Resort Living', 'Club Capri Access', 'Internal Golf Carts', 'Fully Furnished Ready to Move'],
+        publicToken: 'tok_central_park_120k',
+        privacyMode: 'Public',
+        isPublic: true,
+        sharesCount: 11,
+        viewsCount: 94,
+        agentName: 'Aditya Rai',
+        agentPhone: '+91 98200 12345',
+        agentEmail: 'aditya@agentladders.com',
+        createdAt: now
       }
     );
   }
 
-  // 2. Leads
+  // 2. Leads (Active Indian Inquiries & Buyers)
   if (!db.leads.some(l => l.agencyId === agencyId)) {
     db.leads.push(
-      { id: 'lead_1', agencyId, name: 'Brooklyn Lean', email: 'brooklyn@example.com', phone: '+1 (555) 234-5678', status: 'Qualified', source: 'Website', createdAt: now },
-      { id: 'lead_2', agencyId, name: 'James Wilson', email: 'james.w@example.com', phone: '+1 (555) 345-6789', status: 'New', source: 'Referral', createdAt: now },
-      { id: 'lead_3', agencyId, name: 'Sarah Connor', email: 'sarah.c@example.com', phone: '+1 (555) 456-7890', status: 'Contacted', source: 'Zillow', createdAt: now },
-      { id: 'lead_4', agencyId, name: 'Alexander Wright', email: 'alex.wright@horizon.com', phone: '+1 (555) 789-0123', status: 'Qualified', source: 'Property Finder', createdAt: now }
+      { 
+        id: 'lead_1', 
+        agencyId, 
+        name: 'Vikram Malhotra', 
+        email: 'vikram.malhotra@induscap.in', 
+        phone: '+91 98200 45678', 
+        status: 'Hot Buyer 🔥', 
+        source: 'WhatsApp Referral',
+        leadPurpose: 'Buy',
+        city: 'Mumbai',
+        preferredLocalities: ['Worli', 'Lower Parel', 'Bandra West'],
+        bhkNeeded: '4 BHK',
+        budgetMin: 70000000, // ₹7.0 Cr
+        budgetMax: 95000000, // ₹9.5 Cr
+        budget: '₹7.0 Cr - ₹9.5 Cr',
+        financingStatus: 'Pre-Approved HDFC Loan ₹5 Cr + Self-Funded',
+        urgency: 'Immediate (Within 30 Days)',
+        vastuPreference: 'East Facing Mandatory',
+        requirement: 'Looking for ready sea-facing 4 BHK in Worli/Lower Parel. Minimum 2200 sqft carpet, 3 car parks for luxury cars.',
+        priority: 'Hot 🔥',
+        assignedTo: 'Aditya Rai',
+        nextFollowUp: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        notes: 'Very high intent. MD at Private Equity firm. Wife visited last week.',
+        createdAt: now 
+      },
+      { 
+        id: 'lead_2', 
+        agencyId, 
+        name: 'Priya & Rahul Sharma', 
+        email: 'rahul.sharma@techglobal.com', 
+        phone: '+91 98100 89012', 
+        status: 'Site Visit Scheduled', 
+        source: '99acres',
+        leadPurpose: 'Buy',
+        city: 'Gurgaon (Delhi NCR)',
+        preferredLocalities: ['Golf Course Road', 'DLF Phase 5', 'Golf Course Ext'],
+        bhkNeeded: '3 BHK',
+        budgetMin: 120000000, // ₹12.0 Cr
+        budgetMax: 160000000, // ₹16.0 Cr
+        budget: '₹12.0 Cr - ₹16.0 Cr',
+        financingStatus: '100% Self-Funded (ESOP Liquidation)',
+        urgency: 'Within 45 Days',
+        vastuPreference: 'North or North-East',
+        requirement: 'Golf course facing 3 or 4 BHK at DLF 5 / Golf Course Rd. High floor preferred.',
+        priority: 'Hot 🔥',
+        assignedTo: 'Aditya Rai',
+        nextFollowUp: new Date().toISOString().split('T')[0],
+        notes: 'Show DLF The Camellias 28th floor today at 11:30 AM.',
+        createdAt: now 
+      },
+      { 
+        id: 'lead_3', 
+        agencyId, 
+        name: 'Dr. Arvind Singhania', 
+        email: 'arvind.singhania@apollo.org', 
+        phone: '+91 98451 23456', 
+        status: 'Offer Made', 
+        source: 'Direct Referral',
+        leadPurpose: 'Buy',
+        city: 'Bengaluru',
+        preferredLocalities: ['Indiranagar', 'Koramangala'],
+        bhkNeeded: '3 BHK',
+        budgetMin: 35000000, // ₹3.5 Cr
+        budgetMax: 42000000, // ₹4.2 Cr
+        budget: '₹3.5 Cr - ₹4.2 Cr',
+        financingStatus: 'SBI Home Loan in Process',
+        urgency: 'Immediate',
+        vastuPreference: 'East Facing',
+        requirement: 'Indiranagar 3 BHK with 2 covered car parks. Ready to move only.',
+        priority: 'High',
+        assignedTo: 'Aditya Rai',
+        nextFollowUp: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+        notes: 'Offered ₹3.75 Cr on Prestige Kingfisher. Waiting for seller response.',
+        createdAt: now 
+      },
+      { 
+        id: 'lead_4', 
+        agencyId, 
+        name: 'Sneha Kulkarni', 
+        email: 'sneha.kulkarni@infosys.com', 
+        phone: '+91 97650 99887', 
+        status: 'Hot Buyer 🔥', 
+        source: 'MagicBricks',
+        leadPurpose: 'Buy',
+        city: 'Pune',
+        preferredLocalities: ['Kharadi', 'Viman Nagar', 'Kalyani Nagar'],
+        bhkNeeded: '2 BHK',
+        budgetMin: 8000000, // ₹80 Lakhs
+        budgetMax: 10000000, // ₹1.00 Cr
+        budget: '₹80 L - ₹1.00 Cr',
+        financingStatus: 'Pre-Sanctioned ICICI Bank',
+        urgency: 'Within 2 Months',
+        vastuPreference: 'Any',
+        requirement: '2 BHK near EON IT park Kharadi. Builder reputation matters.',
+        priority: 'Hot 🔥',
+        assignedTo: 'Aditya Rai',
+        nextFollowUp: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
+        notes: 'Senior Architect at Infosys. Interested in Godrej Sky Greens Kharadi.',
+        createdAt: now 
+      },
+      { 
+        id: 'lead_5', 
+        agencyId, 
+        name: 'Amitabh Verma (Director, Barclays)', 
+        email: 'amitabh.verma@barclays.com', 
+        phone: '+91 98115 67890', 
+        status: 'Contacted', 
+        source: 'WhatsApp Referral',
+        leadPurpose: 'Rent',
+        city: 'Gurgaon (Delhi NCR)',
+        preferredLocalities: ['Sector 48', 'Golf Course Ext'],
+        bhkNeeded: '3 BHK',
+        budgetMin: 100000, // ₹1.00 L
+        budgetMax: 130000, // ₹1.30 L
+        budget: '₹1.00 L - ₹1.30 L / mo',
+        financingStatus: 'Company Lease',
+        urgency: '1st of Next Month',
+        requirement: 'Fully furnished 3 BHK in Central Park Resorts for corporate family lease.',
+        priority: 'Medium',
+        assignedTo: 'Aditya Rai',
+        nextFollowUp: new Date().toISOString().split('T')[0],
+        notes: 'Follow-up today with Central Park Resorts photo brochure.',
+        createdAt: now 
+      }
     );
   }
 
   // 3. Clients
   if (!db.clients.some(c => c.agencyId === agencyId)) {
     db.clients.push(
-      { id: 'cli_1', agencyId, name: 'Jonathan Reynolds', email: 'jreynolds@invest.org', phone: '+1 (555) 890-1234', type: 'Buyer', createdAt: now },
-      { id: 'cli_2', agencyId, name: 'Sophia Martinez', email: 'smartinez@designlab.co', phone: '+1 (555) 901-2345', type: 'Renter', createdAt: now },
-      { id: 'cli_3', agencyId, name: 'Oliver Zhang', email: 'oliver.zhang@capital.hk', phone: '+1 (555) 012-3456', type: 'Investor', createdAt: now }
+      { id: 'cli_1', agencyId, name: 'Vikram Malhotra', email: 'vikram.malhotra@induscap.in', phone: '+91 98200 45678', type: 'Buyer', requirement: '4 BHK Luxury Sea-Facing Flat, Worli', budget: '₹8.50 Cr', createdAt: now },
+      { id: 'cli_2', agencyId, name: 'Rahul Sharma', email: 'rahul.sharma@techglobal.com', phone: '+91 98100 89012', type: 'Buyer', requirement: '3 BHK Golf Course Road, DLF 5', budget: '₹14.50 Cr', createdAt: now },
+      { id: 'cli_3', agencyId, name: 'Dr. Arvind Singhania', email: 'arvind.singhania@apollo.org', phone: '+91 98451 23456', type: 'Buyer', requirement: '3 BHK Indiranagar, Bengaluru', budget: '₹3.85 Cr', createdAt: now }
     );
   }
 
   // 4. Brokerage Partners
   if (!db.brokers.some(b => b.agencyId === agencyId)) {
     db.brokers.push(
-      { id: 'brk_1', agencyId, name: 'Marcus Vance', agency: 'Vance & Partners Luxury Real Estate', commissionSplit: '70/30', createdAt: now },
-      { id: 'brk_2', agencyId, name: 'Elena Rostova', agency: 'Metropolitan Commercial Realty', commissionSplit: '50/50', createdAt: now },
-      { id: 'brk_3', agencyId, name: 'David Sterling', agency: 'Prime Coastal Estates', commissionSplit: '60/40', createdAt: now }
+      { id: 'brk_1', agencyId, name: 'Sanjay Chhabra', agency: 'Chhabra Associates Gurgaon', commissionSplit: '50/50 Channel Partner', createdAt: now },
+      { id: 'brk_2', agencyId, name: 'Manish Parekh', agency: 'South Mumbai Luxury Homes', commissionSplit: '50/50 Co-Brokerage', createdAt: now },
+      { id: 'brk_3', agencyId, name: 'Girish Rao', agency: 'Bangalore Prime Properties', commissionSplit: '60/40', createdAt: now }
     );
   }
 
   // 5. Companies (B2B)
   if (!db.companies.some(c => c.agencyId === agencyId)) {
     db.companies.push(
-      { id: 'comp_1', agencyId, name: 'Apex Horizon Capital', industry: 'Private Equity / Real Estate', website: 'https://apexhorizon.example.com', createdAt: now },
-      { id: 'comp_2', agencyId, name: 'Sterling Development Group', industry: 'Commercial Property Development', website: 'https://sterlingdev.example.com', createdAt: now },
-      { id: 'comp_3', agencyId, name: 'OmniGlobal Hospitality', industry: 'Hotels & Serviced Residences', website: 'https://omniglobal.example.com', createdAt: now }
+      { id: 'comp_1', agencyId, name: 'Indus Capital Advisors', industry: 'Private Equity', website: 'https://induscap.example.com', createdAt: now },
+      { id: 'comp_2', agencyId, name: 'Barclays Global Service Centre', industry: 'Investment Banking', website: 'https://barclays.example.com', createdAt: now },
+      { id: 'comp_3', agencyId, name: 'Mehra Exports Pvt Ltd', industry: 'Textile Exports', website: 'https://mehraexports.example.com', createdAt: now }
     );
   }
 
   // 6. Property Owners / Landlords
   if (!db.owners.some(o => o.agencyId === agencyId)) {
     db.owners.push(
-      { id: 'own_1', agencyId, name: 'Richard Davenport', email: 'richard@davenport.co', phone: '+1 (555) 111-2233', propertiesCount: 4, createdAt: now },
-      { id: 'own_2', agencyId, name: 'Eleanor Vance', email: 'evance@estateholdings.com', phone: '+1 (555) 222-3344', propertiesCount: 2, createdAt: now },
-      { id: 'own_3', agencyId, name: 'Robert Chen', email: 'rchen@pacificridge.io', phone: '+1 (555) 333-4455', propertiesCount: 6, createdAt: now }
+      { id: 'own_1', agencyId, name: 'Sunil & Neeta Singhania', email: 'sunil.singhania@lodhapark.in', phone: '+91 98201 54321', propertiesCount: 2, createdAt: now },
+      { id: 'own_2', agencyId, name: 'Rajeev Mehra', email: 'mehra@dlfcamellias.in', phone: '+91 98110 98765', propertiesCount: 1, createdAt: now },
+      { id: 'own_3', agencyId, name: 'Karthik Venkataraman', email: 'karthik.v@gmail.com', phone: '+91 98450 11223', propertiesCount: 1, createdAt: now }
     );
   }
 
-  // 7. Deals Pipeline
+  // 7. Deals Pipeline (Indian Real Estate Brokerage Stages)
   if (!db.deals.some(d => d.agencyId === agencyId)) {
     db.deals.push(
-      { id: 'deal_1', agencyId, title: 'Beverly Hills Luxury Villa Purchase', amount: 4500000, stage: 'Closed Won', expectedCloseDate: '2026-08-15', createdAt: now },
-      { id: 'deal_2', agencyId, title: 'Downtown Penthouse Corporate Lease', amount: 180000, stage: 'Negotiation', expectedCloseDate: '2026-10-01', createdAt: now },
-      { id: 'deal_3', agencyId, title: 'Miami Waterfront Acquisition', amount: 1650000, stage: 'Proposal', expectedCloseDate: '2026-11-15', createdAt: now },
-      { id: 'deal_4', agencyId, title: 'Silicon Valley Condo Sale', amount: 1250000, stage: 'Closed Won', expectedCloseDate: '2026-07-20', createdAt: now }
+      { 
+        id: 'deal_1', 
+        agencyId, 
+        title: 'Lodha Park Worli 4 BHK Outright Sale', 
+        propertyId: 'prop_1',
+        propertyName: '4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park',
+        leadId: 'lead_1',
+        clientName: 'Vikram Malhotra',
+        dealType: 'Outright Sale',
+        amount: 85000000, // ₹8.50 Cr
+        stage: 'Token / Bayana Received', 
+        buyerCommissionPercent: 1.0,
+        sellerCommissionPercent: 1.0,
+        totalCommission: 1700000, // ₹17.0 Lakhs
+        commissionRate: '2.0%',
+        commissionAmount: 1700000,
+        assignedBroker: 'Aditya Rai',
+        expectedCloseDate: '2026-10-15', 
+        notes: 'Token ₹10 Lakhs received. Drafting Agreement to Sale (ATS).',
+        createdAt: now 
+      },
+      { 
+        id: 'deal_2', 
+        agencyId, 
+        title: 'DLF The Camellias 3 BHK Resale', 
+        propertyId: 'prop_2',
+        propertyName: '3 BHK High-Rise Golf Course Apartment, DLF The Camellias',
+        leadId: 'lead_2',
+        clientName: 'Priya & Rahul Sharma',
+        dealType: 'Outright Sale',
+        amount: 145000000, // ₹14.50 Cr
+        stage: 'Agreement to Sale (ATS)', 
+        buyerCommissionPercent: 1.0,
+        sellerCommissionPercent: 1.0,
+        totalCommission: 2900000, // ₹29.0 Lakhs
+        commissionRate: '2.0%',
+        commissionAmount: 2900000,
+        assignedBroker: 'Aditya Rai',
+        expectedCloseDate: '2026-10-30', 
+        notes: 'ATS signed. Buyer clearing HDFC loan disbursement.',
+        createdAt: now 
+      },
+      { 
+        id: 'deal_3', 
+        agencyId, 
+        title: 'Prestige Kingfisher Indiranagar 3 BHK', 
+        propertyId: 'prop_3',
+        propertyName: '3 BHK Prime Garden Flat, Prestige Kingfisher',
+        leadId: 'lead_3',
+        clientName: 'Dr. Arvind Singhania',
+        dealType: 'Outright Sale',
+        amount: 38500000, // ₹3.85 Cr
+        stage: 'Stamp Duty & Registration', 
+        buyerCommissionPercent: 2.0,
+        sellerCommissionPercent: 1.0,
+        totalCommission: 1155000, // ₹11.55 Lakhs
+        commissionRate: '3.0%',
+        commissionAmount: 1155000,
+        assignedBroker: 'Aditya Rai',
+        expectedCloseDate: '2026-10-05', 
+        notes: 'Sub-registrar appointment booked for Tuesday 11 AM.',
+        createdAt: now 
+      }
     );
   }
 
   // 8. Tasks
   if (!db.tasks.some(t => t.agencyId === agencyId)) {
     db.tasks.push(
-      { id: 'tsk_1', agencyId, title: 'Prepare Escrow & Title Documents for Beverly Hills Villa', assignedTo: 'Adi', dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0], status: 'Pending', createdAt: now },
-      { id: 'tsk_2', agencyId, title: 'Finalize Lease Agreement with Sophia Martinez', assignedTo: 'Adi', dueDate: new Date(Date.now() + 86400000 * 4).toISOString().split('T')[0], status: 'In Progress', createdAt: now },
-      { id: 'tsk_3', agencyId, title: 'Inspect Miami Waterfront property before buyer handover', assignedTo: 'Marcus Vance', dueDate: new Date(Date.now() + 86400000 * 6).toISOString().split('T')[0], status: 'Completed', createdAt: now }
+      { id: 'tsk_1', agencyId, title: 'Verify RERA Title Search & Encumbrance Certificate for Lodha Park', assignedTo: 'Aditya Rai', dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0], status: 'Pending', createdAt: now },
+      { id: 'tsk_2', agencyId, title: 'Send Camellias floorplan & VRV specs to Rahul Sharma on WhatsApp', assignedTo: 'Aditya Rai', dueDate: new Date().toISOString().split('T')[0], status: 'In Progress', createdAt: now },
+      { id: 'tsk_3', agencyId, title: 'Collect 1% TDS challan from Dr. Singhania for Prestige registration', assignedTo: 'Aditya Rai', dueDate: new Date(Date.now() + 86400000 * 4).toISOString().split('T')[0], status: 'Pending', createdAt: now }
     );
   }
 
   // 9. Calendar Events
   if (!db.calendarEvents.some(c => c.agencyId === agencyId)) {
     db.calendarEvents.push(
-      { id: 'cal_1', agencyId, title: 'Exclusive Viewing: Downtown Sky Penthouse', date: new Date().toISOString().split('T')[0], time: '11:00 AM', type: 'Viewing', createdAt: now },
-      { id: 'cal_2', agencyId, title: 'Contract Signing: Brooklyn Lean & Escrow Agent', date: new Date(Date.now() + 86400000).toISOString().split('T')[0], time: '02:30 PM', type: 'Meeting', createdAt: now },
-      { id: 'cal_3', agencyId, title: 'Follow-up Call with Marcus Vance (Split Review)', date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0], time: '10:00 AM', type: 'Call', createdAt: now }
+      { id: 'cal_1', agencyId, title: 'Site Showing: Lodha Park Worli with Vikram Malhotra', date: new Date().toISOString().split('T')[0], time: '04:30 PM', type: 'Viewing', createdAt: now },
+      { id: 'cal_2', agencyId, title: 'Site Showing: DLF The Camellias with Rahul Sharma', date: new Date().toISOString().split('T')[0], time: '11:30 AM', type: 'Viewing', createdAt: now },
+      { id: 'cal_3', agencyId, title: 'Sub-Registrar Biometric Registration - Dr. Singhania', date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0], time: '11:00 AM', type: 'Registration', createdAt: now }
     );
   }
 
-  // 10. Site Visits
+  // 10. Site Visits (With Time Slots and WhatsApp Confirmations)
   if (!db.siteVisits.some(s => s.agencyId === agencyId)) {
     db.siteVisits.push(
-      { id: 'vis_1', agencyId, property: 'Luxury Villa in Beverly Hills', client: 'Jonathan Reynolds', date: new Date().toISOString().split('T')[0], status: 'Scheduled', createdAt: now },
-      { id: 'vis_2', agencyId, property: 'Downtown Sky Penthouse', client: 'Sophia Martinez', date: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0], status: 'Completed', createdAt: now },
-      { id: 'vis_3', agencyId, property: 'Modern Waterfront Residence', client: 'Oliver Zhang', date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0], status: 'Scheduled', createdAt: now }
+      { 
+        id: 'vis_1', 
+        agencyId, 
+        property: '4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park', 
+        propertyId: 'prop_1',
+        client: 'Vikram Malhotra', 
+        clientPhone: '+91 98200 45678',
+        date: new Date().toISOString().split('T')[0], // TODAY!
+        timeSlot: '04:30 PM - 05:30 PM',
+        slotTime: '04:30 PM',
+        locality: 'Worli, Mumbai',
+        accompaniedBy: 'Aditya Rai',
+        status: 'Scheduled', 
+        interestLevel: 'Extremely Interested 🔥',
+        actionRequired: 'Send location pin and gate pass code',
+        notes: 'Buyer coming with wife and interior architect. Focus on sea view and car parking.',
+        createdAt: now 
+      },
+      { 
+        id: 'vis_2', 
+        agencyId, 
+        property: '3 BHK High-Rise Golf Course Apartment, DLF The Camellias', 
+        propertyId: 'prop_2',
+        client: 'Priya & Rahul Sharma', 
+        clientPhone: '+91 98100 89012',
+        date: new Date().toISOString().split('T')[0], // TODAY!
+        timeSlot: '11:30 AM - 12:30 PM',
+        slotTime: '11:30 AM',
+        locality: 'Golf Course Road, Gurgaon',
+        accompaniedBy: 'Aditya Rai',
+        status: 'Scheduled', 
+        interestLevel: 'Extremely Interested 🔥',
+        actionRequired: 'Meet at Club Camellias reception',
+        notes: 'Carried DLF gate pass. Client has pre-arranged driver.',
+        createdAt: now 
+      },
+      { 
+        id: 'vis_3', 
+        agencyId, 
+        property: '3 BHK Prime Garden Flat, Prestige Kingfisher', 
+        propertyId: 'prop_3',
+        client: 'Dr. Arvind Singhania', 
+        clientPhone: '+91 98451 23456',
+        date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
+        timeSlot: '10:00 AM - 11:00 AM',
+        slotTime: '10:00 AM',
+        locality: 'Indiranagar, Bengaluru',
+        accompaniedBy: 'Aditya Rai',
+        status: 'Scheduled', 
+        interestLevel: 'Considering / Needs 2nd Viewing',
+        actionRequired: '2nd visit with father to verify Vastu North-East Brahmasthan',
+        notes: 'Doctor requested quiet viewing before his hospital clinic hours.',
+        createdAt: now 
+      }
     );
   }
 
   // 11. Listings
   if (!db.listings.some(l => l.agencyId === agencyId)) {
     db.listings.push(
-      { id: 'list_1', agencyId, title: 'Luxury Villa in Beverly Hills', platform: 'Property Finder', status: 'Active', views: 1420, createdAt: now },
-      { id: 'list_2', agencyId, title: 'Downtown Sky Penthouse', platform: 'Bayut', status: 'Active', views: 890, createdAt: now },
-      { id: 'list_3', agencyId, title: 'Modern Waterfront Residence', platform: 'Zillow', status: 'Active', views: 2310, createdAt: now },
-      { id: 'list_4', agencyId, title: 'Silicon Valley Executive Condo', platform: 'Company Website', status: 'Draft', views: 150, createdAt: now }
+      { id: 'list_1', agencyId, title: 'Lodha Park Worli 4 BHK', platform: '99acres', status: 'Active', views: 2420, createdAt: now },
+      { id: 'list_2', agencyId, title: 'DLF The Camellias 3 BHK', platform: 'MagicBricks', status: 'Active', views: 3890, createdAt: now },
+      { id: 'list_3', agencyId, title: 'Prestige Kingfisher Indiranagar', platform: 'Housing.com', status: 'Active', views: 1810, createdAt: now },
+      { id: 'list_4', agencyId, title: 'Godrej Sky Greens Kharadi', platform: 'Direct WhatsApp Network', status: 'Active', views: 850, createdAt: now }
     );
   }
 
-  // 12. Invoices
+  // 12. Invoices (Indian Brokerage Invoices with GST)
   if (!db.invoices.some(i => i.agencyId === agencyId)) {
     db.invoices.push(
-      { id: 'inv_1', agencyId, number: 'INV-2026-001', clientName: 'Jonathan Reynolds', amount: 90000, status: 'Paid', dueDate: '2026-08-30', createdAt: now },
-      { id: 'inv_2', agencyId, number: 'INV-2026-002', clientName: 'Sophia Martinez', amount: 18000, status: 'Pending', dueDate: '2026-10-15', createdAt: now },
-      { id: 'inv_3', agencyId, number: 'INV-2026-003', clientName: 'Apex Horizon Capital', amount: 45000, status: 'Overdue', dueDate: '2026-09-10', createdAt: now }
+      { id: 'inv_1', agencyId, number: 'INV-2026-001', clientName: 'Vikram Malhotra', amount: 850000, status: 'Pending', dueDate: '2026-10-20', notes: '1% Buyer Commission on Lodha Park Sale (₹8.50 L + 18% GST)', createdAt: now },
+      { id: 'inv_2', agencyId, number: 'INV-2026-002', clientName: 'Sunil Singhania', amount: 850000, status: 'Pending', dueDate: '2026-10-20', notes: '1% Seller Commission on Lodha Park Sale (₹8.50 L + 18% GST)', createdAt: now },
+      { id: 'inv_3', agencyId, number: 'INV-2026-003', clientName: 'Dr. Arvind Singhania', amount: 770000, status: 'Paid', dueDate: '2026-09-15', notes: '2% Brokerage on Prestige Indiranagar Sale', createdAt: now }
     );
   }
 
   // 13. Payments
   if (!db.payments.some(p => p.agencyId === agencyId)) {
     db.payments.push(
-      { id: 'pay_1', agencyId, reference: 'TXN-984210', invoiceNumber: 'INV-2026-001', amount: 90000, method: 'Bank Transfer', status: 'Completed', createdAt: now },
-      { id: 'pay_2', agencyId, reference: 'TXN-984211', invoiceNumber: 'INV-2026-002', amount: 5000, method: 'Credit Card', status: 'Processing', createdAt: now }
+      { id: 'pay_1', agencyId, reference: 'NEFT-HDFC-984210', invoiceNumber: 'INV-2026-003', amount: 770000, method: 'NEFT / RTGS', status: 'Completed', createdAt: now }
     );
   }
 
   // 14. Expenses
   if (!db.expenses.some(e => e.agencyId === agencyId)) {
     db.expenses.push(
-      { id: 'exp_1', agencyId, category: 'Marketing', description: 'Zillow & Bayut Premium Featured Placement', amount: 2400, date: '2026-09-05', createdAt: now },
-      { id: 'exp_2', agencyId, category: 'Software', description: 'Matterport 3D Virtual Tour Hosting', amount: 350, date: '2026-09-10', createdAt: now },
-      { id: 'exp_3', agencyId, category: 'Office', description: 'Agency Client Hospitality & Escrow Closing Dinner', amount: 720, date: '2026-09-18', createdAt: now }
+      { id: 'exp_1', agencyId, category: 'Marketing', description: '99acres & MagicBricks Featured Verified Boost', amount: 35000, date: '2026-09-05', createdAt: now },
+      { id: 'exp_2', agencyId, category: 'Travel & Site Visits', description: 'Broker showing fuel & cab hospitality', amount: 8500, date: '2026-09-10', createdAt: now },
+      { id: 'exp_3', agencyId, category: 'Legal & Title Search', description: 'Advocate search report & encumbrance certificate charges', amount: 15000, date: '2026-09-18', createdAt: now }
     );
   }
 
   // 15. Reports
   if (!db.reports.some(r => r.agencyId === agencyId)) {
     db.reports.push(
-      { id: 'rep_1', agencyId, name: 'Q3 Agency Commission & Deal Performance', type: 'Financial', frequency: 'Quarterly', createdAt: now },
-      { id: 'rep_2', agencyId, name: 'Lead Acquisition & Portal ROI Audit', type: 'Sales', frequency: 'Monthly', createdAt: now },
-      { id: 'rep_3', agencyId, name: 'Active Inventory Valuation & Absorption Rate', type: 'Performance', frequency: 'Weekly', createdAt: now }
+      { id: 'rep_1', agencyId, name: 'Q3 Agency Brokerage & Deal Commission Performance', type: 'Financial', frequency: 'Quarterly', createdAt: now },
+      { id: 'rep_2', agencyId, name: 'Indian Portals ROI Audit (99acres vs MagicBricks)', type: 'Sales', frequency: 'Monthly', createdAt: now },
+      { id: 'rep_3', agencyId, name: 'Luxury Micro-Market Absorption (Worli vs Golf Course Rd)', type: 'Performance', frequency: 'Weekly', createdAt: now }
     );
   }
 
   // 16. Documents
   if (!db.documents.some(d => d.agencyId === agencyId)) {
     db.documents.push(
-      { id: 'doc_1', agencyId, name: 'Sales_Purchase_Agreement_Villa_4B.pdf', type: 'Sales Contract', category: 'Contracts', size: '2.4 MB', uploadedBy: 'Adi', createdAt: now },
-      { id: 'doc_2', agencyId, name: 'Title_Deed_Certificate_Downtown_Sky.pdf', type: 'Title Deed', category: 'Title Deeds', size: '1.8 MB', uploadedBy: 'Adi', createdAt: now },
-      { id: 'doc_3', agencyId, name: 'Client_KYC_Passport_Jonathan_Reynolds.pdf', type: 'KYC / Passport', category: 'KYC Documents', size: '850 KB', uploadedBy: 'Adi', createdAt: now }
+      { id: 'doc_1', agencyId, name: 'Agreement_To_Sale_Lodha_Park_Draft.pdf', type: 'Agreement to Sale', category: 'Contracts', size: '2.4 MB', uploadedBy: 'Aditya Rai', createdAt: now },
+      { id: 'doc_2', agencyId, name: 'RERA_Registration_Certificate_P51900001339.pdf', type: 'RERA Certificate', category: 'Compliance', size: '1.2 MB', uploadedBy: 'Aditya Rai', createdAt: now },
+      { id: 'doc_3', agencyId, name: 'DLF_Camellias_Maintenance_No_Objection_NOC.pdf', type: 'Society NOC', category: 'Title Deeds', size: '850 KB', uploadedBy: 'Aditya Rai', createdAt: now },
+      { id: 'doc_4', agencyId, name: 'Client_PAN_Aadhaar_KYC_Vikram_Malhotra.pdf', type: 'KYC / PAN / Aadhaar', category: 'KYC Documents', size: '1.1 MB', uploadedBy: 'Aditya Rai', createdAt: now }
     );
   }
 
@@ -805,11 +1158,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
   if (!db.activities || !db.activities.some(a => a.agencyId === agencyId)) {
     db.activities = db.activities || [];
     db.activities.push(
-      { id: 'act_1', agencyId, actor: 'Aditya Rai', type: 'WhatsApp', relatedEntity: 'Lead', relatedId: 'lead_1', summary: 'Shared Beverly Hills Villa brochure via WhatsApp', details: 'Client responded positively and requested private viewing on Saturday at 2:00 PM.', createdAt: new Date(Date.now() - 3600000 * 2).toISOString() },
-      { id: 'act_2', agencyId, actor: 'Aditya Rai', type: 'Call', relatedEntity: 'Client', relatedId: 'cli_1', summary: 'Escrow closing terms discussion with Jonathan Reynolds', details: 'Confirmed 10% wire deposit received in escrow bank account.', createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
-      { id: 'act_3', agencyId, actor: 'Marcus Vance', type: 'Site Visit', relatedEntity: 'Property', relatedId: 'prop_2', summary: 'Conducted VIP Sunset Tour at Downtown Sky Penthouse', details: 'Client loved unobstructed skyline views, negotiating parking bay inclusion.', createdAt: new Date(Date.now() - 3600000 * 18).toISOString() },
-      { id: 'act_4', agencyId, actor: 'Elena Rostova', type: 'Deal Update', relatedEntity: 'Deal', relatedId: 'deal_1', summary: 'Moved Beverly Hills Villa deal to Negotiation stage', details: 'Counter-offer delivered at $4,420,000 with 30-day closing condition.', createdAt: new Date(Date.now() - 3600000 * 26).toISOString() },
-      { id: 'act_5', agencyId, actor: 'System', type: 'Property Share', relatedEntity: 'Property', relatedId: 'prop_1', summary: 'Public webpage link generated and shared on Telegram', details: 'Unique token tok_beverly_hills_4500k viewed 14 times.', createdAt: new Date(Date.now() - 3600000 * 30).toISOString() }
+      { id: 'act_1', agencyId, actor: 'Aditya Rai', type: 'WhatsApp', relatedEntity: 'Lead', relatedId: 'lead_1', summary: 'Shared Lodha Park Worli 4 BHK WhatsApp pitch brochure', details: 'Client responded in 4 mins: "Looks perfect. Booking visit today at 4:30 PM with my wife."', createdAt: new Date(Date.now() - 3600000 * 2).toISOString() },
+      { id: 'act_2', agencyId, actor: 'Aditya Rai', type: 'Call', relatedEntity: 'Client', relatedId: 'cli_1', summary: 'Token payment confirmation call with Vikram Malhotra', details: 'Confirmed ₹10 Lakhs earnest money RTGS transfer to seller escrow.', createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
+      { id: 'act_3', agencyId, actor: 'Aditya Rai', type: 'Site Visit', relatedEntity: 'Property', relatedId: 'prop_2', summary: 'Prepared gate pass & private showing at DLF Camellias', details: 'Gate security confirmed pre-cleared access for Rahul Sharma.', createdAt: new Date(Date.now() - 3600000 * 18).toISOString() }
     );
   }
 

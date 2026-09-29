@@ -59,11 +59,17 @@ export async function GET(
     publicToken: prop.publicToken || prop.id,
     privacyMode: prop.privacyMode || 'Public',
     viewsCount: prop.viewsCount,
-    agencyName: agency?.name || 'AgentLadders Premier Realty',
-    agencyCountry: agency?.country || 'United States',
-    agentName: prop.agentName || 'Aditya Rai',
-    agentPhone: prop.agentPhone || '+1 (310) 849-2041',
-    agentEmail: prop.agentEmail || 'aditya@agentladders.com'
+    agencyName: agency?.name || 'AgentLadders Realty Network',
+    agencyCountry: agency?.country || 'India',
+    agentName: prop.agentName || 'Aditya Sharma',
+    agentPhone: prop.agentPhone || agency?.phone || '+91 98200 98765',
+    agentEmail: prop.agentEmail || 'aditya@agentladders.com',
+    bhk: prop.bhk || (prop.bedrooms ? `${prop.bedrooms} BHK` : '3 BHK'),
+    reraId: prop.reraId || prop.reraRegistrationNo || 'P51900015822 (RERA Registered)',
+    facing: prop.facing || 'East Facing (Vastu Compliant)',
+    possessionStatus: prop.possessionStatus || 'Ready to Move',
+    city: prop.city || '',
+    locality: prop.locality || ''
   };
 
   return NextResponse.json({ property: publicData });

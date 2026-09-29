@@ -181,16 +181,16 @@ export default function LandingPage() {
             {/* Starter */}
             <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               <h3 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>Solo Broker</h3>
-              <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '24px', height: '48px' }}>Perfect for independent agents starting out.</p>
+              <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '24px', height: '48px' }}>Ideal for independent real estate consultants in India.</p>
               <div style={{ marginBottom: '32px' }}>
-                <span style={{ fontSize: '48px', fontWeight: 800, color: 'var(--text-primary)' }}>$29</span>
+                <span style={{ fontSize: '44px', fontWeight: 800, color: 'var(--text-primary)' }}>₹1,999</span>
                 <span style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>/mo</span>
               </div>
               <Link href="/signup" style={{ textDecoration: 'none' }}>
                 <Button variant="outline" style={{ width: '100%', padding: '12px', fontSize: '16px', marginBottom: '32px' }}>Start Free Trial</Button>
               </Link>
               <ul style={{ listStyle: 'none', padding: 0 }}>
-                {['1 User Account', '500 Properties', 'Basic Pipeline', 'Standard Support'].map((item, i) => (
+                {['1-2 Agent Seats', '500 RERA Verified Properties', 'Kundali Auto-Match Engine', 'WhatsApp 1-Click Pitches', 'Indian Standard Support'].map((item, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                     <div style={{ color: 'var(--primary-color)' }}>✓</div> {item}
                   </li>
@@ -203,17 +203,17 @@ export default function LandingPage() {
               <div style={{ position: 'absolute', top: '-16px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'var(--primary-color)', color: 'white', padding: '6px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: 700 }}>
                 MOST POPULAR
               </div>
-              <h3 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>Agency Pro</h3>
-              <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '24px', height: '48px' }}>For growing teams that need collaboration.</p>
+              <h3 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>Agency Unlimited</h3>
+              <p style={{ fontSize: '16px', color: 'var(--text-secondary)', marginBottom: '24px', height: '48px' }}>For active Indian brokerages and multi-city consultant teams.</p>
               <div style={{ marginBottom: '32px' }}>
-                <span style={{ fontSize: '48px', fontWeight: 800, color: 'var(--text-primary)' }}>$99</span>
+                <span style={{ fontSize: '44px', fontWeight: 800, color: 'var(--text-primary)' }}>₹4,999</span>
                 <span style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>/mo</span>
               </div>
               <Link href="/signup" style={{ textDecoration: 'none' }}>
                 <Button variant="primary" style={{ width: '100%', padding: '12px', fontSize: '16px', marginBottom: '32px' }}>Start Free Trial</Button>
               </Link>
               <ul style={{ listStyle: 'none', padding: 0 }}>
-                {['Up to 10 Users', 'Unlimited Properties', 'Advanced Analytics', 'Invoicing & Accounting', 'Priority Support'].map((item, i) => (
+                {['Up to 15 Agency Team Members', 'Unlimited Inventory & Buyer Inquiries', 'Auto-Match with Budget & Locality Tolerance', 'WhatsApp Site Visit Location Pins', 'ATS & Bayana Milestone Tracking'].map((item, i) => (
                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '15px', color: 'var(--text-primary)', marginBottom: '16px', fontWeight: 500 }}>
                     <div style={{ color: 'var(--primary-color)' }}>✓</div> {item}
                   </li>

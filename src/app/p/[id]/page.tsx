@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { formatINR } from '@/lib/formatters';
 
 export interface PublicPropertyMedia {
   id: string;
@@ -50,6 +51,12 @@ interface PublicProperty {
   agentName: string;
   agentPhone: string;
   agentEmail: string;
+  bhk?: string;
+  reraId?: string;
+  facing?: string;
+  possessionStatus?: string;
+  city?: string;
+  locality?: string;
 }
 
 export default function PublicPropertyPage() {
@@ -134,7 +141,7 @@ export default function PublicPropertyPage() {
   };
 
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const shareText = property ? `Check out this luxury ${property.type}: ${property.title} in ${property.location} - ${property.price ? `$${property.price.toLocaleString()}` : ''}` : '';
+  const shareText = property ? `Check out this luxury property: ${property.title} in ${property.location} - ${property.price ? formatINR(property.price) : 'Price on Request'}` : '';
 
   const handleCopyLink = () => {
     if (typeof navigator !== 'undefined') {
@@ -244,13 +251,23 @@ export default function PublicPropertyPage() {
         {/* Title & Location Header */}
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, backgroundColor: '#eff6ff', color: '#2563eb' }}>
+                {property.bhk || (property.bedrooms ? `${property.bedrooms} BHK` : property.type)}
+              </span>
+              <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#166534' }}>
                 {property.listingType.toUpperCase()}
               </span>
-              <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#f0fdf4', color: '#166534' }}>
-                ✓ Verified Exclusive
-              </span>
+              {property.reraId && (
+                <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}>
+                  🛡️ RERA: {property.reraId}
+                </span>
+              )}
+              {property.facing && (
+                <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
+                  🧭 {property.facing}
+                </span>
+              )}
               <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }}>
                 ID: {property.id}
               </span>
@@ -267,12 +284,12 @@ export default function PublicPropertyPage() {
             <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Offering Price
             </div>
-            <div style={{ fontSize: '36px', fontWeight: 800, color: '#2563eb', letterSpacing: '-1px' }}>
-              {property.price ? `$${property.price.toLocaleString()}` : 'Price on Application'}
+            <div style={{ fontSize: '34px', fontWeight: 800, color: '#2563eb', letterSpacing: '-1px' }}>
+              {property.price ? formatINR(property.price) : 'Price on Request'}
             </div>
-            {property.price && (
-              <div style={{ fontSize: '13px', color: '#64748b' }}>
-                Est. ${Math.round(property.price / (property.areaSqFt || 3200)).toLocaleString()} / sq.ft
+            {property.price && property.areaSqFt && (
+              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
+                ₹{Math.round(property.price / property.areaSqFt).toLocaleString('en-IN')} / sq ft
               </div>
             )}
           </div>
@@ -596,34 +613,36 @@ export default function PublicPropertyPage() {
           marginBottom: '32px'
         }}>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Bedrooms</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🛏️ {property.bedrooms} Beds</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Configuration</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+              🛏️ {property.bhk || (property.bedrooms ? `${property.bedrooms} BHK` : `${property.bedrooms} Beds`)}
+            </div>
           </div>
           <div>
             <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Bathrooms</span>
             <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🛁 {property.bathrooms} Baths</div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Built-Up Area</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>📐 {property.areaSqFt?.toLocaleString()} sqft</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Super Built-Up</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>📐 {property.areaSqFt?.toLocaleString('en-IN')} sq ft</div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Carpet Area</span>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>RERA Carpet Area</span>
             <div style={{ fontSize: '18px', fontWeight: 700, color: '#2563eb', marginTop: '2px' }}>
-              📐 {property.carpetAreaSqFt ? property.carpetAreaSqFt.toLocaleString() : Math.round(Number(property.areaSqFt) * 0.8).toLocaleString()} sqft
+              📐 {property.carpetAreaSqFt ? property.carpetAreaSqFt.toLocaleString('en-IN') : Math.round(Number(property.areaSqFt) * 0.8).toLocaleString('en-IN')} sq ft
             </div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Furnishing</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🪑 {property.furnishing || 'Semi-Furnished'}</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Vastu Facing</span>
+            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🧭 {property.facing || 'East Facing'}</div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Parking</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🚗 {property.parking ?? 1} Bays</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Possession</span>
+            <div style={{ fontSize: '17px', fontWeight: 700, color: '#16a34a', marginTop: '2px' }}>🔑 {property.possessionStatus || property.status || 'Ready to Move'}</div>
           </div>
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Status</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#16a34a', marginTop: '2px' }}>🟢 {property.status}</div>
+            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Reserved Parking</span>
+            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🚗 {property.parking ?? 2} Covered</div>
           </div>
         </div>
 
@@ -805,7 +824,7 @@ export default function PublicPropertyPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Jonathan Reynolds"
+                      placeholder="e.g. Vikram Malhotra"
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
@@ -819,7 +838,7 @@ export default function PublicPropertyPage() {
                     <input
                       type="email"
                       required
-                      placeholder="e.g. client@investments.com"
+                      placeholder="e.g. vikram.malhotra@gmail.com"
                       value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
@@ -828,11 +847,11 @@ export default function PublicPropertyPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '5px' }}>
-                      Phone / WhatsApp Number
+                      Phone / WhatsApp Number *
                     </label>
                     <input
                       type="tel"
-                      placeholder="e.g. +1 (555) 019-2831"
+                      placeholder="e.g. +91 98201 54321"
                       value={form.phone}
                       onChange={e => setForm({ ...form, phone: e.target.value })}
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
@@ -841,7 +860,7 @@ export default function PublicPropertyPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '5px' }}>
-                      Preferred Showing Date (Optional)
+                      Preferred Site Visit Date (Optional)
                     </label>
                     <input
                       type="date"
@@ -857,7 +876,7 @@ export default function PublicPropertyPage() {
                     </label>
                     <textarea
                       rows={3}
-                      placeholder="Interested in private tour schedule, title deed status, or wire transfer terms..."
+                      placeholder="Interested in site visit, floor plan, RERA approvals, payment milestones, or home loan assistance..."
                       value={form.message}
                       onChange={e => setForm({ ...form, message: e.target.value })}
                       style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box', resize: 'vertical' }}

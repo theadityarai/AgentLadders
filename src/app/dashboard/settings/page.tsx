@@ -267,24 +267,27 @@ export default function SettingsPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                 <div className={styles.planCard} style={{ borderColor: agencyData.plan === 'Starter' ? 'var(--primary-color)' : 'var(--border-color)' }}>
                   {agencyData.plan === 'Starter' && <div className={styles.planBadge}>Current Plan</div>}
-                  <h3>Starter</h3>
-                  <p className={styles.planPrice}>$29/mo</p>
+                  <h3>Starter Broker</h3>
+                  <p className={styles.planPrice}>₹1,999/mo</p>
                   <ul className={styles.planFeatures}>
-                    <li>1 User</li>
-                    <li>500 Properties</li>
-                    <li>Basic Support</li>
+                    <li>Up to 2 Real Estate Agents</li>
+                    <li>500 Active Properties (RERA Carpet & Vastu)</li>
+                    <li>Daily Habit Cockpit & Match Engine</li>
+                    <li>WhatsApp Web Pitch Generator</li>
                   </ul>
                   {agencyData.plan !== 'Starter' && <Button variant="outline" onClick={() => setPlanToUpgrade('Starter')}>Downgrade to Starter</Button>}
                 </div>
                 
                 <div className={styles.planCard} style={{ borderColor: agencyData.plan === 'Professional' ? 'var(--primary-color)' : 'var(--border-color)' }}>
                   {agencyData.plan === 'Professional' && <div className={styles.planBadge}>Current Plan</div>}
-                  <h3>Professional</h3>
-                  <p className={styles.planPrice}>$99/mo</p>
+                  <h3>Agency Unlimited</h3>
+                  <p className={styles.planPrice}>₹4,999/mo</p>
                   <ul className={styles.planFeatures}>
-                    <li>Up to 10 Users</li>
-                    <li>Unlimited Properties</li>
-                    <li>Priority Support</li>
+                    <li>Up to 15 Agency Team Members</li>
+                    <li>Unlimited Indian Inventory & Inquiries</li>
+                    <li>Advanced Kundali Match with Tolerance</li>
+                    <li>Automated Site Visit WhatsApp Pins</li>
+                    <li>Priority Dedicated Real Estate Support</li>
                   </ul>
                   {agencyData.plan !== 'Professional' && <Button variant="primary" onClick={() => setPlanToUpgrade('Professional')}>Upgrade to Pro</Button>}
                 </div>

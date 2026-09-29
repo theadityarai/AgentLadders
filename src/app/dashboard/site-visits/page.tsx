@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { generateSiteVisitWhatsApp, openWhatsAppDirect } from '@/lib/whatsapp-engine';
 
 interface SiteVisit {
   [key: string]: unknown;
@@ -43,8 +44,8 @@ export default function SiteVisitsPage() {
     client: '',
     clientPhone: '',
     date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    timeSlot: '11:00 AM',
-    accompaniedBy: 'Marcus Vance',
+    timeSlot: '11:30 AM - 12:30 PM',
+    accompaniedBy: 'Aditya Rai',
     status: 'Scheduled',
     interestLevel: 'Extremely Interested 🔥',
     actionRequired: 'Send draft offer & floorplan',
@@ -152,9 +153,16 @@ export default function SiteVisitsPage() {
 
   // WhatsApp confirmation
   const sendWhatsAppConfirmation = (visit: SiteVisit) => {
-    const phone = (visit.clientPhone || '9876543210').replace(/[^0-9]/g, '');
-    const text = encodeURIComponent(`Hi ${visit.client}, this is Marcus from the agency confirming your upcoming private viewing of "${visit.property}" on ${visit.date} at ${visit.timeSlot || '11:00 AM'}. Please reply to confirm!`);
-    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${text}`, '_blank');
+    const text = generateSiteVisitWhatsApp({
+      leadName: visit.client,
+      propertyTitle: visit.property,
+      propertyLocation: (visit as any).locality || 'Prime Location',
+      scheduledDate: visit.date,
+      scheduledTime: visit.timeSlot || '11:30 AM',
+      agentName: 'Aditya Rai',
+      agentPhone: '+91 98200 12345'
+    });
+    openWhatsAppDirect(visit.clientPhone || '', text);
   };
 
   const filteredData = useMemo(() => {

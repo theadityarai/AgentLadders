@@ -7,6 +7,7 @@ import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { formatINR } from '@/lib/formatters';
 
 interface Invoice {
   [key: string]: unknown;
@@ -129,13 +130,13 @@ export default function InvoicesPage() {
       `-----------------------------------------------------------------\n` +
       `DESCRIPTION                                               AMOUNT\n` +
       `-----------------------------------------------------------------\n` +
-      `Agency Brokerage / Advisory Commission             $${inv.amount.toLocaleString()}\n` +
-      `Tax Rate: 5%\n` +
+      `Agency Brokerage / Advisory Commission             ₹${inv.amount.toLocaleString('en-IN')}\n` +
+      `GST Compliance: 18% Applicable\n` +
       `-----------------------------------------------------------------\n` +
-      `TOTAL PAYABLE:                                     $${inv.amount.toLocaleString()}\n` +
+      `TOTAL PAYABLE:                                     ₹${inv.amount.toLocaleString('en-IN')}\n` +
       `=================================================================\n` +
       `Notes: ${inv.notes || 'Payment due strictly upon invoice receipt. Thank you for your business.'}\n` +
-      `Remittance: Bank Wire Transfer to AgentLadders Escrow Account\n` +
+      `Remittance: RTGS / NEFT / UPI to Agency Real Estate Current Account\n` +
       `=================================================================\n`;
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -206,7 +207,7 @@ export default function InvoicesPage() {
     { 
       key: 'amount', 
       label: 'Invoice Amount', 
-      render: (r) => <span style={{ fontWeight: 700, color: '#0f172a' }}>${r.amount.toLocaleString()}</span> 
+      render: (r) => <span style={{ fontWeight: 700, color: '#0f172a' }}>{formatINR(r.amount)}</span> 
     },
     { 
       key: 'dueDate', 
@@ -403,11 +404,11 @@ export default function InvoicesPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount ($) *</label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount (₹) *</label>
                   <input
                     required
                     type="number"
-                    placeholder="45000"
+                    placeholder="450000"
                     value={form.amount}
                     onChange={e => setForm({ ...form, amount: e.target.value })}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
@@ -514,7 +515,7 @@ export default function InvoicesPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount ($) *</label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount (₹) *</label>
                   <input
                     required
                     type="number"
