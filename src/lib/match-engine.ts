@@ -40,6 +40,10 @@ export function findMatchingPropertiesForLead(
     budgetMin?: number | string;
     budgetMax?: number | string;
     budget?: number | string;
+    vastuPreference?: string;
+    constructionStagePreference?: string;
+    furnishingPreference?: string;
+    parkingPreference?: string;
   },
   properties: Array<{
     id: string;
@@ -55,72 +59,115 @@ export function findMatchingPropertiesForLead(
     carpetAreaSqFt?: number | string;
     areaSqFt?: number | string;
     status: string;
+    furnishing?: string;
+    possessionStatus?: string;
+    vastuFacing?: string;
+    parking?: string | number;
     media?: Array<{ url: string; isCover?: boolean }>;
     images?: string[];
     publicToken?: string;
   }>
 ): PropertyMatchResult[] {
-  // Only match with available inventory
-  const availableProps = properties.filter(p => p.status === 'Available' || p.status === 'Under Offer');
-  
   const leadPurpose = (lead.leadPurpose || lead.purpose || 'Buy').toLowerCase();
+  const isLeadRent = leadPurpose.includes('rent');
+  const isLeadBuy = leadPurpose.includes('buy');
+
   const leadLocalities = Array.isArray(lead.preferredLocalities)
-    ? lead.preferredLocalities.map(l => l.toLowerCase())
+    ? lead.preferredLocalities.map(l => l.toLowerCase().trim()).filter(Boolean)
     : (lead.preferredLocalities || lead.locationPreference || '').toLowerCase().split(',').map(l => l.trim()).filter(Boolean);
+
+  const requestedBhks = Array.isArray(lead.bhkNeeded)
+    ? lead.bhkNeeded.map(b => b.toLowerCase().trim()).filter(Boolean)
+    : (lead.bhkNeeded || lead.bedroomsNeeded || '3 BHK').toLowerCase().split(',').map(b => b.trim()).filter(Boolean);
 
   const budgetMin = lead.budgetMin ? Number(lead.budgetMin) : 0;
   const budgetMax = lead.budgetMax ? Number(lead.budgetMax) : (lead.budget ? Number(lead.budget) : 9999999999);
+  const flexibleMin = budgetMin * 0.9;
+  const flexibleMax = budgetMax * 1.1;
 
   const results: PropertyMatchResult[] = [];
 
-  for (const prop of availableProps) {
-    let score = 0;
-    const reasons: string[] = [];
+  for (let i = 0; i < properties.length; i++) {
+    const prop = properties[i];
+    if (prop.status !== 'Available' && prop.status !== 'Under Offer') continue;
 
     // 1. Transaction Purpose (Buy vs Rent)
     const propPurpose = (prop.purpose || 'For Sale').toLowerCase();
-    const isPurposeMatch = (leadPurpose.includes('rent') && propPurpose.includes('rent')) ||
-                          (leadPurpose.includes('buy') && (propPurpose.includes('sale') || propPurpose.includes('buy')));
+    const isPropRent = propPurpose.includes('rent');
+    const isPropBuy = propPurpose.includes('sale') || propPurpose.includes('buy');
+
+    const isPurposeMatch = (isLeadRent && isPropRent) || (isLeadBuy && isPropBuy);
     if (!isPurposeMatch) continue; // Hard filter
-    score += 25;
-    reasons.push(prop.purpose || 'For Sale');
+
+    let score = 25;
+    const reasons: string[] = [prop.purpose || 'For Sale'];
 
     // 2. Configuration / BHK Match
     const propBhk = (prop.bhk || (prop.bedrooms ? `${prop.bedrooms} BHK` : '3 BHK')).toLowerCase();
-    const requestedBhks = Array.isArray(lead.bhkNeeded)
-      ? lead.bhkNeeded.map(b => b.toLowerCase())
-      : (lead.bhkNeeded || lead.bedroomsNeeded || '3 BHK').toLowerCase().split(',').map(b => b.trim());
-
     const isBhkMatch = requestedBhks.some(b => propBhk.includes(b) || b.includes(propBhk));
     if (isBhkMatch) {
-      score += 35;
+      score += 25;
       reasons.push(prop.bhk || `${prop.bedrooms || 3} BHK`);
     } else {
-      // Partial BHK match (e.g. 2.5 BHK matches 3 BHK or 2 BHK)
-      score += 15;
+      score += 10;
     }
 
     // 3. Location / Locality Match
     const propLoc = ((prop.locality || '') + ' ' + (prop.city || '') + ' ' + (prop.location || '')).toLowerCase();
-    const isLocMatch = leadLocalities.length === 0 || leadLocalities.some(loc => propLoc.includes(loc));
-    if (isLocMatch && leadLocalities.length > 0) {
-      score += 25;
-      reasons.push(prop.locality || prop.location || 'Preferred Area');
-    } else if (leadLocalities.length === 0) {
-      score += 20;
+    if (leadLocalities.length > 0) {
+      const isLocMatch = leadLocalities.some(loc => propLoc.includes(loc));
+      if (isLocMatch) {
+        score += 20;
+        reasons.push(prop.locality || prop.location || 'Preferred Area');
+      }
+    } else {
+      score += 15;
     }
 
     // 4. Budget Match (with 10% Indian broker negotiation flexibility)
-    const flexibleMin = budgetMin * 0.9;
-    const flexibleMax = budgetMax * 1.1;
-
     if (prop.price >= flexibleMin && prop.price <= flexibleMax) {
       score += 15;
       reasons.push(`Budget Fits (${formatINR(prop.price)})`);
     } else if (prop.price <= flexibleMax * 1.15) {
-      // Slightly higher, negotiable
       score += 5;
       reasons.push(`Negotiable Price (${formatINR(prop.price)})`);
+    }
+
+    // 5. Vastu Alignment Match
+    if (lead.vastuPreference && lead.vastuPreference !== 'Any' && prop.vastuFacing) {
+      const leadVastu = lead.vastuPreference.toLowerCase();
+      const propVastu = prop.vastuFacing.toLowerCase();
+      if (leadVastu.includes('east') && propVastu.includes('east') ||
+          leadVastu.includes('north') && propVastu.includes('north') ||
+          propVastu.includes(leadVastu) || leadVastu.includes(propVastu)) {
+        score += 15;
+        reasons.push(`🧭 Vastu Matched (${prop.vastuFacing.split(' ')[0]})`);
+      }
+    }
+
+    // 6. Construction / Possession Stage Match
+    if (lead.constructionStagePreference && lead.constructionStagePreference !== 'Any' && prop.possessionStatus) {
+      const leadStage = lead.constructionStagePreference.toLowerCase();
+      const propStage = prop.possessionStatus.toLowerCase();
+      if ((leadStage.includes('ready') && propStage.includes('ready')) ||
+          (leadStage.includes('under') && propStage.includes('under'))) {
+        score += 10;
+        reasons.push(`🏗️ ${prop.possessionStatus.includes('Ready') ? 'Ready to Move' : 'Possession Fits'}`);
+      }
+    }
+
+    // 7. Furnishing Match
+    if (lead.furnishingPreference && lead.furnishingPreference !== 'Any' && prop.furnishing) {
+      if (lead.furnishingPreference.toLowerCase() === prop.furnishing.toLowerCase()) {
+        score += 8;
+        reasons.push(`🛋️ ${prop.furnishing}`);
+      }
+    }
+
+    // 8. Parking Match
+    if (lead.parkingPreference && lead.parkingPreference !== 'Any' && prop.parking) {
+      score += 7;
+      reasons.push(`🚗 Parking Included`);
     }
 
     if (score >= 50) {
@@ -142,13 +189,13 @@ export function findMatchingPropertiesForLead(
     }
   }
 
-  // Sort by highest match score
   return results.sort((a, b) => b.matchScore - a.matchScore);
 }
 
 export function findMatchingLeadsForProperty(
   property: {
     id: string;
+    title?: string;
     purpose?: string;
     bhk?: string;
     bedrooms?: number | string;
@@ -156,6 +203,7 @@ export function findMatchingLeadsForProperty(
     locality?: string;
     location?: string;
     price: number;
+    status?: string;
   },
   leads: Array<{
     id: string;
@@ -176,12 +224,20 @@ export function findMatchingLeadsForProperty(
     status: string;
   }>
 ): LeadMatchResult[] {
-  // Only match with active buyers (not dropped or deal closed)
-  const activeLeads = leads.filter(l => l.status !== 'Deal Closed' && l.status !== 'Dropped');
+  // Pre-normalize property wrapper
+  const propList = [{
+    ...property,
+    title: property.title || 'Property',
+    status: property.status || 'Available'
+  }];
+
   const results: LeadMatchResult[] = [];
 
-  for (const lead of activeLeads) {
-    const matchedProps = findMatchingPropertiesForLead(lead, [property as any]);
+  for (let i = 0; i < leads.length; i++) {
+    const lead = leads[i];
+    if (lead.status === 'Deal Closed' || lead.status === 'Dropped') continue;
+
+    const matchedProps = findMatchingPropertiesForLead(lead, propList);
     if (matchedProps.length > 0) {
       const match = matchedProps[0];
       const budgetText = (lead.budgetMin && lead.budgetMax)

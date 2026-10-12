@@ -66,6 +66,10 @@ export async function PUT(req: Request) {
   if (data.title) task.title = data.title;
   if (data.assignedTo) task.assignedTo = data.assignedTo;
   if (data.dueDate) task.dueDate = data.dueDate;
+  if (data.category) task.category = data.category;
+  if (data.priority) task.priority = data.priority;
+  if (data.relatedTo !== undefined) task.relatedTo = data.relatedTo;
+  if (data.description !== undefined) task.description = data.description;
 
   saveDb(db);
   return NextResponse.json({ success: true, task });

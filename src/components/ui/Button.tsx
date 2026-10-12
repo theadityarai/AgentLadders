@@ -8,10 +8,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', style, children, ...props }, ref) => {
     
-    let bgColor = 'var(--primary-color)';
+    let bgColor = 'var(--primary)';
     let textColor = 'white';
     let border = '1px solid transparent';
-    let hoverBg = 'var(--primary-hover)';
+    let hoverBg = 'var(--primary-dark)';
 
     if (variant === 'secondary') {
       bgColor = 'var(--secondary-color)';
@@ -43,7 +43,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           border: border,
           padding: padding,
           fontSize: fontSize,
-          fontWeight: 500,
+          fontWeight: 600,
           borderRadius: 'var(--radius-md)',
           cursor: props.disabled ? 'not-allowed' : 'pointer',
           opacity: props.disabled ? 0.55 : 1,
@@ -53,20 +53,26 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           alignItems: 'center',
           justifyContent: 'center',
           outline: 'none',
-          boxShadow: (variant === 'primary' || variant === 'danger') && !props.disabled ? 'var(--shadow-sm)' : 'none',
+          boxShadow: variant === 'primary' && !props.disabled 
+            ? '0 2px 8px rgba(var(--primary-rgb), 0.25)' 
+            : (variant === 'danger' && !props.disabled ? 'var(--shadow-sm)' : 'none'),
           ...style
         }}
         onMouseEnter={(e) => {
           if (props.disabled) return;
           e.currentTarget.style.backgroundColor = hoverBg;
-          if (variant === 'primary' || variant === 'danger') {
+          if (variant === 'primary') {
+            e.currentTarget.style.boxShadow = '0 4px 14px rgba(var(--primary-rgb), 0.35)';
+          } else if (variant === 'danger') {
             e.currentTarget.style.boxShadow = 'var(--shadow-md)';
           }
         }}
         onMouseLeave={(e) => {
           if (props.disabled) return;
           e.currentTarget.style.backgroundColor = bgColor;
-          if (variant === 'primary' || variant === 'danger') {
+          if (variant === 'primary') {
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(var(--primary-rgb), 0.25)';
+          } else if (variant === 'danger') {
             e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
           }
         }}

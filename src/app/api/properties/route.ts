@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { sanitizeString } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -16,6 +17,17 @@ export async function GET() {
   }
 
   const agencyProperties = (db.properties || []).filter(p => p.agencyId === user.agencyId);
+  let dbUpdated = false;
+  agencyProperties.forEach(p => {
+    if (!p.publicToken) {
+      p.publicToken = 'tok_' + p.id.replace(/[^a-zA-Z0-9]/g, '');
+      dbUpdated = true;
+    }
+  });
+  if (dbUpdated) {
+    saveDb(db);
+  }
+
   return NextResponse.json({ properties: agencyProperties });
 }
 
@@ -28,9 +40,11 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
   const data = await req.json();
+  const propId = 'prop_' + Math.random().toString(36).substring(2, 10);
   const newProperty = {
     ...data,
-    id: 'prop_' + Math.random().toString(36).substring(2, 10),
+    id: propId,
+    publicToken: data.publicToken || ('tok_' + Math.random().toString(36).substring(2, 10)),
     agencyId: user.agencyId,
     title: data.title || 'New Property',
     type: data.type || 'Apartment',
@@ -43,7 +57,9 @@ export async function POST(req: Request) {
     areaSqFt: parseInt(data.areaSqFt) || 1800,
     carpetAreaSqFt: parseInt(data.carpetAreaSqFt) || (data.areaSqFt ? Math.round(parseInt(data.areaSqFt) * 0.8) : 1440),
     furnishing: data.furnishing || 'Semi-Furnished',
-    parking: data.parking !== undefined ? parseInt(data.parking) : 1,
+    parking: data.parking !== undefined ? data.parking : '1 Covered Car Park',
+    vastuFacing: data.vastuFacing || 'East Facing (Vastu Compliant)',
+    possessionStatus: data.possessionStatus || 'Ready to Move (OC Received)',
     amenities: data.amenities || ['24/7 Security', 'Balcony', 'Elevator'],
     listingType: data.listingType || data.purpose || 'For Sale',
     sellerName: data.sellerName || data.ownerName || '',
@@ -91,6 +107,11 @@ export async function PUT(req: Request) {
   const updatedProperty = {
     ...db.properties[index],
     ...data,
+    id: db.properties[index].id, // IMMUTABLE
+    agencyId: db.properties[index].agencyId, // IMMUTABLE: cross-tenant isolation
+    title: data.title !== undefined ? sanitizeString(data.title, 200) : db.properties[index].title,
+    location: data.location !== undefined ? sanitizeString(data.location, 200) : db.properties[index].location,
+    description: data.description !== undefined ? sanitizeString(data.description, 2000) : db.properties[index].description,
     price: data.price !== undefined ? parseFloat(data.price) || 0 : db.properties[index].price,
     bedrooms: data.bedrooms !== undefined ? parseInt(data.bedrooms) || 0 : db.properties[index].bedrooms,
     bathrooms: data.bathrooms !== undefined ? parseInt(data.bathrooms) || 0 : db.properties[index].bathrooms,

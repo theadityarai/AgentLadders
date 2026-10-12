@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { DEFAULT_LEAD_SOURCES } from '@/lib/formatters';
 
 interface Client {
   [key: string]: unknown;
@@ -15,6 +17,7 @@ interface Client {
   phone: string;
   type: string;
   status?: string;
+  source?: string;
   requirement?: string;
   budget?: string;
   preferredLocation?: string;
@@ -31,6 +34,7 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [leadSources, setLeadSources] = useState<string[]>(DEFAULT_LEAD_SOURCES);
 
   const initialForm = {
     name: '',
@@ -38,6 +42,7 @@ export default function ClientsPage() {
     phone: '',
     type: 'Buyer',
     status: 'Active Search',
+    source: 'WhatsApp Inbound',
     requirement: '',
     budget: '$1,500,000',
     preferredLocation: '',
@@ -50,6 +55,12 @@ export default function ClientsPage() {
   // Delete modal states
   const [clientToDelete, setClientToDelete] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Toast feedback state
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const showToast = (type: 'success' | 'error' | 'info' | 'warning', message: string, title?: string) => {
+    setToast({ id: Date.now().toString(), type, message, title });
+  };
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,18 +81,72 @@ export default function ClientsPage() {
 
   useEffect(() => {
     loadClients();
+
+    // Check localStorage agency configs for instant sync
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('agentladders_agency_configs');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed.leadSources) && parsed.leadSources.length > 0) setLeadSources(parsed.leadSources);
+        }
+      } catch {}
+    }
+
+    // Refresh agency configs from API
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.agency && Array.isArray(data.agency.leadSources) && data.agency.leadSources.length > 0) {
+          setLeadSources(data.agency.leadSources);
+        }
+      })
+      .catch(() => {});
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'agentladders_agency_configs' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed.leadSources) && parsed.leadSources.length > 0) setLeadSources(parsed.leadSources);
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (editingClient) setEditingClient(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, editingClient]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch('/api/clients', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    });
-    setShowModal(false);
-    setForm(initialForm);
-    loadClients();
+    try {
+      const res = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setShowModal(false);
+        setForm(initialForm);
+        loadClients();
+        showToast('success', `Client "${form.name}" registered successfully!`, 'Client Added');
+      } else {
+        showToast('error', json.error || 'Failed to add client profile.', 'Save Failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('error', 'Network error while adding client.', 'Network Error');
+    }
   };
 
   const handleOpenEdit = (client: Client) => {
@@ -91,14 +156,23 @@ export default function ClientsPage() {
   const handleUpdateClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingClient) return;
-    const res = await fetch('/api/clients', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editingClient)
-    });
-    if (res.ok) {
-      setData(prev => prev.map(c => c.id === editingClient.id ? { ...c, ...editingClient } : c));
-      setEditingClient(null);
+    try {
+      const res = await fetch('/api/clients', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingClient)
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setData(prev => prev.map(c => c.id === editingClient.id ? { ...c, ...editingClient } : c));
+        setEditingClient(null);
+        showToast('success', `Client profile for "${editingClient.name}" updated!`, 'Client Updated');
+      } else {
+        showToast('error', json.error || 'Failed to update client profile.', 'Update Failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('error', 'Network error while updating client profile.', 'Network Error');
     }
   };
 
@@ -109,12 +183,22 @@ export default function ClientsPage() {
   const handleConfirmDelete = async () => {
     if (!clientToDelete) return;
     setIsDeleting(true);
-    const res = await fetch(`/api/clients?id=${clientToDelete.id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setData(prev => prev.filter(c => c.id !== clientToDelete.id));
+    try {
+      const res = await fetch(`/api/clients?id=${clientToDelete.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setData(prev => prev.filter(c => c.id !== clientToDelete.id));
+        showToast('success', `Client profile for "${clientToDelete.name}" deleted.`, 'Client Deleted');
+      } else {
+        const json = await res.json().catch(() => ({}));
+        showToast('error', json.error || 'Failed to delete client.', 'Delete Failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('error', 'Network error while deleting client.', 'Network Error');
+    } finally {
+      setIsDeleting(false);
+      setClientToDelete(null);
     }
-    setIsDeleting(false);
-    setClientToDelete(null);
   };
 
   // WhatsApp click handler
@@ -142,7 +226,14 @@ export default function ClientsPage() {
       header: 'Client & Communications',
       accessor: (row) => (
         <div>
-          <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>{row.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '14px' }}>{row.name}</span>
+            {((row as any).isSelfCreated || (row.source || '').toLowerCase().includes('self-') || (row.type || '').toLowerCase().includes('self-')) && (
+              <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                ✨ User-Created (Self-Interest)
+              </span>
+            )}
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
             <span style={{ fontSize: '12px', color: '#64748b' }}>{row.phone}</span>
             {row.phone && (
@@ -179,17 +270,32 @@ export default function ClientsPage() {
         const isInvestor = row.type?.includes('Investor');
         return (
           <div>
-            <span style={{
-              fontSize: '11.5px',
-              fontWeight: 700,
-              padding: '3px 8px',
-              borderRadius: '6px',
-              backgroundColor: isInvestor ? '#fef3c7' : isBuyer ? '#eff6ff' : '#f5f3ff',
-              color: isInvestor ? '#b45309' : isBuyer ? '#1d4ed8' : '#6d28d9',
-              border: `1px solid ${isInvestor ? '#fde68a' : isBuyer ? '#bfdbfe' : '#ddd6fe'}`
-            }}>
-              {row.type || 'Buyer'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: '11.5px',
+                fontWeight: 700,
+                padding: '3px 8px',
+                borderRadius: '6px',
+                backgroundColor: isInvestor ? '#fef3c7' : isBuyer ? '#eff6ff' : '#f5f3ff',
+                color: isInvestor ? '#b45309' : isBuyer ? '#1d4ed8' : '#6d28d9',
+                border: `1px solid ${isInvestor ? '#fde68a' : isBuyer ? '#bfdbfe' : '#ddd6fe'}`
+              }}>
+                {row.type || 'Buyer'}
+              </span>
+              {row.source && (
+                <span style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  padding: '2px 7px',
+                  borderRadius: '5px',
+                  backgroundColor: '#f1f5f9',
+                  color: '#475569',
+                  border: '1px solid #e2e8f0'
+                }}>
+                  📢 {row.source}
+                </span>
+              )}
+            </div>
             <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, marginTop: '4px' }}>
               ● {row.status || 'Active Search'}
             </div>
@@ -254,7 +360,7 @@ export default function ClientsPage() {
   ];
 
   return (
-    <>
+    <div className="dashboard-page-container">
       <PageHeader
         title="Clients Directory"
         subtitle="Verified property buyers, landlords, tenants, high-net-worth investors, and VIP clients"
@@ -289,36 +395,42 @@ export default function ClientsPage() {
       />
 
       {/* DATA TABLE */}
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        loading={loading}
-        emptyMessage="No clients found. Click '+ Add Client' or convert an inbound lead."
-      />
+      <div style={{ paddingBottom: '24px' }}>
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          loading={loading}
+          emptyMessage="No clients found. Click '+ Add Client' or convert an inbound lead."
+        />
+      </div>
 
       {/* MODAL: ADD CLIENT */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '620px',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-            border: '1px solid #e2e8f0'
-          }}>
+        <div 
+          onClick={() => setShowModal(false)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px'
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+              border: '1px solid #e2e8f0',
+              padding: 0
+            }}
+          >
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Add Client</h3>
@@ -328,7 +440,7 @@ export default function ClientsPage() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+              <div className="responsive-grid-2" style={{ gap: '14px', marginBottom: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Name *</label>
                   <input
@@ -353,7 +465,7 @@ export default function ClientsPage() {
                   />
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Email Address</label>
                   <input
                     type="email"
@@ -386,7 +498,18 @@ export default function ClientsPage() {
                   />
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
+                  <select
+                    value={form.source || 'WhatsApp Inbound'}
+                    onChange={e => setForm({ ...form, source: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
+                  >
+                    {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Specific Requirements & Preferred Locations</label>
                   <input
                     type="text"
@@ -397,7 +520,7 @@ export default function ClientsPage() {
                   />
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Preferences & Notes</label>
                   <textarea
                     rows={3}
@@ -420,27 +543,31 @@ export default function ClientsPage() {
 
       {/* MODAL: EDIT CLIENT */}
       {editingClient && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '620px',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-            border: '1px solid #e2e8f0'
-          }}>
+        <div 
+          onClick={() => setEditingClient(null)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '16px'
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+              border: '1px solid #e2e8f0',
+              padding: 0
+            }}
+          >
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Edit Client: {editingClient.name}</h3>
@@ -450,7 +577,7 @@ export default function ClientsPage() {
             </div>
 
             <form onSubmit={handleUpdateClient} style={{ padding: '24px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+              <div className="responsive-grid-2" style={{ gap: '14px', marginBottom: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Name</label>
                   <input
@@ -495,7 +622,18 @@ export default function ClientsPage() {
                   </select>
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
+                  <select
+                    value={editingClient.source || 'WhatsApp Inbound'}
+                    onChange={e => setEditingClient({ ...editingClient, source: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
+                  >
+                    {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Requirements & Locations</label>
                   <input
                     type="text"
@@ -505,7 +643,7 @@ export default function ClientsPage() {
                   />
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Notes</label>
                   <textarea
                     rows={3}
@@ -536,6 +674,9 @@ export default function ClientsPage() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setClientToDelete(null)}
       />
-    </>
+
+      {/* Global Action Feedback Toast */}
+      {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
+    </div>
   );
 }

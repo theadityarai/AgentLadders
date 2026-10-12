@@ -49,20 +49,23 @@ export async function GET() {
   const closedDeals = deals.filter((d: any) => d.stage === 'Closed Won');
   const totalGmv = closedDeals.reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
 
+  const statsPayload = {
+    totalAgencies: agencies.length,
+    activeAgencies: agencies.filter((a: any) => a.status === 'Active' || !a.status).length,
+    inactiveAgencies: agencies.filter((a: any) => a.status === 'Inactive').length,
+    suspendedAgencies: agencies.filter((a: any) => a.status === 'Suspended').length,
+    trialAgencies: agencies.filter((a: any) => a.status === 'Trial').length,
+    totalUsers: users.length,
+    totalProperties: properties.length,
+    totalDeals: deals.length,
+    totalLeads: leads.length,
+    totalGmv,
+    mrr,
+    planCounts
+  };
+
   return NextResponse.json({
-    stats: {
-      totalAgencies: agencies.length,
-      activeAgencies: agencies.filter((a: any) => a.status === 'Active' || !a.status).length,
-      suspendedAgencies: agencies.filter((a: any) => a.status === 'Suspended').length,
-      trialAgencies: agencies.filter((a: any) => a.status === 'Trial').length,
-      totalUsers: users.length,
-      totalProperties: properties.length,
-      totalDeals: deals.length,
-      closedWonCount: closedDeals.length,
-      totalGmv,
-      platformMrr: mrr,
-      totalLeads: leads.length,
-      planCounts
-    }
+    ...statsPayload,
+    stats: statsPayload
   });
 }

@@ -69,6 +69,17 @@ export default function InvoicesPage() {
     loadInvoices();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (editingInvoice) setEditingInvoice(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, editingInvoice]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await fetch('/api/invoices', {
@@ -334,7 +345,7 @@ export default function InvoicesPage() {
 
       {/* CREATE INVOICE MODAL */}
       {showModal && (
-        <div style={{
+        <div onClick={() => setShowModal(false)} style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -346,18 +357,16 @@ export default function InvoicesPage() {
           justifyContent: 'center',
           zIndex: 1000
         }}>
-          <div style={{
+          <div onClick={e => e.stopPropagation()} className="responsive-modal" style={{
             backgroundColor: 'white',
             borderRadius: '12px',
             padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto'
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
           }}>
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Create New Invoice</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice # *</label>
                   <input
@@ -380,7 +389,7 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Client / Payee *</label>
                   <input
@@ -402,7 +411,7 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount (₹) *</label>
                   <input
@@ -448,7 +457,7 @@ export default function InvoicesPage() {
 
       {/* EDIT INVOICE MODAL */}
       {editingInvoice && (
-        <div style={{
+        <div onClick={() => setEditingInvoice(null)} style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -460,18 +469,16 @@ export default function InvoicesPage() {
           justifyContent: 'center',
           zIndex: 1000
         }}>
-          <div style={{
+          <div onClick={e => e.stopPropagation()} className="responsive-modal" style={{
             backgroundColor: 'white',
             borderRadius: '12px',
             padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto'
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
           }}>
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Invoice: {editingInvoice.number}</h3>
             <form onSubmit={handleUpdateInvoice} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice # *</label>
                   <input
@@ -493,7 +500,7 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Client / Payee *</label>
                   <input
@@ -513,7 +520,7 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Invoice Amount (₹) *</label>
                   <input

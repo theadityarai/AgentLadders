@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { sanitizeString } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -73,6 +74,11 @@ export async function PUT(req: Request) {
   const updatedDeal = {
     ...db.deals[index],
     ...data,
+    id: db.deals[index].id, // IMMUTABLE
+    agencyId: db.deals[index].agencyId, // IMMUTABLE: cross-tenant isolation
+    title: data.title !== undefined ? sanitizeString(data.title, 200) : db.deals[index].title,
+    clientName: data.clientName !== undefined ? sanitizeString(data.clientName, 100) : db.deals[index].clientName,
+    notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.deals[index].notes,
     amount: data.amount !== undefined ? parseFloat(data.amount) || 0 : db.deals[index].amount,
     probability: data.probability !== undefined ? parseInt(data.probability) || 50 : db.deals[index].probability,
     commissionAmount: data.amount !== undefined ? (parseFloat(data.amount) * 0.025 || 0) : db.deals[index].commissionAmount,

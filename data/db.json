@@ -4,10 +4,10 @@
       "id": "usr_nntlkcy7",
       "name": "Adi",
       "email": "adityarai366@gmail.com",
-      "password": "\\.",
+      "password": "$2b$10$ORkavQ/fd9iGicIhXu7ceeJTWzyfFB1R6d0mLd374QVCkkxc.yjtW",
       "role": "OWNER",
       "agencyId": "ag_ql21vxnd",
-      "passwordHash": "\\."
+      "passwordHash": "$2b$10$ORkavQ/fd9iGicIhXu7ceeJTWzyfFB1R6d0mLd374QVCkkxc.yjtW"
     },
     {
       "id": "usr_bt71mcv1",
@@ -16,7 +16,9 @@
       "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
       "role": "SUPER_ADMIN",
       "agencyId": "ag_ql21vxnd",
-      "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q"
+      "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
+      "avatar": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\"><circle cx=\"16\" cy=\"16\" r=\"14\" fill=\"%233b82f6\"/></svg>",
+      "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\"><circle cx=\"16\" cy=\"16\" r=\"14\" fill=\"%233b82f6\"/></svg>"
     },
     {
       "id": "usr_super_admin",
@@ -34,7 +36,9 @@
       "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
       "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
       "role": "OWNER",
-      "agencyId": "ag_vance_01"
+      "agencyId": "ag_vance_01",
+      "avatar": "",
+      "image": ""
     },
     {
       "id": "usr_ag_skyline_02",
@@ -87,10 +91,10 @@
         "Commercial"
       ],
       "leadSources": [
+        "Direct",
         "Website",
         "Referral",
-        "Zillow",
-        "Walk-in"
+        "Listing Websites"
       ],
       "notificationPrefs": {
         "New lead assigned": {
@@ -104,10 +108,115 @@
         "Site visit reminder": {
           "inApp": true,
           "email": true
+        },
+        "Support ticket updates": {
+          "inApp": true,
+          "email": true
         }
       },
       "status": "Active",
-      "createdAt": "2026-08-01T10:00:00.000Z"
+      "createdAt": "2026-08-01T10:00:00.000Z",
+      "bhkOptions": [
+        "1 RK",
+        "1 BHK",
+        "1.5 BHK",
+        "2 BHK",
+        "2.5 BHK",
+        "3 BHK",
+        "3.5 BHK",
+        "4 BHK",
+        "5+ BHK",
+        "Duplex",
+        "Penthouse",
+        "Plot / Land",
+        "Commercial Bare Shell",
+        "Furnished Office"
+      ],
+      "logo": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\"><circle cx=\"16\" cy=\"16\" r=\"14\" fill=\"%2310b981\"/></svg>",
+      "propertySpecs": [
+        "Unfurnished",
+        "Semi-Furnished",
+        "Fully Furnished",
+        "Bare Shell (Commercial / Penthouse)",
+        "Warm Shell (With Flooring & AC)",
+        "Luxury Designer Furnished"
+      ],
+      "constructionStages": [
+        "Ready to Move (OC Received)",
+        "Under Construction (Possession in 3-6 Months)",
+        "Under Construction (Possession in 1-2 Years)",
+        "Newly Launched / Booking Open",
+        "Pre-Launch / Expression of Interest"
+      ],
+      "vastuOptions": [
+        "East Facing (Vastu Compliant)",
+        "North Facing (Vastu Compliant)",
+        "North-East / Ishanya (Highly Auspicious)",
+        "North-West Facing",
+        "West Facing",
+        "South-East Facing",
+        "South Facing",
+        "Not Applicable"
+      ],
+      "dealStages": [
+        "Negotiation",
+        "Token Received",
+        "Agreement Drafted",
+        "Registration Pending",
+        "Closed Won",
+        "Lost"
+      ],
+      "parkingOptions": [
+        "1 Covered Car Park",
+        "2 Covered Car Parks",
+        "3+ Covered Car Parks",
+        "1 Open Car Park",
+        "2 Open Car Parks",
+        "Stilt Parking",
+        "No Dedicated Parking",
+        "Multi-Level Covered"
+      ],
+      "timezone": "Asia/Kolkata",
+      "propertyStatuses": [
+        "Available",
+        "Under Offer",
+        "Under Negotiation",
+        "Sold",
+        "Rented",
+        "Off Market"
+      ],
+      "leadStatuses": [
+        "New Inbound",
+        "Contacted",
+        "Qualified",
+        "Site Visit Scheduled",
+        "Negotiation",
+        "Won",
+        "Lost",
+        "Dead"
+      ],
+      "siteVisitStatuses": [
+        "Scheduled",
+        "Confirmed",
+        "Completed",
+        "Rescheduled",
+        "Cancelled",
+        "No Show"
+      ],
+      "taskStatuses": [
+        "Pending",
+        "In Progress",
+        "Completed",
+        "Overdue",
+        "Cancelled"
+      ],
+      "clientStatuses": [
+        "Active Search",
+        "In Contract",
+        "Closed Client",
+        "Past Client",
+        "Inactive"
+      ]
     },
     {
       "id": "ag_0l04re04",
@@ -122,10 +231,10 @@
         "Commercial"
       ],
       "leadSources": [
+        "Direct",
         "Website",
         "Referral",
-        "Zillow",
-        "Walk-in"
+        "Listing Websites"
       ],
       "notificationPrefs": {
         "New lead assigned": {
@@ -142,35 +251,161 @@
         }
       },
       "createdAt": "2026-09-22T10:22:05.159Z",
-      "status": "Active"
+      "status": "Active",
+      "bhkOptions": [
+        "1 RK",
+        "1 BHK",
+        "1.5 BHK",
+        "2 BHK",
+        "2.5 BHK",
+        "3 BHK",
+        "3.5 BHK",
+        "4 BHK",
+        "5+ BHK",
+        "Duplex",
+        "Penthouse",
+        "Plot / Land",
+        "Commercial Bare Shell",
+        "Furnished Office"
+      ]
     },
     {
       "id": "ag_vance_01",
-      "name": "Vance Luxury Realty",
+      "name": "Vance Luxury Realtyy",
       "country": "United States",
-      "currency": "USD",
+      "currency": "GBP",
       "plan": "Enterprise",
       "status": "Active",
       "propertyTypes": [
         "Luxury Villa",
         "Penthouse",
         "Mansion",
-        "Estate"
+        "Estate",
+        "n"
       ],
       "leadSources": [
-        "Private Referral",
-        "Luxury Portfolio",
-        "Architectural Digest"
+        "Direct",
+        "Website",
+        "Referral",
+        "Listing Websites"
       ],
       "notificationPrefs": {
         "New lead assigned": {
+          "inApp": true,
+          "email": true
+        },
+        "Support ticket updates": {
           "inApp": true,
           "email": true
         }
       },
       "createdAt": "2026-08-10T08:00:00.000Z",
       "ownerName": "Marcus Vance",
-      "ownerEmail": "marcus@vancerealty.com"
+      "ownerEmail": "marcus@vancerealty.com",
+      "bhkOptions": [
+        "1 RK",
+        "1 BHK",
+        "1.5 BHK",
+        "2 BHK",
+        "2.5 BHK",
+        "3 BHK",
+        "3.5 BHK",
+        "4 BHK",
+        "5+ BHK",
+        "Duplex",
+        "Penthouse",
+        "Plot / Land",
+        "Commercial Bare Shell",
+        "Furnished Office"
+      ],
+      "fontFamily": "jakarta",
+      "colorScheme": "amber",
+      "logo": "",
+      "logoUrl": "",
+      "propertySpecs": [
+        "Unfurnished",
+        "Semi-Furnished",
+        "Fully Furnished",
+        "Bare Shell (Commercial / Penthouse)",
+        "Warm Shell (With Flooring & AC)",
+        "Luxury Designer Furnished"
+      ],
+      "constructionStages": [
+        "Ready to Move (OC Received)",
+        "Under Construction (Possession in 3-6 Months)",
+        "Under Construction (Possession in 1-2 Years)",
+        "Newly Launched / Booking Open",
+        "Pre-Launch / Expression of Interest"
+      ],
+      "vastuOptions": [
+        "East Facing (Vastu Compliant)",
+        "North Facing (Vastu Compliant)",
+        "North-East / Ishanya (Highly Auspicious)",
+        "North-West Facing",
+        "West Facing",
+        "South-East Facing",
+        "South Facing",
+        "Not Applicable"
+      ],
+      "dealStages": [
+        "Negotiation",
+        "Token Received",
+        "Agreement Drafted",
+        "Registration Pending",
+        "Closed Won",
+        "Lost"
+      ],
+      "parkingOptions": [
+        "1 Covered Car Park",
+        "2 Covered Car Parks",
+        "3+ Covered Car Parks",
+        "1 Open Car Park",
+        "2 Open Car Parks",
+        "Stilt Parking",
+        "No Dedicated Parking",
+        "Multi-Level Covered"
+      ],
+      "timezone": "Asia/Kolkata",
+      "propertyStatuses": [
+        "Available",
+        "Under Offer",
+        "Under Negotiation",
+        "Sold",
+        "Rented",
+        "Off Market"
+      ],
+      "leadStatuses": [
+        "New Inbound",
+        "Contacted",
+        "Qualified",
+        "Site Visit Scheduled",
+        "Negotiation",
+        "Won",
+        "Lost",
+        "Dead"
+      ],
+      "siteVisitStatuses": [
+        "Scheduled",
+        "Confirmed",
+        "Completed",
+        "Rescheduled",
+        "Cancelled",
+        "No Show"
+      ],
+      "taskStatuses": [
+        "Pending",
+        "In Progress",
+        "Completed",
+        "Overdue",
+        "Cancelled"
+      ],
+      "clientStatuses": [
+        "Active Search",
+        "In Contract",
+        "Closed Client",
+        "Past Client",
+        "Inactive"
+      ]
     },
     {
       "id": "ag_skyline_02",
@@ -185,9 +420,10 @@
         "Industrial Hub"
       ],
       "leadSources": [
-        "Institutional Broker",
-        "Direct Pitch",
-        "Financial Times"
+        "Direct",
+        "Website",
+        "Referral",
+        "Listing Websites"
       ],
       "notificationPrefs": {
         "New lead assigned": {
@@ -197,7 +433,23 @@
       },
       "createdAt": "2026-08-18T10:30:00.000Z",
       "ownerName": "Eleanor Thorne",
-      "ownerEmail": "eleanor@skylinecap.co.uk"
+      "ownerEmail": "eleanor@skylinecap.co.uk",
+      "bhkOptions": [
+        "1 RK",
+        "1 BHK",
+        "1.5 BHK",
+        "2 BHK",
+        "2.5 BHK",
+        "3 BHK",
+        "3.5 BHK",
+        "4 BHK",
+        "5+ BHK",
+        "Duplex",
+        "Penthouse",
+        "Plot / Land",
+        "Commercial Bare Shell",
+        "Furnished Office"
+      ]
     },
     {
       "id": "ag_coastal_03",
@@ -212,9 +464,10 @@
         "Waterfront Penthouse"
       ],
       "leadSources": [
-        "Domain.com.au",
-        "Realestate.com.au",
-        "Referral"
+        "Direct",
+        "Website",
+        "Referral",
+        "Listing Websites"
       ],
       "notificationPrefs": {
         "New lead assigned": {
@@ -224,7 +477,23 @@
       },
       "createdAt": "2026-09-01T14:15:00.000Z",
       "ownerName": "Liam Hemsworth",
-      "ownerEmail": "liam@coastalestates.com.au"
+      "ownerEmail": "liam@coastalestates.com.au",
+      "bhkOptions": [
+        "1 RK",
+        "1 BHK",
+        "1.5 BHK",
+        "2 BHK",
+        "2.5 BHK",
+        "3 BHK",
+        "3.5 BHK",
+        "4 BHK",
+        "5+ BHK",
+        "Duplex",
+        "Penthouse",
+        "Plot / Land",
+        "Commercial Bare Shell",
+        "Furnished Office"
+      ]
     },
     {
       "id": "ag_apex_04",
@@ -239,9 +508,10 @@
         "Marina Suite"
       ],
       "leadSources": [
-        "PropertyFinder",
-        "Bayut",
-        "Dubai Walk-in"
+        "Direct",
+        "Website",
+        "Referral",
+        "Listing Websites"
       ],
       "notificationPrefs": {
         "New lead assigned": {
@@ -251,7 +521,23 @@
       },
       "createdAt": "2026-08-25T11:00:00.000Z",
       "ownerName": "Tariq Al-Mansoor",
-      "ownerEmail": "tariq@apexprime.ae"
+      "ownerEmail": "tariq@apexprime.ae",
+      "bhkOptions": [
+        "1 RK",
+        "1 BHK",
+        "1.5 BHK",
+        "2 BHK",
+        "2.5 BHK",
+        "3 BHK",
+        "3.5 BHK",
+        "4 BHK",
+        "5+ BHK",
+        "Duplex",
+        "Penthouse",
+        "Plot / Land",
+        "Commercial Bare Shell",
+        "Furnished Office"
+      ]
     },
     {
       "id": "ag_horizon_05",
@@ -266,9 +552,10 @@
         "Suburban Home"
       ],
       "leadSources": [
-        "Realtor.ca",
-        "Facebook Ads",
-        "Open House"
+        "Direct",
+        "Website",
+        "Referral",
+        "Listing Websites"
       ],
       "notificationPrefs": {
         "New lead assigned": {
@@ -278,10 +565,86 @@
       },
       "createdAt": "2026-09-15T09:45:00.000Z",
       "ownerName": "Sarah Jenkins",
-      "ownerEmail": "sarah@horizonrealty.ca"
+      "ownerEmail": "sarah@horizonrealty.ca",
+      "bhkOptions": [
+        "1 RK",
+        "1 BHK",
+        "1.5 BHK",
+        "2 BHK",
+        "2.5 BHK",
+        "3 BHK",
+        "3.5 BHK",
+        "4 BHK",
+        "5+ BHK",
+        "Duplex",
+        "Penthouse",
+        "Plot / Land",
+        "Commercial Bare Shell",
+        "Furnished Office"
+      ]
     }
   ],
   "notifications": [
+    {
+      "id": "notif_kyp3wrqo",
+      "agencyId": "ag_ql21vxnd",
+      "userId": "",
+      "title": "New Direct Inquiry (Self-Interested) 🎯",
+      "message": "Aarav Singhania marked direct interest in \"4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park\". Tag: [Created by user itself]. Phone: 9820098200",
+      "type": "info",
+      "read": false,
+      "createdAt": "2026-10-12T19:52:37.778Z"
+    },
+    {
+      "id": "notif_2i8zzip",
+      "agencyId": "ag_vance_01",
+      "userId": "",
+      "title": "Support Response Received",
+      "message": "AgentLadders HQ replied to your ticket TICK-5633 \"Inquiry: How do WhatsApp pitch links work?\".",
+      "type": "info",
+      "read": false,
+      "createdAt": "2026-10-12T19:05:12.727Z"
+    },
+    {
+      "id": "notif_2lbkmr8",
+      "agencyId": "ag_vance_01",
+      "userId": "",
+      "title": "Support Response Received",
+      "message": "AgentLadders HQ replied to your ticket TICK-5633 \"Inquiry: How do WhatsApp pitch links work?\".",
+      "type": "info",
+      "read": false,
+      "createdAt": "2026-10-12T17:13:46.932Z"
+    },
+    {
+      "id": "notif_svy3avvv",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "title": "Site Visit Confirmed 📅",
+      "message": "Client Priya Mehta confirmed 3BHK visit at Lodha Park for tomorrow 11:30 AM.",
+      "type": "info",
+      "read": true,
+      "createdAt": "2026-10-12T15:21:03.352Z"
+    },
+    {
+      "id": "notif_welcome_1791807069138",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "title": "Welcome to AgentLadders! 🚀",
+      "message": "Your high-performance real estate brokerage cockpit is live. Start by exploring properties or logging site visits.",
+      "type": "info",
+      "read": true,
+      "createdAt": "2026-10-12T12:11:09.138Z"
+    },
+    {
+      "id": "notif_tip_1791807069139",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "title": "Agency Configuration Ready ⚙️",
+      "message": "You can customize your BHK layouts, Property Types, and Lead Sources anytime from Settings > Configuration.",
+      "type": "system",
+      "read": true,
+      "createdAt": "2026-10-12T11:11:09.138Z"
+    },
     {
       "id": "notif_7kmpeli",
       "agencyId": "ag_ql21vxnd",
@@ -329,7 +692,7 @@
       "purpose": "For Sale",
       "carpetAreaSqFt": 3040,
       "furnishing": "Semi-Furnished",
-      "parking": 2,
+      "parking": "2",
       "sellerName": "Verified Property Owner",
       "sellerPhone": "+1 (555) 234-9876",
       "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
@@ -395,7 +758,15 @@
           "type": "video"
         }
       ],
-      "updatedAt": "2026-09-28T12:36:35.577Z"
+      "updatedAt": "2026-10-12T19:32:08.594Z",
+      "viewsCount": 219,
+      "bhk": "2 BHK",
+      "city": "Mumbai",
+      "locality": "",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "vastuFacing": "East Facing (Vastu Compliant)",
+      "description": "",
+      "privateNotes": ""
     },
     {
       "id": "prop_ag_vance_01_2",
@@ -478,7 +849,8 @@
           "title": "4K Architectural Walkthrough Tour",
           "type": "video"
         }
-      ]
+      ],
+      "publicToken": "tok_propagvance012"
     },
     {
       "id": "prop_ag_skyline_02_1",
@@ -1059,7 +1431,8 @@
           "title": "4K Architectural Walkthrough Tour",
           "type": "video"
         }
-      ]
+      ],
+      "viewsCount": 3
     },
     {
       "id": "prop_ag_horizon_05_2",
@@ -1248,7 +1621,7 @@
       "privacyMode": "Public",
       "isPublic": true,
       "sharesCount": 34,
-      "viewsCount": 286,
+      "viewsCount": 288,
       "agentName": "Aditya Rai",
       "agentPhone": "+91 98200 12345",
       "agentEmail": "aditya@agentladders.com",
@@ -1541,9 +1914,96 @@
       "agentPhone": "+91 98200 12345",
       "agentEmail": "aditya@agentladders.com",
       "createdAt": "2026-09-29T08:42:17.171Z"
+    },
+    {
+      "title": "Sobha Jist",
+      "purpose": "For Rent",
+      "type": "Estate",
+      "bhk": "2 BHK",
+      "city": "Mumbai",
+      "locality": "Bandra",
+      "price": 25000,
+      "carpetAreaSqFt": 2500,
+      "status": "Available",
+      "furnishing": "Fully Furnished",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "vastuFacing": "East Facing (Vastu Compliant)",
+      "parking": "2 Open Car Parks",
+      "bathrooms": 2,
+      "description": "@bhk fully furnished with full electronics",
+      "privateNotes": "Owner is rahul 70169855",
+      "media": [
+        {
+          "id": "1791826007165",
+          "url": "blob:http://localhost:3000/28b18251-3baa-4105-a4d4-2eeebe1b77c4",
+          "tag": "General",
+          "isCover": true
+        },
+        {
+          "id": "1791826021696",
+          "url": "blob:http://localhost:3000/08b75df2-fdd5-4a4f-a726-63abecc77467",
+          "tag": "Home",
+          "isCover": false
+        },
+        {
+          "id": "1791826027024",
+          "url": "blob:http://localhost:3000/a965b17a-15ca-4724-9a85-9bc0a9d98ec2",
+          "tag": "General",
+          "isCover": false
+        }
+      ],
+      "id": "prop_haww6ptk",
+      "agencyId": "ag_vance_01",
+      "location": "City Center",
+      "bedrooms": 3,
+      "areaSqFt": 1800,
+      "amenities": [
+        "24/7 Security",
+        "Balcony",
+        "Elevator"
+      ],
+      "listingType": "For Rent",
+      "sellerName": "",
+      "sellerPhone": "",
+      "keyLocationNotes": "",
+      "ownerName": "",
+      "images": [
+        "blob:http://localhost:3000/28b18251-3baa-4105-a4d4-2eeebe1b77c4",
+        "blob:http://localhost:3000/08b75df2-fdd5-4a4f-a726-63abecc77467",
+        "blob:http://localhost:3000/a965b17a-15ca-4724-9a85-9bc0a9d98ec2"
+      ],
+      "videos": [],
+      "videoTourUrl": "",
+      "virtualTourUrl": "",
+      "createdAt": "2026-10-12T17:27:17.504Z",
+      "publicToken": "tok_prophaww6ptk",
+      "viewsCount": 2
     }
   ],
   "leads": [
+    {
+      "id": "lead_bfpqjcjf",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Aarav Singhania",
+      "email": "aarav@singhania.com",
+      "phone": "9820098200",
+      "status": "New Inbound",
+      "source": "Self-Created (Public Listing)",
+      "isSelfCreated": true,
+      "selfCreatedTag": "Created by User (Self-Interest)",
+      "urgency": "Immediate (Hot Buyer)",
+      "leadPurpose": "Buy",
+      "propertyTypeNeeded": "Apartment",
+      "bhkNeeded": [
+        "4 BHK"
+      ],
+      "budgetMax": 85000000,
+      "city": "Mumbai",
+      "preferredLocalities": "Worli",
+      "requirement": "Direct Interest in 4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park (4 BHK Apartment)",
+      "notes": "Self-interested buyer from public listing for \"4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park\".",
+      "createdAt": "2026-10-12T19:52:37.778Z"
+    },
     {
       "id": "lead_1",
       "agencyId": "ag_vance_01",
@@ -1551,8 +2011,21 @@
       "email": "brooklyn@example.com",
       "phone": "+1 (555) 234-5678",
       "status": "Qualified",
-      "source": "Website",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "source": "Luxury Portfolio",
+      "createdAt": "2026-09-22T16:55:32.971Z",
+      "leadPurpose": "Buy",
+      "propertyTypeNeeded": "Apartment",
+      "bhkNeeded": [
+        "2 BHK"
+      ],
+      "city": "Mumbai",
+      "preferredLocalities": "",
+      "urgency": "Within 1 Month",
+      "furnishingPreference": "Any",
+      "constructionStagePreference": "Any",
+      "vastuPreference": "Any",
+      "parkingPreference": "Any",
+      "updatedAt": "2026-10-12T19:33:58.029Z"
     },
     {
       "id": "lead_2",
@@ -1599,7 +2072,9 @@
         "Lower Parel",
         "Bandra West"
       ],
-      "bhkNeeded": "4 BHK",
+      "bhkNeeded": [
+        "4 BHK"
+      ],
       "budgetMin": 70000000,
       "budgetMax": 95000000,
       "budget": "₹7.0 Cr - ₹9.5 Cr",
@@ -1611,7 +2086,12 @@
       "assignedTo": "Aditya Rai",
       "nextFollowUp": "2026-09-30",
       "notes": "Very high intent. MD at Private Equity firm. Wife visited last week.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "createdAt": "2026-09-29T08:42:17.171Z",
+      "propertyTypeNeeded": "Apartment",
+      "furnishingPreference": "Any",
+      "constructionStagePreference": "Any",
+      "parkingPreference": "Any",
+      "updatedAt": "2026-10-12T19:31:51.927Z"
     },
     {
       "id": "lead_2",
@@ -1725,6 +2205,36 @@
       "nextFollowUp": "2026-09-29",
       "notes": "Follow-up today with Central Park Resorts photo brochure.",
       "createdAt": "2026-09-29T08:42:17.171Z"
+    },
+    {
+      "name": "Pooja Verma",
+      "phone": "9988776655",
+      "email": "",
+      "leadPurpose": "Buy",
+      "propertyTypeNeeded": "Apartment",
+      "bhkNeeded": [
+        "2 BHK"
+      ],
+      "city": "Mumbai",
+      "preferredLocalities": "",
+      "urgency": "Within 1 Month",
+      "status": "New Inbound",
+      "source": "Website",
+      "furnishingPreference": "Any",
+      "constructionStagePreference": "Any",
+      "vastuPreference": "Any",
+      "parkingPreference": "Any",
+      "id": "lead_1bxyuxic",
+      "agencyId": "ag_ql21vxnd",
+      "leadType": "Buyer",
+      "requirement": "",
+      "budget": "",
+      "locationPreference": "",
+      "priority": "Medium",
+      "assignedTo": "Unassigned",
+      "nextFollowUp": "",
+      "notes": "",
+      "createdAt": "2026-10-12T19:54:31.497Z"
     }
   ],
   "deals": [
@@ -1850,9 +2360,44 @@
       "expectedCloseDate": "2026-10-05",
       "notes": "Sub-registrar appointment booked for Tuesday 11 AM.",
       "createdAt": "2026-09-29T08:42:17.171Z"
+    },
+    {
+      "title": "Test Deal 1",
+      "clientName": "Vikram Malhotra",
+      "propertyName": "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
+      "amount": 5000000,
+      "dealType": "Outright Sale",
+      "stage": "Token Received",
+      "id": "deal_5c2p5fdm",
+      "agencyId": "ag_ql21vxnd",
+      "propertyId": "",
+      "leadId": "",
+      "probability": 50,
+      "commissionRate": "2.5%",
+      "commissionAmount": 125000,
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-11-11",
+      "createdAt": "2026-10-12T18:18:52.602Z",
+      "updatedAt": "2026-10-12T19:57:35.351Z"
     }
   ],
   "clients": [
+    {
+      "id": "cli_gyty864g",
+      "agencyId": "ag_ql21vxnd",
+      "name": "Aarav Singhania",
+      "email": "aarav@singhania.com",
+      "phone": "9820098200",
+      "type": "Direct Buyer (Self-Created)",
+      "source": "Self-Created (Public Listing)",
+      "isSelfCreated": true,
+      "selfCreatedTag": "Created by User (Self-Interest)",
+      "requirement": "Interested in 4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park (4 BHK Apartment)",
+      "budget": "₹8,50,00,000",
+      "preferredLocation": "Worli",
+      "notes": "Marked direct interest via public listing showcase page.",
+      "createdAt": "2026-10-12T19:52:37.778Z"
+    },
     {
       "id": "cli_1",
       "agencyId": "ag_ql21vxnd",
@@ -2338,6 +2883,36 @@
   ],
   "siteVisits": [
     {
+      "id": "vis_4cv3ttgw",
+      "agencyId": "ag_vance_01",
+      "property": "Vance Luxury Realty Flagship Listing",
+      "client": "Vikram Singhania",
+      "clientPhone": "9811223344",
+      "clientEmail": "vikram@singhania.in",
+      "date": "2026-10-15",
+      "timeSlot": "04:00 PM",
+      "accompaniedBy": "Agent",
+      "status": "Scheduled",
+      "source": "Client Portal",
+      "notes": "Self-booked via public listing page. Note: Interested in top floor penthouse with sea view",
+      "createdAt": "2026-10-12T08:25:00.411Z"
+    },
+    {
+      "id": "vis_8dzirtol",
+      "agencyId": "ag_vance_01",
+      "property": "Vance Luxury Realty Flagship Listing",
+      "client": "as",
+      "clientPhone": "999999999999999999999999",
+      "clientEmail": "a@a.com",
+      "date": "2026-10-08",
+      "timeSlot": "02:53",
+      "accompaniedBy": "Agent",
+      "status": "Scheduled",
+      "source": "Client Portal",
+      "notes": "Self-booked via public listing page. Note: scvway",
+      "createdAt": "2026-10-07T18:23:16.037Z"
+    },
+    {
       "id": "vis_1",
       "agencyId": "ag_vance_01",
       "property": "Luxury Villa in Beverly Hills",
@@ -2376,11 +2951,12 @@
       "slotTime": "04:30 PM",
       "locality": "Worli, Mumbai",
       "accompaniedBy": "Aditya Rai",
-      "status": "Scheduled",
+      "status": "Confirmed",
       "interestLevel": "Extremely Interested 🔥",
       "actionRequired": "Send location pin and gate pass code",
       "notes": "Buyer coming with wife and interior architect. Focus on sea view and car parking.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "createdAt": "2026-09-29T08:42:17.171Z",
+      "updatedAt": "2026-10-12T19:56:25.733Z"
     },
     {
       "id": "vis_2",
@@ -2809,6 +3385,43 @@
   ],
   "recycleBin": [],
   "supportTickets": [
+    {
+      "id": "tic_cm6yuvm",
+      "agencyId": "ag_vance_01",
+      "agencyName": "Vance Luxury Realty",
+      "ticketNumber": "TICK-5633",
+      "subject": "Inquiry: How do WhatsApp pitch links work?",
+      "category": "General",
+      "priority": "Medium",
+      "status": "In Review",
+      "contractType": "",
+      "createdByName": "Marcus Vance",
+      "createdByEmail": "marcus@vancerealty.com",
+      "messages": [
+        {
+          "id": "msg_2ek6hj1",
+          "sender": "Marcus Vance",
+          "isStaff": false,
+          "text": "Please confirm if clients can directly book site visits from the WhatsApp link.",
+          "timestamp": "2026-10-12T16:53:59.538Z"
+        },
+        {
+          "id": "msg_g1j26bs",
+          "sender": "Aditya",
+          "isStaff": true,
+          "text": "Thank you for your feedback! This feature enhancement has been logged with our core product engineering team.",
+          "timestamp": "2026-10-12T17:13:46.932Z"
+        },
+        {
+          "id": "msg_reeueb9",
+          "sender": "Aditya",
+          "isStaff": true,
+          "text": "j",
+          "timestamp": "2026-10-12T19:05:12.727Z"
+        }
+      ],
+      "createdAt": "2026-10-12T16:53:59.538Z"
+    },
     {
       "id": "tic_1",
       "agencyId": "ag_ql21vxnd",

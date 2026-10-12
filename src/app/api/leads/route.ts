@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { sanitizeString } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -32,19 +33,19 @@ export async function POST(req: Request) {
     ...data,
     id: 'lead_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    name: data.name || 'New Lead',
-    email: data.email || '',
-    phone: data.phone || '',
-    status: data.status || 'New',
-    source: data.source || 'Direct',
-    leadType: data.leadType || 'Buyer',
-    requirement: data.requirement || '',
-    budget: data.budget || '',
-    locationPreference: data.locationPreference || '',
-    priority: data.priority || 'Medium',
-    assignedTo: data.assignedTo || 'Unassigned',
-    nextFollowUp: data.nextFollowUp || '',
-    notes: data.notes || '',
+    name: sanitizeString(data.name || 'New Lead', 100),
+    email: sanitizeString(data.email || '', 100),
+    phone: sanitizeString(data.phone || '', 30),
+    status: sanitizeString(data.status || 'New', 50),
+    source: sanitizeString(data.source || 'Direct', 50),
+    leadType: sanitizeString(data.leadType || 'Buyer', 50),
+    requirement: sanitizeString(data.requirement || '', 500),
+    budget: sanitizeString(data.budget || '', 100),
+    locationPreference: sanitizeString(data.locationPreference || '', 200),
+    priority: sanitizeString(data.priority || 'Medium', 50),
+    assignedTo: sanitizeString(data.assignedTo || 'Unassigned', 100),
+    nextFollowUp: sanitizeString(data.nextFollowUp || '', 50),
+    notes: sanitizeString(data.notes || '', 1000),
     createdAt: new Date().toISOString()
   };
 
@@ -73,6 +74,12 @@ export async function PUT(req: Request) {
   const updatedLead = {
     ...db.leads[index],
     ...data,
+    id: db.leads[index].id, // IMMUTABLE
+    agencyId: db.leads[index].agencyId, // IMMUTABLE: cannot be stolen across tenants
+    name: data.name !== undefined ? sanitizeString(data.name, 100) : db.leads[index].name,
+    email: data.email !== undefined ? sanitizeString(data.email, 100) : db.leads[index].email,
+    phone: data.phone !== undefined ? sanitizeString(data.phone, 30) : db.leads[index].phone,
+    notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.leads[index].notes,
     updatedAt: new Date().toISOString()
   };
 

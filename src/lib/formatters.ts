@@ -81,37 +81,136 @@ export const CITY_LOCALITIES: Record<string, string[]> = {
   'South Delhi': ['Greater Kailash', 'Vasant Vihar', 'Def Col', 'Hauz Khas', 'Panchsheel Park', 'New Friends Colony']
 };
 
-export const INDIAN_BHK_OPTIONS = [
+export const DEFAULT_BHK_OPTIONS = [
   '1 RK',
   '1 BHK',
+  '1.5 BHK',
   '2 BHK',
   '2.5 BHK',
   '3 BHK',
   '3.5 BHK',
   '4 BHK',
-  '4.5+ BHK / Penthouse',
-  'Builder Floor',
-  'Independent Villa / Bungalow',
-  'Residential Plot',
+  '5+ BHK',
+  'Duplex',
+  'Penthouse',
+  'Plot / Land',
   'Commercial Bare Shell',
-  'Commercial Furnished Office',
-  'Retail Shop / Showroom'
+  'Furnished Office'
 ];
 
-export const VASTU_FACINGS = [
-  'East Facing (Vastu Compliant)',
-  'North Facing (Vastu Compliant)',
-  'North-East / Ishanya (Highly Auspicious)',
-  'West Facing',
-  'South Facing',
-  'South-East Facing',
-  'Not Applicable'
+export const DEFAULT_PROPERTY_TYPES = [
+  'Apartment',
+  'Villa / Bungalow',
+  'Independent Floor',
+  'Penthouse',
+  'Studio Apartment',
+  'Row House / Duplex',
+  'Plot / Land',
+  'Commercial Office',
+  'Retail Shop / Showroom',
+  'Farmhouse / Estate'
 ];
 
-export const POSSESSION_STAGES = [
+export const DEFAULT_LEAD_SOURCES = [
+  'Direct',
+  'Website',
+  'Referral',
+  'Listing Websites'
+];
+
+export const DEFAULT_PROPERTY_SPECS = [
+  'Unfurnished',
+  'Semi-Furnished',
+  'Fully Furnished',
+  'Bare Shell (Commercial / Penthouse)',
+  'Warm Shell (With Flooring & AC)',
+  'Luxury Designer Furnished'
+];
+
+export const DEFAULT_CONSTRUCTION_STAGES = [
   'Ready to Move (OC Received)',
   'Under Construction (Possession in 3-6 Months)',
   'Under Construction (Possession in 1-2 Years)',
   'Newly Launched / Booking Open',
-  'Pre-Launch'
+  'Pre-Launch / Expression of Interest'
 ];
+
+export const DEFAULT_VASTU_FACINGS = [
+  'East Facing (Vastu Compliant)',
+  'North Facing (Vastu Compliant)',
+  'North-East / Ishanya (Highly Auspicious)',
+  'North-West Facing',
+  'West Facing',
+  'South-East Facing',
+  'South Facing',
+  'Not Applicable'
+];
+
+export const DEFAULT_DEAL_STAGES = [
+  'Negotiation',
+  'Token Received',
+  'Agreement Drafted',
+  'Registration Pending',
+  'Closed Won',
+  'Lost'
+];
+
+export const DEFAULT_PARKING_OPTIONS = [
+  '1 Covered Car Park',
+  '2 Covered Car Parks',
+  '3+ Covered Car Parks',
+  '1 Open Car Park',
+  '2 Open Car Parks',
+  'Stilt Parking',
+  'No Dedicated Parking',
+  'Multi-Level Covered'
+];
+
+export const DEFAULT_PROPERTY_STATUSES = [
+  'Available',
+  'Under Offer',
+  'Under Negotiation',
+  'Sold',
+  'Rented',
+  'Off Market'
+];
+
+export const DEFAULT_LEAD_STATUSES = [
+  'New Inbound',
+  'Contacted',
+  'Qualified',
+  'Site Visit Scheduled',
+  'Negotiation',
+  'Won',
+  'Lost',
+  'Dead'
+];
+
+export const DEFAULT_SITE_VISIT_STATUSES = [
+  'Scheduled',
+  'Confirmed',
+  'Completed',
+  'Rescheduled',
+  'Cancelled',
+  'No Show'
+];
+
+export const DEFAULT_TASK_STATUSES = [
+  'Pending',
+  'In Progress',
+  'Completed',
+  'Overdue',
+  'Cancelled'
+];
+
+export const DEFAULT_CLIENT_STATUSES = [
+  'Active Search',
+  'In Contract',
+  'Closed Client',
+  'Past Client',
+  'Inactive'
+];
+
+export const VASTU_FACINGS = DEFAULT_VASTU_FACINGS;
+export const POSSESSION_STAGES = DEFAULT_CONSTRUCTION_STAGES;
+

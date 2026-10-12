@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
+import { sanitizeString } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -40,6 +41,7 @@ export async function POST(req: Request) {
     budget: data.budget || '',
     preferredLocation: data.preferredLocation || '',
     preferredChannel: data.preferredChannel || 'WhatsApp',
+    source: data.source || data.preferredChannel || 'Direct Inbound',
     assignedManager: data.assignedManager || 'Aditya Rai',
     notes: data.notes || '',
     createdAt: new Date().toISOString()
@@ -70,6 +72,12 @@ export async function PUT(req: Request) {
   const updatedClient = {
     ...db.clients[index],
     ...data,
+    id: db.clients[index].id, // IMMUTABLE
+    agencyId: db.clients[index].agencyId, // IMMUTABLE: cross-tenant isolation
+    name: data.name !== undefined ? sanitizeString(data.name, 100) : db.clients[index].name,
+    email: data.email !== undefined ? sanitizeString(data.email, 100) : db.clients[index].email,
+    phone: data.phone !== undefined ? sanitizeString(data.phone, 30) : db.clients[index].phone,
+    notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.clients[index].notes,
     updatedAt: new Date().toISOString()
   };
 

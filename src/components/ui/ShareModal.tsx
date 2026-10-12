@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export interface ShareModalProps {
   isOpen: boolean;
@@ -55,6 +55,16 @@ export function ShareModal({
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [sharesCount, setSharesCount] = useState(activeProperty?.sharesCount || 0);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !activeProperty) return null;
 
@@ -146,30 +156,36 @@ export function ShareModal({
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(15, 23, 42, 0.65)',
-      backdropFilter: 'blur(4px)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      padding: '20px'
-    }}>
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '16px',
-        width: '100%',
-        maxWidth: '560px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        overflow: 'hidden',
-        border: '1px solid #e2e8f0',
-        animation: 'modalFadeIn 0.15s ease-out'
-      }}>
+    <div 
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '20px'
+      }}
+    >
+      <div 
+        onClick={e => e.stopPropagation()}
+        style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          width: '100%',
+          maxWidth: '560px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          overflow: 'hidden',
+          border: '1px solid #e2e8f0',
+          animation: 'modalFadeIn 0.15s ease-out'
+        }}
+      >
         
         {/* Modal Header */}
         <div style={{

@@ -63,6 +63,17 @@ export default function CalendarPage() {
     loadEvents();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (editingEvent) setEditingEvent(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, editingEvent]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await fetch('/api/calendar', {
@@ -265,27 +276,33 @@ export default function CalendarPage() {
 
       {/* CREATE EVENT MODAL */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}>
+        <div 
+          onClick={() => setShowModal(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '540px',
+              maxWidth: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}
+          >
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Schedule Calendar Event</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
@@ -376,27 +393,33 @@ export default function CalendarPage() {
 
       {/* EDIT EVENT MODAL */}
       {editingEvent && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}>
+        <div 
+          onClick={() => setEditingEvent(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '540px',
+              maxWidth: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}
+          >
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Event: {editingEvent.title}</h3>
             <form onSubmit={handleUpdateEvent} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>

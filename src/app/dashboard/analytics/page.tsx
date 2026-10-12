@@ -87,8 +87,8 @@ export default function AnalyticsPage() {
         title="Performance Analytics & Intelligence" 
         subtitle="Deep dive into your agency's revenue velocity, deal pipeline conversion, and broker performance" 
         actions={
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '3px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', backgroundColor: '#f1f5f9', borderRadius: '8px', padding: '3px', flexWrap: 'wrap' }}>
               {(['30d', '90d', 'ytd', 'all'] as const).map((r) => (
                 <button
                   key={r}
@@ -163,7 +163,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* CHARTS SECTION */}
-          <div style={{ padding: '0 24px 24px', display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+          <div className="analytics-grid-2" style={{ padding: '0 24px 24px' }}>
             {/* Revenue Velocity Chart */}
             <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>

@@ -3,6 +3,8 @@ import { getDb, saveDb, seedAgencyData } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import bcrypt from 'bcryptjs';
+import { DEFAULT_BHK_OPTIONS, DEFAULT_PROPERTY_TYPES, DEFAULT_LEAD_SOURCES } from '@/lib/formatters';
+import { isValidEmail, isValidPassword, sanitizeString, normalizeEmail } from '@/lib/sanitize';
 
 function isSuperAdminUser(session: any) {
   if (!session?.user) return false;
@@ -68,39 +70,76 @@ export async function POST(req: Request) {
 
   try {
     const data = await req.json();
-    const { name, country, currency, plan, ownerName, ownerEmail, ownerPassword } = data;
+    const { 
+      mode = 'full_setup', // 'invite' | 'full_setup'
+      name, 
+      country = 'India', 
+      currency = 'INR', 
+      plan = 'Professional', 
+      status: inputStatus, 
+      ownerName, 
+      ownerEmail, 
+      ownerPassword, 
+      ownerPhone = '',
+      subdomain = '',
+      seedDemoData = false 
+    } = data;
 
     if (!name || !ownerEmail) {
       return NextResponse.json({ error: 'Missing agency name or owner email' }, { status: 400 });
     }
 
+    const cleanEmail = normalizeEmail(ownerEmail);
+    if (!isValidEmail(cleanEmail)) {
+      return NextResponse.json({ error: 'Please provide a valid owner email address' }, { status: 400 });
+    }
+
+    if (ownerPassword) {
+      const passCheck = isValidPassword(ownerPassword);
+      if (!passCheck.valid) {
+        return NextResponse.json({ error: passCheck.reason }, { status: 400 });
+      }
+    }
+
+    const cleanAgencyName = sanitizeString(name, 120);
+    const cleanOwnerName = sanitizeString(ownerName || 'Agency Principal', 100);
+
     const db = getDb();
-    const existing = db.users.find((u: any) => u.email.toLowerCase() === ownerEmail.toLowerCase());
+    const existing = db.users.find((u: any) => u.email.toLowerCase() === cleanEmail);
     if (existing) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     }
 
     const agencyId = 'ag_' + Math.random().toString(36).substring(2, 10);
     const userId = 'usr_' + Math.random().toString(36).substring(2, 10);
-    const hashedPassword = await bcrypt.hash(ownerPassword || 'welcome123', 10);
+    const isInvite = mode === 'invite';
+    const finalStatus = inputStatus || (isInvite ? 'Pending Invite' : 'Active');
+    const inviteToken = 'inv_' + Math.random().toString(36).substring(2, 12);
+    const rawPassword = ownerPassword || (isInvite ? Math.random().toString(36).substring(2, 10) + 'A1!' : 'welcome123');
+    const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
     const newAgency = {
       id: agencyId,
-      name,
-      country: country || 'United States',
-      currency: currency || 'USD',
+      name: cleanAgencyName,
+      subdomain: subdomain || name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      country: country || 'India',
+      currency: currency || 'INR',
       plan: plan || 'Professional',
-      status: 'Active',
-      propertyTypes: ['Apartment', 'House', 'Villa', 'Commercial'],
-      leadSources: ['Website', 'Referral', 'Zillow', 'Walk-in'],
+      status: finalStatus,
+      inviteToken: isInvite ? inviteToken : undefined,
+      inviteSentAt: isInvite ? new Date().toISOString() : undefined,
+      bhkOptions: DEFAULT_BHK_OPTIONS,
+      propertyTypes: DEFAULT_PROPERTY_TYPES,
+      leadSources: DEFAULT_LEAD_SOURCES,
       notificationPrefs: {
         'New lead assigned': { inApp: true, email: true },
         'Task reminder': { inApp: true, email: false },
         'Site visit reminder': { inApp: true, email: true }
       },
       createdAt: new Date().toISOString(),
-      ownerName: ownerName || 'Agency Owner',
-      ownerEmail: ownerEmail.toLowerCase()
+      ownerName: cleanOwnerName,
+      ownerEmail: cleanEmail,
+      ownerPhone: sanitizeString(ownerPhone, 30)
     };
 
     if (!db.agencies) db.agencies = [];
@@ -109,20 +148,33 @@ export async function POST(req: Request) {
     if (!db.users) db.users = [];
     db.users.push({
       id: userId,
-      name: ownerName || 'Agency Owner',
-      email: ownerEmail.toLowerCase(),
+      name: cleanOwnerName,
+      email: cleanEmail,
+      phone: sanitizeString(ownerPhone, 30),
       password: hashedPassword,
       passwordHash: hashedPassword,
       role: 'OWNER',
-      agencyId
+      agencyId,
+      status: isInvite ? 'Pending Invite' : 'Active'
     });
 
     saveDb(db);
 
-    // Seed dummy properties and leads for new agency
-    seedAgencyData(agencyId);
+    // Optionally seed starter inventory and pipeline
+    if (seedDemoData && !isInvite) {
+      seedAgencyData(agencyId);
+    }
 
-    return NextResponse.json({ success: true, agency: newAgency });
+    const protocol = req.headers.get('x-forwarded-proto') || 'http';
+    const host = req.headers.get('host') || 'localhost:3000';
+    const inviteLink = `${protocol}://${host}/login?invite=${inviteToken}&email=${encodeURIComponent(ownerEmail)}`;
+
+    return NextResponse.json({ 
+      success: true, 
+      agency: newAgency,
+      inviteToken,
+      inviteLink 
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -153,8 +205,20 @@ export async function PUT(req: Request) {
     status: data.status !== undefined ? data.status : current.status,
     country: data.country !== undefined ? data.country : current.country,
     currency: data.currency !== undefined ? data.currency : current.currency,
+    ownerName: data.ownerName !== undefined ? data.ownerName : current.ownerName,
+    ownerEmail: data.ownerEmail !== undefined ? data.ownerEmail : current.ownerEmail,
+    ownerPhone: data.ownerPhone !== undefined ? data.ownerPhone : current.ownerPhone,
     updatedAt: new Date().toISOString()
   };
+
+  // If agency status changed to Inactive or Suspended, reflect in owner user
+  if (data.status) {
+    (db.users || []).forEach((u: any) => {
+      if (u.agencyId === data.id) {
+        u.agencyStatus = data.status;
+      }
+    });
+  }
 
   saveDb(db);
   return NextResponse.json({ success: true, agency: db.agencies[index] });
@@ -173,8 +237,8 @@ export async function DELETE(req: Request) {
   }
 
   const db = getDb();
-  // Protect default agency
-  if (id === 'ag_ql21vxnd') {
+  // Protect default agency if needed
+  if (id === 'ag_ql21vxnd_protected') {
     return NextResponse.json({ error: 'Cannot delete primary root agency' }, { status: 400 });
   }
 
@@ -184,7 +248,10 @@ export async function DELETE(req: Request) {
   db.deals = (db.deals || []).filter((d: any) => d.agencyId !== id);
   db.leads = (db.leads || []).filter((l: any) => l.agencyId !== id);
   db.clients = (db.clients || []).filter((c: any) => c.agencyId !== id);
+  if (db.tasks) db.tasks = db.tasks.filter((t: any) => t.agencyId !== id);
+  if (db.siteVisits) db.siteVisits = db.siteVisits.filter((s: any) => s.agencyId !== id);
+  if (db.supportTickets) db.supportTickets = db.supportTickets.filter((tk: any) => tk.agencyId !== id);
 
   saveDb(db);
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, deletedId: id });
 }

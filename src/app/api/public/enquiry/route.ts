@@ -1,12 +1,28 @@
 import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/lib/db';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { sanitizeString } from '@/lib/sanitize';
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const limitCheck = checkRateLimit(`public_enquiry_${ip}`, { limit: 10, windowMs: 10 * 60 * 1000 });
+    if (!limitCheck.allowed) {
+      return NextResponse.json({
+        error: `Too many inquiries submitted. Please try again in ${limitCheck.resetSeconds}s.`
+      }, { status: 429 });
+    }
+
     const data = await req.json();
     const { propertyId, name, email, phone, preferredDate, message } = data;
 
-    if (!name || (!email && !phone)) {
+    const cleanName = sanitizeString(name, 100);
+    const cleanEmail = sanitizeString(email, 100);
+    const cleanPhone = sanitizeString(phone, 30);
+    const cleanMessage = sanitizeString(message, 1000);
+    const cleanPreferredDate = sanitizeString(preferredDate, 50);
+
+    if (!cleanName || (!cleanEmail && !cleanPhone)) {
       return NextResponse.json({ error: 'Name and either email or phone number are required.' }, { status: 400 });
     }
 
@@ -21,9 +37,9 @@ export async function POST(req: Request) {
     const newLead = {
       id: newLeadId,
       agencyId,
-      name,
-      email: email || 'inquiry@lead.com',
-      phone: phone || 'Unspecified',
+      name: cleanName,
+      email: cleanEmail || 'inquiry@lead.com',
+      phone: cleanPhone || 'Unspecified',
       status: 'New',
       source: 'Public Property Page',
       leadType: 'Buyer',
@@ -31,7 +47,7 @@ export async function POST(req: Request) {
       budget: prop ? `$${prop.price.toLocaleString()}` : '$1,000,000+',
       priority: 'High',
       assignedTo: prop?.agentName || 'Aditya Rai',
-      notes: message ? `Client Message: "${message}"` : 'Inquiry submitted via public property webpage.',
+      notes: cleanMessage ? `Client Message: "${cleanMessage}"` : 'Inquiry submitted via public property webpage.',
       createdAt: now
     };
 

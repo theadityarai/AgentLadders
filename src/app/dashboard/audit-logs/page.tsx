@@ -204,7 +204,7 @@ export default function AuditLogsPage() {
   ];
 
   return (
-    <>
+    <div className="dashboard-page-container">
       <PageHeader
         title="Audit Logs & Recycle Bin"
         subtitle="Full forensic audit trail of all data changes and recovery bin for soft-deleted records"
@@ -225,9 +225,7 @@ export default function AuditLogsPage() {
       )}
 
       {/* Tabs Navigation */}
-      <div style={{
-        display: 'flex',
-        gap: '12px',
+      <div className="responsive-pills-scroll" style={{
         borderBottom: '1px solid #e2e8f0',
         marginBottom: '24px'
       }}>
@@ -241,7 +239,8 @@ export default function AuditLogsPage() {
             fontSize: '14px',
             color: activeTab === 'audit' ? '#2563eb' : '#64748b',
             borderBottom: activeTab === 'audit' ? '2px solid #2563eb' : '2px solid transparent',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            whiteSpace: 'nowrap'
           }}
         >
           📜 System Audit Trail ({auditLogs.length})
@@ -256,56 +255,59 @@ export default function AuditLogsPage() {
             fontSize: '14px',
             color: activeTab === 'recycle' ? '#2563eb' : '#64748b',
             borderBottom: activeTab === 'recycle' ? '2px solid #2563eb' : '2px solid transparent',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            whiteSpace: 'nowrap'
           }}
         >
           ♻️ Soft-Delete Recycle Bin ({recycleBin.length})
         </button>
       </div>
 
-      {activeTab === 'audit' ? (
-        <>
-          <TableFilterBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            searchPlaceholder="Search audit log by actor, operation, or details..."
-            filters={[
-              {
-                key: 'action',
-                label: 'Action Type',
-                value: actionFilter,
-                options: [
-                  { label: 'All Operations', value: 'All' },
-                  { label: 'CREATE', value: 'CREATE' },
-                  { label: 'UPDATE', value: 'UPDATE' },
-                  { label: 'DELETE', value: 'DELETE' },
-                  { label: 'RESTORE', value: 'RESTORE' },
-                  { label: 'SHARE', value: 'SHARE' },
-                  { label: 'LOGIN', value: 'LOGIN' }
-                ],
-                onChange: setActionFilter
-              }
-            ]}
-            onReset={() => {
-              setSearchQuery('');
-              setActionFilter('All');
-            }}
-            totalCount={auditLogs.length}
-            filteredCount={filteredAuditLogs.length}
-          />
+      <div style={{ paddingBottom: '24px' }}>
+        {activeTab === 'audit' ? (
+          <>
+            <TableFilterBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder="Search audit log by actor, operation, or details..."
+              filters={[
+                {
+                  key: 'action',
+                  label: 'Action Type',
+                  value: actionFilter,
+                  options: [
+                    { label: 'All Operations', value: 'All' },
+                    { label: 'CREATE', value: 'CREATE' },
+                    { label: 'UPDATE', value: 'UPDATE' },
+                    { label: 'DELETE', value: 'DELETE' },
+                    { label: 'RESTORE', value: 'RESTORE' },
+                    { label: 'SHARE', value: 'SHARE' },
+                    { label: 'LOGIN', value: 'LOGIN' }
+                  ],
+                  onChange: setActionFilter
+                }
+              ]}
+              onReset={() => {
+                setSearchQuery('');
+                setActionFilter('All');
+              }}
+              totalCount={auditLogs.length}
+              filteredCount={filteredAuditLogs.length}
+            />
+            <DataTable
+              columns={auditColumns}
+              data={filteredAuditLogs}
+              emptyMessage="No audit log entries recorded yet."
+            />
+          </>
+        ) : (
           <DataTable
-            columns={auditColumns}
-            data={filteredAuditLogs}
-            emptyMessage="No audit log entries recorded yet."
+            columns={recycleColumns}
+            data={recycleBin}
+            emptyMessage="Recycle bin is completely empty. No deleted records."
           />
-        </>
-      ) : (
-        <DataTable
-          columns={recycleColumns}
-          data={recycleBin}
-          emptyMessage="Recycle bin is completely empty. No deleted records."
-        />
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 }

@@ -21,6 +21,7 @@ export default function TasksPage() {
   const [data, setData] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const initialForm = {
     title: '',
     assignedTo: 'Marcus Vance',
@@ -58,14 +59,46 @@ export default function TasksPage() {
     loadTasks();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showModal) setShowModal(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal]);
+
+  const handleOpenAdd = () => {
+    setEditingTask(null);
+    setForm(initialForm);
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (task: Task) => {
+    setEditingTask(task);
+    setForm({
+      title: task.title || '',
+      assignedTo: task.assignedTo || 'Marcus Vance',
+      dueDate: task.dueDate || new Date().toISOString().split('T')[0],
+      category: (task as any).category || 'Follow-up Call',
+      priority: (task as any).priority || 'High',
+      relatedTo: (task as any).relatedTo || '',
+      description: (task as any).description || '',
+      status: task.status || 'Pending'
+    });
+    setShowModal(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const method = editingTask ? 'PUT' : 'POST';
+    const payload = editingTask ? { id: editingTask.id, ...form } : form;
     await fetch('/api/tasks', {
-      method: 'POST',
+      method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      body: JSON.stringify(payload)
     });
     setShowModal(false);
+    setEditingTask(null);
     setForm(initialForm);
     loadTasks();
   };
@@ -147,6 +180,22 @@ export default function TasksPage() {
       render: (r) => (
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
+            onClick={() => handleOpenEdit(r)}
+            style={{
+              padding: '6px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              color: '#1d4ed8'
+            }}
+            title="Edit Task"
+          >
+            ✏️ Edit
+          </button>
+          <button
             onClick={() => handleToggleStatus(r)}
             style={{
               padding: '6px 10px',
@@ -159,7 +208,7 @@ export default function TasksPage() {
               color: r.status === 'Completed' ? '#475569' : '#166534'
             }}
           >
-            {r.status === 'Completed' ? 'Mark Pending' : '✓ Complete'}
+            {r.status === 'Completed' ? 'Pending' : '✓ Complete'}
           </button>
           <button
             onClick={() => handleDelete(r.id, r.title)}
@@ -183,11 +232,11 @@ export default function TasksPage() {
   ];
 
   return (
-    <>
+    <div className="dashboard-page-container">
       <PageHeader 
         title="Tasks & Follow-ups" 
         subtitle="Manage daily agent workflows, client callbacks, and closing checklists" 
-        actions={<Button variant="primary" onClick={() => setShowModal(true)}>+ Add Task</Button>} 
+        actions={<Button variant="primary" onClick={handleOpenAdd}>+ Add Task</Button>} 
       />
 
       <TableFilterBar
@@ -213,35 +262,55 @@ export default function TasksPage() {
         ]}
       />
       
-      {loading ? (
-        <p style={{ padding: 20 }}>Loading tasks...</p>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          emptyMessage="No tasks matched your search"
-          onResetFilters={handleResetFilters}
-        />
-      )}
+      <div style={{ paddingBottom: '24px' }}>
+        {loading ? (
+          <p style={{ padding: 20 }}>Loading tasks...</p>
+        ) : (
+          <DataTable 
+            columns={columns} 
+            data={filteredData} 
+            emptyMessage="No tasks matched your search"
+            onResetFilters={handleResetFilters}
+          />
+        )}
+      </div>
 
       {showModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
-          <div style={{ backgroundColor: 'white', borderRadius: '16px', width: '100%', maxWidth: '680px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid #e2e8f0' }}>
+        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '16px' }}>
+          <div onClick={e => e.stopPropagation()} className="responsive-modal" style={{ backgroundColor: 'white', borderRadius: '16px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid #e2e8f0', padding: 0 }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Create Action Task</h2>
+                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  {editingTask ? '✏️ Edit Action Task' : 'Create Action Task'}
+                </h2>
                 <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>Assign critical follow-ups, contract inspections, and escrow deadlines</p>
               </div>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
             </div>
 
             <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Primary Status Field (First / Top Field) */}
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+                  Task Status *
+                </label>
+                <select 
+                  value={form.status} 
+                  onChange={e => setForm({...form, status: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '14px', fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
+                >
+                  <option value="Pending">⏳ Pending</option>
+                  <option value="In Progress">🔄 In Progress</option>
+                  <option value="Completed">✅ Completed</option>
+                </select>
+              </div>
+
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Task Title / Objective *</label>
                 <input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Prepare Escrow & Title Documents for Beverly Hills Villa" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
+              <div className="responsive-grid-2" style={{ gap: '14px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Task Category</label>
                   <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
@@ -262,17 +331,9 @@ export default function TasksPage() {
                     <option>Low</option>
                   </select>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Task Status</label>
-                  <select value={form.status} onChange={e => setForm({...form, status: e.target.value})} style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}>
-                    <option>Pending</option>
-                    <option>In Progress</option>
-                    <option>Completed</option>
-                  </select>
-                </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+              <div className="responsive-grid-2" style={{ gap: '14px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>Assigned Team Member *</label>
                   <input required value={form.assignedTo} onChange={e => setForm({...form, assignedTo: e.target.value})} placeholder="e.g. Marcus Vance" style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }} />
@@ -293,9 +354,27 @@ export default function TasksPage() {
                 <textarea rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Detailed action checklist, key contacts, or contingency deadlines..." style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', resize: 'vertical' }} />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '8px' }}>
-                <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
-                <Button type="submit" variant="primary">Save Task</Button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '8px' }}>
+                <div>
+                  {editingTask && (
+                    <Button 
+                      type="button" 
+                      variant="danger" 
+                      onClick={() => {
+                        setShowModal(false);
+                        handleDelete(editingTask.id, editingTask.title);
+                      }}
+                    >
+                      🗑️ Delete
+                    </Button>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
+                  <Button type="submit" variant="primary">
+                    {editingTask ? 'Update Task' : 'Save Task'}
+                  </Button>
+                </div>
               </div>
             </form>
           </div>
@@ -317,6 +396,6 @@ export default function TasksPage() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setTaskToDelete(null)}
       />
-    </>
+    </div>
   );
 }

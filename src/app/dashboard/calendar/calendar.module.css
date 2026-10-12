@@ -71,3 +71,23 @@
   text-overflow: ellipsis;
   z-index: 2;
 }
+
+@media (max-width: 768px) {
+  .calendarGrid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .timeColumn {
+    width: 60px;
+    position: sticky;
+    left: 0;
+    background-color: #fff;
+    z-index: 10;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.05);
+  }
+  .dayColumn {
+    min-width: 120px;
+    flex: 0 0 120px;
+  }
+}
+

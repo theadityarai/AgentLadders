@@ -1,1056 +1,1173 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Button } from '@/components/ui/Button';
-import { DataTable, Column } from '@/components/ui/DataTable';
-import { TableFilterBar } from '@/components/ui/TableFilterBar';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import {
-  formatINR,
-  TOP_INDIAN_CITIES,
-  CITY_LOCALITIES,
-  INDIAN_BHK_OPTIONS
+import React, { useState, useEffect } from 'react';
+import { 
+  formatINR, 
+  DEFAULT_BHK_OPTIONS, 
+  DEFAULT_PROPERTY_TYPES,
+  DEFAULT_PROPERTY_SPECS,
+  DEFAULT_CONSTRUCTION_STAGES,
+  DEFAULT_VASTU_FACINGS,
+  DEFAULT_PARKING_OPTIONS,
+  DEFAULT_LEAD_SOURCES,
+  DEFAULT_LEAD_STATUSES
 } from '@/lib/formatters';
-import { findMatchingPropertiesForLead } from '@/lib/match-engine';
-import { openWhatsAppDirect } from '@/lib/whatsapp-engine';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { Toast, ToastMessage } from '@/components/ui/Toast';
 
 interface Lead {
-  [key: string]: unknown;
   id: string;
   name: string;
-  email: string;
   phone: string;
+  email?: string;
   status: string;
-  source: string;
-  leadPurpose?: 'Buy' | 'Rent';
+  source?: string;
+  isSelfCreated?: boolean;
+  selfCreatedTag?: string;
   city?: string;
-  preferredLocalities?: string[] | string;
   bhkNeeded?: string | string[];
   propertyTypeNeeded?: string;
-  bedroomsNeeded?: string;
-  budget?: number | string;
-  budgetMin?: number | string;
-  budgetMax?: number | string;
-  financingStatus?: string;
-  urgency?: string;
+  furnishingPreference?: string;
+  constructionStagePreference?: string;
   vastuPreference?: string;
-  locationPreference?: string;
-  priority?: string;
-  assignedTo?: string;
+  parkingPreference?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  budget?: string;
   nextFollowUp?: string;
-  notes?: string;
-  requirement?: string;
+  preferredLocalities?: string;
+  urgency?: string;
 }
-
-interface Property {
-  id: string;
-  title: string;
-  purpose?: string;
-  type?: string;
-  bhk?: string;
-  bedrooms?: number | string;
-  city?: string;
-  locality?: string;
-  location?: string;
-  price: number;
-  carpetAreaSqFt?: number | string;
-  areaSqFt?: number | string;
-  vastuFacing?: string;
-  reraId?: string;
-  status: string;
-  media?: Array<{ url: string; isCover?: boolean; tag?: string }>;
-  images?: string[];
-  publicToken?: string;
-}
-
-const LEAD_STATUSES = ['New Inbound', 'Contacted', 'Qualified', 'Site Visit Scheduled', 'Site Visit Done', 'Offer Made', 'Won', 'Lost'];
-const FINANCING_OPTIONS = [
-  'Pre-Approved Home Loan (HDFC / ICICI / SBI)',
-  '100% Self-Funded / Equity / ESOPs',
-  'Home Loan in Process',
-  'Company / MNC Corporate Lease',
-  'Exploring Financing'
-];
 
 export default function LeadsPage() {
   const [data, setData] = useState<Lead[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('All');
+  const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
+
+  const isLeadRent = (l: Lead) => {
+    const p = ((l as any).leadPurpose || (l as any).purpose || (l as any).leadType || (l as any).dealType || '').toLowerCase();
+    const req = ((l as any).requirement || '').toLowerCase();
+    return p.includes('rent') || p.includes('tenant') || p.includes('lease') || req.includes('rent') || req.includes('lease');
+  };
+
+  // Dynamic Agency Configurations
+  const [bhkOptions, setBhkOptions] = useState<string[]>(DEFAULT_BHK_OPTIONS);
+  const [propertyTypes, setPropertyTypes] = useState<string[]>(DEFAULT_PROPERTY_TYPES);
+  const [propertySpecs, setPropertySpecs] = useState<string[]>(DEFAULT_PROPERTY_SPECS);
+  const [constructionStages, setConstructionStages] = useState<string[]>(DEFAULT_CONSTRUCTION_STAGES);
+  const [vastuOptions, setVastuOptions] = useState<string[]>(DEFAULT_VASTU_FACINGS);
+  const [parkingOptions, setParkingOptions] = useState<string[]>(DEFAULT_PARKING_OPTIONS);
+  const [leadSources, setLeadSources] = useState<string[]>(DEFAULT_LEAD_SOURCES);
+  const [leadStatuses, setLeadStatuses] = useState<string[]>(DEFAULT_LEAD_STATUSES);
+  const [sourceFilter, setSourceFilter] = useState('All');
+
+  // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
-  const [convertFeedback, setConvertFeedback] = useState<string | null>(null);
-
-  // Matching properties drawer / modal for a selected lead
-  const [matchingModalLead, setMatchingModalLead] = useState<Lead | null>(null);
-
-  const initialForm = {
-    name: '',
-    email: '',
-    phone: '',
-    leadPurpose: 'Buy' as 'Buy' | 'Rent',
-    city: 'Mumbai',
-    preferredLocalities: 'Worli, Lower Parel',
-    bhkNeeded: '3 BHK',
-    propertyTypeNeeded: 'Apartment',
-    budgetMin: '30000000',
-    budgetMax: '45000000',
-    financingStatus: 'Pre-Approved Home Loan (HDFC / ICICI / SBI)',
-    urgency: 'Immediate (Within 30 Days)',
-    vastuPreference: 'East Facing Mandatory',
-    source: 'WhatsApp Referral',
-    status: 'Qualified',
-    priority: 'Hot 🔥',
-    assignedTo: 'Aditya Rai',
-    nextFollowUp: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    notes: '',
-    requirement: 'Looking for ready luxury residence with 2 car parks.'
-  };
-  const [form, setForm] = useState(initialForm);
-
-  // Delete modal state
-  const [leadToDelete, setLeadToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deletingLead, setDeletingLead] = useState<Lead | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [cityFilter, setCityFilter] = useState('All');
-  const [purposeFilter, setPurposeFilter] = useState('All');
-  const [statusFilter, setStatusFilter] = useState('All');
+  // Toast feedback state
+  const [toast, setToast] = useState<ToastMessage | null>(null);
+  const showToast = (type: 'success' | 'error' | 'info' | 'warning', message: string, title?: string) => {
+    setToast({ id: Date.now().toString(), type, message, title });
+  };
 
-  const loadData = async () => {
-    try {
-      const [leadsRes, propsRes] = await Promise.all([
-        fetch('/api/leads'),
-        fetch('/api/properties')
-      ]);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showModal) setShowModal(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal]);
 
-      const leadsJson = await leadsRes.json();
-      const propsJson = await propsRes.json();
+  // Form State
+  const [formData, setFormData] = useState({
+    name: '', phone: '', email: '',
+    leadPurpose: 'Buy', propertyTypeNeeded: 'Apartment',
+    bhkNeeded: '2 BHK', budgetMax: '', city: 'Mumbai',
+    preferredLocalities: '', urgency: 'Within 1 Month', status: 'New Inbound',
+    source: 'Website Inbound',
+    furnishingPreference: 'Any',
+    constructionStagePreference: 'Any',
+    vastuPreference: 'Any',
+    parkingPreference: 'Any'
+  });
 
-      if (leadsJson.leads) setData(leadsJson.leads);
-      if (propsJson.properties) setProperties(propsJson.properties);
-    } catch (err) {
-      console.error('Failed to load leads or properties', err);
-    } finally {
-      setLoading(false);
-    }
+  const loadData = () => {
+    fetch('/api/leads')
+      .then(res => res.json())
+      .then(json => {
+        if (json.leads) setData(json.leads);
+      })
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     loadData();
+
+    // Check localStorage agency configs for instant sync
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('agentladders_agency_configs');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed.bhkOptions) && parsed.bhkOptions.length > 0) setBhkOptions(parsed.bhkOptions);
+          if (Array.isArray(parsed.propertyTypes) && parsed.propertyTypes.length > 0) setPropertyTypes(parsed.propertyTypes);
+          if (Array.isArray(parsed.propertySpecs) && parsed.propertySpecs.length > 0) setPropertySpecs(parsed.propertySpecs);
+          if (Array.isArray(parsed.constructionStages) && parsed.constructionStages.length > 0) setConstructionStages(parsed.constructionStages);
+          if (Array.isArray(parsed.vastuOptions) && parsed.vastuOptions.length > 0) setVastuOptions(parsed.vastuOptions);
+          if (Array.isArray(parsed.parkingOptions) && parsed.parkingOptions.length > 0) setParkingOptions(parsed.parkingOptions);
+          if (Array.isArray(parsed.leadSources) && parsed.leadSources.length > 0) setLeadSources(parsed.leadSources);
+          if (Array.isArray(parsed.leadStatuses) && parsed.leadStatuses.length > 0) setLeadStatuses(parsed.leadStatuses);
+        }
+      } catch {}
+    }
+
+    // Refresh agency configs from API
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.agency) {
+          if (Array.isArray(data.agency.bhkOptions) && data.agency.bhkOptions.length > 0) setBhkOptions(data.agency.bhkOptions);
+          if (Array.isArray(data.agency.propertyTypes) && data.agency.propertyTypes.length > 0) setPropertyTypes(data.agency.propertyTypes);
+          if (Array.isArray(data.agency.propertySpecs) && data.agency.propertySpecs.length > 0) setPropertySpecs(data.agency.propertySpecs);
+          if (Array.isArray(data.agency.constructionStages) && data.agency.constructionStages.length > 0) setConstructionStages(data.agency.constructionStages);
+          if (Array.isArray(data.agency.vastuOptions) && data.agency.vastuOptions.length > 0) setVastuOptions(data.agency.vastuOptions);
+          if (Array.isArray(data.agency.parkingOptions) && data.agency.parkingOptions.length > 0) setParkingOptions(data.agency.parkingOptions);
+          if (Array.isArray(data.agency.leadSources) && data.agency.leadSources.length > 0) setLeadSources(data.agency.leadSources);
+          if (Array.isArray(data.agency.leadStatuses) && data.agency.leadStatuses.length > 0) setLeadStatuses(data.agency.leadStatuses);
+        }
+      })
+      .catch(() => {});
+
+    if (typeof window !== 'undefined' && window.location.search.includes('new=true')) {
+      setShowModal(true);
+    }
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'agentladders_agency_configs' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed.bhkOptions) && parsed.bhkOptions.length > 0) setBhkOptions(parsed.bhkOptions);
+          if (Array.isArray(parsed.propertyTypes) && parsed.propertyTypes.length > 0) setPropertyTypes(parsed.propertyTypes);
+          if (Array.isArray(parsed.propertySpecs) && parsed.propertySpecs.length > 0) setPropertySpecs(parsed.propertySpecs);
+          if (Array.isArray(parsed.constructionStages) && parsed.constructionStages.length > 0) setConstructionStages(parsed.constructionStages);
+          if (Array.isArray(parsed.vastuOptions) && parsed.vastuOptions.length > 0) setVastuOptions(parsed.vastuOptions);
+          if (Array.isArray(parsed.parkingOptions) && parsed.parkingOptions.length > 0) setParkingOptions(parsed.parkingOptions);
+          if (Array.isArray(parsed.leadSources) && parsed.leadSources.length > 0) setLeadSources(parsed.leadSources);
+          if (Array.isArray(parsed.leadStatuses) && parsed.leadStatuses.length > 0) setLeadStatuses(parsed.leadStatuses);
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await fetch('/api/leads', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        budget: `${formatINR(Number(form.budgetMin))} - ${formatINR(Number(form.budgetMax))}`
-      })
+  const handleOpenAdd = () => {
+    setEditingLead(null);
+    setFormData({
+      name: '', phone: '', email: '',
+      leadPurpose: 'Buy', propertyTypeNeeded: 'Apartment',
+      bhkNeeded: '2 BHK', budgetMax: '', city: 'Mumbai',
+      preferredLocalities: '', urgency: 'Within 1 Month', status: 'New Inbound',
+      source: leadSources[0] || 'Direct',
+      furnishingPreference: 'Any',
+      constructionStagePreference: 'Any',
+      vastuPreference: 'Any',
+      parkingPreference: 'Any'
     });
-    setShowModal(false);
-    setForm(initialForm);
-    loadData();
+    setShowModal(true);
   };
 
   const handleOpenEdit = (lead: Lead) => {
     setEditingLead(lead);
-  };
-
-  const handleUpdateLead = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingLead) return;
-    const res = await fetch('/api/leads', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editingLead)
+    const isRent = isLeadRent(lead);
+    setFormData({
+      name: lead.name || '',
+      phone: lead.phone || '',
+      email: lead.email || '',
+      leadPurpose: isRent ? 'Rent' : 'Buy',
+      propertyTypeNeeded: lead.propertyTypeNeeded || 'Apartment',
+      bhkNeeded: Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded[0] || '2 BHK' : (lead.bhkNeeded || '2 BHK'),
+      budgetMax: lead.budgetMax ? lead.budgetMax.toString() : '',
+      city: lead.city || 'Mumbai',
+      preferredLocalities: lead.preferredLocalities || '',
+      urgency: lead.urgency || 'Within 1 Month',
+      status: lead.status || 'New Inbound',
+      source: lead.source || leadSources[0] || 'Direct',
+      furnishingPreference: lead.furnishingPreference || 'Any',
+      constructionStagePreference: lead.constructionStagePreference || 'Any',
+      vastuPreference: lead.vastuPreference || 'Any',
+      parkingPreference: lead.parkingPreference || 'Any'
     });
-    if (res.ok) {
-      setData(prev => prev.map(l => l.id === editingLead.id ? { ...l, ...editingLead } : l));
-      setEditingLead(null);
-    }
-  };
-
-  const handleQuickStatusChange = async (leadId: string, newStatus: string) => {
-    setData(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
-    await fetch('/api/leads', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: leadId, status: newStatus })
-    });
-  };
-
-  const handleConvertToClient = async (lead: Lead) => {
-    try {
-      const clientRes = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: lead.name,
-          email: lead.email,
-          phone: lead.phone,
-          type: lead.leadPurpose === 'Rent' ? 'Tenant' : 'Buyer',
-          requirement: `${lead.bhkNeeded || '3 BHK'} in ${lead.preferredLocalities || lead.city || 'Prime Location'}`,
-          budget: lead.budgetMax ? formatINR(Number(lead.budgetMax)) : (lead.budget || '₹2 Cr - ₹4 Cr'),
-          notes: `Converted from lead. Financing: ${lead.financingStatus || 'N/A'}. Urgency: ${lead.urgency || 'N/A'}`
-        })
-      });
-
-      if (clientRes.ok) {
-        await handleQuickStatusChange(lead.id, 'Won');
-        setConvertFeedback(`✓ Successfully converted "${lead.name}" to Active Client Directory!`);
-        setTimeout(() => setConvertFeedback(null), 4000);
-      }
-    } catch (e) {
-      console.error('Failed to convert lead:', e);
-    }
-  };
-
-  const handleDelete = (id: string, name: string) => {
-    setLeadToDelete({ id, name });
+    setShowModal(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!leadToDelete) return;
+    if (!deletingLead) return;
     setIsDeleting(true);
-    const res = await fetch(`/api/leads?id=${leadToDelete.id}`, { method: 'DELETE' });
-    if (res.ok) {
-      setData(prev => prev.filter(l => l.id !== leadToDelete.id));
-    }
-    setIsDeleting(false);
-    setLeadToDelete(null);
-  };
-
-  // WhatsApp quick greeting
-  const handleOpenLeadWhatsApp = (lead: Lead) => {
-    const greeting = `Namaste ${lead.name} ji! 🙏\n\n` +
-      `This is Aditya Rai from AgentLadders Real Estate Advisory.\n` +
-      `I am reaching out regarding your requirement for a *${lead.bhkNeeded || 'luxury residence'}* in *${lead.city || 'India'}*.\n\n` +
-      `We have verified listings matching your budget and Vastu preferences. Are you free for a quick 2-minute conversation today?`;
-
-    openWhatsAppDirect(lead.phone, greeting);
-  };
-
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      const matchesSearch =
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.phone.includes(searchQuery) ||
-        (item.city && item.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (typeof item.preferredLocalities === 'string' && item.preferredLocalities.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesCity = cityFilter === 'All' || item.city === cityFilter;
-      const matchesPurpose = purposeFilter === 'All' || item.leadPurpose === purposeFilter;
-      const matchesStatus = statusFilter === 'All' || item.status.toLowerCase() === statusFilter.toLowerCase();
-
-      return matchesSearch && matchesCity && matchesPurpose && matchesStatus;
-    });
-  }, [data, searchQuery, cityFilter, purposeFilter, statusFilter]);
-
-  const columns: Column<Lead>[] = [
-    {
-      header: 'Buyer / Contact',
-      accessor: (row) => (
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '14.5px' }}>{row.name}</span>
-            <span style={{
-              fontSize: '10.5px',
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: '9999px',
-              backgroundColor: row.priority?.includes('Hot') ? '#fef2f2' : '#f8fafc',
-              color: row.priority?.includes('Hot') ? '#dc2626' : '#475569',
-              border: `1px solid ${row.priority?.includes('Hot') ? '#fecaca' : '#cbd5e1'}`
-            }}>
-              {row.priority || 'Hot 🔥'}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-            <span style={{ fontSize: '12px', color: '#475569', fontWeight: 600 }}>{row.phone || 'No phone'}</span>
-            {row.phone && (
-              <button
-                type="button"
-                onClick={() => handleOpenLeadWhatsApp(row)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  backgroundColor: '#25D366',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '2px 7px',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-                title="Send personalized WhatsApp greeting"
-              >
-                <span>💬</span> WhatsApp
-              </button>
-            )}
-          </div>
-          {row.email && (
-            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>{row.email}</div>
-          )}
-        </div>
-      )
-    },
-    {
-      header: 'Requirement & Localities',
-      accessor: (row) => {
-        const isRent = row.leadPurpose === 'Rent';
-        const localities = Array.isArray(row.preferredLocalities) 
-          ? row.preferredLocalities.join(', ') 
-          : (row.preferredLocalities || row.locationPreference || 'Prime Area');
-
-        return (
-          <div>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '4px' }}>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                padding: '2px 7px',
-                borderRadius: '4px',
-                backgroundColor: isRent ? '#f3e8ff' : '#ecfdf5',
-                color: isRent ? '#7e22ce' : '#047857',
-                border: `1px solid ${isRent ? '#d8b4fe' : '#a7f3d0'}`
-              }}>
-                {row.leadPurpose || 'Buy'}
-              </span>
-              <span style={{ fontWeight: 700, fontSize: '13px', color: '#2563eb' }}>
-                {Array.isArray(row.bhkNeeded) ? row.bhkNeeded.join(', ') : (row.bhkNeeded || row.bedroomsNeeded || '3 BHK')}
-              </span>
-            </div>
-            <div style={{ fontSize: '12px', color: '#475569', fontWeight: 500 }}>
-              📍 {localities} {row.city ? `(${row.city})` : ''}
-            </div>
-            {row.vastuPreference && (
-              <div style={{ fontSize: '11px', color: '#b45309', marginTop: '2px' }}>
-                🧭 Vastu: {row.vastuPreference}
-              </div>
-            )}
-          </div>
-        );
-      }
-    },
-    {
-      header: 'Budget & Financing',
-      accessor: (row) => {
-        let budgetDisplay = '₹1.50 Cr - ₹3.0 Cr';
-        if (row.budgetMin && row.budgetMax) {
-          budgetDisplay = `${formatINR(Number(row.budgetMin))} - ${formatINR(Number(row.budgetMax))}`;
-        } else if (row.budgetMax) {
-          budgetDisplay = `Up to ${formatINR(Number(row.budgetMax))}`;
-        } else if (row.budget) {
-          budgetDisplay = String(row.budget);
+    try {
+      const res = await fetch(`/api/leads?id=${encodeURIComponent(deletingLead.id)}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setData(prev => prev.filter(l => l.id !== deletingLead.id));
+        if (editingLead?.id === deletingLead.id) {
+          setShowModal(false);
+          setEditingLead(null);
         }
-
-        return (
-          <div>
-            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
-              {budgetDisplay}
-            </div>
-            <span style={{
-              fontSize: '11px',
-              color: '#065f46',
-              backgroundColor: '#ecfdf5',
-              border: '1px solid #a7f3d0',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              marginTop: '3px',
-              display: 'inline-block',
-              fontWeight: 600
-            }}>
-              ✓ {row.financingStatus || 'Self-Funded'}
-            </span>
-            {row.urgency && (
-              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
-                ⏱ {row.urgency}
-              </div>
-            )}
-          </div>
-        );
+        showToast('success', `Inquiry for "${deletingLead.name}" deleted successfully.`, 'Inquiry Deleted');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast('error', err.error || 'Failed to delete inquiry.', 'Delete Failed');
       }
-    },
-    {
-      header: 'Live Property Match',
-      accessor: (row) => {
-        const matchingProps = findMatchingPropertiesForLead(row as any, properties as any);
-        const hasMatches = matchingProps.length > 0;
-
-        return (
-          <div>
-            <button
-              type="button"
-              onClick={() => setMatchingModalLead(row)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 10px',
-                borderRadius: '20px',
-                fontSize: '11.5px',
-                fontWeight: 700,
-                border: hasMatches ? '1px solid #fed7aa' : '1px solid #e2e8f0',
-                backgroundColor: hasMatches ? '#fff7ed' : '#f8fafc',
-                color: hasMatches ? '#c2410c' : '#64748b',
-                cursor: 'pointer'
-              }}
-              title="Click to view exact inventory flats matching this buyer"
-            >
-              <span>{hasMatches ? '🔥' : '🏢'}</span>
-              <span>{matchingProps.length} {matchingProps.length === 1 ? 'Match' : 'Matches'}</span>
-            </button>
-            {hasMatches && (
-              <div style={{ fontSize: '10.5px', color: '#ea580c', fontWeight: 600, marginTop: '2px' }}>
-                Top: {matchingProps[0].propertyTitle.slice(0, 24)}... ({matchingProps[0].matchScore}%)
-              </div>
-            )}
-          </div>
-        );
-      }
-    },
-    {
-      header: 'Stage Status',
-      accessor: (row) => (
-        <select
-          value={row.status}
-          onChange={(e) => handleQuickStatusChange(row.id, e.target.value)}
-          style={{
-            padding: '5px 8px',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
-            fontSize: '12px',
-            fontWeight: 600,
-            backgroundColor: row.status.includes('Won') ? '#ecfdf5' : row.status.includes('Hot') ? '#fef2f2' : '#f8fafc',
-            color: row.status.includes('Won') ? '#047857' : row.status.includes('Hot') ? '#dc2626' : '#334155',
-            cursor: 'pointer'
-          }}
-        >
-          {LEAD_STATUSES.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-      )
-    },
-    {
-      header: 'Actions',
-      accessor: (row) => (
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          
-          {/* Convert to Client */}
-          {row.status !== 'Won' && (
-            <button
-              type="button"
-              onClick={() => handleConvertToClient(row)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '3px',
-                padding: '4px 8px',
-                fontSize: '11px',
-                fontWeight: 700,
-                backgroundColor: '#eff6ff',
-                color: '#2563eb',
-                border: '1px solid #bfdbfe',
-                borderRadius: '6px',
-                cursor: 'pointer'
-              }}
-              title="Convert this lead to active client directory"
-            >
-              <span>⭐</span> Client
-            </button>
-          )}
-
-          {/* Edit */}
-          <button
-            type="button"
-            onClick={() => handleOpenEdit(row)}
-            style={{
-              padding: '4px 8px',
-              fontSize: '11.5px',
-              fontWeight: 600,
-              backgroundColor: '#f8fafc',
-              color: '#334155',
-              border: '1px solid #cbd5e1',
-              borderRadius: '6px',
-              cursor: 'pointer'
-            }}
-          >
-            ✏️
-          </button>
-
-          {/* Delete */}
-          <button
-            type="button"
-            onClick={() => handleDelete(row.id, row.name)}
-            style={{
-              padding: '4px 8px',
-              fontSize: '11.5px',
-              fontWeight: 600,
-              backgroundColor: '#fff1f2',
-              color: '#e11d48',
-              border: '1px solid #fecdd3',
-              borderRadius: '6px',
-              cursor: 'pointer'
-            }}
-          >
-            🗑️
-          </button>
-        </div>
-      )
+    } catch (e) {
+      console.error(e);
+      showToast('error', 'Network error while attempting to delete inquiry.', 'Network Error');
+    } finally {
+      setIsDeleting(false);
+      setDeletingLead(null);
     }
-  ];
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ...(editingLead ? { id: editingLead.id } : {}),
+        ...formData,
+        budgetMax: formData.budgetMax ? Number(formData.budgetMax) : undefined,
+        bhkNeeded: [formData.bhkNeeded]
+      };
+      const method = editingLead ? 'PUT' : 'POST';
+      const res = await fetch('/api/leads', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setShowModal(false);
+        setEditingLead(null);
+        loadData();
+        showToast('success', editingLead ? `Inquiry for "${formData.name}" updated successfully!` : `Inquiry for "${formData.name}" added successfully!`, editingLead ? 'Inquiry Updated' : 'Inquiry Created');
+        setFormData({
+          name: '', phone: '', email: '',
+          leadPurpose: 'Buy', propertyTypeNeeded: 'Apartment',
+          bhkNeeded: '2 BHK', budgetMax: '', city: 'Mumbai',
+          preferredLocalities: '', urgency: 'Within 1 Month', status: 'New Inbound',
+          source: leadSources[0] || 'Direct',
+          furnishingPreference: 'Any',
+          constructionStagePreference: 'Any',
+          vastuPreference: 'Any',
+          parkingPreference: 'Any'
+        });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        showToast('error', err.error || 'Failed to save inquiry. Please check your inputs.', 'Save Failed');
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('error', 'Network error occurred while saving inquiry.', 'Network Error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const buyCount = data.filter(l => !isLeadRent(l)).length;
+  const rentCount = data.filter(l => isLeadRent(l)).length;
+
+  const filteredData = data.filter(l => {
+    if (purposeFilter !== 'All') {
+      const isRent = isLeadRent(l);
+      if (purposeFilter === 'Rent' && !isRent) return false;
+      if (purposeFilter === 'Buy' && isRent) return false;
+    }
+    if (filter !== 'All') {
+      if (filter === 'Active' && ['Won', 'Lost', 'Dead'].includes(l.status)) return false;
+      if (filter !== 'Active' && l.status !== filter) return false;
+    }
+    if (sourceFilter !== 'All' && (l.source || 'Direct Inbound') !== sourceFilter) {
+      return false;
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      return l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q));
+    }
+    return true;
+  });
+
+  const getStatusBadge = (s: string) => {
+    const map: Record<string, { bg: string; color: string; dot: string }> = {
+      'New Inbound': { bg: '#ede9fe', color: '#5b21b6', dot: '#8b5cf6' },
+      'Contacted': { bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
+      'Qualified': { bg: '#d1fae5', color: '#065f46', dot: '#10b981' },
+      'Site Visit Scheduled': { bg: '#ffedd5', color: '#9a3412', dot: '#f97316' },
+      'Negotiation': { bg: '#fef3c7', color: '#92400e', dot: '#f59e0b' },
+      'Won': { bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
+      'Lost': { bg: '#fee2e2', color: '#991b1b', dot: '#ef4444' },
+      'Dead': { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' }
+    };
+    const style = map[s] || { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' };
+    return (
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: style.bg, padding: '4px 10px', borderRadius: 20 }}>
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: style.dot }} />
+        <span style={{ color: style.color, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{s}</span>
+      </div>
+    );
+  };
+
+  const getSourceBadge = (src?: string) => {
+    const s = src || 'Direct Inbound';
+    let icon = '🌐';
+    let bg = '#f1f5f9';
+    let color = '#475569';
+    let border = '#e2e8f0';
+
+    if (s.toLowerCase().includes('self-created') || s.toLowerCase().includes('public listing') || s.toLowerCase().includes('self-interest')) {
+      icon = '✨'; bg = '#fdf4ff'; color = '#a21caf'; border = '#f0abfc';
+    } else if (s.toLowerCase().includes('whatsapp')) {
+      icon = '💬'; bg = '#dcfce7'; color = '#15803d'; border = '#86efac';
+    } else if (s.toLowerCase().includes('website')) {
+      icon = '🌐'; bg = '#eff6ff'; color = '#1d4ed8'; border = '#bfdbfe';
+    } else if (s.toLowerCase().includes('99acres') || s.toLowerCase().includes('magicbricks') || s.toLowerCase().includes('housing')) {
+      icon = '🏢'; bg = '#fff7ed'; color = '#c2410c'; border = '#fed7aa';
+    } else if (s.toLowerCase().includes('referral') || s.toLowerCase().includes('word of mouth')) {
+      icon = '🤝'; bg = '#faf5ff'; color = '#7e22ce'; border = '#e9d5ff';
+    } else if (s.toLowerCase().includes('walk-in')) {
+      icon = '🚶'; bg = '#f0fdf4'; color = '#166534'; border = '#bbf7d0';
+    } else if (s.toLowerCase().includes('instagram') || s.toLowerCase().includes('social')) {
+      icon = '📸'; bg = '#fdf2f8'; color = '#be185d'; border = '#fbcfe8';
+    }
+
+    return (
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 5,
+        padding: '3px 8px',
+        borderRadius: 6,
+        backgroundColor: bg,
+        color: color,
+        border: `1px solid ${border}`,
+        fontSize: 11.5,
+        fontWeight: 600,
+        whiteSpace: 'nowrap'
+      }}>
+        <span>{icon}</span> {s}
+      </span>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12 }}>
+        <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <span style={{ color: '#64748b', fontSize: 14 }}>Fetching latest inquiries...</span>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <>
-      <PageHeader 
-        title="Inbound Inquiries & Buyer Requirements" 
-        subtitle="Manage prospective buyers, BHK preferences, financing status, and instant property matching" 
-        actions={
-          <Button variant="primary" onClick={() => setShowModal(true)}>
-            🎯 + Capture Inbound Buyer
-          </Button>
-        } 
-      />
-
-      {/* FEEDBACK TOAST */}
-      {convertFeedback && (
-        <div style={{
-          margin: '0 24px 16px',
-          padding: '12px 18px',
-          backgroundColor: '#ecfdf5',
-          border: '1px solid #a7f3d0',
-          borderRadius: '8px',
-          color: '#065f46',
-          fontSize: '13px',
-          fontWeight: 600
-        }}>
-          {convertFeedback}
-        </div>
-      )}
-
-      {/* FILTER BAR */}
-      <TableFilterBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Search leads by name, phone, locality (Worli, Kharadi...)..."
-        filters={[
-          {
-            key: 'city',
-            label: 'Indian City',
-            value: cityFilter,
-            options: [
-              { label: 'All Cities', value: 'All' },
-              ...TOP_INDIAN_CITIES.map(c => ({ label: c, value: c }))
-            ],
-            onChange: setCityFilter
-          },
-          {
-            key: 'purpose',
-            label: 'Purpose',
-            value: purposeFilter,
-            options: [
-              { label: 'All (Buy & Rent)', value: 'All' },
-              { label: 'Buy', value: 'Buy' },
-              { label: 'Rent', value: 'Rent' }
-            ],
-            onChange: setPurposeFilter
-          },
-          {
-            key: 'status',
-            label: 'Stage Status',
-            value: statusFilter,
-            options: [
-              { label: 'All Statuses', value: 'All' },
-              ...LEAD_STATUSES.map(s => ({ label: s, value: s }))
-            ],
-            onChange: setStatusFilter
-          }
-        ]}
-        onReset={() => {
-          setSearchQuery('');
-          setCityFilter('All');
-          setPurposeFilter('All');
-          setStatusFilter('All');
-        }}
-      />
-
-      {/* DATA TABLE */}
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        loading={loading}
-        emptyMessage="No leads match your filter. Click '+ Capture Inbound Buyer' to add a buyer requirement."
-      />
-
-      {/* ======================================================== */}
-      {/* MODAL 1: ADD NEW INBOUND BUYER */}
-      {/* ======================================================== */}
+      {/* Slide-over Modal for Adding Lead */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '720px',
-            maxHeight: '90vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-            border: '1px solid #e2e8f0',
-            overflow: 'hidden'
-          }}>
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Capture Inbound Buyer / Tenant</h3>
-                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Configure BHK requirements, budget range, and financing readiness</p>
-              </div>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}>
+          <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
+                {editingLead ? '✏️ Edit Inquiry' : 'Add New Inquiry'}
+                <InfoTooltip text="Log or update buyer and tenant inquiries, match requirements, and set pipeline status." />
+              </h2>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, color: '#94a3b8', cursor: 'pointer' }}>&times;</button>
             </div>
-
-            <form onSubmit={handleSubmit} style={{ overflowY: 'auto', padding: '24px', flex: 1 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            
+            <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+              
+              {/* Primary Status & Priority / Urgency (Top 2 Fields) */}
+              <div className="responsive-grid-2">
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Vikram Malhotra"
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Mobile / WhatsApp Number *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. +91 98200 45678"
-                    value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Purpose</label>
-                  <select
-                    value={form.leadPurpose}
-                    onChange={e => setForm({ ...form, leadPurpose: e.target.value as any })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Inquiry Status *
+                    <InfoTooltip text="Pipeline stage for this inquiry, from initial inbound to qualified, site visit, negotiation, or won." />
+                  </label>
+                  <select 
+                    value={formData.status} 
+                    onChange={e => setFormData({...formData, status: e.target.value})}
+                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
-                    <option value="Buy">Looking to Buy (Outright / Resale)</option>
-                    <option value="Rent">Looking to Rent (Lease)</option>
+                    {leadStatuses.map(st => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>BHK Configuration Needed *</label>
-                  <select
-                    value={form.bhkNeeded}
-                    onChange={e => setForm({ ...form, bhkNeeded: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Priority / Urgency *
+                    <InfoTooltip text="Urgency or timeline readiness of this client (Hot buyer ready now vs exploring), helping agents prioritize fast follow-ups." />
+                  </label>
+                  <select 
+                    value={formData.urgency} 
+                    onChange={e => setFormData({...formData, urgency: e.target.value})}
+                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
-                    {INDIAN_BHK_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}
+                    <option value="Immediate (Hot Buyer)">🔥 Immediate (Hot Buyer - Ready Now)</option>
+                    <option value="Within 15 Days">⚡ High Urgency (Within 15 Days)</option>
+                    <option value="Within 1 Month">🟡 Moderate (Within 1 Month)</option>
+                    <option value="1-3 Months">🔵 Standard (1-3 Months)</option>
+                    <option value="Exploring / Low">⚪ Low / Long-term Exploring</option>
                   </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Target Indian City *</label>
-                  <select
-                    value={form.city}
-                    onChange={e => {
-                      const newCity = e.target.value;
-                      const defaultLoc = (CITY_LOCALITIES[newCity] && CITY_LOCALITIES[newCity].slice(0, 2).join(', ')) || '';
-                      setForm({ ...form, city: newCity, preferredLocalities: defaultLoc });
-                    }}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {TOP_INDIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Preferred Localities *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Worli, Lower Parel, Bandra West"
-                    value={form.preferredLocalities}
-                    onChange={e => setForm({ ...form, preferredLocalities: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                  {form.city && CITY_LOCALITIES[form.city] && (
-                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
-                      Suggestions: {CITY_LOCALITIES[form.city].slice(0, 4).join(', ')}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Minimum Budget (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 70000000 for ₹7.0 Cr"
-                    value={form.budgetMin}
-                    onChange={e => setForm({ ...form, budgetMin: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                  <div style={{ fontSize: '11.5px', color: '#047857', fontWeight: 600, marginTop: '2px' }}>
-                    Min: {formatINR(Number(form.budgetMin) || 0)}
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Maximum Budget (₹) *</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="e.g. 95000000 for ₹9.5 Cr"
-                    value={form.budgetMax}
-                    onChange={e => setForm({ ...form, budgetMax: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                  <div style={{ fontSize: '11.5px', color: '#2563eb', fontWeight: 700, marginTop: '2px' }}>
-                    Max: {formatINR(Number(form.budgetMax) || 0)}
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Financing Readiness</label>
-                  <select
-                    value={form.financingStatus}
-                    onChange={e => setForm({ ...form, financingStatus: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {FINANCING_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Purchase Urgency</label>
-                  <select
-                    value={form.urgency}
-                    onChange={e => setForm({ ...form, urgency: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    <option value="Immediate (Within 30 Days)">Immediate (Within 30 Days)</option>
-                    <option value="Within 45 Days">Within 45 Days</option>
-                    <option value="2 - 3 Months">2 - 3 Months</option>
-                    <option value="Exploring Market">Exploring Market</option>
-                  </select>
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Specific Client Notes / Requirement</label>
-                  <textarea
-                    rows={2}
-                    placeholder="e.g. Sea-facing preferred, high floor, requires 3 covered car parks, Vastu compliant entrance."
-                    value={form.requirement}
-                    onChange={e => setForm({ ...form, requirement: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
-                  <Button variant="outline" type="button" onClick={() => setShowModal(false)}>Cancel</Button>
-                  <Button variant="primary" type="submit">Save Inbound Buyer 🚀</Button>
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* ======================================================== */}
-      {/* MODAL 2: EDIT INBOUND BUYER */}
-      {/* ======================================================== */}
-      {editingLead && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '720px',
-            maxHeight: '90vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-            border: '1px solid #e2e8f0',
-            overflow: 'hidden'
-          }}>
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Edit Buyer: {editingLead.name}</h3>
-                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Update requirements, budget, and follow-up timeline</p>
-              </div>
-              <button onClick={() => setEditingLead(null)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
-            </div>
-
-            <form onSubmit={handleUpdateLead} style={{ overflowY: 'auto', padding: '24px', flex: 1 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="responsive-grid-2">
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingLead.name}
-                    onChange={e => setEditingLead({ ...editingLead, name: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Full Name *</label>
+                  <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="e.g. Rahul Sharma" />
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>WhatsApp Number</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingLead.phone}
-                    onChange={e => setEditingLead({ ...editingLead, phone: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>BHK Needed</label>
-                  <select
-                    value={String(editingLead.bhkNeeded || '3 BHK')}
-                    onChange={e => setEditingLead({ ...editingLead, bhkNeeded: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {INDIAN_BHK_OPTIONS.map(b => <option key={b} value={b}>{b}</option>)}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Target Indian City</label>
-                  <select
-                    value={editingLead.city || 'Mumbai'}
-                    onChange={e => setEditingLead({ ...editingLead, city: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {TOP_INDIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Max Budget (₹)</label>
-                  <input
-                    type="number"
-                    value={editingLead.budgetMax ? String(editingLead.budgetMax) : ''}
-                    onChange={e => setEditingLead({ ...editingLead, budgetMax: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                  {editingLead.budgetMax && (
-                    <div style={{ fontSize: '11.5px', color: '#2563eb', fontWeight: 700, marginTop: '2px' }}>
-                      Formatted: {formatINR(Number(editingLead.budgetMax))}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Financing Readiness</label>
-                  <select
-                    value={editingLead.financingStatus || 'Pre-Approved Home Loan (HDFC / ICICI / SBI)'}
-                    onChange={e => setEditingLead({ ...editingLead, financingStatus: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {FINANCING_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
-                  </select>
-                </div>
-
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Requirement & Notes</label>
-                  <textarea
-                    rows={2}
-                    value={editingLead.requirement || ''}
-                    onChange={e => setEditingLead({ ...editingLead, requirement: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
-
-                <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '14px' }}>
-                  <Button variant="outline" type="button" onClick={() => setEditingLead(null)}>Cancel</Button>
-                  <Button variant="primary" type="submit">Save Changes</Button>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Phone *</label>
+                  <input required type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="e.g. 9876543210" />
                 </div>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* ======================================================== */}
-      {/* MODAL 3: MATCHING PROPERTIES (KUNDALI FIT FOR BUYER) */}
-      {/* ======================================================== */}
-      {matchingModalLead && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '680px',
-            maxHeight: '85vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-            border: '1px solid #fed7aa',
-            overflow: 'hidden'
-          }}>
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff7ed' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>🔮</span>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
-                    Matching Properties for {matchingModalLead.name}
-                  </h3>
+              <div className="responsive-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Email Address</label>
+                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="rahul@example.com" />
                 </div>
-                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>
-                  Target: <strong style={{ color: '#2563eb' }}>{String(matchingModalLead.bhkNeeded || '3 BHK')}</strong> in {String(matchingModalLead.preferredLocalities || matchingModalLead.city || 'India')} · Budget: {matchingModalLead.budgetMax ? formatINR(Number(matchingModalLead.budgetMax)) : '₹2 Cr - ₹4 Cr'}
-                </p>
-              </div>
-              <button onClick={() => setMatchingModalLead(null)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
-            </div>
-
-            <div style={{ padding: '20px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {(() => {
-                const matched = findMatchingPropertiesForLead(matchingModalLead as any, properties as any);
-                if (matched.length === 0) {
-                  return (
-                    <div style={{ padding: '32px', textAlign: 'center', color: '#64748b' }}>
-                      No active listings in your inventory match this buyer&apos;s BHK and budget. Add new property inventory in Properties to generate matches!
-                    </div>
-                  );
-                }
-
-                return matched.map(prop => (
-                  <div 
-                    key={prop.propertyId}
-                    style={{
-                      backgroundColor: '#f8fafc',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '16px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                      gap: '12px'
-                    }}
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                    Lead & Inbound Source <InfoTooltip text="Channel where inquiry originated: WhatsApp, 99acres, MagicBricks, Referral, Website, etc." />
+                  </label>
+                  <select 
+                    value={formData.source} 
+                    onChange={e => setFormData({...formData, source: e.target.value})} 
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                   >
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <strong style={{ fontSize: '14.5px', color: '#0f172a' }}>{prop.propertyTitle}</strong>
-                        <span style={{
-                          fontSize: '11px',
-                          fontWeight: 800,
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          backgroundColor: prop.matchScore >= 90 ? '#dcfce7' : '#fef9c3',
-                          color: prop.matchScore >= 90 ? '#15803d' : '#854d0e'
-                        }}>
-                          {prop.matchScore}% Match
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '12.5px', color: '#475569', marginTop: '3px' }}>
-                        Quoting: <strong style={{ color: '#2563eb' }}>{prop.priceFormatted}</strong> · {prop.locality}, {prop.city} · {prop.bhk}
-                      </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
-                        {prop.matchReasons.map((r, i) => (
-                          <span key={i} style={{ fontSize: '10.5px', backgroundColor: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: '4px' }}>
-                            ✓ {r}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                    {leadSources.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+              </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const pitch = `Namaste ${matchingModalLead.name} ji! 🙏\n\n` +
-                          `Based on your search for a *${matchingModalLead.bhkNeeded || 'luxury residence'}* in *${prop.locality}*,\n` +
-                          `we have an exclusive verified property that matches your criteria (*${prop.matchScore}% Match*):\n\n` +
-                          `🏢 *${prop.propertyTitle}*\n` +
-                          `💰 *Price*: ${prop.priceFormatted}\n` +
-                          `📍 *Location*: ${prop.locality}, ${prop.city}\n` +
-                          `🎯 *Highlights*: ${prop.matchReasons.join(' · ')}\n\n` +
-                          `Would you like to schedule a private viewing today or tomorrow?`;
+              <div style={{ height: 1, backgroundColor: 'var(--border)', margin: '4px 0' }} />
 
-                        openWhatsAppDirect(matchingModalLead.phone, pitch);
-                      }}
-                      style={{
-                        padding: '8px 14px',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        backgroundColor: '#25d366',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }}
+              <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: '#0f172a' }}>Requirements</h3>
+
+              <div className="responsive-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Purpose</label>
+                  <select value={formData.leadPurpose} onChange={e => setFormData({...formData, leadPurpose: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    {['Buy', 'Rent'].map(opt => <option key={opt}>{opt}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Property Type</label>
+                  <select value={formData.propertyTypeNeeded} onChange={e => setFormData({...formData, propertyTypeNeeded: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    {propertyTypes.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="responsive-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>BHK Needed</label>
+                  <select value={formData.bhkNeeded} onChange={e => setFormData({...formData, bhkNeeded: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    {bhkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Max Budget (₹)</label>
+                  <input type="number" value={formData.budgetMax} onChange={e => setFormData({...formData, budgetMax: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="e.g. 20000000" />
+                </div>
+              </div>
+
+              <div className="responsive-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>City</label>
+                  <input value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Preferred Localities</label>
+                  <input value={formData.preferredLocalities} onChange={e => setFormData({...formData, preferredLocalities: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="e.g. Bandra West, Worli" />
+                </div>
+              </div>
+
+              {/* Preferences: Specs, Construction Stage, Vastu, Parking */}
+              <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: 10, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>🎯</span> Client Preferences & Criteria
+                </div>
+
+                <div className="responsive-grid-2">
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                      Furnishing / Specs <InfoTooltip text="Client furnishing expectation" />
+                    </label>
+                    <select 
+                      value={formData.furnishingPreference} 
+                      onChange={e => setFormData({...formData, furnishingPreference: e.target.value})} 
+                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
-                      <span>💬</span> WhatsApp Pitch
-                    </button>
+                      {['Any', ...propertySpecs].map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
                   </div>
-                ));
-              })()}
-            </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                      Construction Stage <InfoTooltip text="Possession timeline required by client" />
+                    </label>
+                    <select 
+                      value={formData.constructionStagePreference} 
+                      onChange={e => setFormData({...formData, constructionStagePreference: e.target.value})} 
+                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
+                    >
+                      {['Any', ...constructionStages].map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="responsive-grid-2">
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                      Vastu Preference <InfoTooltip text="Mandatory orientation for spiritual alignment" />
+                    </label>
+                    <select 
+                      value={formData.vastuPreference} 
+                      onChange={e => setFormData({...formData, vastuPreference: e.target.value})} 
+                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
+                    >
+                      {['Any', ...vastuOptions].map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
+                      Parking Needed <InfoTooltip text="Car parking requirement" />
+                    </label>
+                    <select 
+                      value={formData.parkingPreference} 
+                      onChange={e => setFormData({...formData, parkingPreference: e.target.value})} 
+                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
+                    >
+                      {['Any', ...parkingOptions].map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 12, marginTop: 'auto', position: 'sticky', bottom: '-24px', backgroundColor: '#fff', padding: '16px 0', borderTop: '1px solid var(--border)', zIndex: 10 }}>
+                {editingLead && (
+                  <button
+                    type="button"
+                    onClick={() => setDeletingLead(editingLead)}
+                    style={{
+                      padding: '12px 16px',
+                      backgroundColor: '#fee2e2',
+                      color: '#dc2626',
+                      border: '1px solid #fecaca',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6
+                    }}
+                  >
+                    🗑️ Delete
+                  </button>
+                )}
+                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={isSubmitting} style={{ flex: 2, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  {isSubmitting ? 'Saving...' : editingLead ? 'Update Inquiry' : 'Save Inquiry'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
-      {/* CONFIRM DELETE MODAL */}
-      <ConfirmModal
-        isOpen={!!leadToDelete}
-        title="Delete Lead"
-        message={`Are you sure you want to remove "${leadToDelete?.name}" from your inquiries?`}
-        confirmText={isDeleting ? 'Deleting...' : 'Delete Lead'}
-        danger
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setLeadToDelete(null)}
-      />
+      <div className="dashboard-page-container animate-enter">
+      {/* Header */}
+      <div className="responsive-header">
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center' }}>
+            Inquiries <InfoTooltip text="Manage all your incoming leads and match them with properties instantly." />
+          </h1>
+          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
+            {filteredData.length} active leads matching criteria
+          </p>
+        </div>
+        <button 
+          onClick={handleOpenAdd}
+          style={{
+            backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
+            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.15s ease',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
+        >
+          + Add Inquiry
+        </button>
+      </div>
+
+      {/* Primary Type / Purpose Filter (Buy vs Rent) */}
+      <div className="responsive-pills-scroll" style={{ alignItems: 'center', marginBottom: 14 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          Inquiry Type:
+        </span>
+        {[
+          { id: 'All', label: 'All Inquiries', count: data.length, icon: '📋' },
+          { id: 'Buy', label: 'Buy / Purchase', count: buyCount, icon: '🏠' },
+          { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: '🔑' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setPurposeFilter(tab.id as any)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 14px',
+              borderRadius: 20,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
+              color: purposeFilter === tab.id ? '#fff' : '#475569',
+              border: 'none'
+            }}
+          >
+            <span>{tab.icon}</span>
+            <span>{tab.label}</span>
+            <span style={{
+              padding: '1px 6px',
+              borderRadius: 10,
+              fontSize: 11,
+              backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+              color: purposeFilter === tab.id ? '#fff' : '#64748b'
+            }}>
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Filters & Search */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <div className="responsive-pills-scroll">
+            {['Active', 'All', 'New Inbound', 'Site Visit Scheduled'].map(f => (
+              <button key={f}
+                onClick={() => setFilter(f)}
+                style={{
+                  padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
+                  backgroundColor: filter === f ? '#0f172a' : '#f1f5f9',
+                  color: filter === f ? '#fff' : '#475569',
+                  border: 'none',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Channel:</span>
+            <select
+              value={sourceFilter}
+              onChange={e => setSourceFilter(e.target.value)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 20,
+                border: '1px solid var(--border)',
+                backgroundColor: sourceFilter === 'All' ? '#fff' : '#eff6ff',
+                color: sourceFilter === 'All' ? '#334155' : '#1d4ed8',
+                fontSize: 12.5,
+                fontWeight: 600,
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="All">All Inbound Sources</option>
+              {leadSources.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
+          <span style={{ position: 'absolute', left: 12, top: 8, fontSize: 14 }}>🔍</span>
+          <input 
+            type="text"
+            placeholder="Search name, phone, source..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ padding: '8px 12px 8px 36px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
+          />
+        </div>
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="desktop-only-table">
+        <div style={{ backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
+          <div className="responsive-table-scroll">
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 640 }}>
+          <thead>
+            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
+              <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client Details</th>
+              <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Inbound Source</th>
+              <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Requirement</th>
+              <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Budget</th>
+              <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</th>
+              <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredData.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                  <div style={{ fontSize: 32, marginBottom: 12 }}>🕵️</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>No inquiries found</div>
+                  <div style={{ fontSize: 13 }}>Try adjusting your filters or search query.</div>
+                </td>
+              </tr>
+            ) : (
+              filteredData.map((lead, i) => (
+                <tr 
+                  key={lead.id} 
+                  onClick={() => handleOpenEdit(lead)}
+                  style={{ cursor: 'pointer', borderBottom: i === filteredData.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background-color 0.15s ease' }} 
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'} 
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  
+                  <td style={{ padding: '16px 20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#475569' }}>
+                        {lead.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{lead.name}</span>
+                          {((lead as any).isSelfCreated || (lead.source || '').toLowerCase().includes('self-created') || (lead.source || '').toLowerCase().includes('public listing')) && (
+                            <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                              ✨ User-Created (Self-Interest)
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                          {lead.phone}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td style={{ padding: '16px 20px' }}>
+                    {getSourceBadge(lead.source)}
+                  </td>
+                  
+                  <td style={{ padding: '16px 20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 3,
+                        padding: '2px 7px',
+                        borderRadius: 4,
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        backgroundColor: isLeadRent(lead) ? '#f3e8ff' : '#eff6ff',
+                        color: isLeadRent(lead) ? '#7e22ce' : '#1d4ed8',
+                        border: `1px solid ${isLeadRent(lead) ? '#d8b4fe' : '#bfdbfe'}`
+                      }}>
+                        {isLeadRent(lead) ? '🔑 Rent' : '🏠 Buy'}
+                      </span>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
+                        {Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any')}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>
+                      {lead.city || 'Any Location'}
+                    </div>
+                    {(lead.vastuPreference && lead.vastuPreference !== 'Any' || lead.constructionStagePreference && lead.constructionStagePreference !== 'Any') && (
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                        {lead.vastuPreference && lead.vastuPreference !== 'Any' && (
+                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe' }}>
+                            🧭 {lead.vastuPreference}
+                          </span>
+                        )}
+                        {lead.constructionStagePreference && lead.constructionStagePreference !== 'Any' && (
+                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}>
+                            🏗️ {lead.constructionStagePreference}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </td>
+
+                  <td style={{ padding: '16px 20px' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>
+                      {lead.budgetMax ? `Up to ${formatINR(lead.budgetMax)}` : (lead.budget || 'Unspecified')}
+                    </div>
+                  </td>
+
+                  <td style={{ padding: '16px 20px' }}>
+                    {getStatusBadge(lead.status)}
+                  </td>
+
+                  <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEdit(lead);
+                        }}
+                        title="Edit Inquiry"
+                        style={{
+                          width: 32,
+                          height: 32,
+                          padding: 0,
+                          backgroundColor: '#eff6ff',
+                          color: '#1d4ed8',
+                          border: '1px solid #bfdbfe',
+                          borderRadius: 7,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#dbeafe'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#eff6ff'}
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingLead(lead);
+                        }}
+                        title="Delete Inquiry"
+                        style={{
+                          width: 32,
+                          height: 32,
+                          padding: 0,
+                          backgroundColor: '#fee2e2',
+                          color: '#dc2626',
+                          border: '1px solid #fecaca',
+                          borderRadius: 7,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fecaca'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fee2e2'}
+                      >
+                        🗑️
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const phone = lead.phone.replace(/\D/g, '');
+                          window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
+                        }}
+                        title="Chat on WhatsApp"
+                        style={{
+                          width: 32,
+                          height: 32,
+                          padding: 0,
+                          backgroundColor: '#dcfce7',
+                          color: '#166534',
+                          border: '1px solid #bbf7d0',
+                          borderRadius: 7,
+                          fontSize: 14,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#bbf7d0'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#dcfce7'}
+                      >
+                        💬
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = `tel:${lead.phone}`;
+                        }}
+                        title="Call Client"
+                        style={{
+                          width: 32,
+                          height: 32,
+                          padding: 0,
+                          backgroundColor: '#f1f5f9',
+                          color: '#475569',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 7,
+                          fontSize: 13,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                      >
+                        📞
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Card List View (Touch-First, Zero Horizontal Scroll) */}
+      <div className="mobile-only-cards">
+        {filteredData.length === 0 ? (
+          <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '48px 20px', textAlign: 'center', color: '#94a3b8' }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🕵️</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>No inquiries found</div>
+            <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
+          </div>
+        ) : (
+          filteredData.map(lead => (
+            <div
+              key={`m-${lead.id}`}
+              onClick={() => handleOpenEdit(lead)}
+              style={{
+                backgroundColor: '#ffffff',
+                borderRadius: 12,
+                border: '1px solid var(--border)',
+                padding: '14px 16px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                cursor: 'pointer'
+              }}
+            >
+              {/* Card Header: Client Info + Fast Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                  <div style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: '50%',
+                    backgroundColor: '#e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: '#475569',
+                    flexShrink: 0
+                  }}>
+                    {lead.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {lead.name}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 1 }}>
+                      {lead.phone}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Icon Action Buttons */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(lead)}
+                    title="Edit Inquiry"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      padding: 0,
+                      backgroundColor: '#eff6ff',
+                      color: '#1d4ed8',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: 7,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeletingLead(lead)}
+                    title="Delete Inquiry"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      padding: 0,
+                      backgroundColor: '#fee2e2',
+                      color: '#dc2626',
+                      border: '1px solid #fecaca',
+                      borderRadius: 7,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    🗑️
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const phone = lead.phone.replace(/\D/g, '');
+                      window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
+                    }}
+                    title="Chat on WhatsApp"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      padding: 0,
+                      backgroundColor: '#dcfce7',
+                      color: '#166534',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: 7,
+                      fontSize: 14,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    💬
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.location.href = `tel:${lead.phone}`}
+                    title="Call Client"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      padding: 0,
+                      backgroundColor: '#f1f5f9',
+                      color: '#475569',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 7,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    📞
+                  </button>
+                </div>
+              </div>
+
+              {/* Status & Badges */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                {getStatusBadge(lead.status)}
+                {getSourceBadge(lead.source)}
+                {((lead as any).isSelfCreated || (lead.source || '').toLowerCase().includes('self-created') || (lead.source || '').toLowerCase().includes('public listing')) && (
+                  <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700 }}>
+                    ✨ User-Created
+                  </span>
+                )}
+              </div>
+
+              {/* Requirement & Budget */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '9px 12px',
+                backgroundColor: '#f8fafc',
+                borderRadius: 8,
+                fontSize: 12.5
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{
+                    padding: '2px 6px',
+                    borderRadius: 4,
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    backgroundColor: isLeadRent(lead) ? '#f3e8ff' : '#eff6ff',
+                    color: isLeadRent(lead) ? '#7e22ce' : '#1d4ed8'
+                  }}>
+                    {isLeadRent(lead) ? '🔑 Rent' : '🏠 Buy'}
+                  </span>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                    {Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any')}
+                  </span>
+                  <span style={{ color: '#64748b' }}>• {lead.city || 'Any Location'}</span>
+                </div>
+                <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 13, whiteSpace: 'nowrap' }}>
+                  {lead.budgetMax ? formatINR(lead.budgetMax) : (lead.budget || 'Unspecified')}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingLead && (
+        <ConfirmModal
+          isOpen={!!deletingLead}
+          title="Delete Inquiry?"
+          message={
+            <div>
+              Are you sure you want to delete the inquiry for <strong>{deletingLead.name}</strong>?
+              <div style={{ marginTop: 8, fontSize: 12.5, color: '#64748b' }}>
+                This record and associated requirement details will be permanently removed.
+              </div>
+            </div>
+          }
+          confirmText="Yes, Delete Inquiry"
+          cancelText="Cancel"
+          danger
+          isLoading={isDeleting}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeletingLead(null)}
+        />
+      )}
+
+      {/* Global Action Feedback Toast */}
+      {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
     </>
   );
 }

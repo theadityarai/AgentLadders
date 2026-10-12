@@ -66,6 +66,17 @@ export default function ExpensesPage() {
     loadExpenses();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (editingExpense) setEditingExpense(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, editingExpense]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await fetch('/api/expenses', {
@@ -271,7 +282,7 @@ export default function ExpensesPage() {
   ];
 
   return (
-    <>
+    <div className="dashboard-page-container">
       <PageHeader 
         title="Operating Expenses" 
         subtitle="Track marketing spend, portal fees, office operations, and company expenditures" 
@@ -299,33 +310,36 @@ export default function ExpensesPage() {
         ]}
       />
 
-      <div style={{ padding: '0 24px 24px' }}>
+      <div style={{ paddingBottom: '24px' }}>
         <DataTable columns={columns} data={filteredData} />
       </div>
 
       {/* CREATE EXPENSE MODAL */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}>
+        <div 
+          onClick={() => setShowModal(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px'
+            }}
+          >
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Record Operating Expense</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
@@ -339,7 +353,7 @@ export default function ExpensesPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
                   <select
@@ -363,7 +377,7 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
                   <input
@@ -385,7 +399,7 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
                   <select
@@ -418,27 +432,30 @@ export default function ExpensesPage() {
 
       {/* EDIT EXPENSE MODAL */}
       {editingExpense && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '24px',
-            width: '540px',
-            maxWidth: '90%',
-            maxHeight: '90vh',
-            overflowY: 'auto'
-          }}>
+        <div 
+          onClick={() => setEditingExpense(null)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px'
+            }}
+          >
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Expense: {editingExpense.description}</h3>
             <form onSubmit={handleUpdateExpense} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
@@ -451,7 +468,7 @@ export default function ExpensesPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
                   <select
@@ -474,7 +491,7 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
                   <input
@@ -495,7 +512,7 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
                   <select
@@ -541,6 +558,6 @@ export default function ExpensesPage() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setExpenseToDelete(null)}
       />
-    </>
+    </div>
   );
 }

@@ -28,13 +28,19 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
   const data = await req.json();
+  let clientPhone = data.clientPhone || '';
+  if (!clientPhone && data.client && db.leads) {
+    const matchedLead = db.leads.find(l => l.name?.trim().toLowerCase() === data.client.trim().toLowerCase() && l.agencyId === user.agencyId);
+    if (matchedLead?.phone) clientPhone = matchedLead.phone;
+  }
+
   const newVisit = {
     ...data,
     id: 'vis_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
     property: data.property || 'Property Tour',
     client: data.client || 'Client',
-    clientPhone: data.clientPhone || '',
+    clientPhone: clientPhone,
     date: data.date || new Date().toISOString().split('T')[0],
     timeSlot: data.timeSlot || '11:30 AM - 12:30 PM',
     accompaniedBy: data.accompaniedBy || user.name || 'Aditya Rai',
@@ -45,7 +51,7 @@ export async function POST(req: Request) {
   };
 
   if (!db.siteVisits) db.siteVisits = [];
-  db.siteVisits.push(newVisit);
+  db.siteVisits.unshift(newVisit);
   saveDb(db);
 
   return NextResponse.json({ success: true, visit: newVisit });

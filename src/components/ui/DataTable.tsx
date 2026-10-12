@@ -27,12 +27,9 @@ export function DataTable<T extends Record<string, unknown>>({
 }: DataTableProps<T>) {
   if (loading) {
     return (
-      <div style={{
+      <div className="responsive-table-container" style={{
         padding: '50px 24px',
         textAlign: 'center',
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        margin: '0 24px',
         border: '1px solid #e2e8f0',
         color: '#64748b',
         fontSize: '14px',
@@ -45,12 +42,9 @@ export function DataTable<T extends Record<string, unknown>>({
 
   if (!data || data.length === 0) {
     return (
-      <div style={{
+      <div className="responsive-table-container" style={{
         padding: '50px 24px',
         textAlign: 'center',
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        margin: '0 24px',
         border: '1px dashed #cbd5e1',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}>
@@ -68,7 +62,7 @@ export function DataTable<T extends Record<string, unknown>>({
               padding: '8px 16px',
               fontSize: '13px',
               fontWeight: 600,
-              backgroundColor: '#2563eb',
+              backgroundColor: 'var(--primary)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -83,15 +77,8 @@ export function DataTable<T extends Record<string, unknown>>({
   }
 
   return (
-    <div style={{ 
-      margin: '0 24px', 
-      backgroundColor: '#ffffff', 
-      borderRadius: '12px', 
-      border: '1px solid #e2e8f0', 
-      overflow: 'hidden', 
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)' 
-    }}>
-      <div style={{ overflowX: 'auto' }}>
+    <div className="responsive-table-container">
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
           <thead>
             <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>

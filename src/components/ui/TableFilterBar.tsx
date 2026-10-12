@@ -35,21 +35,9 @@ export function TableFilterBar({
   const isFiltered = searchQuery.trim() !== '' || filters.some(f => f.value !== '' && f.value !== 'All');
 
   return (
-    <div style={{
-      margin: '0 24px 16px 24px',
-      padding: '14px 18px',
-      backgroundColor: '#ffffff',
-      borderRadius: '12px',
-      border: '1px solid #e2e8f0',
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '12px',
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
-    }}>
+    <div className="responsive-filter-bar">
       {/* Left side: Search input + Dropdowns */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', flex: 1, minWidth: '280px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', flex: 1, minWidth: 'min(280px, 100%)' }}>
         
         {/* Search Field */}
         <div style={{ position: 'relative', minWidth: '240px', flex: '1 1 240px', maxWidth: '380px' }}>
@@ -74,11 +62,13 @@ export function TableFilterBar({
               boxSizing: 'border-box'
             }}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = '#2563eb';
+              e.currentTarget.style.borderColor = 'var(--primary)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(var(--primary-rgb), 0.18)';
               e.currentTarget.style.backgroundColor = '#ffffff';
             }}
             onBlur={(e) => {
               e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.boxShadow = 'none';
               e.currentTarget.style.backgroundColor = '#f8fafc';
             }}
           />
@@ -115,9 +105,9 @@ export function TableFilterBar({
               style={{
                 padding: '7px 12px',
                 borderRadius: '8px',
-                border: f.value !== '' && f.value !== 'All' ? '1px solid #2563eb' : '1px solid #cbd5e1',
-                backgroundColor: f.value !== '' && f.value !== 'All' ? '#eff6ff' : '#ffffff',
-                color: f.value !== '' && f.value !== 'All' ? '#1d4ed8' : '#0f172a',
+                border: f.value !== '' && f.value !== 'All' ? '1px solid var(--primary)' : '1px solid #cbd5e1',
+                backgroundColor: f.value !== '' && f.value !== 'All' ? 'var(--primary-light)' : '#ffffff',
+                color: f.value !== '' && f.value !== 'All' ? 'var(--primary-text)' : '#0f172a',
                 fontSize: '13px',
                 fontWeight: f.value !== '' && f.value !== 'All' ? 600 : 400,
                 outline: 'none',

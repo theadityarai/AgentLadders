@@ -60,6 +60,14 @@ export default function ReportsPage() {
     loadReports();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showModal) setShowModal(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await fetch('/api/reports', {
@@ -269,7 +277,7 @@ export default function ReportsPage() {
       )}
 
       {showModal && (
-        <div style={{
+        <div onClick={() => setShowModal(false)} style={{
           position: 'fixed',
           inset: 0,
           backgroundColor: 'rgba(15, 23, 42, 0.6)',
@@ -280,7 +288,7 @@ export default function ReportsPage() {
           zIndex: 100,
           padding: '20px'
         }}>
-          <div style={{
+          <div onClick={e => e.stopPropagation()} style={{
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             width: '100%',
@@ -325,8 +333,8 @@ export default function ReportsPage() {
             </div>
 
             <form onSubmit={handleSubmit} style={{ padding: '24px 28px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
-                <div style={{ gridColumn: 'span 2' }}>
+              <div className="responsive-grid-2" style={{ gap: '18px' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
                     Statement / Report Title *
                   </label>
@@ -402,7 +410,7 @@ export default function ReportsPage() {
                   </select>
                 </div>
 
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: '1 / -1' }}>
                   <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
                     Operational Scope
                   </label>

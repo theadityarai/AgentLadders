@@ -12,6 +12,15 @@ export interface User {
   password?: string;
   passwordHash?: string;
   role: string;
+  avatar?: string;
+  image?: string;
+  phone?: string;
+  status?: string;
+  agencyStatus?: string;
+  twoFactorEnabled?: boolean;
+  twoFactorSecret?: string;
+  twoFactorBackupCodes?: string[];
+  createdAt?: string;
 }
 
 export interface Agency {
@@ -19,12 +28,26 @@ export interface Agency {
   name: string;
   country: string;
   currency: string;
+  timezone?: string;
   plan?: string;
   status?: string;
   ownerName?: string;
   ownerEmail?: string;
+  logo?: string;
+  logoUrl?: string;
+  bhkOptions?: string[];
   propertyTypes?: string[];
   leadSources?: string[];
+  propertySpecs?: string[];
+  constructionStages?: string[];
+  vastuOptions?: string[];
+  dealStages?: string[];
+  parkingOptions?: string[];
+  propertyStatuses?: string[];
+  leadStatuses?: string[];
+  siteVisitStatuses?: string[];
+  taskStatuses?: string[];
+  clientStatuses?: string[];
   notificationPrefs?: Record<string, { inApp: boolean; email: boolean }>;
   createdAt?: string;
   updatedAt?: string;
@@ -129,6 +152,9 @@ export interface Lead {
   financingStatus?: string;
   urgency?: string;
   vastuPreference?: string;
+  furnishingPreference?: string;
+  constructionStagePreference?: string;
+  parkingPreference?: string;
   requirement?: string;
   budget?: string;
   locationPreference?: string;
@@ -179,6 +205,7 @@ export interface Client {
   budget?: string;
   preferredLocation?: string;
   preferredChannel?: string;
+  source?: string;
   assignedManager?: string;
   notes?: string;
   createdAt: string;
@@ -411,10 +438,13 @@ export interface SupportTicket {
   agencyId: string;
   ticketNumber: string;
   subject: string;
-  category: 'Billing' | 'CRM Feature' | 'Integrations' | 'Bug Report' | 'General';
+  category: 'Billing' | 'CRM Feature' | 'Integrations' | 'Bug Report' | 'General' | 'Contract Inquiry' | 'Legal Template';
   priority: 'Low' | 'Medium' | 'High' | 'Urgent';
   status: 'Open' | 'In Review' | 'Resolved';
   createdByName: string;
+  createdByEmail?: string;
+  agencyName?: string;
+  contractType?: string;
   messages: Array<{
     id: string;
     sender: string;
@@ -470,12 +500,33 @@ if (!fs.existsSync(path.dirname(DB_PATH))) {
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 }
 
+// High-performance in-memory DB cache singleton
+let _cachedDb: DB | null = null;
+let _cachedMtime: number = 0;
+
 export function getDb(): DB {
+  // Fast path: if cache exists and file hasn't changed on disk, return cache immediately
+  if (_cachedDb && fs.existsSync(DB_PATH)) {
+    try {
+      const currentMtime = fs.statSync(DB_PATH).mtimeMs;
+      if (currentMtime === _cachedMtime) {
+        return _cachedDb;
+      }
+    } catch {
+      // Fall through if stat fails
+    }
+  }
+
   let db: Partial<DB> = {};
 
   if (fs.existsSync(DB_PATH)) {
     try {
       db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+      try {
+        _cachedMtime = fs.statSync(DB_PATH).mtimeMs;
+      } catch {
+        _cachedMtime = Date.now();
+      }
     } catch {
       db = {};
     }
@@ -523,17 +574,77 @@ export function getDb(): DB {
   db.auditLogs = db.auditLogs || [];
   db.recycleBin = db.recycleBin || [];
   db.supportTickets = db.supportTickets || [];
+  if (db.supportTickets.length === 0) {
+    const firstAgency = (db.agencies && db.agencies[0]) ? db.agencies[0] : { id: 'agency_1', name: 'Prestige Estates' };
+    db.supportTickets = [
+      {
+        id: 'tic_1',
+        agencyId: firstAgency.id,
+        agencyName: firstAgency.name,
+        ticketNumber: 'TICK-4091',
+        subject: 'Custom Domain SSL for Agency Public Properties',
+        category: 'Integrations',
+        priority: 'Medium',
+        status: 'In Review',
+        createdByName: 'Aditya Rai',
+        createdByEmail: 'aditya@agentladders.com',
+        contractType: '',
+        messages: [
+          { id: 'msg_1', sender: 'Aditya Rai', isStaff: false, text: 'Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.', timestamp: new Date(Date.now() - 86400000).toISOString() },
+          { id: 'msg_2', sender: 'AgentLadders Support HQ', isStaff: true, text: 'Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.', timestamp: new Date(Date.now() - 43200000).toISOString() }
+        ],
+        createdAt: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        id: 'tic_2',
+        agencyId: firstAgency.id,
+        agencyName: firstAgency.name,
+        ticketNumber: 'TICK-4092',
+        subject: 'Sole Selling Rights Agreement Review for DLF CyberCity Penthouse',
+        category: 'Contract Inquiry',
+        priority: 'High',
+        status: 'Open',
+        createdByName: 'Aditya Rai',
+        createdByEmail: 'aditya@agentladders.com',
+        contractType: 'Sole Selling Rights (Exclusive Mandate Agreement)',
+        messages: [
+          { id: 'msg_3', sender: 'Aditya Rai', isStaff: false, text: 'Hi Legal Team, we have an exclusive mandate opportunity for a 5,400 sq.ft luxury duplex penthouse in Gurgaon. Please advise if we can increase the post-termination protection clause from 180 to 270 days for introduced NRI buyers.', timestamp: new Date(Date.now() - 21600000).toISOString() }
+        ],
+        createdAt: new Date(Date.now() - 21600000).toISOString()
+      }
+    ];
+  }
   db.sharedLinks = db.sharedLinks || [];
 
-  return db as DB;
+  _cachedDb = db as DB;
+  return _cachedDb;
 }
 
 export function saveDb(db: DB) {
+  _cachedDb = db;
   try {
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    const serialized = JSON.stringify(db, null, 2);
+    const tmpPath = `${DB_PATH}.${Date.now()}.${Math.random().toString(36).substring(2, 6)}.tmp`;
+    fs.writeFileSync(tmpPath, serialized, 'utf8');
+    try {
+      fs.renameSync(tmpPath, DB_PATH);
+    } catch {
+      fs.writeFileSync(DB_PATH, serialized, 'utf8');
+      if (fs.existsSync(tmpPath)) {
+        try { fs.unlinkSync(tmpPath); } catch {}
+      }
+    }
+
+    try {
+      _cachedMtime = fs.statSync(DB_PATH).mtimeMs;
+    } catch {
+      _cachedMtime = Date.now();
+    }
     // Also keep legacy file in sync if it exists to avoid desync
     if (fs.existsSync(LEGACY_MOCK_PATH)) {
-      fs.writeFileSync(LEGACY_MOCK_PATH, JSON.stringify(db, null, 2));
+      try {
+        fs.writeFileSync(LEGACY_MOCK_PATH, serialized, 'utf8');
+      } catch {}
     }
   } catch (err) {
     console.error('Failed to save DB:', err);
@@ -920,9 +1031,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
   // 3. Clients
   if (!db.clients.some(c => c.agencyId === agencyId)) {
     db.clients.push(
-      { id: 'cli_1', agencyId, name: 'Vikram Malhotra', email: 'vikram.malhotra@induscap.in', phone: '+91 98200 45678', type: 'Buyer', requirement: '4 BHK Luxury Sea-Facing Flat, Worli', budget: '₹8.50 Cr', createdAt: now },
-      { id: 'cli_2', agencyId, name: 'Rahul Sharma', email: 'rahul.sharma@techglobal.com', phone: '+91 98100 89012', type: 'Buyer', requirement: '3 BHK Golf Course Road, DLF 5', budget: '₹14.50 Cr', createdAt: now },
-      { id: 'cli_3', agencyId, name: 'Dr. Arvind Singhania', email: 'arvind.singhania@apollo.org', phone: '+91 98451 23456', type: 'Buyer', requirement: '3 BHK Indiranagar, Bengaluru', budget: '₹3.85 Cr', createdAt: now }
+      { id: 'cli_1', agencyId, name: 'Vikram Malhotra', email: 'vikram.malhotra@induscap.in', phone: '+91 98200 45678', type: 'Buyer', source: 'WhatsApp Inbound', requirement: '4 BHK Luxury Sea-Facing Flat, Worli', budget: '₹8.50 Cr', createdAt: now },
+      { id: 'cli_2', agencyId, name: 'Rahul Sharma', email: 'rahul.sharma@techglobal.com', phone: '+91 98100 89012', type: 'Buyer', source: '99acres', requirement: '3 BHK Golf Course Road, DLF 5', budget: '₹14.50 Cr', createdAt: now },
+      { id: 'cli_3', agencyId, name: 'Dr. Arvind Singhania', email: 'arvind.singhania@apollo.org', phone: '+91 98451 23456', type: 'Buyer', source: 'Referral / Word of Mouth', requirement: '3 BHK Indiranagar, Bengaluru', budget: '₹3.85 Cr', createdAt: now }
     );
   }
 

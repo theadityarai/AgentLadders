@@ -2,59 +2,31 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
 import { formatINR } from '@/lib/formatters';
 
-export interface PublicPropertyMedia {
+interface PublicPropertyMedia {
   id: string;
   url: string;
   tag: string;
   isCover?: boolean;
-  caption?: string;
-}
-
-export interface PublicPropertyVideo {
-  id: string;
-  url: string;
-  title?: string;
-  type?: string;
 }
 
 interface PublicProperty {
   id: string;
   title: string;
   type: string;
-  location: string;
   price: number | null;
   status: string;
-  bedrooms: number;
-  bathrooms: number;
   areaSqFt: number;
   carpetAreaSqFt?: number;
-  furnishing?: string;
-  parking?: number;
   purpose?: string;
-  listingType: string;
   description: string;
-  images: string[];
   media?: PublicPropertyMedia[];
-  videos?: PublicPropertyVideo[];
-  videoTourUrl?: string;
-  virtualTourUrl?: string;
-  features: string[];
-  publicToken: string;
-  privacyMode: string;
-  viewsCount: number;
+  images: string[];
   agencyName: string;
-  agencyCountry: string;
   agentName: string;
   agentPhone: string;
-  agentEmail: string;
   bhk?: string;
-  reraId?: string;
-  facing?: string;
-  possessionStatus?: string;
   city?: string;
   locality?: string;
 }
@@ -66,23 +38,18 @@ export default function PublicPropertyPage() {
   const [property, setProperty] = useState<PublicProperty | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Gallery state
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [activeTag, setActiveTag] = useState<string>('All');
-  const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
-  // Inquiry form states
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    preferredDate: '',
-    message: ''
-  });
+  // Form State
+  const [showInquiryModal, setShowInquiryModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'interest' | 'visit'>('interest');
+  const [form, setForm] = useState({ name: '', phone: '', email: '', date: '', timeSlot: '', note: '' });
   const [submitting, setSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState('');
-  const [submitError, setSubmitError] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [inquiryError, setInquiryError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -94,10 +61,10 @@ export default function PublicPropertyPage() {
         if (res.ok && data.property) {
           setProperty(data.property);
         } else {
-          setError(data.error || 'Property listing not found or is currently private.');
+          setError(data.error || 'Property not found.');
         }
       } catch {
-        setError('Failed to connect to property registry.');
+        setError('Failed to connect.');
       } finally {
         setLoading(false);
       }
@@ -105,829 +72,556 @@ export default function PublicPropertyPage() {
     loadProperty();
   }, [id]);
 
-  const handleInquirySubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showInquiryModal) setShowInquiryModal(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showInquiryModal]);
+
+  const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || (!form.email && !form.phone)) {
-      setSubmitError('Please provide your name and at least an email or phone number.');
-      return;
-    }
     setSubmitting(true);
-    setSubmitError('');
+    setInquiryError(null);
     try {
-      const res = await fetch('/api/public/enquiry', {
+      const res = await fetch(`/api/public/property/${id}/inquire`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          propertyId: property?.id,
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          preferredDate: form.preferredDate,
-          message: form.message
-        })
+        body: JSON.stringify(form)
       });
-      const json = await res.json();
       if (res.ok) {
-        setSubmitSuccess(json.message || 'Inquiry successfully submitted! Our advisor will be in touch shortly.');
-        setForm({ name: '', email: '', phone: '', preferredDate: '', message: '' });
+        setSubmitSuccess(true);
+        setTimeout(() => {
+          setShowInquiryModal(false);
+          setSubmitSuccess(false);
+          setForm({ name: '', phone: '', email: '', date: '', timeSlot: '', note: '' });
+        }, 2000);
       } else {
-        setSubmitError(json.error || 'Failed to submit inquiry.');
+        setInquiryError('Failed to send request. Please try WhatsApp directly or contact support.');
       }
     } catch {
-      setSubmitError('Network error. Please try again or contact the agent directly.');
+      setInquiryError('Network error. Please try WhatsApp directly or check your connection.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const shareText = property ? `Check out this luxury property: ${property.title} in ${property.location} - ${property.price ? formatINR(property.price) : 'Price on Request'}` : '';
-
-  const handleCopyLink = () => {
-    if (typeof navigator !== 'undefined') {
-      navigator.clipboard.writeText(currentUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }
+  const handleWhatsApp = () => {
+    if (!property) return;
+    const msg = `Hi, I'm interested in the property: ${property.title} (${formatINR(property.price || 0)}). Is it still available?`;
+    const phone = property.agentPhone ? property.agentPhone.replace(/\\D/g, '') : '';
+    window.open(`https://wa.me/${phone ? (phone.startsWith('91') ? phone : '91'+phone) : ''}?text=${encodeURIComponent(msg)}`, '_blank');
   };
+
+  // Normalize media
+  const allMedia = React.useMemo(() => {
+    if (!property) return [];
+    const media = property.media && property.media.length > 0 
+      ? property.media 
+      : property.images?.map((url, i) => ({ id: String(i), url, tag: 'Photo' })) || [];
+      
+    if (media.length === 0) {
+      return [{ id: 'fallback', url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80', tag: 'Exterior' }];
+    }
+    return media;
+  }, [property]);
+
+  const handleNextImage = React.useCallback(() => {
+    if (allMedia.length <= 1) return;
+    setActiveImageIndex(prev => (prev + 1) % allMedia.length);
+  }, [allMedia.length]);
+
+  const handlePrevImage = React.useCallback(() => {
+    if (allMedia.length <= 1) return;
+    setActiveImageIndex(prev => (prev - 1 + allMedia.length) % allMedia.length);
+  }, [allMedia.length]);
+
+  // Automatic slider (autoplay every 4 seconds, pauses when user hovers or touches)
+  useEffect(() => {
+    if (allMedia.length <= 1 || isPaused) return;
+    const interval = setInterval(() => {
+      setActiveImageIndex(prev => (prev + 1) % allMedia.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [allMedia.length, isPaused]);
+
+  // Keyboard navigation (ArrowLeft and ArrowRight)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (showInquiryModal) return;
+      if (e.key === 'ArrowLeft') handlePrevImage();
+      if (e.key === 'ArrowRight') handleNextImage();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNextImage, handlePrevImage, showInquiryModal]);
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', color: '#f8fafc', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ width: '48px', height: '48px', border: '3px solid rgba(255,255,255,0.1)', borderTop: '3px solid #3b82f6', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginBottom: '16px' }} />
-        <h2 style={{ fontSize: '18px', fontWeight: 600 }}>Loading Exclusive Property Presentation...</h2>
-        <style dangerouslySetInnerHTML={{ __html: '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f8fafc', flexDirection: 'column', gap: 16 }}>
+        <div style={{ width: 40, height: 40, border: '3px solid #e2e8f0', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <span style={{ color: '#64748b', fontSize: 15, fontWeight: 500 }}>Loading exclusive property...</span>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   if (error || !property) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', color: '#f8fafc', padding: '24px', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', marginBottom: '20px' }}>
-          🔒
-        </div>
-        <h1 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '12px' }}>Listing Unavailable</h1>
-        <p style={{ maxWidth: '440px', color: '#94a3b8', fontSize: '15px', lineHeight: 1.6, marginBottom: '28px' }}>
-          {error || 'This property is either private or has been removed by the listing brokerage.'}
-        </p>
-        <Link href="/" style={{ padding: '12px 24px', backgroundColor: '#2563eb', color: '#ffffff', borderRadius: '8px', fontWeight: 600, textDecoration: 'none', fontSize: '14px' }}>
-          Return to AgentLadders
-        </Link>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f8fafc', flexDirection: 'column', gap: 12 }}>
+        <div style={{ fontSize: 48 }}>🏚️</div>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', margin: 0 }}>Listing Not Found</h1>
+        <p style={{ color: '#64748b', fontSize: 15 }}>{error}</p>
       </div>
     );
   }
 
-  const images = property.images && property.images.length > 0 ? property.images : ['/images/property_hero.jpg'];
+  const activeMedia = allMedia[activeImageIndex] || allMedia[0];
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', color: '#0f172a', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-      {/* Top Navigation Bar */}
-      <header style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid #e2e8f0',
-        padding: '12px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '16px' }}>
-            AL
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '15px', color: '#0f172a', letterSpacing: '-0.3px' }}>{property.agencyName}</div>
-            <div style={{ fontSize: '11px', color: '#64748b' }}>Verified Real Estate Partner &middot; {property.agencyCountry}</div>
-          </div>
+    <div style={{ backgroundColor: '#fff', minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: 80 }}>
+      {/* Mobile Top Nav (transparent) */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '20px', zIndex: 30, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', pointerEvents: 'none' }}>
+        <div style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: '#fff', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', pointerEvents: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+          {property.agencyName || 'Exclusive Listing'}
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <a
-            href={`https://api.whatsapp.com/send?phone=${encodeURIComponent(property.agentPhone.replace(/[^0-9+]/g, ''))}&text=${encodeURIComponent(`Hi ${property.agentName}, I am inquiring about "${property.title}" (${currentUrl})`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#25D366',
-              color: '#ffffff',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              fontWeight: 600,
-              fontSize: '13px',
-              textDecoration: 'none'
-            }}
-          >
-            <span>💬</span> WhatsApp Agent
-          </a>
-          <a
-            href="#tour-booking"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#0f172a',
-              color: '#ffffff',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontWeight: 600,
-              fontSize: '13px',
-              textDecoration: 'none'
-            }}
-          >
-            Schedule VIP Tour
-          </a>
+        <div style={{ backgroundColor: property.status === 'Available' ? '#10b981' : '#f59e0b', color: '#fff', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, pointerEvents: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+          {property.status}
         </div>
-      </header>
+      </div>
 
-      {/* Main Content Container */}
-      <main style={{ maxWidth: '1240px', margin: '0 auto', padding: '24px 20px 80px' }}>
+      {/* Hero Image Section with Automatic Slider & Forward/Back Controls */}
+      <div 
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+        style={{ position: 'relative', width: '100%', height: '52vh', minHeight: 420, backgroundColor: '#0f172a', overflow: 'hidden', userSelect: 'none' }}
+      >
+        {/* Images with smooth crossfade */}
+        {allMedia.map((media, index) => (
+          <img 
+            key={media.id || index}
+            src={media.url} 
+            alt={media.tag || `Property Photo ${index + 1}`} 
+            style={{ 
+              position: 'absolute',
+              inset: 0,
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover',
+              opacity: index === activeImageIndex ? 1 : 0,
+              transition: 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+              pointerEvents: index === activeImageIndex ? 'auto' : 'none'
+            }} 
+          />
+        ))}
+
+        {/* Subtle dark ambient gradient overlay */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '45%', background: 'linear-gradient(transparent, rgba(0,0,0,0.85))', pointerEvents: 'none' }} />
         
-        {/* Title & Location Header */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
-          <div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, backgroundColor: '#eff6ff', color: '#2563eb' }}>
-                {property.bhk || (property.bedrooms ? `${property.bedrooms} BHK` : property.type)}
-              </span>
-              <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 700, backgroundColor: '#f0fdf4', color: '#166534' }}>
-                {property.listingType.toUpperCase()}
-              </span>
-              {property.reraId && (
-                <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}>
-                  🛡️ RERA: {property.reraId}
-                </span>
-              )}
-              {property.facing && (
-                <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
-                  🧭 {property.facing}
-                </span>
-              )}
-              <span style={{ padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 600, backgroundColor: '#f8fafc', color: '#64748b', border: '1px solid #e2e8f0' }}>
-                ID: {property.id}
-              </span>
+        {/* Forward & Backward Navigation Buttons */}
+        {allMedia.length > 1 && (
+          <>
+            {/* Backward / Previous Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrevImage();
+              }}
+              aria-label="Previous image"
+              style={{
+                position: 'absolute',
+                left: 18,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(15, 23, 42, 0.55)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.35)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 25,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.85)';
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.55)';
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+
+            {/* Forward / Next Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleNextImage();
+              }}
+              aria-label="Next image"
+              style={{
+                position: 'absolute',
+                right: 18,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(15, 23, 42, 0.55)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.35)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                zIndex: 25,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.85)';
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.55)';
+                e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </>
+        )}
+
+        {/* Tag Badge */}
+        <div style={{ 
+          position: 'absolute', 
+          bottom: 20, 
+          left: 20, 
+          backgroundColor: 'rgba(15, 23, 42, 0.65)', 
+          backdropFilter: 'blur(8px)', 
+          WebkitBackdropFilter: 'blur(8px)', 
+          color: '#fff', 
+          padding: '6px 14px', 
+          borderRadius: 20, 
+          fontSize: 13, 
+          fontWeight: 600, 
+          border: '1px solid rgba(255,255,255,0.25)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          zIndex: 20
+        }}>
+          <span>📍</span> {activeMedia?.tag || 'Property Photo'}
+        </div>
+
+        {/* Slide Counter & Interactive Indicator Dots */}
+        {allMedia.length > 1 && (
+          <div style={{ 
+            position: 'absolute', 
+            bottom: 20, 
+            right: 20, 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 10,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            padding: '6px 14px',
+            borderRadius: 20,
+            border: '1px solid rgba(255,255,255,0.2)',
+            zIndex: 20
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.95)', letterSpacing: '0.04em' }}>
+              {activeImageIndex + 1} / {allMedia.length}
+            </span>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              {allMedia.map((_, i) => (
+                <button 
+                  key={i} 
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImageIndex(i);
+                  }}
+                  style={{ 
+                    width: i === activeImageIndex ? 18 : 7, 
+                    height: 7, 
+                    borderRadius: 4, 
+                    padding: 0, 
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    backgroundColor: i === activeImageIndex ? '#10b981' : 'rgba(255,255,255,0.45)', 
+                    transition: 'all 0.25s ease' 
+                  }}
+                  aria-label={`View image ${i + 1}`}
+                />
+              ))}
             </div>
-            <h1 style={{ fontSize: '32px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px', margin: '0 0 6px 0' }}>
-              {property.title}
-            </h1>
-            <p style={{ fontSize: '16px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-              📍 {property.location}
-            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Main Content Area */}
+      <div style={{ padding: '24px 20px', maxWidth: 800, margin: '0 auto', width: '100%', flex: 1 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
+          <div style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
+            {property.price ? formatINR(property.price) : 'Price on Request'}
+          </div>
+          <h1 style={{ fontSize: 20, fontWeight: 600, color: '#475569', margin: 0, lineHeight: 1.4 }}>
+            {property.title}
+          </h1>
+          <div style={{ fontSize: 15, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+            <span>🗺️</span> {property.locality ? `${property.locality}, ${property.city}` : property.city || 'Prime Location'}
           </div>
 
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Offering Price
-            </div>
-            <div style={{ fontSize: '34px', fontWeight: 800, color: '#2563eb', letterSpacing: '-1px' }}>
-              {property.price ? formatINR(property.price) : 'Price on Request'}
-            </div>
-            {property.price && property.areaSqFt && (
-              <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
-                ₹{Math.round(property.price / property.areaSqFt).toLocaleString('en-IN')} / sq ft
-              </div>
-            )}
+          {/* Quick Buyer Action Badges */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setModalMode('interest');
+                setShowInquiryModal(true);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                backgroundColor: '#fff1f2',
+                color: '#e11d48',
+                border: '1.5px solid #fecdd3',
+                padding: '7px 16px',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <span>❤️</span> I'm Interested
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setModalMode('visit');
+                setShowInquiryModal(true);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                backgroundColor: '#f0fdf4',
+                color: '#166534',
+                border: '1.5px solid #bbf7d0',
+                padding: '7px 16px',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <span>📅</span> Schedule Site Visit
+            </button>
           </div>
         </div>
 
-        {/* Room Tag Filter Bar */}
-        {(() => {
-          const mediaList: PublicPropertyMedia[] = (property.media && property.media.length > 0)
-            ? property.media
-            : (property.images || []).map((img, i) => ({
-                id: `img_${i}`,
-                url: img,
-                tag: i === 0 ? 'Exterior / Facade' : (i === 1 ? 'Hall / Living Area' : 'Property Photo'),
-                isCover: i === 0,
-                caption: ''
-              }));
-          const uniqueTags = Array.from(new Set(mediaList.map(m => m.tag))).filter(Boolean);
-          const displayedMedia = activeTag === 'All'
-            ? mediaList
-            : mediaList.filter(m => m.tag === activeTag);
-          const currentMedia = displayedMedia[activeImageIndex] || displayedMedia[0] || mediaList[0];
+        {/* Key Metrics Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 32 }}>
+          <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Configuration</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>{property.bhk || 'Not Specified'}</div>
+          </div>
+          <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Carpet Area</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>{property.carpetAreaSqFt || property.areaSqFt} <span style={{ fontSize: 12, fontWeight: 500 }}>Sq.Ft</span></div>
+          </div>
+          <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Property Type</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>{property.type || 'Apartment'}</div>
+          </div>
+          <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4 }}>Purpose</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>{property.purpose || 'For Sale'}</div>
+          </div>
+        </div>
 
-          return (
-            <>
-              {/* Filter Tabs */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                <button
-                  type="button"
-                  onClick={() => { setActiveTag('All'); setActiveImageIndex(0); }}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '20px',
-                    fontSize: '12.5px',
-                    fontWeight: 700,
-                    border: activeTag === 'All' ? '2px solid #2563eb' : '1px solid #cbd5e1',
-                    backgroundColor: activeTag === 'All' ? '#2563eb' : '#ffffff',
-                    color: activeTag === 'All' ? '#ffffff' : '#475569',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
+        {/* Description */}
+        <div style={{ marginBottom: 40 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 12 }}>About this property</h2>
+          <p style={{ fontSize: 15, color: '#475569', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            {property.description || 'No description provided by the agent.'}
+          </p>
+        </div>
+
+        {/* Listed By Agency Card */}
+        <div style={{ backgroundColor: '#0f172a', padding: '20px', borderRadius: 16, color: '#fff', display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ width: 50, height: 50, backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
+            🏢
+          </div>
+          <div>
+            <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', marginBottom: 2 }}>Listed By</div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: '#ffffff' }}>{property.agencyName || 'Agency'}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Bottom Action Bar (Crucial for Mobile) */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', padding: '14px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: 10, zIndex: 40, boxShadow: '0 -4px 15px rgba(0,0,0,0.05)' }}>
+        <button 
+          onClick={handleWhatsApp}
+          style={{ flex: 1, padding: '12px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+        >
+          <span>💬</span> WhatsApp
+        </button>
+        <button 
+          onClick={() => {
+            setModalMode('interest');
+            setShowInquiryModal(true);
+          }}
+          style={{ flex: 1.2, padding: '12px', backgroundColor: '#e11d48', color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 4px 12px rgba(225,29,72,0.25)' }}
+        >
+          <span>❤️</span> I'm Interested
+        </button>
+        <button 
+          onClick={() => {
+            setModalMode('visit');
+            setShowInquiryModal(true);
+          }}
+          style={{ flex: 1, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+        >
+          Book Visit
+        </button>
+      </div>
+
+      {/* Inquiry & Interest Modal */}
+      {showInquiryModal && (
+        <div onClick={() => setShowInquiryModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 500, maxHeight: '90vh', overflowY: 'auto', backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '32px 24px', animation: 'slideUp 0.3s ease-out', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: '#0f172a' }}>
+                  {modalMode === 'interest' ? "❤️ I'm Interested in this Property" : '📅 Book Site Visit'}
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>
+                  {modalMode === 'interest' 
+                    ? 'Leave your details and the agency will reach out directly with pricing & floor plans.' 
+                    : 'Schedule an on-site property walkthrough with the agency team.'}
+                </p>
+              </div>
+              <button onClick={() => setShowInquiryModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, color: '#94a3b8', cursor: 'pointer' }}>&times;</button>
+            </div>
+            
+            {submitSuccess ? (
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+                  {modalMode === 'interest' ? 'Interest Registered!' : 'Visit Request Sent!'}
+                </div>
+                <div style={{ fontSize: 15, color: '#64748b' }}>
+                  The agency team has been notified and will contact you shortly.
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleInquiry} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {inquiryError && (
+                  <div style={{ padding: '12px 14px', backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 10, color: '#dc2626', fontSize: 13, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 16 }}>⚠️</span>
+                    <span style={{ flex: 1, fontWeight: 500 }}>{inquiryError}</span>
+                    <button type="button" onClick={() => setInquiryError(null)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>&times;</button>
+                  </div>
+                )}
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>Your Name *</label>
+                  <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: '100%', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: 12, fontSize: 15, outline: 'none' }} placeholder="Enter your full name" />
+                </div>
+                
+                <div className="responsive-grid-2">
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>Phone Number *</label>
+                    <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={{ width: '100%', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: 12, fontSize: 15, outline: 'none' }} placeholder="10-digit number" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>Email (Optional)</label>
+                    <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} style={{ width: '100%', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: 12, fontSize: 15, outline: 'none' }} placeholder="your@email.com" />
+                  </div>
+                </div>
+
+                {modalMode === 'visit' && (
+                  <div className="responsive-grid-2">
+                    <div>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>Preferred Date *</label>
+                      <input required type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} style={{ width: '100%', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: 12, fontSize: 15, outline: 'none' }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>Time Slot (Optional)</label>
+                      <input type="time" value={form.timeSlot} onChange={e => setForm({...form, timeSlot: e.target.value})} style={{ width: '100%', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: 12, fontSize: 15, outline: 'none' }} />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>
+                    {modalMode === 'interest' ? 'Specific Requirements / Message' : 'Additional Notes (Optional)'}
+                  </label>
+                  <textarea 
+                    value={form.note} 
+                    onChange={e => setForm({...form, note: e.target.value})} 
+                    style={{ width: '100%', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: 12, fontSize: 15, outline: 'none', resize: 'vertical', minHeight: 80 }} 
+                    placeholder={modalMode === 'interest' ? "e.g. Looking for high floor, flexible on payment plans, need brochure..." : "Any specific timings or preferences?"} 
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  disabled={submitting} 
+                  style={{ 
+                    width: '100%', 
+                    padding: '16px', 
+                    backgroundColor: modalMode === 'interest' ? '#e11d48' : 'var(--primary)', 
+                    color: '#fff', 
+                    border: 'none', 
+                    borderRadius: 12, 
+                    fontSize: 16, 
+                    fontWeight: 700, 
+                    cursor: 'pointer', 
+                    marginTop: 12, 
+                    boxShadow: modalMode === 'interest' ? '0 4px 12px rgba(225,29,72,0.25)' : '0 4px 12px rgba(0,0,0,0.1)' 
                   }}
                 >
-                  All Photos ({mediaList.length})
+                  {submitting 
+                    ? 'Submitting...' 
+                    : (modalMode === 'interest' ? "Submit My Interest ❤️" : 'Confirm Site Visit 📅')}
                 </button>
-                {uniqueTags.map(tag => {
-                  const count = mediaList.filter(m => m.tag === tag).length;
-                  const isSelected = activeTag === tag;
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => { setActiveTag(tag); setActiveImageIndex(0); }}
-                      style={{
-                        padding: '8px 14px',
-                        borderRadius: '20px',
-                        fontSize: '12.5px',
-                        fontWeight: isSelected ? 700 : 500,
-                        border: isSelected ? '2px solid #2563eb' : '1px solid #cbd5e1',
-                        backgroundColor: isSelected ? '#eff6ff' : '#ffffff',
-                        color: isSelected ? '#1d4ed8' : '#334155',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <span>🏷️</span> {tag} <span style={{ opacity: 0.7, fontSize: '11px' }}>({count})</span>
-                    </button>
-                  );
-                })}
-                {property.videoTourUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setVideoModalOpen(true)}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '20px',
-                      fontSize: '12.5px',
-                      fontWeight: 700,
-                      border: '1px solid #f43f5e',
-                      backgroundColor: '#fff1f2',
-                      color: '#e11d48',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      marginLeft: 'auto'
-                    }}
-                  >
-                    <span>🎥</span> Watch 4K Video Tour
-                  </button>
-                )}
-              </div>
-
-              {/* Hero Gallery Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: displayedMedia.length > 1 ? '2.2fr 1fr' : '1fr', gap: '16px', borderRadius: '16px', overflow: 'hidden', marginBottom: '32px', backgroundColor: '#0f172a' }}>
-                {/* Main Large Showcase Image */}
-                <div style={{ position: 'relative', minHeight: '460px', backgroundColor: '#1e293b', cursor: 'pointer' }} onClick={() => setLightboxOpen(true)}>
-                  <Image
-                    src={currentMedia?.url || '/images/property_hero.jpg'}
-                    alt={property.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 66vw"
-                    priority
-                    style={{ objectFit: 'cover' }}
-                  />
-                  
-                  {/* Room Tag Badge */}
-                  {currentMedia?.tag && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '16px',
-                      left: '16px',
-                      backgroundColor: 'rgba(15, 23, 42, 0.85)',
-                      backdropFilter: 'blur(8px)',
-                      padding: '6px 14px',
-                      borderRadius: '8px',
-                      color: '#ffffff',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      border: '1px solid rgba(255,255,255,0.25)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.3)'
-                    }}>
-                      <span>🏷️</span> {currentMedia.tag}
-                    </div>
-                  )}
-
-                  {/* Expand Lightbox Button */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '16px',
-                    right: '16px',
-                    backgroundColor: 'rgba(15, 23, 42, 0.75)',
-                    backdropFilter: 'blur(8px)',
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    color: '#ffffff',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    <span>⛶</span> Full Screen
-                  </div>
-
-                  {/* Caption & Counter */}
-                  <div style={{ position: 'absolute', bottom: '16px', left: '16px', right: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', padding: '6px 14px', borderRadius: '8px', color: '#fff', fontSize: '13px', fontWeight: 500 }}>
-                      {currentMedia?.caption || currentMedia?.tag || `Photo ${activeImageIndex + 1}`}
-                    </div>
-                    <div style={{ backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', padding: '6px 12px', borderRadius: '8px', color: '#94a3b8', fontSize: '12px', fontWeight: 600 }}>
-                      {activeImageIndex + 1} of {displayedMedia.length}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Side Thumbnails Column */}
-                {displayedMedia.length > 1 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', backgroundColor: '#0f172a', justifyContent: 'center', maxHeight: '480px', overflowY: 'auto' }}>
-                    {displayedMedia.map((m, idx) => (
-                      <div
-                        key={m.id || idx}
-                        onClick={() => setActiveImageIndex(idx)}
-                        style={{
-                          position: 'relative',
-                          height: '98px',
-                          borderRadius: '10px',
-                          overflow: 'hidden',
-                          cursor: 'pointer',
-                          border: activeImageIndex === idx ? '3px solid #3b82f6' : '1px solid rgba(255,255,255,0.15)',
-                          opacity: activeImageIndex === idx ? 1 : 0.65,
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        <Image
-                          src={m.url}
-                          alt={m.tag || `Thumbnail ${idx + 1}`}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          style={{ objectFit: 'cover' }}
-                        />
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '4px',
-                          left: '4px',
-                          backgroundColor: 'rgba(15, 23, 42, 0.85)',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          color: '#fff',
-                          fontSize: '10px',
-                          fontWeight: 700
-                        }}>
-                          {m.tag}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* LIGHTBOX MODAL */}
-              {lightboxOpen && (
-                <div style={{
-                  position: 'fixed',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.95)',
-                  zIndex: 9999,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '20px'
-                }}>
-                  {/* Top Bar */}
-                  <div style={{ width: '100%', maxWidth: '1200px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', color: '#fff' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ backgroundColor: '#2563eb', padding: '4px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: 700 }}>
-                        🏷️ {currentMedia?.tag || 'Property Photo'}
-                      </span>
-                      <span style={{ fontSize: '14px', color: '#cbd5e1' }}>
-                        {currentMedia?.caption || property.title}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setLightboxOpen(false)}
-                      style={{ background: 'none', border: 'none', color: '#fff', fontSize: '32px', cursor: 'pointer', padding: '0 8px' }}
-                    >
-                      &times;
-                    </button>
-                  </div>
-
-                  {/* Lightbox Image Container */}
-                  <div style={{ position: 'relative', width: '100%', maxWidth: '1200px', height: '70vh' }}>
-                    <Image
-                      src={currentMedia?.url || '/images/property_hero.jpg'}
-                      alt={currentMedia?.tag || property.title}
-                      fill
-                      style={{ objectFit: 'contain' }}
-                    />
-                  </div>
-
-                  {/* Lightbox Controls */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '16px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveImageIndex(prev => prev > 0 ? prev - 1 : displayedMedia.length - 1)}
-                      style={{ padding: '8px 18px', backgroundColor: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
-                    >
-                      &larr; Previous
-                    </button>
-                    <span style={{ color: '#94a3b8', fontSize: '13px', fontWeight: 600 }}>
-                      {activeImageIndex + 1} / {displayedMedia.length}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setActiveImageIndex(prev => prev < displayedMedia.length - 1 ? prev + 1 : 0)}
-                      style={{ padding: '8px 18px', backgroundColor: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 700 }}
-                    >
-                      Next &rarr;
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* VIDEO TOUR MODAL */}
-              {videoModalOpen && property.videoTourUrl && (
-                <div style={{
-                  position: 'fixed',
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  backgroundColor: 'rgba(0, 0, 0, 0.92)',
-                  zIndex: 9999,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '24px'
-                }}>
-                  <div style={{ width: '100%', maxWidth: '960px', backgroundColor: '#0f172a', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700, fontSize: '16px' }}>
-                        <span>🎥</span> 4K Architectural Video Walkthrough &bull; {property.title}
-                      </div>
-                      <button
-                        onClick={() => setVideoModalOpen(false)}
-                        style={{ background: 'none', border: 'none', color: '#fff', fontSize: '26px', cursor: 'pointer' }}
-                      >
-                        &times;
-                      </button>
-                    </div>
-                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0 }}>
-                      <iframe
-                        src={property.videoTourUrl.includes('watch?v=') 
-                          ? property.videoTourUrl.replace('watch?v=', 'embed/') 
-                          : property.videoTourUrl}
-                        title="Video Tour"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          );
-        })()}
-
-        {/* Specifications Ribbon */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-          gap: '16px',
-          backgroundColor: '#ffffff',
-          padding: '20px 24px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          marginBottom: '32px'
-        }}>
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Configuration</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-              🛏️ {property.bhk || (property.bedrooms ? `${property.bedrooms} BHK` : `${property.bedrooms} Beds`)}
-            </div>
+              </form>
+            )}
           </div>
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Bathrooms</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🛁 {property.bathrooms} Baths</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Super Built-Up</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>📐 {property.areaSqFt?.toLocaleString('en-IN')} sq ft</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>RERA Carpet Area</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#2563eb', marginTop: '2px' }}>
-              📐 {property.carpetAreaSqFt ? property.carpetAreaSqFt.toLocaleString('en-IN') : Math.round(Number(property.areaSqFt) * 0.8).toLocaleString('en-IN')} sq ft
-            </div>
-          </div>
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Vastu Facing</span>
-            <div style={{ fontSize: '17px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🧭 {property.facing || 'East Facing'}</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Possession</span>
-            <div style={{ fontSize: '17px', fontWeight: 700, color: '#16a34a', marginTop: '2px' }}>🔑 {property.possessionStatus || property.status || 'Ready to Move'}</div>
-          </div>
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Reserved Parking</span>
-            <div style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>🚗 {property.parking ?? 2} Covered</div>
-          </div>
+          <style>{`
+            @keyframes slideUp {
+              from { transform: translateY(100%); }
+              to { transform: translateY(0); }
+            }
+          `}</style>
         </div>
-
-        {/* 2-Column Layout: Details + Inquiry Sidebar */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.9fr 1.1fr', gap: '32px', alignItems: 'start' }}>
-          
-          {/* Left Column: Description & Amenities */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-            
-            {/* Description Card */}
-            <div style={{ backgroundColor: '#ffffff', padding: '28px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginBottom: '16px' }}>
-                Property Overview
-              </h2>
-              <p style={{ fontSize: '15px', color: '#334155', lineHeight: 1.8, whiteSpace: 'pre-line', margin: 0 }}>
-                {property.description}
-              </p>
-            </div>
-
-            {/* Key Features & Amenities Card */}
-            <div style={{ backgroundColor: '#ffffff', padding: '28px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0f172a', marginBottom: '16px' }}>
-                Highlights & Bespoke Amenities
-              </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
-                {property.features.map((feat, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '14px', fontWeight: 500, color: '#1e293b' }}>
-                    <span style={{ color: '#2563eb', fontWeight: 700 }}>✓</span> {feat}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Social Share Bar */}
-            <div style={{ backgroundColor: '#ffffff', padding: '24px 28px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', marginBottom: '12px' }}>
-                Share This Presentation
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                {/* WhatsApp */}
-                <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + currentUrl)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', backgroundColor: '#25D366', color: '#ffffff', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
-                >
-                  💬 WhatsApp
-                </a>
-
-                {/* Telegram */}
-                <a
-                  href={`https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(shareText)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', backgroundColor: '#0088cc', color: '#ffffff', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
-                >
-                  ✈️ Telegram
-                </a>
-
-                {/* Email */}
-                <a
-                  href={`mailto:?subject=${encodeURIComponent(property.title)}&body=${encodeURIComponent(shareText + '\n\nView Property: ' + currentUrl)}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', backgroundColor: '#475569', color: '#ffffff', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
-                >
-                  ✉️ Email
-                </a>
-
-                {/* SMS */}
-                <a
-                  href={`sms:?body=${encodeURIComponent(shareText + ' ' + currentUrl)}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', backgroundColor: '#64748b', color: '#ffffff', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
-                >
-                  📱 SMS
-                </a>
-
-                {/* LinkedIn */}
-                <a
-                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', backgroundColor: '#0a66c2', color: '#ffffff', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
-                >
-                  💼 LinkedIn
-                </a>
-
-                {/* Copy Link */}
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', borderRadius: '8px', backgroundColor: copied ? '#10b981' : '#0f172a', color: '#ffffff', fontWeight: 600, fontSize: '13px', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease' }}
-                >
-                  {copied ? '✓ Link Copied!' : '🔗 Copy Link'}
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column: Agent Card & VIP Tour Booking */}
-          <div id="tour-booking" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            
-            {/* Agent Contact Card */}
-            <div style={{
-              backgroundColor: '#ffffff',
-              padding: '24px',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '20px', color: '#2563eb', border: '2px solid #dbeafe' }}>
-                  {property.agentName.substring(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '17px', color: '#0f172a' }}>{property.agentName}</div>
-                  <div style={{ fontSize: '13px', color: '#64748b' }}>Certified Luxury Specialist</div>
-                  <div style={{ fontSize: '12px', color: '#2563eb', fontWeight: 600, marginTop: '2px' }}>{property.agencyName}</div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <a
-                  href={`tel:${property.agentPhone}`}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', color: '#0f172a', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }}
-                >
-                  📞 Call {property.agentPhone}
-                </a>
-                <a
-                  href={`https://api.whatsapp.com/send?phone=${encodeURIComponent(property.agentPhone.replace(/[^0-9+]/g, ''))}&text=${encodeURIComponent(`Hello ${property.agentName}, I would like more information on "${property.title}" (${currentUrl})`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', borderRadius: '8px', backgroundColor: '#25D366', color: '#ffffff', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }}
-                >
-                  💬 Chat on WhatsApp
-                </a>
-              </div>
-            </div>
-
-            {/* Direct Client Inquiry & Showing Booking Form */}
-            <div style={{
-              backgroundColor: '#ffffff',
-              padding: '28px',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
-            }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', marginBottom: '6px' }}>
-                Schedule Private Showing
-              </h3>
-              <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', lineHeight: 1.5 }}>
-                Reserve an exclusive viewing or request full architectural specifications directly with the listing broker.
-              </p>
-
-              {submitSuccess ? (
-                <div style={{ padding: '20px', borderRadius: '8px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', textAlign: 'center' }}>
-                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎉</div>
-                  <div style={{ fontWeight: 700, fontSize: '15px', marginBottom: '6px' }}>Inquiry Registered</div>
-                  <div style={{ fontSize: '13px', lineHeight: 1.5 }}>{submitSuccess}</div>
-                  <button
-                    type="button"
-                    onClick={() => setSubmitSuccess('')}
-                    style={{ marginTop: '16px', padding: '6px 14px', borderRadius: '6px', border: '1px solid #16a34a', backgroundColor: '#ffffff', color: '#166534', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
-                  >
-                    Submit Another Inquiry
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleInquirySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {submitError && (
-                    <div style={{ padding: '10px 14px', borderRadius: '6px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '13px' }}>
-                      ⚠️ {submitError}
-                    </div>
-                  )}
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '5px' }}>
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Vikram Malhotra"
-                      value={form.name}
-                      onChange={e => setForm({ ...form, name: e.target.value })}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '5px' }}>
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="e.g. vikram.malhotra@gmail.com"
-                      value={form.email}
-                      onChange={e => setForm({ ...form, email: e.target.value })}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '5px' }}>
-                      Phone / WhatsApp Number *
-                    </label>
-                    <input
-                      type="tel"
-                      placeholder="e.g. +91 98201 54321"
-                      value={form.phone}
-                      onChange={e => setForm({ ...form, phone: e.target.value })}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '5px' }}>
-                      Preferred Site Visit Date (Optional)
-                    </label>
-                    <input
-                      type="date"
-                      value={form.preferredDate}
-                      onChange={e => setForm({ ...form, preferredDate: e.target.value })}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#475569', marginBottom: '5px' }}>
-                      Questions / Special Requests
-                    </label>
-                    <textarea
-                      rows={3}
-                      placeholder="Interested in site visit, floor plan, RERA approvals, payment milestones, or home loan assistance..."
-                      value={form.message}
-                      onChange={e => setForm({ ...form, message: e.target.value })}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', outline: 'none', boxSizing: 'border-box', resize: 'vertical' }}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      backgroundColor: submitting ? '#94a3b8' : '#2563eb',
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      fontSize: '14px',
-                      border: 'none',
-                      cursor: submitting ? 'not-allowed' : 'pointer',
-                      marginTop: '6px',
-                      boxShadow: '0 2px 4px rgba(37, 99, 235, 0.2)'
-                    }}
-                  >
-                    {submitting ? 'Transmitting Request...' : 'Confirm Showing Request'}
-                  </button>
-                  <p style={{ fontSize: '11px', color: '#94a3b8', textAlign: 'center', margin: 0 }}>
-                    🔒 Confidentiality guaranteed. Your details are never sold or shared.
-                  </p>
-                </form>
-              )}
-            </div>
-
-          </div>
-
-        </div>
-
-      </main>
-
-      {/* Footer */}
-      <footer style={{ backgroundColor: '#0f172a', color: '#94a3b8', padding: '32px 24px', textAlign: 'center', fontSize: '13px', borderTop: '1px solid #1e293b' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-          <div>
-            &copy; {new Date().getFullYear()} {property.agencyName}. All rights reserved. Real Estate License Verified.
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span>Privacy Policy</span>
-            <span>Terms of Service</span>
-            <span style={{ color: '#38bdf8' }}>Powered by AgentLadders</span>
-          </div>
-        </div>
-      </footer>
+      )}
     </div>
   );
 }
