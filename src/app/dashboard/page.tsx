@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { PhoneIcon, UserIcon, ArrowRightIcon, PlusIcon } from '@/components/icons/NavIcons';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface VisitItem {
@@ -108,7 +109,8 @@ export default function DashboardPage() {
             Browse Inventory
           </Link>
           <Link href="/dashboard/leads?new=true" style={{ textDecoration: 'none', backgroundColor: 'var(--primary)', color: '#ffffff', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: '#ffffff', fontWeight: 700 }}>+ Add Inquiry</span>
+            <PlusIcon size={15} color="#ffffff" strokeWidth={2.5} />
+            <span>Add Inquiry</span>
           </Link>
         </div>
       </div>
@@ -122,7 +124,9 @@ export default function DashboardPage() {
           <div style={{ backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#0f172a' }}>Priority Follow-ups</h3>
-              <Link href="/dashboard/leads" style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}>View All →</Link>
+              <Link href="/dashboard/leads" style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                View All <ArrowRightIcon size={13} color="currentColor" />
+              </Link>
             </div>
             <div className="responsive-table-scroll">
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 440 }}>
@@ -147,9 +151,10 @@ export default function DashboardPage() {
                         <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                           <button 
                             onClick={() => window.location.href = `tel:${lead.phone}`}
-                            style={{ backgroundColor: '#f1f5f9', color: '#0f172a', border: 'none', borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                            style={{ backgroundColor: '#f1f5f9', color: '#0f172a', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                           >
-                            📞 Call
+                            <PhoneIcon size={13} color="#0f172a" />
+                            <span>Call</span>
                           </button>
                         </td>
                       </tr>
@@ -193,7 +198,7 @@ export default function DashboardPage() {
                         <div style={{ display: 'flex', gap: 4 }}>
                           {v.source === 'Client Portal' && (
                             <span style={{ fontSize: 9.5, fontWeight: 700, backgroundColor: '#fef08a', color: '#854d0e', padding: '2px 6px', borderRadius: 6 }}>
-                              🌐 Portal
+                              Portal
                             </span>
                           )}
                           <span style={{ fontSize: 10, fontWeight: 700, backgroundColor: v.status === 'Completed' ? '#d1fae5' : '#dbeafe', color: v.status === 'Completed' ? '#065f46' : '#1e40af', padding: '2px 8px', borderRadius: 10 }}>
@@ -202,8 +207,9 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div style={{ fontSize: 13, fontWeight: 600, color: '#475569', marginTop: 4 }}>{v.property}</div>
-                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        👤 {v.client}
+                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 3, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <UserIcon size={12} color="#94a3b8" />
+                        <span>{v.client}</span>
                       </div>
                     </div>
                   </div>
@@ -211,8 +217,9 @@ export default function DashboardPage() {
               </div>
             )}
             
-            <Link href="/dashboard/site-visits" style={{ display: 'block', textAlign: 'center', marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)', fontSize: 13, fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}>
-              Open Calendar →
+            <Link href="/dashboard/site-visits" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)', fontSize: 13, fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}>
+              <span>Open Calendar</span>
+              <ArrowRightIcon size={13} color="currentColor" />
             </Link>
           </div>
 

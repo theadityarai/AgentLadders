@@ -7,6 +7,7 @@ import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { EditIcon, TrashIcon, CheckIcon, XIcon, PlusIcon } from '@/components/icons/NavIcons';
 
 interface Task {
   [key: string]: unknown;
@@ -189,11 +190,15 @@ export default function TasksPage() {
               border: '1px solid #bfdbfe',
               borderRadius: '6px',
               cursor: 'pointer',
-              color: '#1d4ed8'
+              color: '#1d4ed8',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
             }}
             title="Edit Task"
           >
-            ✏️ Edit
+            <EditIcon size={12} color="#1d4ed8" />
+            <span>Edit</span>
           </button>
           <button
             onClick={() => handleToggleStatus(r)}
@@ -205,10 +210,20 @@ export default function TasksPage() {
               border: `1px solid ${r.status === 'Completed' ? '#cbd5e1' : '#bbf7d0'}`,
               borderRadius: '6px',
               cursor: 'pointer',
-              color: r.status === 'Completed' ? '#475569' : '#166534'
+              color: r.status === 'Completed' ? '#475569' : '#166534',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
             }}
           >
-            {r.status === 'Completed' ? 'Pending' : '✓ Complete'}
+            {r.status === 'Completed' ? (
+              <span>Mark Pending</span>
+            ) : (
+              <>
+                <CheckIcon size={12} color="#166534" />
+                <span>Complete</span>
+              </>
+            )}
           </button>
           <button
             onClick={() => handleDelete(r.id, r.title)}
@@ -220,11 +235,14 @@ export default function TasksPage() {
               border: '1px solid #fecdd3',
               borderRadius: '6px',
               cursor: 'pointer',
-              color: '#e11d48'
+              color: '#e11d48',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
             title="Delete Task"
           >
-            🗑️
+            <TrashIcon size={13} color="#e11d48" />
           </button>
         </div>
       )
@@ -281,11 +299,13 @@ export default function TasksPage() {
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                  {editingTask ? '✏️ Edit Action Task' : 'Create Action Task'}
+                  {editingTask ? 'Edit Action Task' : 'Create Action Task'}
                 </h2>
                 <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0' }}>Assign critical follow-ups, contract inspections, and escrow deadlines</p>
               </div>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94a3b8' }}>✕</button>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', padding: '4px', cursor: 'pointer', color: '#94a3b8', display: 'flex', alignItems: 'center' }}>
+                <XIcon size={18} color="#94a3b8" />
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -299,9 +319,9 @@ export default function TasksPage() {
                   onChange={e => setForm({...form, status: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '14px', fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                 >
-                  <option value="Pending">⏳ Pending</option>
-                  <option value="In Progress">🔄 In Progress</option>
-                  <option value="Completed">✅ Completed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
                 </select>
               </div>
 
@@ -364,8 +384,10 @@ export default function TasksPage() {
                         setShowModal(false);
                         handleDelete(editingTask.id, editingTask.title);
                       }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
                     >
-                      🗑️ Delete
+                      <TrashIcon size={14} color="#fff" />
+                      <span>Delete</span>
                     </Button>
                   )}
                 </div>

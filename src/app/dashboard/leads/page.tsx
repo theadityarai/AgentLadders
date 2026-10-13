@@ -15,6 +15,20 @@ import {
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { 
+  EditIcon, 
+  TrashIcon, 
+  WhatsAppIcon, 
+  PhoneIcon, 
+  SearchIcon, 
+  PlusIcon, 
+  KeyIcon, 
+  HomeIcon, 
+  ListIcon, 
+  CompassIcon, 
+  SparklesIcon, 
+  BuildingIcon 
+} from '@/components/icons/NavIcons';
 
 interface Lead {
   id: string;
@@ -324,32 +338,32 @@ export default function LeadsPage() {
 
   const getSourceBadge = (src?: string) => {
     const s = src || 'Direct Inbound';
-    let icon = '🌐';
     let bg = '#f1f5f9';
     let color = '#475569';
     let border = '#e2e8f0';
+    let dot = '#94a3b8';
 
     if (s.toLowerCase().includes('self-created') || s.toLowerCase().includes('public listing') || s.toLowerCase().includes('self-interest')) {
-      icon = '✨'; bg = '#fdf4ff'; color = '#a21caf'; border = '#f0abfc';
+      bg = '#fdf4ff'; color = '#a21caf'; border = '#f0abfc'; dot = '#c026d3';
     } else if (s.toLowerCase().includes('whatsapp')) {
-      icon = '💬'; bg = '#dcfce7'; color = '#15803d'; border = '#86efac';
+      bg = '#dcfce7'; color = '#15803d'; border = '#86efac'; dot = '#16a34a';
     } else if (s.toLowerCase().includes('website')) {
-      icon = '🌐'; bg = '#eff6ff'; color = '#1d4ed8'; border = '#bfdbfe';
+      bg = '#eff6ff'; color = '#1d4ed8'; border = '#bfdbfe'; dot = '#2563eb';
     } else if (s.toLowerCase().includes('99acres') || s.toLowerCase().includes('magicbricks') || s.toLowerCase().includes('housing')) {
-      icon = '🏢'; bg = '#fff7ed'; color = '#c2410c'; border = '#fed7aa';
+      bg = '#fff7ed'; color = '#c2410c'; border = '#fed7aa'; dot = '#ea580c';
     } else if (s.toLowerCase().includes('referral') || s.toLowerCase().includes('word of mouth')) {
-      icon = '🤝'; bg = '#faf5ff'; color = '#7e22ce'; border = '#e9d5ff';
+      bg = '#faf5ff'; color = '#7e22ce'; border = '#e9d5ff'; dot = '#9333ea';
     } else if (s.toLowerCase().includes('walk-in')) {
-      icon = '🚶'; bg = '#f0fdf4'; color = '#166534'; border = '#bbf7d0';
+      bg = '#f0fdf4'; color = '#166534'; border = '#bbf7d0'; dot = '#16a34a';
     } else if (s.toLowerCase().includes('instagram') || s.toLowerCase().includes('social')) {
-      icon = '📸'; bg = '#fdf2f8'; color = '#be185d'; border = '#fbcfe8';
+      bg = '#fdf2f8'; color = '#be185d'; border = '#fbcfe8'; dot = '#db2777';
     }
 
     return (
       <span style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 5,
+        gap: 6,
         padding: '3px 8px',
         borderRadius: 6,
         backgroundColor: bg,
@@ -359,7 +373,8 @@ export default function LeadsPage() {
         fontWeight: 600,
         whiteSpace: 'nowrap'
       }}>
-        <span>{icon}</span> {s}
+        <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: dot }} />
+        <span>{s}</span>
       </span>
     );
   };
@@ -382,7 +397,7 @@ export default function LeadsPage() {
           <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                {editingLead ? '✏️ Edit Inquiry' : 'Add New Inquiry'}
+                {editingLead ? 'Edit Inquiry' : 'Add New Inquiry'}
                 <InfoTooltip text="Log or update buyer and tenant inquiries, match requirements, and set pipeline status." />
               </h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, color: '#94a3b8', cursor: 'pointer' }}>&times;</button>
@@ -418,11 +433,11 @@ export default function LeadsPage() {
                     onChange={e => setFormData({...formData, urgency: e.target.value})}
                     style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
-                    <option value="Immediate (Hot Buyer)">🔥 Immediate (Hot Buyer - Ready Now)</option>
-                    <option value="Within 15 Days">⚡ High Urgency (Within 15 Days)</option>
-                    <option value="Within 1 Month">🟡 Moderate (Within 1 Month)</option>
-                    <option value="1-3 Months">🔵 Standard (1-3 Months)</option>
-                    <option value="Exploring / Low">⚪ Low / Long-term Exploring</option>
+                    <option value="Immediate (Hot Buyer)">Immediate (Hot Buyer - Ready Now)</option>
+                    <option value="Within 15 Days">High Urgency (Within 15 Days)</option>
+                    <option value="Within 1 Month">Moderate (Within 1 Month)</option>
+                    <option value="1-3 Months">Standard (1-3 Months)</option>
+                    <option value="Exploring / Low">Low / Long-term Exploring</option>
                   </select>
                 </div>
               </div>
@@ -503,7 +518,8 @@ export default function LeadsPage() {
               {/* Preferences: Specs, Construction Stage, Vastu, Parking */}
               <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: 10, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>🎯</span> Client Preferences & Criteria
+                  <CompassIcon size={16} color="var(--primary)" />
+                  <span>Client Preferences & Criteria</span>
                 </div>
 
                 <div className="responsive-grid-2">
@@ -580,7 +596,8 @@ export default function LeadsPage() {
                       gap: 6
                     }}
                   >
-                    🗑️ Delete
+                    <TrashIcon size={15} color="#dc2626" />
+                    <span>Delete</span>
                   </button>
                 )}
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
@@ -610,13 +627,14 @@ export default function LeadsPage() {
           onClick={handleOpenAdd}
           style={{
             backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
-            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
             boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.15s ease',
           }}
           onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
           onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
         >
-          + Add Inquiry
+          <PlusIcon size={16} color="#fff" strokeWidth={2.5} />
+          <span>Add Inquiry</span>
         </button>
       </div>
 
@@ -626,41 +644,44 @@ export default function LeadsPage() {
           Inquiry Type:
         </span>
         {[
-          { id: 'All', label: 'All Inquiries', count: data.length, icon: '📋' },
-          { id: 'Buy', label: 'Buy / Purchase', count: buyCount, icon: '🏠' },
-          { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: '🔑' }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setPurposeFilter(tab.id as any)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '6px 14px',
-              borderRadius: 20,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
-              color: purposeFilter === tab.id ? '#fff' : '#475569',
-              border: 'none'
-            }}
-          >
-            <span>{tab.icon}</span>
-            <span>{tab.label}</span>
-            <span style={{
-              padding: '1px 6px',
-              borderRadius: 10,
-              fontSize: 11,
-              backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-              color: purposeFilter === tab.id ? '#fff' : '#64748b'
-            }}>
-              {tab.count}
-            </span>
-          </button>
-        ))}
+          { id: 'All', label: 'All Inquiries', count: data.length, icon: ListIcon },
+          { id: 'Buy', label: 'Buy / Purchase', count: buyCount, icon: HomeIcon },
+          { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: KeyIcon }
+        ].map(tab => {
+          const IconComp = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setPurposeFilter(tab.id as any)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 14px',
+                borderRadius: 20,
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
+                color: purposeFilter === tab.id ? '#fff' : '#475569',
+                border: 'none'
+              }}
+            >
+              <IconComp size={14} color={purposeFilter === tab.id ? '#fff' : '#64748b'} />
+              <span>{tab.label}</span>
+              <span style={{
+                padding: '1px 6px',
+                borderRadius: 10,
+                fontSize: 11,
+                backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+                color: purposeFilter === tab.id ? '#fff' : '#64748b'
+              }}>
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Filters & Search */}
@@ -709,13 +730,13 @@ export default function LeadsPage() {
           </div>
         </div>
         <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
-          <span style={{ position: 'absolute', left: 12, top: 8, fontSize: 14 }}>🔍</span>
+          <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
           <input 
             type="text"
             placeholder="Search name, phone, source..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ padding: '8px 12px 8px 36px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
+            style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
           />
         </div>
       </div>
@@ -739,9 +760,11 @@ export default function LeadsPage() {
             {filteredData.length === 0 ? (
               <tr>
                 <td colSpan={6} style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
-                  <div style={{ fontSize: 32, marginBottom: 12 }}>🕵️</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                    <SearchIcon size={36} color="#cbd5e1" />
+                  </div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>No inquiries found</div>
-                  <div style={{ fontSize: 13 }}>Try adjusting your filters or search query.</div>
+                  <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
                 </td>
               </tr>
             ) : (
@@ -764,7 +787,8 @@ export default function LeadsPage() {
                           <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{lead.name}</span>
                           {((lead as any).isSelfCreated || (lead.source || '').toLowerCase().includes('self-created') || (lead.source || '').toLowerCase().includes('public listing')) && (
                             <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                              ✨ User-Created (Self-Interest)
+                              <SparklesIcon size={10} color="#a21caf" />
+                              <span>Self-Interest</span>
                             </span>
                           )}
                         </div>
@@ -784,7 +808,7 @@ export default function LeadsPage() {
                       <span style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: 3,
+                        gap: 4,
                         padding: '2px 7px',
                         borderRadius: 4,
                         fontSize: 10.5,
@@ -793,7 +817,8 @@ export default function LeadsPage() {
                         color: isLeadRent(lead) ? '#7e22ce' : '#1d4ed8',
                         border: `1px solid ${isLeadRent(lead) ? '#d8b4fe' : '#bfdbfe'}`
                       }}>
-                        {isLeadRent(lead) ? '🔑 Rent' : '🏠 Buy'}
+                        {isLeadRent(lead) ? <KeyIcon size={11} color="currentColor" /> : <HomeIcon size={11} color="currentColor" />}
+                        <span>{isLeadRent(lead) ? 'Rent' : 'Buy'}</span>
                       </span>
                       <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
                         {Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any')}
@@ -805,13 +830,15 @@ export default function LeadsPage() {
                     {(lead.vastuPreference && lead.vastuPreference !== 'Any' || lead.constructionStagePreference && lead.constructionStagePreference !== 'Any') && (
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
                         {lead.vastuPreference && lead.vastuPreference !== 'Any' && (
-                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe' }}>
-                            🧭 {lead.vastuPreference}
+                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                            <CompassIcon size={10} color="currentColor" />
+                            <span>{lead.vastuPreference}</span>
                           </span>
                         )}
                         {lead.constructionStagePreference && lead.constructionStagePreference !== 'Any' && (
-                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}>
-                            🏗️ {lead.constructionStagePreference}
+                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                            <BuildingIcon size={10} color="currentColor" />
+                            <span>{lead.constructionStagePreference}</span>
                           </span>
                         )}
                       </div>
@@ -845,8 +872,6 @@ export default function LeadsPage() {
                           color: '#1d4ed8',
                           border: '1px solid #bfdbfe',
                           borderRadius: 7,
-                          fontSize: 13,
-                          fontWeight: 600,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -856,7 +881,7 @@ export default function LeadsPage() {
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#dbeafe'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = '#eff6ff'}
                       >
-                        ✏️
+                        <EditIcon size={14} color="#1d4ed8" />
                       </button>
                       <button 
                         type="button"
@@ -873,8 +898,6 @@ export default function LeadsPage() {
                           color: '#dc2626',
                           border: '1px solid #fecaca',
                           borderRadius: 7,
-                          fontSize: 13,
-                          fontWeight: 600,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -884,7 +907,7 @@ export default function LeadsPage() {
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fecaca'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fee2e2'}
                       >
-                        🗑️
+                        <TrashIcon size={14} color="#dc2626" />
                       </button>
                       <button 
                         type="button"
@@ -902,7 +925,6 @@ export default function LeadsPage() {
                           color: '#166534',
                           border: '1px solid #bbf7d0',
                           borderRadius: 7,
-                          fontSize: 14,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -912,7 +934,7 @@ export default function LeadsPage() {
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#bbf7d0'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = '#dcfce7'}
                       >
-                        💬
+                        <WhatsAppIcon size={14} color="#166534" />
                       </button>
                       <button 
                         type="button"
@@ -929,7 +951,6 @@ export default function LeadsPage() {
                           color: '#475569',
                           border: '1px solid #e2e8f0',
                           borderRadius: 7,
-                          fontSize: 13,
                           cursor: 'pointer',
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -939,7 +960,7 @@ export default function LeadsPage() {
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e2e8f0'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                       >
-                        📞
+                        <PhoneIcon size={14} color="#475569" />
                       </button>
                     </div>
                   </td>
@@ -956,7 +977,9 @@ export default function LeadsPage() {
       <div className="mobile-only-cards">
         {filteredData.length === 0 ? (
           <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '48px 20px', textAlign: 'center', color: '#94a3b8' }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>🕵️</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+              <SearchIcon size={32} color="#cbd5e1" />
+            </div>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>No inquiries found</div>
             <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
           </div>
@@ -1019,14 +1042,13 @@ export default function LeadsPage() {
                       color: '#1d4ed8',
                       border: '1px solid #bfdbfe',
                       borderRadius: 7,
-                      fontSize: 13,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
                   >
-                    ✏️
+                    <EditIcon size={14} color="#1d4ed8" />
                   </button>
                   <button
                     type="button"
@@ -1040,14 +1062,13 @@ export default function LeadsPage() {
                       color: '#dc2626',
                       border: '1px solid #fecaca',
                       borderRadius: 7,
-                      fontSize: 13,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
                   >
-                    🗑️
+                    <TrashIcon size={14} color="#dc2626" />
                   </button>
                   <button
                     type="button"
@@ -1064,14 +1085,13 @@ export default function LeadsPage() {
                       color: '#166534',
                       border: '1px solid #bbf7d0',
                       borderRadius: 7,
-                      fontSize: 14,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
                   >
-                    💬
+                    <WhatsAppIcon size={14} color="#166534" />
                   </button>
                   <button
                     type="button"
@@ -1085,14 +1105,13 @@ export default function LeadsPage() {
                       color: '#475569',
                       border: '1px solid #e2e8f0',
                       borderRadius: 7,
-                      fontSize: 13,
                       cursor: 'pointer',
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
                   >
-                    📞
+                    <PhoneIcon size={14} color="#475569" />
                   </button>
                 </div>
               </div>
@@ -1102,8 +1121,9 @@ export default function LeadsPage() {
                 {getStatusBadge(lead.status)}
                 {getSourceBadge(lead.source)}
                 {((lead as any).isSelfCreated || (lead.source || '').toLowerCase().includes('self-created') || (lead.source || '').toLowerCase().includes('public listing')) && (
-                  <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700 }}>
-                    ✨ User-Created
+                  <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <SparklesIcon size={10} color="#a21caf" />
+                    <span>Self-Interest</span>
                   </span>
                 )}
               </div>
@@ -1120,6 +1140,9 @@ export default function LeadsPage() {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                   <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
                     padding: '2px 6px',
                     borderRadius: 4,
                     fontSize: 10.5,
@@ -1127,7 +1150,8 @@ export default function LeadsPage() {
                     backgroundColor: isLeadRent(lead) ? '#f3e8ff' : '#eff6ff',
                     color: isLeadRent(lead) ? '#7e22ce' : '#1d4ed8'
                   }}>
-                    {isLeadRent(lead) ? '🔑 Rent' : '🏠 Buy'}
+                    {isLeadRent(lead) ? <KeyIcon size={10} color="currentColor" /> : <HomeIcon size={10} color="currentColor" />}
+                    <span>{isLeadRent(lead) ? 'Rent' : 'Buy'}</span>
                   </span>
                   <span style={{ fontWeight: 700, color: '#0f172a' }}>
                     {Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any')}

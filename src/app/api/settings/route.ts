@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { isValidPassword, isValidEmail, sanitizeString, generateRandom12Digits } from '@/lib/sanitize';

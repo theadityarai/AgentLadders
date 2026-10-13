@@ -91,22 +91,24 @@ export function generatePropertyPitchWhatsApp(property: {
   const purpose = property.purpose || property.listingType || 'For Sale';
   const vastu = property.vastuFacing && property.vastuFacing !== 'Not Applicable' ? property.vastuFacing : property.facing;
 
-  let msg = `✨ *EXCLUSIVE PROPERTY DETAILS* ✨\n\n` +
-    `🏢 *${property.title}*\n\n` +
-    `📍 *Location*: ${location}\n` +
-    `💰 *Quoting Price*: ${priceFormatted} (${purpose})\n` +
-    `🛏️ *Configuration*: ${bhk} (${property.furnishing || 'Semi-Furnished'})\n` +
-    `📐 *Carpet Area*: ${carpetArea} sq.ft. (RERA Standard)\n` +
-    (property.floor ? `🏢 *Floor*: ${property.floor}\n` : '') +
-    (vastu && vastu !== 'Not Applicable' ? `🧭 *Vastu / Facing*: ${vastu}\n` : '') +
-    (property.parking ? `🚗 *Car Parking*: ${property.parking}\n` : '') +
-    (property.possessionStatus ? `🟢 *Possession*: ${property.possessionStatus}\n` : '') +
-    (property.reraId ? `🏛️ *RERA Reg*: ${property.reraId}\n` : '') +
-    (property.videoTourUrl ? `🎥 *4K Video Walkthrough*: ${property.videoTourUrl}\n` : '') +
-    `\n🖼️ *Property Photo*:\n${primaryImageUrl}\n` +
-    `\n👉 *View Complete Interactive Brochure*:\n${publicUrl}\n\n` +
-    `_To arrange an exclusive private site visit, please contact:_\n` +
-    `*${agencyName}* | 📞 ${agentPhone}`;
+  let msg = `🌟 *NEW EXCLUSIVE LISTING*\n` +
+    `*${property.title}*\n` +
+    `📍 ${location}\n\n` +
+    `━━━━━━━━━━━━━━━━━━━━\n` +
+    `💰 *Quoting:* ${priceFormatted} (${purpose})\n` +
+    `🛏️ *Configuration:* ${bhk} · ${property.furnishing || 'Semi-Furnished'}\n` +
+    `📐 *Carpet Area:* ${carpetArea} sq.ft. (RERA Standard)\n` +
+    (property.floor ? `🏢 *Floor:* ${property.floor}\n` : '') +
+    (vastu && vastu !== 'Not Applicable' ? `🧭 *Facing:* ${vastu} (Vastu Compliant)\n` : '') +
+    (property.parking ? `🚗 *Parking:* ${property.parking}\n` : '') +
+    (property.possessionStatus ? `🔑 *Possession:* ${property.possessionStatus}\n` : '') +
+    (property.reraId ? `🏛️ *RERA Reg:* ${property.reraId}\n` : '') +
+    `━━━━━━━━━━━━━━━━━━━━\n\n` +
+    `📸 *Full Photo Gallery & Verified Brochure:*\n` +
+    `${publicUrl}\n\n` +
+    `📲 *For Exclusive Site Visit & Details:*\n` +
+    `*${agencyName}*\n` +
+    `📞 Contact / WhatsApp: ${agentPhone}`;
 
   return msg;
 }

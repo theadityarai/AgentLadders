@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '../login/auth.module.css';
+import { FileTextIcon } from '@/components/icons/NavIcons';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -61,7 +62,18 @@ export default function ForgotPasswordPage() {
             </form>
           ) : (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>✉️</div>
+              <div style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                backgroundColor: '#ecfdf5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px'
+              }}>
+                <FileTextIcon size={32} color="#059669" />
+              </div>
               <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', color: '#0f172a' }}>Check your email</h3>
               <p style={{ color: '#64748b', marginBottom: '24px', lineHeight: 1.5, fontSize: '14px' }}>
                 We have sent a password reset link to <strong>{email}</strong>. Please check your inbox and spam folder.

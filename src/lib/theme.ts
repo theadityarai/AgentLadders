@@ -25,15 +25,6 @@ export interface ColorSchemeOption {
 
 export const FONT_OPTIONS: FontOption[] = [
   {
-    id: 'montserrat',
-    name: 'Montserrat',
-    category: 'Urban Metropolitan',
-    tagline: 'Bold, architectural presence reminiscent of iconic city high-rise branding',
-    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    previewHeading: 'Bandra West Coastal Horizon',
-    previewBody: 'Prime arterial connectivity, exclusive concierge desk, and 4 reserved basement parkings.'
-  },
-  {
     id: 'jakarta',
     name: 'Plus Jakarta Sans',
     category: 'Modern Corporate',
@@ -50,6 +41,15 @@ export const FONT_OPTIONS: FontOption[] = [
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     previewHeading: 'Vance Luxury Realty Catalog',
     previewBody: 'Streamlined data tables, rapid deal pipeline navigation, and instant client WhatsApp pitches.'
+  },
+  {
+    id: 'montserrat',
+    name: 'Montserrat',
+    category: 'Urban Metropolitan',
+    tagline: 'Bold, architectural presence reminiscent of iconic city high-rise branding',
+    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    previewHeading: 'Bandra West Coastal Horizon',
+    previewBody: 'Prime arterial connectivity, exclusive concierge desk, and 4 reserved basement parkings.'
   },
   {
     id: 'outfit',
@@ -240,14 +240,14 @@ export function applyTheme(fontId: string, colorId: string) {
 
 export function getStoredTheme(): { fontId: string; colorId: string } {
   if (typeof window === 'undefined') {
-    return { fontId: 'montserrat', colorId: 'emerald' };
+    return { fontId: 'jakarta', colorId: 'emerald' };
   }
 
   try {
-    const fontId = localStorage.getItem('agentladders_font') || 'montserrat';
+    const fontId = localStorage.getItem('agentladders_font') || 'jakarta';
     const colorId = localStorage.getItem('agentladders_color') || 'emerald';
     return { fontId, colorId };
   } catch {
-    return { fontId: 'montserrat', colorId: 'emerald' };
+    return { fontId: 'jakarta', colorId: 'emerald' };
   }
 }

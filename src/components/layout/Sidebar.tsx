@@ -4,19 +4,49 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import {
+  HomeIcon,
+  UsersIcon,
+  BuildingIcon,
+  MapPinIcon,
+  BriefcaseIcon,
+  TrendingUpIcon,
+  FileTextIcon,
+  ReceiptIcon,
+  CheckSquareIcon,
+  BarChartIcon,
+  MessageCircleIcon,
+  SettingsIcon,
+  ShieldIcon
+} from '@/components/icons/NavIcons';
 
-const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Today', icon: '◈', exact: true },
-  { href: '/dashboard/leads', label: 'Inquiries', icon: '👥', exact: false },
-  { href: '/dashboard/properties', label: 'Properties', icon: '🏠', exact: false },
-  { href: '/dashboard/site-visits', label: 'Site Visits', icon: '📍', exact: false },
-  { href: '/dashboard/deals', label: 'Deals', icon: '💼', exact: false },
-  { href: '/dashboard/insights', label: 'Insights', icon: '📈', exact: false },
+interface NavItemConfig {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; color?: string; style?: React.CSSProperties }>;
+  exact: boolean;
+  badge?: string;
+}
+
+const NAV_ITEMS: NavItemConfig[] = [
+  { href: '/dashboard', label: 'Today', icon: HomeIcon, exact: true },
+  { href: '/dashboard/leads', label: 'Inquiries', icon: UsersIcon, exact: false },
+  { href: '/dashboard/properties', label: 'Properties', icon: BuildingIcon, exact: false },
+  { href: '/dashboard/site-visits', label: 'Site Visits', icon: MapPinIcon, exact: false, badge: 'KEY' },
+  { href: '/dashboard/deals', label: 'Deals', icon: BriefcaseIcon, exact: false },
+  { href: '/dashboard/insights', label: 'Insights', icon: TrendingUpIcon, exact: false },
 ];
 
-const BOTTOM_ITEMS = [
-  { href: '/dashboard/support', label: 'Help & Support', icon: '💬', exact: false },
-  { href: '/dashboard/settings', label: 'Settings', icon: '⚙️', exact: false },
+const MORE_ITEMS: NavItemConfig[] = [
+  { href: '/dashboard/documents', label: 'Documents', icon: FileTextIcon, exact: false },
+  { href: '/dashboard/invoices', label: 'Invoices', icon: ReceiptIcon, exact: false },
+  { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquareIcon, exact: false },
+  { href: '/dashboard/reports', label: 'Reports', icon: BarChartIcon, exact: false },
+];
+
+const BOTTOM_ITEMS: NavItemConfig[] = [
+  { href: '/dashboard/support', label: 'Help & Support', icon: MessageCircleIcon, exact: false },
+  { href: '/dashboard/settings', label: 'Settings', icon: SettingsIcon, exact: false },
 ];
 
 export function Sidebar() {
@@ -45,7 +75,7 @@ export function Sidebar() {
       .catch(() => {});
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadBrandData();
     const handleBrand = () => loadBrandData();
     window.addEventListener('brand-updated', handleBrand);
@@ -65,7 +95,7 @@ export function Sidebar() {
     <aside className="app-sidebar hide-on-mobile" style={{
       width: 'var(--sidebar-width)',
       height: '100vh',
-      backgroundColor: 'var(--sidebar-bg)',
+      backgroundColor: 'var(--sidebar-bg, #0f172a)',
       display: 'flex',
       flexDirection: 'column',
       position: 'fixed',
@@ -73,77 +103,95 @@ export function Sidebar() {
       top: 0,
       zIndex: 40,
       overflowY: 'auto',
+      borderRight: '1px solid rgba(255,255,255,0.06)'
     }}>
-      {/* Logo */}
-      <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      {/* Brand Header */}
+      <div style={{ padding: '20px 18px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            width: 36, height: 36,
-            background: agencyLogo ? '#ffffff' : 'var(--primary-gradient)',
+            width: 38,
+            height: 38,
+            background: agencyLogo ? '#ffffff' : 'var(--primary-gradient, linear-gradient(135deg, #059669 0%, #10b981 100%))',
             borderRadius: 10,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 17, fontWeight: 800, color: '#fff',
-            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
             flexShrink: 0,
             overflow: 'hidden',
             padding: agencyLogo ? 3 : 0,
+            color: '#ffffff'
           }}>
             {agencyLogo ? (
               <img src={agencyLogo} alt={agencyName || "Agency Logo"} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 7 }} />
             ) : (
-              '🏡'
+              <BuildingIcon size={20} color="#ffffff" strokeWidth={2} />
             )}
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#ffffff', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {agencyName || 'AgentLadders'}
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}>Real Estate CRM · India</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 1, letterSpacing: '0.02em', fontWeight: 500 }}>
+              Broker Workstation
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Nav */}
-      <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 10px 4px' }}>
-          Main
+      {/* Main Navigation */}
+      <nav style={{ flex: 1, padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '6px 12px 6px' }}>
+          Workspace
         </div>
-        {NAV_ITEMS.map(({ href, label, icon, exact }) => {
+        {NAV_ITEMS.map(({ href, label, icon: Icon, exact, badge }) => {
           const active = isActive(href, exact);
           return (
             <Link key={href} href={href} style={{ textDecoration: 'none' }}>
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 10,
+                gap: 11,
                 padding: '9px 12px',
                 borderRadius: 8,
-                backgroundColor: active ? 'rgba(var(--primary-rgb), 0.22)' : 'transparent',
-                color: active ? '#ffffff' : 'rgba(255,255,255,0.6)',
-                fontWeight: active ? 600 : 400,
+                backgroundColor: active ? 'rgba(var(--primary-rgb, 5, 150, 105), 0.22)' : 'transparent',
+                color: active ? '#ffffff' : 'rgba(255,255,255,0.65)',
+                fontWeight: active ? 600 : 500,
                 fontSize: 13.5,
                 transition: 'all 0.15s ease',
                 cursor: 'pointer',
-                borderLeft: active ? '3px solid var(--primary)' : '3px solid transparent',
+                borderLeft: active ? '3px solid var(--primary, #059669)' : '3px solid transparent',
               }}
               onMouseEnter={e => {
                 if (!active) {
-                  (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255,255,255,0.06)';
-                  (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.85)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)';
+                  e.currentTarget.style.color = '#ffffff';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
-                  (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent';
-                  (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.55)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.65)';
                 }
               }}
               >
-                <span style={{ fontSize: 15, flexShrink: 0, color: active ? 'var(--primary)' : 'inherit' }}>{icon}</span>
-                <span>{label}</span>
-                {label === 'Site Visits' && (
-                  <span style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 700, backgroundColor: 'var(--primary)', color: '#fff', padding: '1px 6px', borderRadius: 10 }}>
-                    KEY
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: active ? 'var(--primary, #10b981)' : 'rgba(255,255,255,0.55)' }}>
+                  <Icon size={18} />
+                </span>
+                <span style={{ letterSpacing: '-0.1px' }}>{label}</span>
+                {badge && (
+                  <span style={{
+                    marginLeft: 'auto',
+                    fontSize: 9.5,
+                    fontWeight: 700,
+                    letterSpacing: '0.04em',
+                    backgroundColor: 'rgba(var(--primary-rgb, 5, 150, 105), 0.35)',
+                    color: 'var(--primary-light, #d1fae5)',
+                    padding: '2px 6px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.4)'
+                  }}>
+                    {badge}
                   </span>
                 )}
               </div>
@@ -152,102 +200,137 @@ export function Sidebar() {
         })}
 
         {/* Divider */}
-        <div style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.06)', margin: '8px 0' }} />
-        <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 10px' }}>
-          More
+        <div style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.06)', margin: '10px 6px' }} />
+        <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 12px' }}>
+          Operations
         </div>
-        <Link href="/dashboard/documents" style={{ textDecoration: 'none' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8,
-            color: 'rgba(255,255,255,0.45)', fontSize: 13.5, transition: 'all 0.15s ease', cursor: 'pointer',
-            borderLeft: '2px solid transparent',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.75)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.45)'; }}
-          >
-            <span style={{ fontSize: 15 }}>📁</span>
-            <span>Documents</span>
-          </div>
-        </Link>
-        <Link href="/dashboard/invoices" style={{ textDecoration: 'none' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8,
-            color: 'rgba(255,255,255,0.45)', fontSize: 13.5, transition: 'all 0.15s ease', cursor: 'pointer',
-            borderLeft: '2px solid transparent',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.75)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.45)'; }}
-          >
-            <span style={{ fontSize: 15 }}>🧾</span>
-            <span>Invoices</span>
-          </div>
-        </Link>
-        <Link href="/dashboard/tasks" style={{ textDecoration: 'none' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8,
-            color: 'rgba(255,255,255,0.45)', fontSize: 13.5, transition: 'all 0.15s ease', cursor: 'pointer',
-            borderLeft: '2px solid transparent',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.75)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.45)'; }}
-          >
-            <span style={{ fontSize: 15 }}>✅</span>
-            <span>Tasks</span>
-          </div>
-        </Link>
-        <Link href="/dashboard/reports" style={{ textDecoration: 'none' }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8,
-            color: 'rgba(255,255,255,0.45)', fontSize: 13.5, transition: 'all 0.15s ease', cursor: 'pointer',
-            borderLeft: '2px solid transparent',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.75)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.45)'; }}
-          >
-            <span style={{ fontSize: 15 }}>📊</span>
-            <span>Reports</span>
-          </div>
-        </Link>
+        {MORE_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+          const active = isActive(href, exact);
+          return (
+            <Link key={href} href={href} style={{ textDecoration: 'none' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 11,
+                padding: '8px 12px',
+                borderRadius: 8,
+                backgroundColor: active ? 'rgba(var(--primary-rgb, 5, 150, 105), 0.22)' : 'transparent',
+                color: active ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                fontSize: 13,
+                fontWeight: active ? 600 : 500,
+                transition: 'all 0.15s ease',
+                cursor: 'pointer',
+                borderLeft: active ? '3px solid var(--primary, #059669)' : '3px solid transparent',
+              }}
+              onMouseEnter={e => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)';
+                  e.currentTarget.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
+                }
+              }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: active ? 'var(--primary, #10b981)' : 'rgba(255,255,255,0.45)' }}>
+                  <Icon size={17} />
+                </span>
+                <span>{label}</span>
+              </div>
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* Bottom: Settings + User */}
-      <div style={{ padding: '10px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Bottom Actions & User Profile */}
+      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {isSuperAdmin && (
           <Link href="/admin" style={{ textDecoration: 'none' }}>
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8,
-              backgroundColor: 'rgba(99,102,241,0.15)', color: '#a5b4fc', fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '8px 12px',
+              borderRadius: 8,
+              backgroundColor: 'rgba(99,102,241,0.18)',
+              color: '#a5b4fc',
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: 'pointer',
               transition: 'all 0.15s ease',
+              border: '1px solid rgba(99,102,241,0.25)'
             }}>
-              <span>🛡️</span>
-              <span>Super Admin</span>
+              <ShieldIcon size={16} color="#a5b4fc" />
+              <span>Super Admin HQ</span>
             </div>
           </Link>
         )}
-        {BOTTOM_ITEMS.map(({ href, label, icon }) => (
-          <Link key={href} href={href} style={{ textDecoration: 'none' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8,
-              color: 'rgba(255,255,255,0.45)', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s ease',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.75)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLDivElement).style.color = 'rgba(255,255,255,0.45)'; }}
-            >
-              <span style={{ fontSize: 14 }}>{icon}</span>
-              <span>{label}</span>
-            </div>
-          </Link>
-        ))}
-        {/* User pill */}
+        {BOTTOM_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+          const active = isActive(href, exact);
+          return (
+            <Link key={href} href={href} style={{ textDecoration: 'none' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 11,
+                padding: '8px 12px',
+                borderRadius: 8,
+                backgroundColor: active ? 'rgba(var(--primary-rgb, 5, 150, 105), 0.22)' : 'transparent',
+                color: active ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                fontSize: 13,
+                fontWeight: active ? 600 : 500,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)';
+                  e.currentTarget.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!active) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
+                }
+              }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: active ? 'var(--primary, #10b981)' : 'rgba(255,255,255,0.45)' }}>
+                  <Icon size={17} />
+                </span>
+                <span>{label}</span>
+              </div>
+            </Link>
+          );
+        })}
+
+        {/* User Pill */}
         {user && (
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', marginTop: 4,
-            borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.04)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '8px 10px',
+            marginTop: 6,
+            borderRadius: 8,
+            backgroundColor: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.06)'
           }}>
             <div style={{
-              width: 28, height: 28, borderRadius: '50%',
-              backgroundColor: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
+              width: 30,
+              height: 30,
+              borderRadius: '50%',
+              backgroundColor: 'var(--primary, #059669)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 12,
+              fontWeight: 700,
+              color: '#ffffff',
+              flexShrink: 0,
               overflow: 'hidden'
             }}>
               {userAvatar ? (
@@ -256,11 +339,11 @@ export function Sidebar() {
                 (user.name || user.email || 'U').substring(0, 2).toUpperCase()
               )}
             </div>
-            <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.75)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {user.name || 'Agent'}
+            <div style={{ overflow: 'hidden', minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user.name || 'Broker Agent'}
               </div>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {user.email}
               </div>
             </div>

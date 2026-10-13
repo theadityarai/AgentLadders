@@ -6,6 +6,17 @@ import Link from 'next/link';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { 
+  EditIcon, 
+  TrashIcon, 
+  SearchIcon, 
+  PlusIcon, 
+  KeyIcon, 
+  HomeIcon, 
+  BuildingIcon, 
+  ListIcon, 
+  UserIcon 
+} from '@/components/icons/NavIcons';
 
 interface Deal {
   id: string;
@@ -270,7 +281,7 @@ export default function DealsPage() {
           <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                {editingDeal ? '✏️ Edit Deal' : 'Create Deal'} <InfoTooltip text="Log a new transaction or edit deal stages." />
+                {editingDeal ? 'Edit Deal' : 'Create Deal'} <InfoTooltip text="Log a new transaction or edit deal stages." />
               </h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, color: '#94a3b8', cursor: 'pointer' }}>&times;</button>
             </div>
@@ -288,8 +299,8 @@ export default function DealsPage() {
                   style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                 >
                   {stages.map(s => <option key={s} value={s}>{s}</option>)}
-                  <option value="Closed Won">🎉 Closed Won</option>
-                  <option value="Lost">❌ Lost / Cancelled</option>
+                  <option value="Closed Won">Closed Won</option>
+                  <option value="Lost">Lost / Cancelled</option>
                 </select>
               </div>
               
@@ -305,7 +316,7 @@ export default function DealsPage() {
                     required 
                     value={formData.clientName}
                     onChange={e => { 
-                      if (e.target.value === 'NEW') window.location.href = '/dashboard/leads?new=true';
+                       if (e.target.value === 'NEW') window.location.href = '/dashboard/leads?new=true';
                       else setFormData({...formData, clientName: e.target.value});
                     }}
                     style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
@@ -350,9 +361,9 @@ export default function DealsPage() {
                     onChange={e => setFormData({...formData, dealType: e.target.value})}
                     style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
                   >
-                    <option value="Outright Sale">🏠 Outright Sale (Buy)</option>
-                    <option value="Rental Lease">🔑 Rental / Lease</option>
-                    <option value="Builder CP Booking">🏢 Builder CP Booking</option>
+                    <option value="Outright Sale">Outright Sale (Buy)</option>
+                    <option value="Rental Lease">Rental / Lease</option>
+                    <option value="Builder CP Booking">Builder CP Booking</option>
                   </select>
                 </div>
                 <div>
@@ -380,7 +391,8 @@ export default function DealsPage() {
                       gap: 6
                     }}
                   >
-                    🗑️ Delete
+                    <TrashIcon size={14} color="#dc2626" />
+                    <span>Delete</span>
                   </button>
                 )}
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
@@ -410,14 +422,15 @@ export default function DealsPage() {
         <button 
           onClick={handleOpenAdd}
           style={{
-          backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
-          fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-          boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'transform 0.15s ease',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
-        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
+            backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
+            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
+            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'transform 0.15s ease',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
         >
-          + Create Deal
+          <PlusIcon size={16} color="#fff" strokeWidth={2.5} />
+          <span>Create Deal</span>
         </button>
       </div>
 
@@ -428,51 +441,54 @@ export default function DealsPage() {
             Deal Type:
           </span>
           {[
-            { id: 'All', label: 'All Deals', count: data.length, icon: '📋' },
-            { id: 'Buy', label: 'Sale / Buy Deals', count: saleCount, icon: '🏠' },
-            { id: 'Rent', label: 'Rental / Lease Deals', count: rentCount, icon: '🔑' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setDealTypeFilter(tab.id as any)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 14px',
-                borderRadius: 20,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: dealTypeFilter === tab.id ? '#0f172a' : '#f1f5f9',
-                color: dealTypeFilter === tab.id ? '#fff' : '#475569',
-                border: 'none'
-              }}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-              <span style={{
-                padding: '1px 6px',
-                borderRadius: 10,
-                fontSize: 11,
-                backgroundColor: dealTypeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: dealTypeFilter === tab.id ? '#fff' : '#64748b'
-              }}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
+            { id: 'All', label: 'All Deals', count: data.length, icon: ListIcon },
+            { id: 'Buy', label: 'Sale / Buy Deals', count: saleCount, icon: HomeIcon },
+            { id: 'Rent', label: 'Rental / Lease Deals', count: rentCount, icon: KeyIcon }
+          ].map(tab => {
+            const IconComp = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setDealTypeFilter(tab.id as any)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 20,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  backgroundColor: dealTypeFilter === tab.id ? '#0f172a' : '#f1f5f9',
+                  color: dealTypeFilter === tab.id ? '#fff' : '#475569',
+                  border: 'none'
+                }}
+              >
+                <IconComp size={14} color={dealTypeFilter === tab.id ? '#fff' : '#64748b'} />
+                <span>{tab.label}</span>
+                <span style={{
+                  padding: '1px 6px',
+                  borderRadius: 10,
+                  fontSize: 11,
+                  backgroundColor: dealTypeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+                  color: dealTypeFilter === tab.id ? '#fff' : '#64748b'
+                }}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
-          <span style={{ position: 'absolute', left: 12, top: 8, fontSize: 14 }}>🔍</span>
+          <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
           <input 
             type="text"
             placeholder="Search deals, clients, properties..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            style={{ padding: '8px 12px 8px 36px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
+            style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
           />
         </div>
       </div>
@@ -562,23 +578,25 @@ export default function DealsPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(deal)}
-                          style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 6, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}
+                          style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         >
-                          ✏️ Edit
+                          <EditIcon size={11} color="#1d4ed8" />
+                          <span>Edit</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeletingDeal(deal)}
-                          style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', cursor: 'pointer' }}
+                          style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         >
-                          🗑️ Delete
+                          <TrashIcon size={11} color="#dc2626" />
+                          <span>Delete</span>
                         </button>
                         <select
                           value={deal.stage}
                           onChange={(e) => {
                             handleMoveStage(deal.id, e.target.value);
                           }}
-                          style={{ fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 6, border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#475569', cursor: 'pointer', outline: 'none' }}
+                          style={{ fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6, border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#475569', cursor: 'pointer', outline: 'none' }}
                         >
                           {stages.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
@@ -598,7 +616,8 @@ export default function DealsPage() {
                         color: isDealRent(deal) ? '#7e22ce' : '#1d4ed8',
                         border: `1px solid ${isDealRent(deal) ? '#d8b4fe' : '#bfdbfe'}`
                       }}>
-                        {isDealRent(deal) ? '🔑 Rental Lease' : '🏠 Outright Sale'}
+                        {isDealRent(deal) ? <KeyIcon size={11} color="currentColor" /> : <HomeIcon size={11} color="currentColor" />}
+                        <span>{isDealRent(deal) ? 'Rental Lease' : 'Outright Sale'}</span>
                       </span>
                     </div>
                     
@@ -607,11 +626,13 @@ export default function DealsPage() {
                     </div>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                        <span style={{ fontSize: 14 }}>👤</span> {deal.clientName}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                        <UserIcon size={13} color="#94a3b8" />
+                        <span>{deal.clientName}</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                        <span style={{ fontSize: 14 }}>🏢</span> {deal.propertyName}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                        <BuildingIcon size={13} color="#94a3b8" />
+                        <span>{deal.propertyName}</span>
                       </div>
                     </div>
 

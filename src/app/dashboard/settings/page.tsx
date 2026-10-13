@@ -94,7 +94,7 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState<Record<string, {inApp: boolean; email: boolean}>>({});
 
   // Theme & Appearance State
-  const [selectedFont, setSelectedFont] = useState('montserrat');
+  const [selectedFont, setSelectedFont] = useState('jakarta');
   const [selectedColor, setSelectedColor] = useState('emerald');
   const [savingTheme, setSavingTheme] = useState(false);
 
@@ -261,10 +261,10 @@ export default function SettingsPage() {
   };
 
   const handleResetTheme = () => {
-    setSelectedFont('montserrat');
+    setSelectedFont('jakarta');
     setSelectedColor('emerald');
-    applyTheme('montserrat', 'emerald');
-    showToast('info', 'Reset to Montserrat & Emerald Prosperity theme.', 'Default Restored');
+    applyTheme('jakarta', 'emerald');
+    showToast('info', 'Reset to Plus Jakarta Sans & Emerald Prosperity theme.', 'Default Restored');
   };
 
   const handleSaveAgencyLogo = async (logoVal?: string) => {

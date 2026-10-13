@@ -4,6 +4,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
+import { 
+  PhoneIcon, 
+  WhatsAppIcon, 
+  FileTextIcon, 
+  MapPinIcon, 
+  IndianRupeeIcon, 
+  ShareIcon, 
+  EditIcon, 
+  ClockIcon, 
+  UserIcon, 
+  BuildingIcon,
+  PlusIcon 
+} from '@/components/icons/NavIcons';
 
 interface ActivityItem {
   id: string;
@@ -82,13 +95,13 @@ export default function TimelinePage() {
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'Call': return { icon: '📞', bg: '#eff6ff', color: '#1d4ed8' };
-      case 'WhatsApp': return { icon: '💬', bg: '#f0fdf4', color: '#15803d' };
-      case 'Email': return { icon: '✉️', bg: '#f8fafc', color: '#475569' };
-      case 'Site Visit': return { icon: '📍', bg: '#fef3c7', color: '#b45309' };
-      case 'Deal Update': return { icon: '💰', bg: '#ecfdf5', color: '#047857' };
-      case 'Property Share': return { icon: '📲', bg: '#f5f3ff', color: '#6d28d9' };
-      default: return { icon: '📝', bg: '#f1f5f9', color: '#334155' };
+      case 'Call': return { icon: <PhoneIcon size={14} color="#1d4ed8" />, bg: '#eff6ff', color: '#1d4ed8' };
+      case 'WhatsApp': return { icon: <WhatsAppIcon size={14} color="#15803d" />, bg: '#f0fdf4', color: '#15803d' };
+      case 'Email': return { icon: <FileTextIcon size={14} color="#475569" />, bg: '#f8fafc', color: '#475569' };
+      case 'Site Visit': return { icon: <MapPinIcon size={14} color="#b45309" />, bg: '#fef3c7', color: '#b45309' };
+      case 'Deal Update': return { icon: <IndianRupeeIcon size={14} color="#047857" />, bg: '#ecfdf5', color: '#047857' };
+      case 'Property Share': return { icon: <ShareIcon size={14} color="#6d28d9" />, bg: '#f5f3ff', color: '#6d28d9' };
+      default: return { icon: <EditIcon size={14} color="#334155" />, bg: '#f1f5f9', color: '#334155' };
     }
   };
 
@@ -99,7 +112,9 @@ export default function TimelinePage() {
         subtitle="Chronological audit trail of all broker calls, WhatsApp messages, client showings, and transactions"
         actions={
           <Button variant="primary" onClick={() => setShowModal(true)}>
-            + Log Interaction
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <PlusIcon size={15} color="#ffffff" /> Log Interaction
+            </span>
           </Button>
         }
       />
@@ -147,7 +162,9 @@ export default function TimelinePage() {
           border: '1px solid #e2e8f0',
           color: '#64748b'
         }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📜</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <ClockIcon size={36} color="#94a3b8" />
+          </div>
           <div style={{ fontWeight: 600, color: '#0f172a' }}>No timeline entries found</div>
           <div style={{ fontSize: '13px', marginTop: '4px' }}>Log your first call, client tour, or WhatsApp share to record interaction history.</div>
         </div>
@@ -203,7 +220,6 @@ export default function TimelinePage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '14px'
                   }}>
                     {style.icon}
                   </div>
@@ -239,8 +255,12 @@ export default function TimelinePage() {
                     )}
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: '#64748b' }}>
-                      <span>👤 Logged by: <strong>{act.actor}</strong></span>
-                      <span>🎯 Entity: <strong>{act.relatedEntity}</strong></span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <UserIcon size={13} color="#64748b" /> Logged by: <strong>{act.actor}</strong>
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <BuildingIcon size={13} color="#64748b" /> Entity: <strong>{act.relatedEntity}</strong>
+                      </span>
                     </div>
                   </div>
                 </div>

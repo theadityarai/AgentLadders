@@ -6,6 +6,16 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import styles from './auth.module.css';
+import { 
+  ShieldIcon, 
+  BuildingIcon, 
+  WhatsAppIcon, 
+  AlertCircleIcon, 
+  CheckIcon,
+  InfoIcon,
+  LockIcon,
+  ZapIcon
+} from '@/components/icons/NavIcons';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -75,9 +85,9 @@ export default function LoginPage() {
           if (res.error.includes('2FA_REQUIRED')) {
             setStep('2fa');
           } else if (res.error.includes('AGENCY_INACTIVE')) {
-            setError('⚠️ Agency Inactive: This agency account has been deactivated by Super Admin. Access is disabled.');
+            setError('Agency Inactive: This agency account has been deactivated by Super Admin. Access is disabled.');
           } else if (res.error.includes('AGENCY_SUSPENDED')) {
-            setError('⚠️ Agency Suspended: This agency subscription is suspended. Please contact AgentLadders Super Admin support.');
+            setError('Agency Suspended: This agency subscription is suspended. Please contact AgentLadders Super Admin support.');
           } else {
             setError('Invalid email or password. Please verify your credentials or select a 1-click demo account below.');
           }
@@ -218,13 +228,13 @@ export default function LoginPage() {
           {/* Trust Badges Footer */}
           <div className={styles.trustFooter}>
             <div className={styles.trustBadgeItem}>
-              <span>🛡️</span> RERA & GST Compliant
+              <ShieldIcon size={14} color="#059669" /> RERA & GST Compliant
             </div>
             <div className={styles.trustBadgeItem}>
-              <span>🔒</span> 256-Bit SSL Encryption
+              <CheckIcon size={14} color="#059669" /> 256-Bit SSL Encryption
             </div>
             <div className={styles.trustBadgeItem}>
-              <span>💬</span> WhatsApp Cloud Engine
+              <WhatsAppIcon size={14} color="#059669" /> WhatsApp Cloud Engine
             </div>
           </div>
         </div>
@@ -237,7 +247,7 @@ export default function LoginPage() {
             <>
               <div className={styles.formHeader}>
                 <div className={styles.formTag}>
-                  <span>⚡</span> Agency Cockpit Login
+                  Agency Cockpit Login
                 </div>
                 <h2 className={styles.formTitle}>Welcome back</h2>
                 <p className={styles.formSubtitle}>
@@ -249,7 +259,7 @@ export default function LoginPage() {
               <div className={styles.demoSection}>
                 <div className={styles.demoHeader}>
                   <span className={styles.demoTitle}>
-                    <span>⚡</span> 1-Click Demo Accounts
+                    1-Click Demo Accounts
                   </span>
                   <span style={{ fontSize: 11, color: '#64748b' }}>Select to fill</span>
                 </div>
@@ -264,7 +274,7 @@ export default function LoginPage() {
                     }}
                   >
                     <div className={styles.demoRole}>
-                      <span>🏢</span> Agency Owner
+                      <BuildingIcon size={14} color="var(--primary)" /> Agency Owner
                     </div>
                     <div className={styles.demoEmail}>marcus@vancerealty.com</div>
                     <div className={styles.demoHint}>Click to autofill →</div>
@@ -280,7 +290,7 @@ export default function LoginPage() {
                     }}
                   >
                     <div className={styles.demoRole}>
-                      <span>🛡️</span> Super Admin
+                      <ShieldIcon size={14} color="var(--primary)" /> Super Admin
                     </div>
                     <div className={styles.demoEmail}>aditya@agentladders.com</div>
                     <div className={styles.demoHint}>Click to autofill →</div>
@@ -291,7 +301,7 @@ export default function LoginPage() {
               {/* Error Banner */}
               {error && (
                 <div className={styles.alertCard}>
-                  <div className={styles.alertIcon}>⚠️</div>
+                  <div className={styles.alertIcon}><AlertCircleIcon size={18} color="#dc2626" /></div>
                   <div className={styles.alertText}>
                     <div className={styles.alertTitle}>Authentication Notice</div>
                     <div className={styles.alertMessage}>{error}</div>
@@ -420,7 +430,7 @@ export default function LoginPage() {
               {/* 2FA STEP */}
               <div className={styles.formHeader}>
                 <div className={styles.formTag} style={{ backgroundColor: '#ecfdf5', color: '#047857' }}>
-                  <span>🛡️</span> Two-Factor Authentication
+                  <ShieldIcon size={14} color="#047857" /> Two-Factor Authentication
                 </div>
                 <h2 className={styles.formTitle}>Enter Security Code</h2>
                 <p className={styles.formSubtitle}>
@@ -431,7 +441,7 @@ export default function LoginPage() {
               {/* Error Banner */}
               {error && (
                 <div className={styles.alertCard}>
-                  <div className={styles.alertIcon}>⚠️</div>
+                  <div className={styles.alertIcon}><AlertCircleIcon size={18} color="#b91c1c" /></div>
                   <div className={styles.alertText}>
                     <div className={styles.alertTitle}>Verification Notice</div>
                     <div className={styles.alertMessage}>{error}</div>
@@ -468,8 +478,8 @@ export default function LoginPage() {
                     className={`${styles.inputField} ${styles.twoFactorInput}`}
                     autoComplete="one-time-code"
                   />
-                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 6, lineHeight: 1.4 }}>
-                    💡 <em>Tip:</em> In demo mode, you can enter <code>123456</code> or your configured backup recovery code.
+                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 6, lineHeight: 1.4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <InfoIcon size={13} color="#059669" /> <span><em>Tip:</em> In demo mode, you can enter <code>123456</code> or your configured backup recovery code.</span>
                   </div>
                 </div>
 
@@ -515,8 +525,12 @@ export default function LoginPage() {
           </div>
 
           {/* Mobile trust badges */}
-          <div className={styles.mobileTrustBadges}>
-            🛡️ RERA & GST Compliant • 🔒 256-Bit SSL Secured • ⚡ Instant Broker Setup
+          <div className={styles.mobileTrustBadges} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ShieldIcon size={13} color="#059669" /> RERA &amp; GST Compliant</span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><LockIcon size={13} color="#059669" /> 256-Bit SSL Secured</span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ZapIcon size={13} color="#059669" /> Instant Broker Setup</span>
           </div>
         </div>
       </div>

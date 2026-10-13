@@ -5,6 +5,15 @@ import { useParams } from 'next/navigation';
 import { formatINR } from '@/lib/formatters';
 import { generatePropertyPitchWhatsApp, openWhatsApp } from '@/lib/whatsapp-engine';
 import { ShareModal } from '@/components/ui/ShareModal';
+import {
+  WhatsAppIcon,
+  ShareIcon,
+  BuildingIcon,
+  MapPinIcon,
+  CalendarIcon,
+  CheckIcon,
+  AlertCircleIcon
+} from '@/components/icons/NavIcons';
 
 interface PublicPropertyMedia {
   id: string;
@@ -127,7 +136,7 @@ export default function PublicPropertyPage() {
     const publicUrl = `${origin}/p/${property.publicToken || property.id}`;
     const priceText = property.price ? formatINR(property.price) : 'Price on Request';
     const locationText = property.locality ? `${property.locality}, ${property.city || ''}` : (property.location || 'Prime Location');
-    const msg = `Hi ${property.agentName || 'there'}, I am interested in your property listing:\n\n🏡 *${property.title}*\n💰 *Price*: ${priceText}\n📍 *Location*: ${locationText}\n\n🔗 *Showcase Link*:\n${publicUrl}\n\nPlease share floor plans and schedule a private site visit.`;
+    const msg = `Hi ${property.agentName || 'there'}, I am interested in your property listing:\n\n*${property.title}*\n*Price*: ${priceText}\n*Location*: ${locationText}\n\n*Showcase Link*:\n${publicUrl}\n\nPlease share floor plans and schedule a private site visit.`;
     const brokerPhone = property.agentWhatsApp || property.agentPhone || '';
     openWhatsApp(msg, brokerPhone);
   };
@@ -192,7 +201,9 @@ export default function PublicPropertyPage() {
   if (error || !property) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f8fafc', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontSize: 48 }}>🏚️</div>
+        <div style={{ width: 64, height: 64, borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <BuildingIcon size={32} color="#94a3b8" />
+        </div>
         <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', margin: 0 }}>Listing Not Found</h1>
         <p style={{ color: '#64748b', fontSize: 15 }}>{error}</p>
       </div>
@@ -228,7 +239,8 @@ export default function PublicPropertyPage() {
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
             }}
           >
-            <span>💬</span> Share
+            <ShareIcon size={14} color="#ffffff" />
+            <span>Share</span>
           </button>
           <div style={{ backgroundColor: property.status === 'Available' ? '#10b981' : '#f59e0b', color: '#fff', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
             {property.status}
@@ -376,7 +388,7 @@ export default function PublicPropertyPage() {
           gap: 6,
           zIndex: 20
         }}>
-          <span>📍</span> {activeMedia?.tag || 'Property Photo'}
+          <span>{activeMedia?.tag || 'Property Photo'}</span>
         </div>
 
         {/* Slide Counter & Interactive Indicator Dots */}
@@ -436,7 +448,8 @@ export default function PublicPropertyPage() {
             {property.title}
           </h1>
           <div style={{ fontSize: 15, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-            <span>🗺️</span> {property.locality ? `${property.locality}, ${property.city}` : property.city || 'Prime Location'}
+            <MapPinIcon size={16} color="#64748b" />
+            <span>{property.locality ? `${property.locality}, ${property.city}` : property.city || 'Prime Location'}</span>
           </div>
 
           {/* Quick Buyer Action Badges */}
@@ -462,7 +475,7 @@ export default function PublicPropertyPage() {
                 transition: 'all 0.15s ease'
               }}
             >
-              <span>❤️</span> I'm Interested
+              <span>Interested</span>
             </button>
             <button
               type="button"
@@ -485,7 +498,8 @@ export default function PublicPropertyPage() {
                 transition: 'all 0.15s ease'
               }}
             >
-              <span>📅</span> Schedule Site Visit
+              <CalendarIcon size={15} color="#166534" />
+              <span>Schedule Site Visit</span>
             </button>
           </div>
         </div>
@@ -520,8 +534,8 @@ export default function PublicPropertyPage() {
 
         {/* Listed By Agency Card */}
         <div style={{ backgroundColor: '#0f172a', padding: '20px', borderRadius: 16, color: '#fff', display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 50, height: 50, backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
-            🏢
+          <div style={{ width: 48, height: 48, backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BuildingIcon size={22} color="#38bdf8" />
           </div>
           <div>
             <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', marginBottom: 2 }}>Listed By</div>
@@ -535,18 +549,20 @@ export default function PublicPropertyPage() {
         <button 
           type="button"
           onClick={handleConnectWhatsApp}
-          style={{ flex: '1.2 1 180px', padding: '12px 14px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 2px 8px rgba(37,211,102,0.25)' }}
+          style={{ flex: '1.2 1 180px', padding: '12px 14px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 2px 8px rgba(37,211,102,0.25)' }}
           title="Connect directly with broker on WhatsApp"
         >
-          <span style={{ fontSize: 16 }}>💬</span> Connect with me on WhatsApp
+          <WhatsAppIcon size={18} color="#ffffff" />
+          <span>Connect with me on WhatsApp</span>
         </button>
         <button 
           type="button"
           onClick={handleOpenShare}
           title="Share property listing across WhatsApp, Social & more"
-          style={{ padding: '12px 14px', backgroundColor: '#f0fdf4', color: '#15803d', border: '1.5px solid #bbf7d0', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+          style={{ padding: '12px 16px', backgroundColor: '#f0fdf4', color: '#15803d', border: '1.5px solid #bbf7d0', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}
         >
-          <span>📤</span> Share
+          <ShareIcon size={16} color="#15803d" />
+          <span>Share</span>
         </button>
         <button 
           type="button"
@@ -556,7 +572,7 @@ export default function PublicPropertyPage() {
           }}
           style={{ flex: '1 1 120px', padding: '12px', backgroundColor: '#e11d48', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 4px 12px rgba(225,29,72,0.25)' }}
         >
-          <span>❤️</span> I'm Interested
+          <span>Interested</span>
         </button>
         <button 
           type="button"
@@ -577,7 +593,7 @@ export default function PublicPropertyPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
               <div>
                 <h3 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: '#0f172a' }}>
-                  {modalMode === 'interest' ? "❤️ I'm Interested in this Property" : '📅 Book Site Visit'}
+                  {modalMode === 'interest' ? "Inquire About This Property" : 'Book Site Visit Walkthrough'}
                 </h3>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>
                   {modalMode === 'interest' 
@@ -590,7 +606,9 @@ export default function PublicPropertyPage() {
             
             {submitSuccess ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <CheckIcon size={28} color="#16a34a" strokeWidth={3} />
+                </div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
                   {modalMode === 'interest' ? 'Interest Registered!' : 'Visit Request Sent!'}
                 </div>
@@ -602,7 +620,7 @@ export default function PublicPropertyPage() {
               <form onSubmit={handleInquiry} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {inquiryError && (
                   <div style={{ padding: '12px 14px', backgroundColor: '#fee2e2', border: '1px solid #fca5a5', borderRadius: 10, color: '#dc2626', fontSize: 13, display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 16 }}>⚠️</span>
+                    <AlertCircleIcon size={16} color="#dc2626" />
                     <span style={{ flex: 1, fontWeight: 500 }}>{inquiryError}</span>
                     <button type="button" onClick={() => setInquiryError(null)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>&times;</button>
                   </div>
@@ -666,7 +684,7 @@ export default function PublicPropertyPage() {
                 >
                   {submitting 
                     ? 'Submitting...' 
-                    : (modalMode === 'interest' ? "Submit My Interest ❤️" : 'Confirm Site Visit 📅')}
+                    : (modalMode === 'interest' ? "Submit My Interest" : 'Confirm Site Visit')}
                 </button>
               </form>
             )}

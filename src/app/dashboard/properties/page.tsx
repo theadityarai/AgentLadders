@@ -16,6 +16,19 @@ import { openWhatsApp, openWhatsAppDirect, generatePropertyPitchWhatsApp } from 
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { ShareModal } from '@/components/ui/ShareModal';
+import {
+  HomeIcon,
+  BuildingIcon,
+  MapPinIcon,
+  WhatsAppIcon,
+  ShareIcon,
+  EditIcon,
+  TrashIcon,
+  CopyIcon,
+  ExternalLinkIcon,
+  PlusIcon
+} from '@/components/icons/NavIcons';
 
 export interface PropertyMedia {
   id: string;
@@ -55,6 +68,7 @@ function PropertyCardItem({
   statusStyle, 
   priceFormatted,
   onCopyPitchLink,
+  onShare,
   onEdit,
   onDelete
 }: { 
@@ -62,6 +76,7 @@ function PropertyCardItem({
   statusStyle: { bg: string; color: string }; 
   priceFormatted: string; 
   onCopyPitchLink?: (title: string) => void;
+  onShare?: (prop: Property) => void;
   onEdit?: (prop: Property) => void;
   onDelete?: (prop: Property) => void;
 }) {
@@ -89,27 +104,28 @@ function PropertyCardItem({
       title="Click to view or edit property"
       style={{
         backgroundColor: '#fff', 
-        border: '1px solid var(--border)', 
-        borderRadius: 12,
+        border: '1px solid #e2e8f0', 
+        borderRadius: 14,
         overflow: 'hidden', 
-        transition: 'all 0.2s ease', 
+        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)', 
         cursor: 'pointer',
         display: 'flex', 
         flexDirection: 'column',
-        position: 'relative'
+        position: 'relative',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
       }}
       onMouseEnter={e => { 
         (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)'; 
-        (e.currentTarget as HTMLDivElement).style.boxShadow = 'var(--shadow-md)'; 
-        (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--primary)'; 
+        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 10px 24px -4px rgba(15,23,42,0.1)'; 
+        (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--primary, #059669)'; 
       }}
       onMouseLeave={e => { 
         (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; 
-        (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; 
-        (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border)'; 
+        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)'; 
+        (e.currentTarget as HTMLDivElement).style.borderColor = '#e2e8f0'; 
       }}
     >
-      <div style={{ width: '100%', height: 180, position: 'relative', backgroundColor: '#f1f5f9', overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: 190, position: 'relative', backgroundColor: '#f1f5f9', overflow: 'hidden' }}>
         <img 
           src={currentMedia.url} 
           alt={prop.title} 
@@ -119,12 +135,14 @@ function PropertyCardItem({
         {/* Purpose Badge (Buy vs Rent) */}
         <div style={{
           position: 'absolute', top: 12, left: 12,
-          backgroundColor: isRent ? '#7e22ce' : '#1d4ed8', color: '#fff',
-          padding: '3px 9px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-          boxShadow: '0 2px 4px rgba(0,0,0,0.15)', zIndex: 5,
-          display: 'flex', alignItems: 'center', gap: 4
+          backgroundColor: isRent ? '#7e22ce' : '#0f172a', color: '#fff',
+          padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+          boxShadow: '0 2px 6px rgba(0,0,0,0.25)', zIndex: 5,
+          display: 'flex', alignItems: 'center', gap: 5,
+          letterSpacing: '0.02em'
         }}>
-          <span>{isRent ? '🔑 For Rent' : '🏠 For Sale'}</span>
+          {isRent ? <BuildingIcon size={12} color="#fff" /> : <HomeIcon size={12} color="#fff" />}
+          <span>{isRent ? 'FOR RENT' : 'FOR SALE'}</span>
         </div>
 
         {/* Top-Right: Status Badge */}
@@ -132,7 +150,8 @@ function PropertyCardItem({
           <div style={{
             backgroundColor: statusStyle.bg, color: statusStyle.color,
             padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+            letterSpacing: '0.02em'
           }}>
             {prop.status}
           </div>
@@ -142,7 +161,7 @@ function PropertyCardItem({
         {currentMedia.tag && (
           <div style={{
             position: 'absolute', bottom: 10, left: 10,
-            backgroundColor: 'rgba(15, 23, 42, 0.7)', color: '#fff',
+            backgroundColor: 'rgba(15, 23, 42, 0.75)', color: '#fff',
             backdropFilter: 'blur(4px)',
             padding: '3px 8px', borderRadius: 6, fontSize: 11, fontWeight: 600,
             zIndex: 5
@@ -198,48 +217,49 @@ function PropertyCardItem({
         )}
       </div>
 
-      <div style={{ padding: 16, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 6, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+      <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 19, fontWeight: 800, color: '#0f172a', marginBottom: 4, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
           <span>{priceFormatted}{isRent ? <span style={{ fontSize: 12, fontWeight: 500, color: '#64748b' }}> / mo</span> : ''}</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{prop.type}</span>
+          <span style={{ fontSize: 11.5, fontWeight: 600, color: '#64748b', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: 6 }}>{prop.type}</span>
         </div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {prop.bhk ? `${prop.bhk} • ` : ''}{prop.title}
         </div>
-        <div style={{ fontSize: 12.5, color: '#64748b', marginBottom: 10 }}>
-          {prop.locality || prop.city || 'Unknown Location'}
+        <div style={{ fontSize: 12.5, color: '#64748b', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <MapPinIcon size={13} color="#94a3b8" />
+          <span>{prop.locality || prop.city || 'Prime Location'}</span>
         </div>
 
         {/* Specs Badges Row */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+          {prop.carpetAreaSqFt && (
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, backgroundColor: '#f8fafc', color: '#334155', border: '1px solid #e2e8f0' }}>
+              {prop.carpetAreaSqFt} sq.ft.
+            </span>
+          )}
           {prop.possessionStatus && (
             <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}>
-              🏗️ {prop.possessionStatus}
+              {prop.possessionStatus}
             </span>
           )}
           {prop.vastuFacing && prop.vastuFacing !== 'Not Applicable' && (
             <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, backgroundColor: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe' }}>
-              🧭 {prop.vastuFacing}
+              {prop.vastuFacing}
             </span>
           )}
           {prop.furnishing && (
             <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, backgroundColor: '#faf5ff', color: '#6b21a8', border: '1px solid #e9d5ff' }}>
-              🛋️ {prop.furnishing}
+              {prop.furnishing}
             </span>
           )}
           {prop.parking && (
             <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, backgroundColor: '#fffbeb', color: '#92400e', border: '1px solid #fde68a' }}>
-              🚗 {prop.parking}
-            </span>
-          )}
-          {prop.bathrooms && (
-            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 6, backgroundColor: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>
-              🚿 {prop.bathrooms} Baths
+              {prop.parking}
             </span>
           )}
         </div>
         
-        {/* Visible Listing URL for EVERY property irrespective of status */}
+        {/* Visible Listing URL bar */}
         {(() => {
           const listingToken = prop.publicToken || prop.id;
           const listingPath = `/p/${listingToken}`;
@@ -253,7 +273,7 @@ function PropertyCardItem({
                   onCopyPitchLink(prop.title);
                 }
               }}
-              title="Click to copy listing URL"
+              title="Click to copy public brochure URL"
               style={{
                 marginTop: 'auto',
                 display: 'flex',
@@ -262,8 +282,8 @@ function PropertyCardItem({
                 backgroundColor: '#f8fafc',
                 border: '1px solid #e2e8f0',
                 borderRadius: 8,
-                padding: '5px 10px',
-                marginBottom: 8,
+                padding: '6px 10px',
+                marginBottom: 10,
                 fontSize: 12,
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
@@ -278,46 +298,54 @@ function PropertyCardItem({
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden' }}>
-                <span style={{ fontSize: 13, flexShrink: 0 }}>🌐</span>
-                <span style={{ fontWeight: 700, color: '#334155', fontSize: 11.5, flexShrink: 0 }}>Listing URL:</span>
+                <ExternalLinkIcon size={12} color="#64748b" />
+                <span style={{ fontWeight: 600, color: '#334155', fontSize: 11.5, flexShrink: 0 }}>Brochure:</span>
                 <span style={{ color: '#2563eb', fontWeight: 600, fontSize: 11.5, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                   {listingPath}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, paddingLeft: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#2563eb', backgroundColor: '#eff6ff', padding: '2px 6px', borderRadius: 4, border: '1px solid #bfdbfe' }}>
-                  📋 Copy
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#2563eb', backgroundColor: '#eff6ff', padding: '2px 6px', borderRadius: 4, border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <CopyIcon size={11} color="#2563eb" />
+                  <span>Copy</span>
                 </span>
                 <a
                   href={listingPath}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
-                  title="Open live showcase page in new tab"
-                  style={{ fontSize: 11, fontWeight: 700, color: '#475569', backgroundColor: '#fff', padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+                  title="Open live brochure page"
+                  style={{ fontSize: 11, fontWeight: 700, color: '#475569', backgroundColor: '#fff', padding: '3px 6px', borderRadius: 4, border: '1px solid #cbd5e1', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
                 >
-                  ↗
+                  <ExternalLinkIcon size={11} color="#475569" />
                 </a>
               </div>
             </div>
           );
         })()}
 
+        {/* Action Buttons Row */}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {/* Primary WhatsApp Share Button */}
           <button 
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              const msg = generatePropertyPitchWhatsApp(prop as any);
-              openWhatsApp(msg);
+              if (onShare) {
+                onShare(prop);
+              } else {
+                const msg = generatePropertyPitchWhatsApp(prop as any);
+                openWhatsApp(msg);
+              }
             }}
+            title="Share on WhatsApp with Photo Card & details"
             style={{
               flex: 1,
-              backgroundColor: '#f0fdf4',
-              color: '#166534',
-              border: '1px solid #bbf7d0',
+              backgroundColor: '#25D366',
+              color: '#ffffff',
+              border: 'none',
               borderRadius: 8,
-              padding: '7px 10px',
+              padding: '8px 10px',
               fontSize: 12,
               fontWeight: 700,
               cursor: 'pointer',
@@ -326,38 +354,32 @@ function PropertyCardItem({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 6,
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 6px rgba(37, 211, 102, 0.2)'
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#dcfce7';
-              e.currentTarget.style.borderColor = '#86efac';
+              e.currentTarget.style.backgroundColor = '#22c55e';
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = '#f0fdf4';
-              e.currentTarget.style.borderColor = '#bbf7d0';
+              e.currentTarget.style.backgroundColor = '#25D366';
             }}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366" style={{ flexShrink: 0 }}>
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.889-9.888 9.889m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 00-3.48-8.413z"/>
-            </svg>
-            <span>Share Pitch on WhatsApp</span>
+            <WhatsAppIcon size={15} color="#ffffff" />
+            <span>WhatsApp Pitch</span>
           </button>
           
+          {/* Share Modal Trigger */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              const msg = generatePropertyPitchWhatsApp(prop as any);
-              if (typeof navigator !== 'undefined') {
-                navigator.clipboard.writeText(msg);
-                onCopyPitchLink && onCopyPitchLink(`WhatsApp Pitch copied for "${prop.title}"!`);
-              }
+              onShare && onShare(prop);
             }}
-            title="Copy formatted WhatsApp pitch with photo & showcase URL to clipboard"
+            title="Open multi-channel sharing options"
             style={{
-              padding: '7px 9px',
+              padding: '8px 10px',
               backgroundColor: '#f8fafc',
-              border: '1px solid var(--border)',
+              border: '1px solid #cbd5e1',
               borderRadius: 8,
               color: '#334155',
               cursor: 'pointer',
@@ -366,6 +388,7 @@ function PropertyCardItem({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: 4,
               transition: 'all 0.15s ease'
             }}
             onMouseEnter={e => {
@@ -377,9 +400,11 @@ function PropertyCardItem({
               e.currentTarget.style.color = '#334155';
             }}
           >
-            <span style={{ fontSize: 13 }}>📋</span>
+            <ShareIcon size={14} color="#475569" />
+            <span>Share</span>
           </button>
           
+          {/* Edit Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -387,12 +412,27 @@ function PropertyCardItem({
               onEdit && onEdit(prop);
             }}
             title="Edit Property"
-            style={{ padding: '7px 10px', backgroundColor: '#f1f5f9', border: '1px solid var(--border)', borderRadius: 8, color: '#0f172a', cursor: 'pointer', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}
+            style={{
+              padding: '8px 10px',
+              backgroundColor: '#f1f5f9',
+              border: '1px solid #e2e8f0',
+              borderRadius: 8,
+              color: '#0f172a',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#e2e8f0')}
             onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
           >
-            <span>✏️</span> Edit
+            <EditIcon size={14} color="#0f172a" />
+            <span>Edit</span>
           </button>
+
+          {/* Delete Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -400,11 +440,21 @@ function PropertyCardItem({
               onDelete && onDelete(prop);
             }}
             title="Delete Property"
-            style={{ padding: '7px 10px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, color: '#dc2626', cursor: 'pointer', fontSize: 12 }}
+            style={{
+              padding: '8px 9px',
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              borderRadius: 8,
+              color: '#dc2626',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
             onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fee2e2')}
             onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fef2f2')}
           >
-            🗑️
+            <TrashIcon size={14} color="#dc2626" />
           </button>
         </div>
       </div>
@@ -418,6 +468,7 @@ export default function PropertiesPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
+  const [sharingProperty, setSharingProperty] = useState<Property | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   
   const [showModal, setShowModal] = useState(false);
@@ -1166,9 +1217,9 @@ export default function PropertiesPage() {
             Listing Type:
           </span>
           {[
-            { id: 'All', label: 'All Inventory', count: data.length, icon: '📋' },
-            { id: 'Buy', label: 'Buy / For Sale', count: buyCount, icon: '🏠' },
-            { id: 'Rent', label: 'Rent / For Lease', count: rentCount, icon: '🔑' }
+            { id: 'All', label: 'All Inventory', count: data.length },
+            { id: 'Buy', label: 'For Sale', count: buyCount },
+            { id: 'Rent', label: 'For Rent', count: rentCount }
           ].map(tab => (
             <button
               key={tab.id}
@@ -1188,7 +1239,6 @@ export default function PropertiesPage() {
                 border: 'none'
               }}
             >
-              <span>{tab.icon}</span>
               <span>{tab.label}</span>
               <span style={{
                 padding: '1px 6px',
@@ -1237,6 +1287,7 @@ export default function PropertiesPage() {
             statusStyle={getStatusStyle(prop.status)} 
             priceFormatted={formatINR(prop.price)} 
             onCopyPitchLink={handleCopyPitchLink}
+            onShare={setSharingProperty}
             onEdit={handleOpenEdit}
             onDelete={(p) => setDeletingProperty(p)}
           />
@@ -1245,7 +1296,9 @@ export default function PropertiesPage() {
       
       {filteredData.length === 0 && (
         <div style={{ textAlign: 'center', padding: '60px 0', color: '#94a3b8' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🏠</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+            <BuildingIcon size={44} color="#94a3b8" />
+          </div>
           <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>No properties found</div>
           <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
             Try switching listing type (Buy / Rent) or clear search filters.
@@ -1253,6 +1306,15 @@ export default function PropertiesPage() {
         </div>
       )}
       </div>
+
+      {/* Share Modal with Meesho/Flipkart Flyer Generator */}
+      {sharingProperty && (
+        <ShareModal
+          isOpen={!!sharingProperty}
+          onClose={() => setSharingProperty(null)}
+          property={sharingProperty}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       {deletingProperty && (

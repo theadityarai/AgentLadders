@@ -6,6 +6,16 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import styles from '../login/auth.module.css';
+import { 
+  ZapIcon, 
+  CreditCardIcon, 
+  SparklesIcon, 
+  AlertCircleIcon, 
+  GlobeIcon, 
+  IndianRupeeIcon, 
+  ShieldIcon, 
+  LockIcon 
+} from '@/components/icons/NavIcons';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -137,8 +147,8 @@ export default function SignupPage() {
             <div className={styles.floatingDealCard}>
               <div className={styles.pulseDot} />
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>
-                  ⚡ Instant Cockpit Activation
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ZapIcon size={14} color="#10b981" /> Instant Cockpit Activation
                 </div>
                 <div style={{ fontSize: 11.5, color: '#94a3b8', marginTop: 2 }}>
                   Pre-loaded with sample Indian inventory & buyer leads so you can test live
@@ -190,13 +200,13 @@ export default function SignupPage() {
           {/* Trust Badges Footer */}
           <div className={styles.trustFooter}>
             <div className={styles.trustBadgeItem}>
-              <span>✨</span> 14 Days Free
+              <SparklesIcon size={14} color="#10b981" /> 14 Days Free
             </div>
             <div className={styles.trustBadgeItem}>
-              <span>💳</span> No Credit Card Required
+              <CreditCardIcon size={14} color="#10b981" /> No Credit Card Required
             </div>
             <div className={styles.trustBadgeItem}>
-              <span>⚡</span> Cancel Anytime
+              <ZapIcon size={14} color="#10b981" /> Cancel Anytime
             </div>
           </div>
         </div>
@@ -207,7 +217,7 @@ export default function SignupPage() {
         <div className={`${styles.formContainer} ${styles.signupContainer}`}>
           <div className={styles.formHeader}>
             <div className={styles.formTag}>
-              <span>✨</span> 14-Day Free Agency Trial
+              <SparklesIcon size={13} color="#059669" /> 14-Day Free Agency Trial
             </div>
             <h2 className={styles.formTitle}>Create Agency Account</h2>
             <p className={styles.formSubtitle}>
@@ -218,7 +228,7 @@ export default function SignupPage() {
           {/* Error Banner */}
           {error && (
             <div className={styles.alertCard}>
-              <div className={styles.alertIcon}>⚠️</div>
+              <div className={styles.alertIcon}><AlertCircleIcon size={18} color="#b91c1c" /></div>
               <div className={styles.alertText}>
                 <div className={styles.alertTitle}>Notice</div>
                 <div className={styles.alertMessage}>{error}</div>
@@ -418,7 +428,7 @@ export default function SignupPage() {
                 </label>
                 <div className={styles.inputWrapper}>
                   <span className={styles.inputIcon}>
-                    <span>🌐</span>
+                    <GlobeIcon size={16} color="#64748b" />
                   </span>
                   <select
                     id="signup-country"
@@ -426,13 +436,13 @@ export default function SignupPage() {
                     onChange={e => update('country', e.target.value)}
                     className={styles.selectField}
                   >
-                    <option value="India">India 🇮🇳</option>
-                    <option value="UAE">United Arab Emirates 🇦🇪</option>
-                    <option value="United States">United States 🇺🇸</option>
-                    <option value="United Kingdom">United Kingdom 🇬🇧</option>
-                    <option value="Singapore">Singapore 🇸🇬</option>
-                    <option value="Australia">Australia 🇦🇺</option>
-                    <option value="Canada">Canada 🇨🇦</option>
+                    <option value="India">India</option>
+                    <option value="UAE">United Arab Emirates</option>
+                    <option value="United States">United States</option>
+                    <option value="United Kingdom">United Kingdom</option>
+                    <option value="Singapore">Singapore</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Canada">Canada</option>
                   </select>
                 </div>
               </div>
@@ -443,7 +453,7 @@ export default function SignupPage() {
                 </label>
                 <div className={styles.inputWrapper}>
                   <span className={styles.inputIcon}>
-                    <span>🪙</span>
+                    <IndianRupeeIcon size={16} color="#64748b" />
                   </span>
                   <select
                     id="signup-currency"
@@ -452,7 +462,7 @@ export default function SignupPage() {
                     className={styles.selectField}
                   >
                     <option value="INR">INR (₹ Indian Rupee)</option>
-                    <option value="AED">AED (د.إ UAE Dirham)</option>
+                    <option value="AED">AED (UAE Dirham)</option>
                     <option value="USD">USD ($ US Dollar)</option>
                     <option value="GBP">GBP (£ British Pound)</option>
                     <option value="SGD">SGD (S$ Singapore Dollar)</option>
@@ -504,8 +514,12 @@ export default function SignupPage() {
           </div>
 
           {/* Mobile trust badges */}
-          <div className={styles.mobileTrustBadges}>
-            🛡️ RERA & GST Compliant • 🔒 256-Bit SSL Secured • ⚡ Instant Broker Setup
+          <div className={styles.mobileTrustBadges} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ShieldIcon size={13} color="#059669" /> RERA &amp; GST Compliant</span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><LockIcon size={13} color="#059669" /> 256-Bit SSL Secured</span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ZapIcon size={13} color="#059669" /> Instant Broker Setup</span>
           </div>
         </div>
       </div>

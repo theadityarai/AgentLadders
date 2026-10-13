@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { formatINR } from '@/lib/formatters';
 import { findMatchingPropertiesForLead } from '@/lib/match-engine';
 

@@ -5,6 +5,22 @@ import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { DEFAULT_SITE_VISIT_STATUSES } from '@/lib/formatters';
+import { 
+  CalendarIcon, 
+  EditIcon, 
+  TrashIcon, 
+  WhatsAppIcon, 
+  PhoneIcon, 
+  SearchIcon, 
+  PlusIcon, 
+  KeyIcon, 
+  HomeIcon, 
+  UserIcon, 
+  FileTextIcon, 
+  ListIcon,
+  FlameIcon,
+  SparklesIcon
+} from '@/components/icons/NavIcons';
 
 interface SiteVisit {
   id: string;
@@ -289,7 +305,7 @@ export default function SiteVisitsPage() {
           <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
-                {editingVisit ? '✏️ Edit Site Visit' : 'Book Site Visit'} <InfoTooltip text="Schedule and track client property showings." />
+                {editingVisit ? 'Edit Site Visit' : 'Book Site Visit'} <InfoTooltip text="Schedule and track client property showings." />
               </h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 24, color: '#94a3b8', cursor: 'pointer' }}>&times;</button>
             </div>
@@ -324,10 +340,10 @@ export default function SiteVisitsPage() {
                     onChange={e => setFormData({...formData, priority: e.target.value})}
                     style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
-                    <option value="High Priority">🔥 High Priority (Decision Maker / Ready to Close)</option>
-                    <option value="Medium Priority">⚡ Medium Priority (Qualified Buyer)</option>
-                    <option value="Standard">🟡 Standard Priority (First Screening)</option>
-                    <option value="Low Priority">⚪ Low Priority (Browsing / Preliminary)</option>
+                    <option value="High Priority">High Priority (Decision Maker / Ready to Close)</option>
+                    <option value="Medium Priority">Medium Priority (Qualified Buyer)</option>
+                    <option value="Standard">Standard Priority (First Screening)</option>
+                    <option value="Low Priority">Low Priority (Browsing / Preliminary)</option>
                   </select>
                 </div>
               </div>
@@ -391,8 +407,8 @@ export default function SiteVisitsPage() {
                     onChange={e => setFormData({...formData, purpose: e.target.value as any})}
                     style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
                   >
-                    <option value="Buy">🏠 Buy / Sale Showing</option>
-                    <option value="Rent">🔑 Rent / Lease Showing</option>
+                    <option value="Buy">Buy / Sale Showing</option>
+                    <option value="Rent">Rent / Lease Showing</option>
                   </select>
                 </div>
                 <div>
@@ -429,7 +445,8 @@ export default function SiteVisitsPage() {
                       gap: 6
                     }}
                   >
-                    🗑️ Delete
+                    <TrashIcon size={14} color="#dc2626" />
+                    <span>Delete</span>
                   </button>
                 )}
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
@@ -458,14 +475,15 @@ export default function SiteVisitsPage() {
         <button 
           onClick={handleOpenAdd}
           style={{
-          backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
-          fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-          boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.2s ease',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
-        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
+            backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
+            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
+            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
         >
-          + Book Visit
+          <PlusIcon size={16} color="#fff" strokeWidth={2.5} />
+          <span>Book Visit</span>
         </button>
       </div>
 
@@ -476,51 +494,54 @@ export default function SiteVisitsPage() {
             Showing Type:
           </span>
           {[
-            { id: 'All', label: 'All Showings', count: data.length, icon: '📋' },
-            { id: 'Buy', label: 'Buy Visits', count: buyCount, icon: '🏠' },
-            { id: 'Rent', label: 'Rent Visits', count: rentCount, icon: '🔑' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setPurposeFilter(tab.id as any)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 14px',
-                borderRadius: 20,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
-                color: purposeFilter === tab.id ? '#fff' : '#475569',
-                border: 'none'
-              }}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-              <span style={{
-                padding: '1px 6px',
-                borderRadius: 10,
-                fontSize: 11,
-                backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: purposeFilter === tab.id ? '#fff' : '#64748b'
-              }}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
+            { id: 'All', label: 'All Showings', count: data.length, icon: ListIcon },
+            { id: 'Buy', label: 'Buy Visits', count: buyCount, icon: HomeIcon },
+            { id: 'Rent', label: 'Rent Visits', count: rentCount, icon: KeyIcon }
+          ].map(tab => {
+            const IconComp = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setPurposeFilter(tab.id as any)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 14px',
+                  borderRadius: 20,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
+                  color: purposeFilter === tab.id ? '#fff' : '#475569',
+                  border: 'none'
+                }}
+              >
+                <IconComp size={14} color={purposeFilter === tab.id ? '#fff' : '#64748b'} />
+                <span>{tab.label}</span>
+                <span style={{
+                  padding: '1px 6px',
+                  borderRadius: 10,
+                  fontSize: 11,
+                  backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
+                  color: purposeFilter === tab.id ? '#fff' : '#64748b'
+                }}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
-          <span style={{ position: 'absolute', left: 12, top: 8, fontSize: 14 }}>🔍</span>
+          <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
           <input 
             type="text"
             placeholder="Search client, property..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            style={{ padding: '8px 12px 8px 36px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
+            style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
           />
         </div>
       </div>
@@ -550,7 +571,9 @@ export default function SiteVisitsPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         {Object.keys(groupedData).length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8', backgroundColor: '#f8fafc', borderRadius: 16, border: '1px dashed var(--border)' }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>📅</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <CalendarIcon size={36} color="#cbd5e1" />
+            </div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>No {filter.toLowerCase()} site visits found</div>
             <div style={{ fontSize: 13, marginTop: 4 }}>Try clearing the search or changing showing type (Buy / Rent).</div>
           </div>
@@ -603,7 +626,8 @@ export default function SiteVisitsPage() {
                             fontSize: 11,
                             fontWeight: 700
                           }}>
-                            {(visit.priority || '').includes('High') ? '🔥 ' : '⚡ '}{visit.priority || (visit as any).urgency}
+                            {(visit.priority || '').includes('High') ? <FlameIcon size={11} color="currentColor" /> : <SparklesIcon size={11} color="currentColor" />}
+                            <span>{visit.priority || (visit as any).urgency}</span>
                           </span>
                         )}
                         <span style={{
@@ -618,11 +642,12 @@ export default function SiteVisitsPage() {
                           fontSize: 11,
                           fontWeight: 700
                         }}>
-                          {isRent ? '🔑 Rent Showing' : '🏠 Buy Showing'}
+                          {isRent ? <KeyIcon size={11} color="currentColor" /> : <HomeIcon size={11} color="currentColor" />}
+                          <span>{isRent ? 'Rent Showing' : 'Buy Showing'}</span>
                         </span>
                         {visit.source === 'Client Portal' && (
                           <span style={{ backgroundColor: '#fef08a', color: '#854d0e', padding: '4px 8px', borderRadius: 8, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                            🌐 Self-Booked
+                            Portal
                           </span>
                         )}
                       </div>
@@ -632,16 +657,18 @@ export default function SiteVisitsPage() {
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(visit)}
-                          style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', cursor: 'pointer' }}
+                          style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         >
-                          ✏️ Edit
+                          <EditIcon size={12} color="#1d4ed8" />
+                          <span>Edit</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeletingVisit(visit)}
-                          style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', cursor: 'pointer' }}
+                          style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         >
-                          🗑️ Delete
+                          <TrashIcon size={12} color="#dc2626" />
+                          <span>Delete</span>
                         </button>
                         <select
                           value={visit.status}
@@ -666,21 +693,25 @@ export default function SiteVisitsPage() {
                       <div>
                         <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 4, textTransform: 'uppercase' }}>Client</div>
                         <div style={{ fontSize: 14, fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          👤 {visit.client}
+                          <UserIcon size={13} color="#94a3b8" />
+                          <span>{visit.client}</span>
                         </div>
                       </div>
                     </div>
 
                     {visit.notes && (
                       <div style={{ marginTop: 12, padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 13, color: '#475569', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                        <span style={{ fontSize: 14 }}>📝</span>
+                        <FileTextIcon size={14} color="#94a3b8" style={{ marginTop: 2, flexShrink: 0 }} />
                         <span style={{ lineHeight: 1.4 }}>{visit.notes}</span>
                       </div>
                     )}
                     
                     {visit.clientPhone && (
                       <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 12, color: '#64748b' }}>📞 {visit.clientPhone}</span>
+                        <span style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <PhoneIcon size={12} color="#64748b" />
+                          <span>{visit.clientPhone}</span>
+                        </span>
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
@@ -690,7 +721,8 @@ export default function SiteVisitsPage() {
                           onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
                           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                         >
-                          💬 WhatsApp Client
+                          <WhatsAppIcon size={14} color="#fff" />
+                          <span>WhatsApp Client</span>
                         </button>
                       </div>
                     )}

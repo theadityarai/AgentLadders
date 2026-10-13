@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { PlusIcon } from '@/components/icons/NavIcons';
 
 interface SupportMessage {
   id: string;
@@ -935,7 +936,9 @@ export default function SupportPage() {
         actions={
           <div style={{ display: 'flex', gap: 10 }}>
             <Button variant="primary" onClick={handleOpenGeneralInquiry}>
-              ✉️ Submit New Inquiry
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <PlusIcon size={15} color="#ffffff" /> Submit New Inquiry
+              </span>
             </Button>
           </div>
         }

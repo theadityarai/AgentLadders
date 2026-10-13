@@ -35,12 +35,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var f = localStorage.getItem('agentladders_font') || 'montserrat';
+                var f = localStorage.getItem('agentladders_font') || 'jakarta';
                 var c = localStorage.getItem('agentladders_color') || 'emerald';
                 var fonts = {
+                  jakarta: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                  inter: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                   montserrat: "'Montserrat', sans-serif",
-                  jakarta: "'Plus Jakarta Sans', sans-serif",
-                  inter: "'Inter', sans-serif",
                   outfit: "'Outfit', sans-serif",
                   poppins: "'Poppins', sans-serif",
                   playfair: "'Playfair Display', Georgia, serif"
@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   amber: { p: '#d97706', pd: '#b45309', pl: '#fef3c7', pt: '#92400e', rgb: '217, 119, 6', grad: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)', acc: '#f59e0b', bb: '#fef3c7', bt: '#92400e' },
                   indigo: { p: '#6366f1', pd: '#4f46e5', pl: '#e0e7ff', pt: '#3730a3', rgb: '99, 102, 241', grad: 'linear-gradient(135deg, #4f46e5 0%, #818cf8 100%)', acc: '#818cf8', bb: '#e0e7ff', bt: '#3730a3' }
                 };
-                var fontVal = fonts[f] || fonts.montserrat;
+                var fontVal = fonts[f] || fonts.jakarta;
                 var cur = colors[c] || colors.emerald;
 
                 var s = document.createElement('style');

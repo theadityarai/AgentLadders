@@ -3,6 +3,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { 
+  BuildingIcon, 
+  HomeIcon, 
+  ZapIcon, 
+  BriefcaseIcon, 
+  MapPinIcon, 
+  MenuIcon, 
+  XIcon 
+} from '@/components/icons/NavIcons';
 
 // Inline SVG Icons for pixel-perfect, crisp rendering
 const IconCheck = ({ size = 16, color = '#059669' }: { size?: number; color?: string }) => (
@@ -99,7 +108,9 @@ export default function LandingPage() {
         <span style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700, color: '#ffffff' }}>
           NEW 2026 EDITION
         </span>
-        <span>⚡ Public Client Portals with Verified Site Visit Booking & WhatsApp Automation are now live!</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <ZapIcon size={14} color="#34d399" /> Public Client Portals with Verified Site Visit Booking &amp; WhatsApp Automation are now live!
+        </span>
         <Link href="/signup" style={{ color: '#ffffff', textDecoration: 'underline', fontWeight: 700 }}>
           Try Free →
         </Link>
@@ -134,12 +145,10 @@ export default function LandingPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: '19px',
               boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
               color: '#ffffff',
-              fontWeight: 800
             }}>
-              🏡
+              <BuildingIcon size={20} color="#ffffff" />
             </div>
             <div>
               <div style={{ fontSize: '19px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>
@@ -197,14 +206,13 @@ export default function LandingPage() {
               display: 'none',
               background: 'none',
               border: 'none',
-              fontSize: '24px',
               color: '#0f172a',
               cursor: 'pointer',
               padding: '6px'
             }}
             aria-label="Toggle Navigation Menu"
           >
-            {mobileMenuOpen ? '✕' : '☰'}
+            {mobileMenuOpen ? <XIcon size={24} color="#0f172a" /> : <MenuIcon size={24} color="#0f172a" />}
           </button>
         </nav>
 
@@ -330,7 +338,7 @@ export default function LandingPage() {
                 alignItems: 'center',
                 gap: '8px'
               }}>
-                <span>⚡</span>
+                <ZapIcon size={16} color="#059669" />
                 Explore Live Interactive CRM
               </Link>
             </div>
@@ -408,8 +416,8 @@ export default function LandingPage() {
                 gap: '12px',
                 zIndex: 2
               }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
-                  🤝
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <BriefcaseIcon size={20} color="#059669" />
                 </div>
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Deal Closed · Token Received</div>
@@ -432,8 +440,8 @@ export default function LandingPage() {
                 gap: '12px',
                 zIndex: 2
               }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
-                  📍
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MapPinIcon size={20} color="#2563eb" />
                 </div>
                 <div>
                   <div style={{ fontSize: '11px', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Weekend Calendar</div>
@@ -662,7 +670,7 @@ export default function LandingPage() {
                 alignItems: 'center',
                 gap: '12px'
               }}>
-                <span style={{ fontSize: '22px' }}>🏢</span>
+                <BuildingIcon size={22} color="#059669" />
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>Aurora Residences · Worli</div>
                   <div style={{ fontSize: '11px', color: '#059669', fontWeight: 600 }}>Active Public Booking Portal Enabled</div>
@@ -1468,7 +1476,7 @@ export default function LandingPage() {
             fontWeight: 700,
             marginBottom: '24px'
           }}>
-            <span>⚡</span> Instant Setup in 2 Minutes · No Credit Card Required
+            <ZapIcon size={14} color="#34d399" /> Instant Setup in 2 Minutes · No Credit Card Required
           </div>
           <h2 className="mobile-text-3xl" style={{ fontSize: '46px', fontWeight: 800, letterSpacing: '-1.2px', marginBottom: '20px', lineHeight: 1.15 }}>
             Ready to upgrade your brokerage to the next tier?
@@ -1533,9 +1541,9 @@ export default function LandingPage() {
                   background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                   borderRadius: '8px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '16px', color: '#fff', fontWeight: 800
+                  color: '#fff',
                 }}>
-                  🏡
+                  <BuildingIcon size={18} color="#ffffff" />
                 </div>
                 <span style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff' }}>AgentLadders</span>
               </div>
@@ -1543,7 +1551,7 @@ export default function LandingPage() {
                 The premier operating system for high-performing real estate brokers, channel partners, and luxury property advisors across India.
               </p>
               <div style={{ fontSize: '12px', color: '#059669', fontWeight: 700 }}>
-                🇮🇳 Designed & Engineered in India
+                Proudly Built &amp; Engineered for Indian Real Estate
               </div>
             </div>
 
