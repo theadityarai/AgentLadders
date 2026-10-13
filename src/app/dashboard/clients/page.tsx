@@ -65,6 +65,7 @@ export default function ClientsPage() {
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   const loadClients = async () => {
     setLoading(true);
@@ -217,9 +218,10 @@ export default function ClientsPage() {
         (item.preferredLocation && item.preferredLocation.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesType = typeFilter === 'All' || item.type === typeFilter;
-      return matchesSearch && matchesType;
+      const matchesStatus = statusFilter === 'All' || item.status === statusFilter;
+      return matchesSearch && matchesType && matchesStatus;
     });
-  }, [data, searchQuery, typeFilter]);
+  }, [data, searchQuery, typeFilter, statusFilter]);
 
   const columns: Column<Client>[] = [
     {
@@ -386,11 +388,22 @@ export default function ClientsPage() {
               ...CLIENT_TYPES.map(t => ({ label: t, value: t }))
             ],
             onChange: setTypeFilter
+          },
+          {
+            key: 'status',
+            label: 'Status',
+            value: statusFilter,
+            options: [
+              { label: 'All Statuses', value: 'All' },
+              ...CLIENT_STATUSES.map(s => ({ label: s, value: s }))
+            ],
+            onChange: setStatusFilter
           }
         ]}
         onReset={() => {
           setSearchQuery('');
           setTypeFilter('All');
+          setStatusFilter('All');
         }}
       />
 

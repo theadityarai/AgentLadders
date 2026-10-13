@@ -799,7 +799,13 @@ export default function PropertiesPage() {
       if (purposeFilter === 'Rent' && !isRent) return false;
       if (purposeFilter === 'Buy' && isRent) return false;
     }
-    if (filter !== 'All' && p.status !== filter) return false;
+    if (filter !== 'All') {
+      if (filter === 'Rented') {
+        if (p.status !== 'Rented' && !p.status?.toLowerCase().includes('rent') && !p.status?.toLowerCase().includes('lease')) return false;
+      } else if (p.status !== filter) {
+        return false;
+      }
+    }
     if (search) {
       const q = search.toLowerCase();
       return (
@@ -1253,8 +1259,58 @@ export default function PropertiesPage() {
           ))}
         </div>
 
+        {/* Status Filter Pills */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
+            Property Status:
+          </span>
+          <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {[
+              { id: 'All', label: 'All Statuses', count: data.length },
+              { id: 'Available', label: 'Available', count: data.filter(p => p.status === 'Available').length },
+              { id: 'Under Offer', label: 'Under Offer', count: data.filter(p => p.status === 'Under Offer').length },
+              { id: 'Under Contract', label: 'Under Contract', count: data.filter(p => p.status === 'Under Contract').length },
+              { id: 'Sold', label: 'Sold', count: data.filter(p => p.status === 'Sold').length },
+              { id: 'Rented', label: 'Rented', count: data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length },
+              { id: 'Off Market', label: 'Off Market', count: data.filter(p => p.status === 'Off Market').length },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setFilter(tab.id)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  backgroundColor: filter === tab.id ? '#0f172a' : '#f1f5f9',
+                  color: filter === tab.id ? '#fff' : '#475569',
+                  border: 'none',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}
+              >
+                <span>{tab.label}</span>
+                <span style={{
+                  padding: '1px 6px',
+                  borderRadius: 10,
+                  fontSize: 10.5,
+                  backgroundColor: filter === tab.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
+                  color: filter === tab.id ? '#fff' : '#64748b'
+                }}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Search and Status Dropdown */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <input 
             type="text" 
             placeholder="Search by title, location, BHK..." 
@@ -1262,19 +1318,32 @@ export default function PropertiesPage() {
             onChange={e => setSearch(e.target.value)}
             style={{ flex: '1 1 200px', maxWidth: 360, padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13.5, outline: 'none' }}
           />
-          <select 
-            value={filter} 
-            onChange={e => setFilter(e.target.value)}
-            style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13.5, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-          >
-            <option value="All">All Statuses</option>
-            <option value="Available">Available</option>
-            <option value="Under Contract">Under Contract</option>
-            <option value="Under Offer">Under Offer</option>
-            <option value="Sold">Sold</option>
-            <option value="Rented">Rented / Leased</option>
-            <option value="Off Market">Off Market</option>
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Filter by Status:</span>
+            <select 
+              value={filter} 
+              onChange={e => setFilter(e.target.value)}
+              style={{
+                padding: '9px 14px',
+                borderRadius: 8,
+                border: '1.5px solid var(--border)',
+                fontSize: 13,
+                fontWeight: 700,
+                outline: 'none',
+                backgroundColor: filter === 'All' ? '#fff' : '#ecfdf5',
+                color: filter === 'All' ? '#334155' : '#047857',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="All">All Statuses ({data.length})</option>
+              <option value="Available">Available ({data.filter(p => p.status === 'Available').length})</option>
+              <option value="Under Offer">Under Offer ({data.filter(p => p.status === 'Under Offer').length})</option>
+              <option value="Under Contract">Under Contract ({data.filter(p => p.status === 'Under Contract').length})</option>
+              <option value="Sold">Sold ({data.filter(p => p.status === 'Sold').length})</option>
+              <option value="Rented">Rented / Leased ({data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length})</option>
+              <option value="Off Market">Off Market ({data.filter(p => p.status === 'Off Market').length})</option>
+            </select>
+          </div>
         </div>
       </div>
 

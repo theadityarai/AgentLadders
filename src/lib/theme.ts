@@ -240,14 +240,14 @@ export function applyTheme(fontId: string, colorId: string) {
 
 export function getStoredTheme(): { fontId: string; colorId: string } {
   if (typeof window === 'undefined') {
-    return { fontId: 'jakarta', colorId: 'emerald' };
+    return { fontId: 'montserrat', colorId: 'emerald' };
   }
 
   try {
-    const fontId = localStorage.getItem('agentladders_font') || 'jakarta';
+    const fontId = localStorage.getItem('agentladders_font') || 'montserrat';
     const colorId = localStorage.getItem('agentladders_color') || 'emerald';
     return { fontId, colorId };
   } catch {
-    return { fontId: 'jakarta', colorId: 'emerald' };
+    return { fontId: 'montserrat', colorId: 'emerald' };
   }
 }

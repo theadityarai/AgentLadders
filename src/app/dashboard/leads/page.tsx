@@ -811,50 +811,110 @@ export default function LeadsPage() {
       </div>
 
       {/* Filters & Search */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <div className="responsive-pills-scroll">
-            {['Active', 'All', 'New Inbound', 'Site Visit Scheduled'].map(f => (
-              <button key={f}
-                onClick={() => setFilter(f)}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+        {/* Status Filter Pills Row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
+            Status:
+          </span>
+          <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {[
+              { id: 'All', label: 'All', count: data.length },
+              { id: 'Active', label: 'Active Pipeline', count: data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length },
+              ...leadStatuses.map(s => ({
+                id: s,
+                label: s,
+                count: data.filter(l => l.status === s).length
+              }))
+            ].map(f => (
+              <button 
+                key={f.id}
+                onClick={() => setFilter(f.id)}
                 style={{
-                  padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
-                  backgroundColor: filter === f ? '#0f172a' : '#f1f5f9',
-                  color: filter === f ? '#fff' : '#475569',
+                  padding: '6px 12px',
+                  borderRadius: 20,
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  backgroundColor: filter === f.id ? '#0f172a' : '#f1f5f9',
+                  color: filter === f.id ? '#fff' : '#475569',
                   border: 'none',
                   whiteSpace: 'nowrap',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6
                 }}
               >
-                {f}
+                <span>{f.label}</span>
+                <span style={{
+                  padding: '1px 6px',
+                  borderRadius: 10,
+                  fontSize: 10.5,
+                  backgroundColor: filter === f.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
+                  color: filter === f.id ? '#fff' : '#64748b'
+                }}>
+                  {f.count}
+                </span>
               </button>
             ))}
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Channel:</span>
-            <select
-              value={sourceFilter}
-              onChange={e => setSourceFilter(e.target.value)}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 20,
-                border: '1px solid var(--border)',
-                backgroundColor: sourceFilter === 'All' ? '#fff' : '#eff6ff',
-                color: sourceFilter === 'All' ? '#334155' : '#1d4ed8',
-                fontSize: 12.5,
-                fontWeight: 600,
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="All">All Inbound Sources</option>
-              {leadSources.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
         </div>
+
+        {/* Dropdowns & Search Toolbar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Status Filter:</span>
+              <select
+                value={filter}
+                onChange={e => setFilter(e.target.value)}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: 10,
+                  border: '1.5px solid var(--border)',
+                  backgroundColor: filter === 'All' ? '#fff' : '#ecfdf5',
+                  color: filter === 'All' ? '#334155' : '#047857',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="All">All Statuses ({data.length})</option>
+                <option value="Active">Active Pipeline ({data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length})</option>
+                {leadStatuses.map(s => {
+                  const cnt = data.filter(l => l.status === s).length;
+                  return <option key={s} value={s}>{s} ({cnt})</option>;
+                })}
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Channel:</span>
+              <select
+                value={sourceFilter}
+                onChange={e => setSourceFilter(e.target.value)}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: 10,
+                  border: '1.5px solid var(--border)',
+                  backgroundColor: sourceFilter === 'All' ? '#fff' : '#eff6ff',
+                  color: sourceFilter === 'All' ? '#334155' : '#1d4ed8',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="All">All Inbound Sources</option>
+                {leadSources.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
           <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
           <input 
@@ -866,6 +926,7 @@ export default function LeadsPage() {
           />
         </div>
       </div>
+    </div>
 
       {/* Desktop Table View */}
       <div className="desktop-only-table">

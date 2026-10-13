@@ -47,6 +47,7 @@ export default function SiteVisitsPage() {
   const [data, setData] = useState<SiteVisit[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Upcoming');
+  const [statusFilter, setStatusFilter] = useState('All');
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -163,9 +164,14 @@ export default function SiteVisitsPage() {
 
   const filteredData = data.filter(v => {
     if (purposeFilter !== 'All' && getVisitPurpose(v) !== purposeFilter) return false;
-    if (filter === 'Upcoming') return v.date >= today && v.status !== 'Cancelled';
-    if (filter === 'Past') return v.date < today;
-    if (filter === 'Cancelled') return v.status === 'Cancelled';
+    if (filter === 'Upcoming') {
+      if (v.date < today || v.status === 'Cancelled') return false;
+    } else if (filter === 'Past') {
+      if (v.date >= today) return false;
+    } else if (filter === 'Cancelled') {
+      if (v.status !== 'Cancelled') return false;
+    }
+    if (statusFilter !== 'All' && v.status !== statusFilter) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return (
@@ -606,21 +612,97 @@ export default function SiteVisitsPage() {
           })}
         </div>
 
-        <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
-          <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
-          <input 
-            type="text"
-            placeholder="Search client, property..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
-          />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Status:</span>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: 10,
+                border: '1.5px solid var(--border)',
+                backgroundColor: statusFilter === 'All' ? '#fff' : '#ecfdf5',
+                color: statusFilter === 'All' ? '#334155' : '#047857',
+                fontSize: 13,
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="All">All Statuses ({data.length})</option>
+              {siteVisitStatuses.map(s => {
+                const cnt = data.filter(v => v.status === s).length;
+                return <option key={s} value={s}>{s} ({cnt})</option>;
+              })}
+            </select>
+          </div>
+
+          <div style={{ position: 'relative', minWidth: 200, maxWidth: 280, flex: 1 }}>
+            <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
+            <input 
+              type="text"
+              placeholder="Search client, property..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Visit Status Filter Pills Row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
+          Visit Status:
+        </span>
+        <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {[
+            { id: 'All', label: 'All Statuses', count: data.length },
+            ...siteVisitStatuses.map(s => ({
+              id: s,
+              label: s,
+              count: data.filter(v => v.status === s).length
+            }))
+          ].map(st => (
+            <button
+              key={st.id}
+              onClick={() => setStatusFilter(st.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 20,
+                fontSize: 12.5,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                backgroundColor: statusFilter === st.id ? '#0f172a' : '#f1f5f9',
+                color: statusFilter === st.id ? '#fff' : '#475569',
+                border: 'none',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              <span>{st.label}</span>
+              <span style={{
+                padding: '1px 6px',
+                borderRadius: 10,
+                fontSize: 10.5,
+                backgroundColor: statusFilter === st.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
+                color: statusFilter === st.id ? '#fff' : '#64748b'
+              }}>
+                {st.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Date Range Tabs */}
       <div className="responsive-pills-scroll" style={{ marginBottom: 32, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
-        {['Upcoming', 'Past', 'Cancelled'].map(f => (
+        {['All Dates', 'Upcoming', 'Past', 'Cancelled'].map(f => (
           <button key={f}
             onClick={() => setFilter(f)}
             style={{

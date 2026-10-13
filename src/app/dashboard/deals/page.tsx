@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { formatINR, DEFAULT_DEAL_STAGES } from '@/lib/formatters';
 import Link from 'next/link';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
@@ -39,6 +39,7 @@ export default function DealsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stages, setStages] = useState<string[]>(DEFAULT_DEAL_STAGES);
   const [dealTypeFilter, setDealTypeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
+  const [stageFilter, setStageFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [clientsList, setClientsList] = useState<{name: string; phone?: string; email?: string; type?: string}[]>([]);
@@ -184,11 +185,24 @@ export default function DealsPage() {
   const saleCount = data.filter(d => !isDealRent(d)).length;
   const rentCount = data.filter(d => isDealRent(d)).length;
 
+  const allStagesList = useMemo(() => {
+    return Array.from(new Set([...stages, 'Closed Won', 'Lost']));
+  }, [stages]);
+
+  const activeDealsCount = data.filter(d => !['Closed Won', 'Lost'].includes(d.stage)).length;
+
   const filteredDeals = data.filter(d => {
     if (dealTypeFilter !== 'All') {
       const isRent = isDealRent(d);
       if (dealTypeFilter === 'Rent' && !isRent) return false;
       if (dealTypeFilter === 'Buy' && isRent) return false;
+    }
+    if (stageFilter !== 'All') {
+      if (stageFilter === 'Active') {
+        if (['Closed Won', 'Lost'].includes(d.stage)) return false;
+      } else if (d.stage !== stageFilter) {
+        return false;
+      }
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -202,8 +216,14 @@ export default function DealsPage() {
     return true;
   });
 
+  const columnsToDisplay = useMemo(() => {
+    if (stageFilter === 'All') return stages;
+    if (stageFilter === 'Active') return stages.filter(s => !['Closed Won', 'Lost'].includes(s));
+    return [stageFilter];
+  }, [stages, stageFilter]);
+
   // Calculate totals per stage
-  const stageTotals = stages.reduce((acc, stage) => {
+  const stageTotals = allStagesList.reduce((acc, stage) => {
     acc[stage] = filteredDeals.filter(d => d.stage === stage).reduce((sum, d) => sum + (d.amount || 0), 0);
     return acc;
   }, {} as Record<string, number>);
@@ -542,21 +562,99 @@ export default function DealsPage() {
           })}
         </div>
 
-        <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
-          <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
-          <input 
-            type="text"
-            placeholder="Search deals, clients, properties..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
-          />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Stage Filter:</span>
+            <select
+              value={stageFilter}
+              onChange={e => setStageFilter(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: 10,
+                border: '1.5px solid var(--border)',
+                backgroundColor: stageFilter === 'All' ? '#fff' : '#ecfdf5',
+                color: stageFilter === 'All' ? '#334155' : '#047857',
+                fontSize: 13,
+                fontWeight: 700,
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              <option value="All">All Stages ({data.length})</option>
+              <option value="Active">Active Pipeline ({activeDealsCount})</option>
+              {allStagesList.map(s => {
+                const cnt = data.filter(d => d.stage === s).length;
+                return <option key={s} value={s}>{s} ({cnt})</option>;
+              })}
+            </select>
+          </div>
+
+          <div style={{ position: 'relative', minWidth: 200, maxWidth: 280, flex: 1 }}>
+            <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
+            <input 
+              type="text"
+              placeholder="Search deals, clients, properties..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Deal Status / Pipeline Stage Filter Pills Row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
+          Deal Stage:
+        </span>
+        <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {[
+            { id: 'All', label: 'All Stages', count: data.length },
+            { id: 'Active', label: 'Active Pipeline', count: activeDealsCount },
+            ...allStagesList.map(s => ({
+              id: s,
+              label: s,
+              count: data.filter(d => d.stage === s).length
+            }))
+          ].map(st => (
+            <button
+              key={st.id}
+              onClick={() => setStageFilter(st.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 20,
+                fontSize: 12.5,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                backgroundColor: stageFilter === st.id ? '#0f172a' : '#f1f5f9',
+                color: stageFilter === st.id ? '#fff' : '#475569',
+                border: 'none',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              <span>{st.label}</span>
+              <span style={{
+                padding: '1px 6px',
+                borderRadius: 10,
+                fontSize: 10.5,
+                backgroundColor: stageFilter === st.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
+                color: stageFilter === st.id ? '#fff' : '#64748b'
+              }}>
+                {st.count}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Kanban Board */}
       <div style={{ display: 'flex', gap: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24, minHeight: 'calc(100vh - 180px)' }}>
-        {stages.map(stage => {
+        {columnsToDisplay.map(stage => {
           const stageDeals = filteredDeals.filter(d => d.stage === stage);
           const colors = getStageColor(stage);
           
