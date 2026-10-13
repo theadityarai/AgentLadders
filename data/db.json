@@ -227,7 +227,9 @@
         "Closed Client",
         "Past Client",
         "Inactive"
-      ]
+      ],
+      "fontFamily": "montserrat",
+      "colorScheme": "emerald"
     },
     {
       "id": "ag_0l04re04",
@@ -278,7 +280,9 @@
         "Plot / Land",
         "Commercial Bare Shell",
         "Furnished Office"
-      ]
+      ],
+      "fontFamily": "montserrat",
+      "colorScheme": "emerald"
     },
     {
       "id": "ag_vance_01",
@@ -329,8 +333,8 @@
         "Commercial Bare Shell",
         "Furnished Office"
       ],
-      "fontFamily": "jakarta",
-      "colorScheme": "amber",
+      "fontFamily": "montserrat",
+      "colorScheme": "emerald",
       "logo": "",
       "logoUrl": "",
       "propertySpecs": [
@@ -460,7 +464,9 @@
         "Plot / Land",
         "Commercial Bare Shell",
         "Furnished Office"
-      ]
+      ],
+      "fontFamily": "montserrat",
+      "colorScheme": "emerald"
     },
     {
       "id": "ag_coastal_03",
@@ -504,7 +510,9 @@
         "Plot / Land",
         "Commercial Bare Shell",
         "Furnished Office"
-      ]
+      ],
+      "fontFamily": "montserrat",
+      "colorScheme": "emerald"
     },
     {
       "id": "ag_apex_04",
@@ -548,7 +556,9 @@
         "Plot / Land",
         "Commercial Bare Shell",
         "Furnished Office"
-      ]
+      ],
+      "fontFamily": "montserrat",
+      "colorScheme": "emerald"
     },
     {
       "id": "ag_horizon_05",
@@ -592,7 +602,9 @@
         "Plot / Land",
         "Commercial Bare Shell",
         "Furnished Office"
-      ]
+      ],
+      "fontFamily": "montserrat",
+      "colorScheme": "emerald"
     }
   ],
   "notifications": [

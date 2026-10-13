@@ -5,6 +5,7 @@ import { authOptions } from '../auth/[...nextauth]/route';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { isValidPassword, isValidEmail, sanitizeString, generateRandom12Digits } from '@/lib/sanitize';
+import { canUpdateUserRole, canRemoveUser, canInviteUsers, getAllowedInviteRoles, canManageBilling } from '@/lib/rbac';
 import { 
   DEFAULT_BHK_OPTIONS, 
   DEFAULT_PROPERTY_TYPES, 
@@ -28,7 +29,9 @@ export async function GET() {
   }
 
   const db = getDb();
-  const user = db.users.find(u => u.id === (session.user as any).id);
+  const sessionUserEmail = session.user.email?.toLowerCase().trim();
+  const sessionUserId = (session.user as any).id;
+  const user = db.users.find(u => (sessionUserId && u.id === sessionUserId) || (sessionUserEmail && u.email?.toLowerCase().trim() === sessionUserEmail));
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
   const agency = db.agencies.find(a => a.id === user.agencyId);
@@ -96,6 +99,14 @@ export async function GET() {
       agency.timezone = 'Asia/Kolkata';
       modified = true;
     }
+    if (!agency.fontFamily) {
+      agency.fontFamily = 'montserrat';
+      modified = true;
+    }
+    if (!agency.colorScheme) {
+      agency.colorScheme = 'emerald';
+      modified = true;
+    }
     if (!agency.notificationPrefs) {
       agency.notificationPrefs = {
         'Support ticket updates': { inApp: true, email: true },
@@ -136,7 +147,9 @@ export async function PUT(req: Request) {
 
   const data = await req.json();
   const db = getDb();
-  const user = db.users.find(u => u.id === (session.user as any).id);
+  const sessionUserEmail = session.user.email?.toLowerCase().trim();
+  const sessionUserId = (session.user as any).id;
+  const user = db.users.find(u => (sessionUserId && u.id === sessionUserId) || (sessionUserEmail && u.email?.toLowerCase().trim() === sessionUserEmail));
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
   const agencyIndex = db.agencies.findIndex(a => a.id === user.agencyId);
@@ -144,7 +157,8 @@ export async function PUT(req: Request) {
 
   const { action } = data;
   const userRole = (user.role || '').toUpperCase();
-  const canManageUsers = ['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(userRole) || user.email === 'aditya@agentladders.com' || user.email === 'admin@agentladders.com';
+  const isSuperAdmin = userRole === 'SUPER_ADMIN' || user.email === 'aditya@agentladders.com' || user.email === 'admin@agentladders.com';
+  const canManageUsers = ['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(userRole) || isSuperAdmin;
   let invitedTemporaryPassword: string | undefined = undefined;
 
   if (action === 'updateAgency') {
@@ -166,6 +180,9 @@ export async function PUT(req: Request) {
     user.image = data.avatar || '';
   }
   else if (action === 'updatePlan') {
+    if (!canManageBilling(userRole, isSuperAdmin)) {
+      return NextResponse.json({ error: 'Forbidden: Only the Agency Owner can modify subscription plans.' }, { status: 403 });
+    }
     db.agencies[agencyIndex].plan = data.plan;
   }
   else if (action === 'updateBranding') {
@@ -195,12 +212,18 @@ export async function PUT(req: Request) {
     db.agencies[agencyIndex].notificationPrefs = data.notificationPrefs;
   }
   else if (action === 'inviteUser') {
-    if (!canManageUsers) {
-      return NextResponse.json({ error: 'Forbidden: Insufficient permissions to invite team members' }, { status: 403 });
+    if (!canInviteUsers(userRole, isSuperAdmin)) {
+      return NextResponse.json({ error: `Forbidden: ${userRole} accounts cannot invite team members. Only the Agency Owner and Managers have permission.` }, { status: 403 });
     }
     if (!isValidEmail(data.email)) {
       return NextResponse.json({ error: 'Please provide a valid email address' }, { status: 400 });
     }
+    const cleanRole = (data.role || 'AGENT').toUpperCase().trim();
+    const allowedRoles = getAllowedInviteRoles(userRole, isSuperAdmin);
+    if (!allowedRoles.includes(cleanRole as any)) {
+      return NextResponse.json({ error: `Forbidden: As a ${userRole}, you can only invite: ${allowedRoles.join(', ')}.` }, { status: 403 });
+    }
+
     const cleanName = sanitizeString(data.name || 'Team Member');
     const existing = db.users.find(u => u.email.toLowerCase() === data.email.toLowerCase());
     if (existing) return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
@@ -215,7 +238,7 @@ export async function PUT(req: Request) {
       agencyId: user.agencyId,
       name: cleanName,
       email: data.email.toLowerCase().trim(),
-      role: data.role || 'MANAGER',
+      role: cleanRole,
       password: defaultPassword,
       passwordHash: defaultPassword,
       twoFactorEnabled: false,
@@ -230,24 +253,33 @@ export async function PUT(req: Request) {
       agencyId: user.agencyId,
       userId: user.id,
       title: 'New Team Member Invited 👥',
-      message: `${cleanName} (${data.email}) was invited as ${data.role || 'MANAGER'}. Temporary password is ${temporaryPassword}.`,
+      message: `${cleanName} (${data.email}) was invited as ${cleanRole}. Temporary password is ${temporaryPassword}.`,
       type: 'info',
       read: false,
       createdAt: new Date().toISOString()
     });
   }
   else if (action === 'removeUser') {
-    if (!canManageUsers) {
-      return NextResponse.json({ error: 'Forbidden: Insufficient permissions' }, { status: 403 });
+    const cleanEmail = (data.email || '').toLowerCase().trim();
+    const target = db.users.find(u => 
+      (u.id === data.userId || (cleanEmail && u.email?.toLowerCase().trim() === cleanEmail)) && 
+      (u.agencyId === user.agencyId || isSuperAdmin)
+    );
+    if (!target) {
+      return NextResponse.json({ error: 'User not found in your agency team' }, { status: 404 });
     }
-    if (data.userId === user.id) {
+
+    const check = canRemoveUser(userRole, target.role, isSuperAdmin);
+    if (!check.allowed) {
+      return NextResponse.json({ error: check.reason }, { status: 403 });
+    }
+
+    if (target.id === user.id) {
       return NextResponse.json({ error: 'You cannot remove your own account' }, { status: 400 });
     }
-    const targetIdx = db.users.findIndex(u => u.id === data.userId && u.agencyId === user.agencyId);
-    if (targetIdx === -1) {
-      return NextResponse.json({ error: 'User not found in your agency' }, { status: 404 });
-    }
-    const removedUserName = db.users[targetIdx].name;
+
+    const targetIdx = db.users.findIndex(u => u.id === target.id);
+    const removedUserName = target.name;
     db.users.splice(targetIdx, 1);
 
     db.notifications = db.notifications || [];
@@ -263,12 +295,34 @@ export async function PUT(req: Request) {
     });
   }
   else if (action === 'updateUserRole') {
-    if (!canManageUsers) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const cleanRole = (data.role || '').toUpperCase().trim();
+    const cleanEmail = (data.email || '').toLowerCase().trim();
+    const target = db.users.find(u => 
+      (u.id === data.userId || (cleanEmail && u.email?.toLowerCase().trim() === cleanEmail)) && 
+      (u.agencyId === user.agencyId || isSuperAdmin)
+    );
+    if (!target) {
+      return NextResponse.json({ error: 'User not found in your agency team' }, { status: 404 });
     }
-    const target = db.users.find(u => u.id === data.userId && u.agencyId === user.agencyId);
-    if (!target) return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    target.role = data.role;
+
+    const check = canUpdateUserRole(userRole, target.role, cleanRole, isSuperAdmin);
+    if (!check.allowed) {
+      return NextResponse.json({ error: check.reason }, { status: 403 });
+    }
+
+    target.role = cleanRole;
+
+    db.notifications = db.notifications || [];
+    db.notifications.unshift({
+      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      agencyId: user.agencyId,
+      userId: user.id,
+      title: 'Role Updated 🛡️',
+      message: `${target.name}'s role was updated to ${cleanRole}.`,
+      type: 'info',
+      read: false,
+      createdAt: new Date().toISOString()
+    });
   }
   else if (action === 'enable2FA') {
     user.twoFactorEnabled = true;

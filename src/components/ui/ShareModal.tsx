@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { generatePropertyPitchWhatsApp } from '@/lib/whatsapp-engine';
+import { formatINR } from '@/lib/formatters';
 
 export interface ShareModalProps {
   isOpen: boolean;
@@ -16,6 +18,16 @@ export interface ShareModalProps {
     publicToken?: string;
     privacyMode?: string;
     sharesCount?: number;
+    media?: Array<{ id?: string; url?: string; tag?: string; isCover?: boolean }>;
+    images?: string[];
+    image?: string;
+    bhk?: string;
+    carpetAreaSqFt?: number | string;
+    furnishing?: string;
+    parking?: string | number;
+    locality?: string;
+    city?: string;
+    [key: string]: any;
   } | null;
   propertyId?: string;
   propertyTitle?: string;
@@ -72,7 +84,9 @@ export function ShareModal({
   const token = activeProperty.publicToken || activeProperty.id;
   const shareUrl = `${origin}/p/${token}`;
 
-  const summary = `${activeProperty.title} - ${activeProperty.type || 'Property'} in ${activeProperty.location || 'Prime Location'}${activeProperty.price ? ` ($${activeProperty.price.toLocaleString()})` : ''} | ${activeProperty.bedrooms || 3} Beds, ${activeProperty.bathrooms || 2} Baths.`;
+  const [pitchCopied, setPitchCopied] = useState(false);
+
+  const summary = `${activeProperty.title} - ${activeProperty.type || 'Property'} in ${activeProperty.location || 'Prime Location'}${activeProperty.price ? ` (${formatINR(activeProperty.price)})` : ''} | ${activeProperty.bedrooms || 3} Beds, ${activeProperty.bathrooms || 2} Baths.`;
 
   const changePrivacyMode = async (mode: 'Public' | 'Restricted' | 'Private') => {
     setPrivacyModeState(mode);
@@ -112,8 +126,18 @@ export function ShareModal({
 
   const handleWhatsApp = () => {
     recordShare('WhatsApp');
-    const text = encodeURIComponent(`Hi! Take a look at this property listing:\n\n🏡 *${activeProperty.title}*\n📍 ${activeProperty.location || ''}\n💰 ${activeProperty.price ? `$${activeProperty.price.toLocaleString()}` : 'Price on Request'}\n\n👉 Full details & tour booking: ${shareUrl}`);
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    const msg = generatePropertyPitchWhatsApp(activeProperty as any);
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleCopyPitch = () => {
+    recordShare('Copy WhatsApp Pitch');
+    const msg = generatePropertyPitchWhatsApp(activeProperty as any);
+    if (typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText(msg);
+      setPitchCopied(true);
+      setTimeout(() => setPitchCopied(false), 2500);
+    }
   };
 
   const handleTelegram = () => {
@@ -237,7 +261,7 @@ export function ShareModal({
             <div>
               <div style={{ fontWeight: 700, fontSize: '15px', color: '#1e3a8a' }}>{activeProperty.title}</div>
               <div style={{ fontSize: '12px', color: '#3b82f6', marginTop: '2px' }}>
-                📍 {activeProperty.location || 'Prime Location'} &middot; {activeProperty.price ? `$${activeProperty.price.toLocaleString()}` : 'Price on Request'}
+                📍 {activeProperty.location || 'Prime Location'} &middot; {activeProperty.price ? formatINR(activeProperty.price) : 'Price on Request'}
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
@@ -358,6 +382,30 @@ export function ShareModal({
                 {copied ? '✓ Copied' : 'Copy'}
               </button>
             </div>
+            <div style={{ marginTop: '10px' }}>
+              <button
+                type="button"
+                onClick={handleCopyPitch}
+                style={{
+                  width: '100%',
+                  padding: '9px 14px',
+                  backgroundColor: pitchCopied ? '#10b981' : '#f0fdf4',
+                  color: pitchCopied ? '#ffffff' : '#166534',
+                  border: pitchCopied ? '1px solid #059669' : '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '12.5px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {pitchCopied ? '✓ WhatsApp Pitch Copied with Details, Photo & URL!' : '📋 Copy Formatted WhatsApp Pitch (with Photo & URL)'}
+              </button>
+            </div>
           </div>
 
           {/* Channel Grid */}
@@ -370,6 +418,7 @@ export function ShareModal({
               <button
                 type="button"
                 onClick={handleWhatsApp}
+                title="Send formatted pitch on WhatsApp with photo & URL"
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -378,16 +427,17 @@ export function ShareModal({
                   gap: '6px',
                   padding: '14px 10px',
                   borderRadius: '10px',
-                  border: '1px solid #bbf7d0',
+                  border: '1.5px solid #86efac',
                   backgroundColor: '#f0fdf4',
                   color: '#15803d',
-                  fontWeight: 600,
+                  fontWeight: 700,
                   fontSize: '13px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(34, 197, 94, 0.12)'
                 }}
               >
                 <span style={{ fontSize: '24px' }}>💬</span>
-                WhatsApp
+                WhatsApp Pitch
               </button>
 
               {/* Telegram */}

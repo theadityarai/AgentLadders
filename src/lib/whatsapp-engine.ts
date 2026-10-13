@@ -30,42 +30,67 @@ export function generatePropertyPitchWhatsApp(property: {
   areaSqFt?: number | string;
   price: number;
   purpose?: string;
+  listingType?: string;
   furnishing?: string;
   vastuFacing?: string;
+  facing?: string;
   floor?: string;
   parking?: string | number;
   reraId?: string;
   possessionStatus?: string;
-  media?: Array<{ tag: string }>;
+  media?: Array<{ id?: string; url?: string; tag?: string; isCover?: boolean }>;
+  images?: string[];
+  image?: string;
   videoTourUrl?: string;
   publicToken?: string;
   id: string;
+  [key: string]: any;
 }, agencyName = 'AgentLadders Realty', agentPhone = '+91 98200 12345'): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://agentladders.com';
   const publicUrl = `${origin}/p/${property.publicToken || property.id}`;
   
+  // Resolve primary property image (cover photo, first media, or images array)
+  let primaryImageUrl = '';
+  if (property.image && typeof property.image === 'string' && property.image.trim()) {
+    primaryImageUrl = property.image.trim();
+  } else if (Array.isArray(property.images) && property.images.length > 0 && typeof property.images[0] === 'string' && property.images[0].trim()) {
+    primaryImageUrl = property.images[0].trim();
+  } else if (Array.isArray(property.media) && property.media.length > 0) {
+    const cover = property.media.find(m => m.isCover && m.url) || property.media.find(m => m.url);
+    if (cover?.url) {
+      primaryImageUrl = cover.url.trim();
+    }
+  }
+
+  // Fallback to high quality architectural exterior photo if none exists
+  if (!primaryImageUrl) {
+    primaryImageUrl = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80';
+  } else if (primaryImageUrl.startsWith('/')) {
+    primaryImageUrl = `${origin}${primaryImageUrl}`;
+  }
+
   const bhk = property.bhk || `${property.bedrooms || 3} BHK`;
-  const location = property.locality ? `${property.locality}, ${property.city || 'Mumbai'}` : (property.location || 'Prime Location');
+  const location = property.locality 
+    ? `${property.locality}, ${property.city || 'Mumbai'}` 
+    : (property.location || 'Prime Location');
   const carpetArea = property.carpetAreaSqFt || (property.areaSqFt ? Math.round(Number(property.areaSqFt) * 0.8) : 1250);
   const priceFormatted = formatINR(property.price);
-
-  const tags = property.media && property.media.length > 0
-    ? Array.from(new Set(property.media.map(m => m.tag))).join(', ')
-    : 'Living Hall, Modular Kitchen, Master Suite, Spa Washroom, Balcony';
+  const purpose = property.purpose || property.listingType || 'For Sale';
+  const vastu = property.vastuFacing && property.vastuFacing !== 'Not Applicable' ? property.vastuFacing : property.facing;
 
   let msg = `✨ *EXCLUSIVE PROPERTY DETAILS* ✨\n\n` +
-    `🏢 *${property.title}*\n` +
+    `🏢 *${property.title}*\n\n` +
     `📍 *Location*: ${location}\n` +
+    `💰 *Quoting Price*: ${priceFormatted} (${purpose})\n` +
     `🛏️ *Configuration*: ${bhk} (${property.furnishing || 'Semi-Furnished'})\n` +
     `📐 *Carpet Area*: ${carpetArea} sq.ft. (RERA Standard)\n` +
     (property.floor ? `🏢 *Floor*: ${property.floor}\n` : '') +
-    (property.vastuFacing && property.vastuFacing !== 'Not Applicable' ? `🧭 *Vastu*: ${property.vastuFacing}\n` : '') +
+    (vastu && vastu !== 'Not Applicable' ? `🧭 *Vastu / Facing*: ${vastu}\n` : '') +
     (property.parking ? `🚗 *Car Parking*: ${property.parking}\n` : '') +
-    `💰 *Quoting Price*: ${priceFormatted} (${property.purpose || 'For Sale'})\n` +
     (property.possessionStatus ? `🟢 *Possession*: ${property.possessionStatus}\n` : '') +
     (property.reraId ? `🏛️ *RERA Reg*: ${property.reraId}\n` : '') +
-    `\n📸 *Tagged Photos*: ${tags}\n` +
     (property.videoTourUrl ? `🎥 *4K Video Walkthrough*: ${property.videoTourUrl}\n` : '') +
+    `\n🖼️ *Property Photo*:\n${primaryImageUrl}\n` +
     `\n👉 *View Complete Interactive Brochure*:\n${publicUrl}\n\n` +
     `_To arrange an exclusive private site visit, please contact:_\n` +
     `*${agencyName}* | 📞 ${agentPhone}`;

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { formatINR } from '@/lib/formatters';
+import { generatePropertyPitchWhatsApp } from '@/lib/whatsapp-engine';
 
 interface PublicPropertyMedia {
   id: string;
@@ -29,6 +30,14 @@ interface PublicProperty {
   bhk?: string;
   city?: string;
   locality?: string;
+  location?: string;
+  publicToken?: string;
+  furnishing?: string;
+  parking?: string | number;
+  reraId?: string;
+  possessionStatus?: string;
+  vastuFacing?: string;
+  videoTourUrl?: string;
 }
 
 export default function PublicPropertyPage() {
@@ -109,9 +118,23 @@ export default function PublicPropertyPage() {
 
   const handleWhatsApp = () => {
     if (!property) return;
-    const msg = `Hi, I'm interested in the property: ${property.title} (${formatINR(property.price || 0)}). Is it still available?`;
-    const phone = property.agentPhone ? property.agentPhone.replace(/\\D/g, '') : '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://agentladders.com';
+    const publicUrl = `${origin}/p/${property.publicToken || property.id}`;
+    const priceText = property.price ? formatINR(property.price) : 'Price on Request';
+    const locationText = property.locality ? `${property.locality}, ${property.city || ''}` : (property.location || '');
+    const msg = `Hi ${property.agentName || 'Team'}, I am interested in your property listing:\n\n🏡 *${property.title}*\n💰 *Price*: ${priceText}\n📍 *Location*: ${locationText}\n\n🔗 *Showcase Link*:\n${publicUrl}\n\nPlease share floor plans and schedule a private site visit.`;
+    const phone = property.agentPhone ? property.agentPhone.replace(/\D/g, '') : '';
     window.open(`https://wa.me/${phone ? (phone.startsWith('91') ? phone : '91'+phone) : ''}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleShareToWhatsApp = () => {
+    if (!property) return;
+    const msg = generatePropertyPitchWhatsApp(
+      property as any,
+      property.agencyName || 'AgentLadders Realty',
+      property.agentPhone || '+91 98200 98765'
+    );
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   // Normalize media
@@ -186,8 +209,31 @@ export default function PublicPropertyPage() {
         <div style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', color: '#fff', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', pointerEvents: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
           {property.agencyName || 'Exclusive Listing'}
         </div>
-        <div style={{ backgroundColor: property.status === 'Available' ? '#10b981' : '#f59e0b', color: '#fff', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, pointerEvents: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
-          {property.status}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', pointerEvents: 'auto' }}>
+          <button
+            type="button"
+            onClick={handleShareToWhatsApp}
+            title="Share property listing on WhatsApp with photo & URL"
+            style={{
+              backgroundColor: 'rgba(37, 211, 102, 0.95)',
+              color: '#ffffff',
+              border: 'none',
+              padding: '6px 14px',
+              borderRadius: 20,
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            }}
+          >
+            <span>💬</span> Share
+          </button>
+          <div style={{ backgroundColor: property.status === 'Available' ? '#10b981' : '#f59e0b', color: '#fff', padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+            {property.status}
+          </div>
         </div>
       </div>
 
@@ -492,6 +538,14 @@ export default function PublicPropertyPage() {
           style={{ flex: 1, padding: '12px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
         >
           <span>💬</span> WhatsApp
+        </button>
+        <button 
+          type="button"
+          onClick={handleShareToWhatsApp}
+          title="Share property listing on WhatsApp with photo & URL"
+          style={{ padding: '12px 16px', backgroundColor: '#f0fdf4', color: '#15803d', border: '1.5px solid #bbf7d0', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+        >
+          <span>📤</span> Share
         </button>
         <button 
           onClick={() => {

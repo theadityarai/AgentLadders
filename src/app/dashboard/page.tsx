@@ -28,20 +28,6 @@ interface FollowUpItem {
   status: string;
 }
 
-interface MatchItem {
-  leadId: string;
-  leadName: string;
-  leadPhone: string;
-  leadBudget: string;
-  propertyId: string;
-  propertyTitle: string;
-  propertyPrice: string;
-  propertyLocation: string;
-  propertyBhk: string;
-  matchScore: number;
-  matchReasons: string[];
-}
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatINR(val: number) {
   if (val >= 10000000) return `₹${(val / 10000000).toFixed(1)} Cr`;
@@ -54,7 +40,6 @@ export default function DashboardPage() {
   const [visits, setVisits] = useState<VisitItem[]>([]);
   const [isTodayVisits, setIsTodayVisits] = useState(true);
   const [leads, setLeads] = useState<FollowUpItem[]>([]);
-  const [matches, setMatches] = useState<MatchItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,9 +55,8 @@ export default function DashboardPage() {
   useEffect(() => {
     Promise.all([
       fetch('/api/site-visits').then(r => r.json()).catch(() => ({})),
-      fetch('/api/leads').then(r => r.json()).catch(() => ({})),
-      fetch('/api/magic-match').then(r => r.json()).catch(() => ({}))
-    ]).then(([visitsData, leadsData, matchData]) => {
+      fetch('/api/leads').then(r => r.json()).catch(() => ({}))
+    ]).then(([visitsData, leadsData]) => {
       const todayStr = new Date().toISOString().split('T')[0];
       
       if (visitsData.siteVisits) {
@@ -91,18 +75,8 @@ export default function DashboardPage() {
       if (leadsData.leads) {
         setLeads(leadsData.leads.slice(0, 5));
       }
-      if (matchData.matches) {
-        setMatches(matchData.matches.slice(0, 3));
-      }
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
-
-  const openWa = (phone?: string, text?: string) => {
-    if (!phone) return;
-    const clean = phone.replace(/\D/g, '');
-    const num = clean.startsWith('91') ? clean : `91${clean}`;
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(text || '')}`, '_blank');
-  };
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
@@ -123,7 +97,7 @@ export default function DashboardPage() {
       <div className="responsive-header">
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-            {greeting}, {firstName} <InfoTooltip text="Your daily command center. AI matches, site visits, and priority follow-ups all in one place." />
+            {greeting}, {firstName} <InfoTooltip text="Your daily command center. Site visits and priority follow-ups all in one place." />
           </h1>
           <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
             {isTodayVisits ? `You have ${visits.length} site visits and ${leads.length} follow-ups scheduled for today.` : `You have ${visits.length} upcoming site visits and ${leads.length} active follow-ups.`}
@@ -143,43 +117,6 @@ export default function DashboardPage() {
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
           
-          {/* Magic Match (AI feature highlight) */}
-          {matches.length > 0 && (
-            <div style={{ backgroundColor: '#fff', border: '1px solid var(--primary)', borderRadius: 12, padding: 24, boxShadow: '0 10px 30px rgba(var(--primary-rgb), 0.08)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -40, right: -40, width: 120, height: 120, background: 'radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }} />
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                <span style={{ fontSize: 18 }}>✨</span>
-                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>Smart Matches</h3>
-                <span style={{ fontSize: 11, backgroundColor: 'var(--primary-light)', color: 'var(--primary-text)', padding: '2px 8px', borderRadius: 10, fontWeight: 700 }}>AI Suggested</span>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {matches.map((m, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: '16px', borderRadius: 12, border: '1px solid var(--border)', flexWrap: 'wrap', gap: 12 }}>
-                    <div style={{ flex: '1 1 240px' }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{m.leadName} ➔ {m.propertyTitle}</div>
-                      <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
-                        {m.propertyBhk} in {m.propertyLocation} • {m.propertyPrice}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--primary)' }}>{m.matchScore}%</span>
-                        <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Match</span>
-                      </div>
-                      <button 
-                        onClick={() => openWa(m.leadPhone, `Hi ${m.leadName}, I have a perfect property for you: ${m.propertyTitle} in ${m.propertyLocation}. Let me know if you'd like details!`)}
-                        style={{ backgroundColor: '#25d366', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
-                      >
-                        💬 Pitch
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Today's Follow-ups */}
           <div style={{ backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>

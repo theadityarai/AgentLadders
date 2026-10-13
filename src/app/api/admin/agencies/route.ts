@@ -131,6 +131,8 @@ export async function POST(req: Request) {
       bhkOptions: DEFAULT_BHK_OPTIONS,
       propertyTypes: DEFAULT_PROPERTY_TYPES,
       leadSources: DEFAULT_LEAD_SOURCES,
+      fontFamily: 'montserrat',
+      colorScheme: 'emerald',
       notificationPrefs: {
         'New lead assigned': { inApp: true, email: true },
         'Task reminder': { inApp: true, email: false },

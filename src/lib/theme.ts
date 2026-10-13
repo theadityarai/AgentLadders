@@ -25,6 +25,15 @@ export interface ColorSchemeOption {
 
 export const FONT_OPTIONS: FontOption[] = [
   {
+    id: 'montserrat',
+    name: 'Montserrat',
+    category: 'Urban Metropolitan',
+    tagline: 'Bold, architectural presence reminiscent of iconic city high-rise branding',
+    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    previewHeading: 'Bandra West Coastal Horizon',
+    previewBody: 'Prime arterial connectivity, exclusive concierge desk, and 4 reserved basement parkings.'
+  },
+  {
     id: 'jakarta',
     name: 'Plus Jakarta Sans',
     category: 'Modern Corporate',
@@ -59,15 +68,6 @@ export const FONT_OPTIONS: FontOption[] = [
     fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     previewHeading: 'Prestige Boulevard Smart Homes',
     previewBody: 'Designed for young high-net-worth families with integrated home automation and clubhouse.'
-  },
-  {
-    id: 'montserrat',
-    name: 'Montserrat',
-    category: 'Urban Metropolitan',
-    tagline: 'Bold, architectural presence reminiscent of iconic city high-rise branding',
-    fontFamily: "'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    previewHeading: 'Bandra West Coastal Horizon',
-    previewBody: 'Prime arterial connectivity, exclusive concierge desk, and 4 reserved basement parkings.'
   },
   {
     id: 'playfair',
@@ -240,14 +240,14 @@ export function applyTheme(fontId: string, colorId: string) {
 
 export function getStoredTheme(): { fontId: string; colorId: string } {
   if (typeof window === 'undefined') {
-    return { fontId: 'jakarta', colorId: 'emerald' };
+    return { fontId: 'montserrat', colorId: 'emerald' };
   }
 
   try {
-    const fontId = localStorage.getItem('agentladders_font') || 'jakarta';
+    const fontId = localStorage.getItem('agentladders_font') || 'montserrat';
     const colorId = localStorage.getItem('agentladders_color') || 'emerald';
     return { fontId, colorId };
   } catch {
-    return { fontId: 'jakarta', colorId: 'emerald' };
+    return { fontId: 'montserrat', colorId: 'emerald' };
   }
 }

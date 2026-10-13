@@ -93,7 +93,7 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState<Record<string, {inApp: boolean; email: boolean}>>({});
 
   // Theme & Appearance State
-  const [selectedFont, setSelectedFont] = useState('jakarta');
+  const [selectedFont, setSelectedFont] = useState('montserrat');
   const [selectedColor, setSelectedColor] = useState('emerald');
   const [savingTheme, setSavingTheme] = useState(false);
 
@@ -118,7 +118,7 @@ export default function SettingsPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: 'MANAGER' });
   const [invitedUserResult, setInvitedUserResult] = useState<{ name: string; email: string; role: string; password: string } | null>(null);
-  const [userToDelete, setUserToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{ id: string; name: string; email?: string } | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [configModal, setConfigModal] = useState<{
@@ -259,10 +259,10 @@ export default function SettingsPage() {
   };
 
   const handleResetTheme = () => {
-    setSelectedFont('jakarta');
+    setSelectedFont('montserrat');
     setSelectedColor('emerald');
-    applyTheme('jakarta', 'emerald');
-    showToast('info', 'Reset to Plus Jakarta Sans & Emerald theme.', 'Default Restored');
+    applyTheme('montserrat', 'emerald');
+    showToast('info', 'Reset to Montserrat & Emerald Prosperity theme.', 'Default Restored');
   };
 
   const handleSaveAgencyLogo = async (logoVal?: string) => {
@@ -410,36 +410,52 @@ export default function SettingsPage() {
   const handleConfirmRemoveUser = async () => {
     if (!userToDelete) return;
     setSaving(true);
-    const res = await fetch('/api/settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'removeUser', userId: userToDelete.id })
-    });
-    if (res.ok) {
-      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
-      showToast('success', `Removed ${userToDelete.name} from team.`, 'User Removed');
-    } else {
-      const err = await res.json();
-      showToast('error', err.error || 'Failed to remove user', 'Error');
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'removeUser', userId: userToDelete.id, email: userToDelete.email })
+      });
+      if (res.ok) {
+        setUsers(prev => prev.filter(u => u.id !== userToDelete.id && (!userToDelete.email || u.email?.toLowerCase() !== userToDelete.email.toLowerCase())));
+        showToast('success', `Removed ${userToDelete.name} from team.`, 'User Removed');
+      } else {
+        const err = await res.json().catch(() => null);
+        showToast('error', err?.error || 'Failed to remove user', 'Error');
+      }
+    } catch {
+      showToast('error', 'Network error while removing user', 'Error');
+    } finally {
+      setUserToDelete(null);
+      setSaving(false);
     }
-    setUserToDelete(null);
-    setSaving(false);
   };
 
-  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+  const handleUpdateUserRole = async (targetUser: { id: string; email?: string; name?: string }, newRole: string) => {
     setSaving(true);
-    const res = await fetch('/api/settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'updateUserRole', userId, role: newRole })
-    });
-    if (res.ok) {
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
-      showToast('success', 'User role updated successfully.', 'Role Updated');
-    } else {
-      showToast('error', 'Failed to update user role.', 'Error');
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateUserRole', userId: targetUser.id, email: targetUser.email, role: newRole })
+      });
+      if (res.ok) {
+        const resData = await res.json().catch(() => null);
+        if (resData?.users) {
+          setUsers(resData.users);
+        } else {
+          setUsers(prev => prev.map(u => (u.id === targetUser.id || (targetUser.email && u.email?.toLowerCase() === targetUser.email.toLowerCase())) ? { ...u, role: newRole } : u));
+        }
+        showToast('success', `${targetUser.name || 'User'} role updated to ${newRole}.`, 'Role Updated');
+      } else {
+        const err = await res.json().catch(() => null);
+        showToast('error', err?.error || 'Failed to update user role.', 'Error');
+      }
+    } catch {
+      showToast('error', 'Network error while updating user role.', 'Error');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleSendTestNotification = async () => {
@@ -1118,6 +1134,27 @@ export default function SettingsPage() {
 
           {activeTab === 'users' && (
             <div className={styles.formSection}>
+              {/* Permission Notice Banner for Admin, Agent, Read-Only */}
+              {!['OWNER', 'MANAGER', 'SUPER_ADMIN'].includes((currentUser?.role || '').toUpperCase()) && (
+                <div style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 12,
+                  padding: '12px 16px',
+                  marginBottom: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  fontSize: 13,
+                  color: '#475569'
+                }}>
+                  <span style={{ fontSize: 16 }}>🔒</span>
+                  <div>
+                    <strong style={{ color: '#0f172a' }}>Directory View-Only Mode:</strong> Your account role (<strong>{currentUser?.role || 'AGENT'}</strong>) does not have permission to modify team members or permissions. Role management is restricted to the <strong>Agency Owner</strong> and <strong>Managers</strong>.
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
                 <div>
                   <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Team & Permissions</h2>
@@ -1125,14 +1162,34 @@ export default function SettingsPage() {
                     Manage access credentials, role permissions, and active broker accounts for your agency.
                   </p>
                 </div>
-                <Button variant="primary" onClick={() => setShowInviteModal(true)} disabled={saving}>
-                  + Invite Team Member
-                </Button>
+                {['OWNER', 'MANAGER', 'SUPER_ADMIN'].includes((currentUser?.role || '').toUpperCase()) && (
+                  <Button variant="primary" onClick={() => setShowInviteModal(true)} disabled={saving}>
+                    + Invite Team Member
+                  </Button>
+                )}
               </div>
 
               <div className={styles.userList}>
                 {users.map((user) => {
                   const isCurrent = user.id === currentUser?.id || user.email === currentUser?.email;
+                  const currentRole = (currentUser?.role || '').toUpperCase();
+                  const targetRole = (user.role || '').toUpperCase();
+                  const isOwner = targetRole === 'OWNER';
+
+                  // RBAC Evaluators for UI controls:
+                  // 1. Owner can never be modified or removed by anyone
+                  // 2. Manager can modify Admin, Agent, Read-Only. Cannot modify Owner or other Managers.
+                  // 3. Admin, Agent, Read-Only cannot modify any roles or remove anyone.
+                  const canEditThisUser = !isOwner && !isCurrent && (
+                    ['OWNER', 'SUPER_ADMIN'].includes(currentRole) ||
+                    (currentRole === 'MANAGER' && ['ADMIN', 'AGENT', 'READONLY'].includes(targetRole))
+                  );
+
+                  const canRemoveThisUser = !isOwner && !isCurrent && (
+                    ['OWNER', 'SUPER_ADMIN'].includes(currentRole) ||
+                    (currentRole === 'MANAGER' && ['ADMIN', 'AGENT', 'READONLY'].includes(targetRole))
+                  );
+
                   return (
                     <div key={user.id} className={styles.userRow} style={{ justifyContent: 'space-between', gap: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -1147,16 +1204,21 @@ export default function SettingsPage() {
                                 You
                               </span>
                             )}
+                            {isOwner && (
+                              <span style={{ fontSize: 10.5, fontWeight: 800, padding: '2px 7px', borderRadius: 6, backgroundColor: '#fef3c7', color: '#92400e', letterSpacing: '0.05em' }}>
+                                OWNER
+                              </span>
+                            )}
                           </div>
                           <span style={{ fontSize: 13, color: '#64748b' }}>{user.email}</span>
                         </div>
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        {!isCurrent ? (
+                        {canEditThisUser ? (
                           <select
                             value={user.role}
-                            onChange={(e) => handleUpdateUserRole(user.id, e.target.value)}
+                            onChange={(e) => handleUpdateUserRole(user, e.target.value)}
                             style={{
                               padding: '6px 10px',
                               borderRadius: 8,
@@ -1168,19 +1230,28 @@ export default function SettingsPage() {
                               cursor: 'pointer'
                             }}
                           >
-                            <option value="AGENT">Agent (Standard)</option>
-                            <option value="MANAGER">Manager (Full Agency)</option>
-                            <option value="ADMIN">Admin (Billing & Team)</option>
+                            {/* Manager can only assign Admin, Agent, Read-Only */}
+                            {['OWNER', 'SUPER_ADMIN'].includes(currentRole) && (
+                              <option value="MANAGER">Manager (Full Agency)</option>
+                            )}
+                            <option value="ADMIN">Admin (Billing & Operations)</option>
+                            <option value="AGENT">Agent (Standard Broker)</option>
                             <option value="READONLY">Read-Only Agent</option>
                           </select>
                         ) : (
-                          <span className={styles.roleBadge}>{user.role}</span>
+                          <span className={styles.roleBadge} style={{
+                            backgroundColor: isOwner ? '#fef3c7' : undefined,
+                            color: isOwner ? '#92400e' : undefined,
+                            fontWeight: isOwner ? 700 : undefined
+                          }}>
+                            {user.role}
+                          </span>
                         )}
 
-                        {!isCurrent && (
+                        {canRemoveThisUser && (
                           <button
                             type="button"
-                            onClick={() => setUserToDelete({ id: user.id, name: user.name })}
+                            onClick={() => setUserToDelete({ id: user.id, name: user.name, email: user.email })}
                             title="Remove from agency"
                             style={{
                               border: '1px solid #fecaca',
@@ -2100,8 +2171,11 @@ export default function SettingsPage() {
                   onChange={e => setInviteForm({ ...inviteForm, role: e.target.value })}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
                 >
-                  <option value="MANAGER">Manager (Full Agency Access)</option>
-                  <option value="ADMIN">Admin (Settings & Billing Access)</option>
+                  {['OWNER', 'SUPER_ADMIN'].includes((currentUser?.role || '').toUpperCase()) && (
+                    <option value="MANAGER">Manager (Full Agency Access)</option>
+                  )}
+                  <option value="ADMIN">Admin (Billing & Operations Access)</option>
+                  <option value="AGENT">Agent (Standard Broker Access)</option>
                   <option value="READONLY">Read-Only Agent</option>
                 </select>
               </div>
