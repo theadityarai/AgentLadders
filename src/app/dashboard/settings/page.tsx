@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { SearchBar } from '@/components/ui/SearchBar';
 import { FONT_OPTIONS, COLOR_SCHEMES, applyTheme, getStoredTheme } from '@/lib/theme';
 import { 
   DEFAULT_BHK_OPTIONS, 
@@ -1806,33 +1807,12 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Real-time search filter */}
-                  <div style={{ position: 'relative', width: '100%', maxWidth: 320 }}>
-                    <input 
-                      type="text"
-                      value={configSearch}
-                      onChange={e => setConfigSearch(e.target.value)}
-                      placeholder="🔍 Quick search configs..."
-                      style={{
-                        width: '100%',
-                        padding: '9px 32px 9px 12px',
-                        borderRadius: 10,
-                        border: '1.5px solid #cbd5e1',
-                        fontSize: 13.5,
-                        outline: 'none',
-                        backgroundColor: '#fff',
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                    {configSearch && (
-                      <button 
-                        type="button" 
-                        onClick={() => setConfigSearch('')}
-                        style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 14 }}
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
+                  <SearchBar
+                    value={configSearch}
+                    onChange={setConfigSearch}
+                    placeholder="Quick search configs..."
+                    maxWidth={320}
+                  />
                 </div>
 
                 {/* Organized Category Tabs / Switcher */}

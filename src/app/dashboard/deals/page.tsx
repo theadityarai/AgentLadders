@@ -8,6 +8,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
+import { SearchBar } from '@/components/ui/SearchBar';
 import { 
   EditIcon, 
   TrashIcon, 
@@ -589,16 +590,12 @@ export default function DealsPage() {
             </select>
           </div>
 
-          <div style={{ position: 'relative', minWidth: 200, maxWidth: 280, flex: 1 }}>
-            <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
-            <input 
-              type="text"
-              placeholder="Search deals, clients, properties..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
-            />
-          </div>
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search deals, clients, properties..."
+            maxWidth={280}
+          />
         </div>
       </div>
 

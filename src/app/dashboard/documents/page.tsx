@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { SearchBar } from '@/components/ui/SearchBar';
 
 interface DocumentItem {
   id: string;
@@ -259,12 +260,11 @@ export default function DocumentsPage() {
 
       {/* Search */}
       <div style={{ marginBottom: 20 }}>
-        <input 
-          type="text"
-          placeholder="Search documents by name or type..."
+        <SearchBar
           value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{ width: '100%', maxWidth: 320, padding: '10px 16px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', backgroundColor: '#fff' }}
+          onChange={setSearch}
+          placeholder="Search documents by name or type..."
+          maxWidth={320}
         />
       </div>
 

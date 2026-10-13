@@ -17,6 +17,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
+import { SearchBar } from '@/components/ui/SearchBar';
 import { 
   EditIcon, 
   TrashIcon, 
@@ -915,16 +916,12 @@ export default function LeadsPage() {
               </select>
             </div>
           </div>
-        <div style={{ position: 'relative', minWidth: 200, flex: '1 1 auto', maxWidth: 280 }}>
-          <SearchIcon size={14} color="#94a3b8" style={{ position: 'absolute', left: 12, top: 11 }} />
-          <input 
-            type="text"
-            placeholder="Search name, phone, source..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ padding: '8px 12px 8px 34px', borderRadius: 20, border: '1px solid var(--border)', fontSize: 13, outline: 'none', width: '100%' }}
-          />
-        </div>
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Search name, phone, source..."
+          maxWidth={280}
+        />
       </div>
     </div>
 

@@ -17,6 +17,7 @@ import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ShareModal } from '@/components/ui/ShareModal';
+import { SearchBar } from '@/components/ui/SearchBar';
 import {
   HomeIcon,
   BuildingIcon,
@@ -1311,12 +1312,11 @@ export default function PropertiesPage() {
 
         {/* Search and Status Dropdown */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input 
-            type="text" 
-            placeholder="Search by title, location, BHK..." 
+          <SearchBar 
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{ flex: '1 1 200px', maxWidth: 360, padding: '10px 14px', borderRadius: 8, border: '1px solid var(--border)', fontSize: 13.5, outline: 'none' }}
+            onChange={setSearch}
+            placeholder="Search by title, location, BHK..."
+            maxWidth={320}
           />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Filter by Status:</span>

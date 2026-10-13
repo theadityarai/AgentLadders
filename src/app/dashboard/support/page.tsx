@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { PlusIcon } from '@/components/icons/NavIcons';
+import { SearchBar } from '@/components/ui/SearchBar';
 
 interface SupportMessage {
   id: string;
@@ -1028,23 +1029,13 @@ export default function SupportPage() {
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <div style={{ flex: '1 1 300px', position: 'relative' }}>
-              <input
-                type="text"
-                placeholder="Search FAQs (e.g. WhatsApp, RERA, commission splits, tokens)..."
-                value={faqSearch}
-                onChange={e => setFaqSearch(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px 10px 36px',
-                  borderRadius: 8,
-                  border: '1px solid #cbd5e1',
-                  fontSize: 13.5,
-                  outline: 'none'
-                }}
-              />
-              <span style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }}>🔍</span>
-            </div>
+            <SearchBar
+              value={faqSearch}
+              onChange={setFaqSearch}
+              placeholder="Search FAQs (e.g. WhatsApp, RERA, commission splits, tokens)..."
+              maxWidth={420}
+              minWidth={280}
+            />
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {faqCategories.map(cat => (
                 <button
@@ -1165,23 +1156,13 @@ export default function SupportPage() {
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <div style={{ flex: '1 1 300px', position: 'relative' }}>
-              <input
-                type="text"
-                placeholder="Search contracts (e.g. rent, bayana, exclusive mandate, commercial lease, police verification)..."
-                value={contractSearch}
-                onChange={e => setContractSearch(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 14px 10px 36px',
-                  borderRadius: 8,
-                  border: '1px solid #cbd5e1',
-                  fontSize: 13.5,
-                  outline: 'none'
-                }}
-              />
-              <span style={{ position: 'absolute', left: 12, top: 11, color: '#94a3b8' }}>🔍</span>
-            </div>
+            <SearchBar
+              value={contractSearch}
+              onChange={setContractSearch}
+              placeholder="Search contracts (e.g. rent, bayana, exclusive mandate, commercial lease)..."
+              maxWidth={420}
+              minWidth={280}
+            />
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {contractCategories.map(cat => (
                 <button

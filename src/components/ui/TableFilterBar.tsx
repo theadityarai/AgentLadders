@@ -1,4 +1,5 @@
 import React from 'react';
+import { SearchBar } from '@/components/ui/SearchBar';
 
 export interface FilterOption {
   label: string;
@@ -40,58 +41,13 @@ export function TableFilterBar({
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', flex: 1, minWidth: 'min(280px, 100%)' }}>
         
         {/* Search Field */}
-        <div style={{ position: 'relative', minWidth: '240px', flex: '1 1 240px', maxWidth: '380px' }}>
-          <span style={{ position: 'absolute', left: '12px', top: '9px', color: '#94a3b8', fontSize: '14px' }}>
-            🔍
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={searchPlaceholder}
-            style={{
-              width: '100%',
-              padding: '8px 32px 8px 36px',
-              borderRadius: '8px',
-              border: '1px solid #cbd5e1',
-              backgroundColor: '#f8fafc',
-              fontSize: '13px',
-              color: '#0f172a',
-              outline: 'none',
-              transition: 'border-color 0.2s, background-color 0.2s',
-              boxSizing: 'border-box'
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = 'var(--primary)';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(var(--primary-rgb), 0.18)';
-              e.currentTarget.style.backgroundColor = '#ffffff';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = '#cbd5e1';
-              e.currentTarget.style.boxShadow = 'none';
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-            }}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange('')}
-              style={{
-                position: 'absolute',
-                right: '10px',
-                top: '9px',
-                background: 'none',
-                border: 'none',
-                color: '#94a3b8',
-                cursor: 'pointer',
-                fontSize: '12px',
-                padding: 0
-              }}
-              title="Clear search"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+        <SearchBar
+          value={searchQuery}
+          onChange={onSearchChange}
+          placeholder={searchPlaceholder}
+          maxWidth={380}
+          minWidth={240}
+        />
 
         {/* Dropdown Filters */}
         {filters.map((f) => (

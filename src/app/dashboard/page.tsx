@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ShareModal } from '@/components/ui/ShareModal';
+import { SearchBar } from '@/components/ui/SearchBar';
 import { openWhatsAppDirect } from '@/lib/whatsapp-engine';
 import { formatINR } from '@/lib/formatters';
 import {
@@ -760,57 +761,13 @@ export default function DashboardPage() {
 
               {/* Instant Search Bar & Status Dropdown */}
               <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
-                  <input
-                    type="text"
-                    placeholder="🔍 Search buyer name, phone, or location (e.g. Vikram, Worli, 98200)..."
-                    value={leadSearch}
-                    onChange={e => setLeadSearch(e.target.value)}
-                    style={{
-                      width: '100%',
-                      boxSizing: 'border-box',
-                      padding: '12px 16px 12px 42px',
-                      borderRadius: 12,
-                      border: '1.5px solid #cbd5e1',
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      outline: 'none',
-                      backgroundColor: '#f8fafc',
-                      transition: 'all 0.15s ease'
-                    }}
-                    onFocus={e => { e.currentTarget.style.borderColor = '#059669'; e.currentTarget.style.backgroundColor = '#ffffff'; }}
-                    onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-                  />
-                  <div style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: 16, pointerEvents: 'none' }}>
-                    <SearchIcon size={18} color="#64748b" />
-                  </div>
-                  {leadSearch && (
-                    <button
-                      onClick={() => setLeadSearch('')}
-                      style={{
-                        position: 'absolute',
-                        right: 12,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        border: 'none',
-                        backgroundColor: '#e2e8f0',
-                        color: '#475569',
-                        borderRadius: '50%',
-                        width: 24,
-                        height: 24,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
+                <SearchBar
+                  value={leadSearch}
+                  onChange={setLeadSearch}
+                  placeholder="Search buyer name, phone, or location (e.g. Vikram, Worli, 98200)..."
+                  size="md"
+                  minWidth={240}
+                />
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                   <span style={{ fontSize: 12.5, fontWeight: 700, color: '#64748b' }}>Status:</span>
