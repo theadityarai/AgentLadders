@@ -39,6 +39,9 @@ export interface Agency {
   status?: string;
   ownerName?: string;
   ownerEmail?: string;
+  ownerPhone?: string;
+  phone?: string;
+  whatsapp?: string;
   logo?: string;
   logoUrl?: string;
   bhkOptions?: string[];

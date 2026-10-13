@@ -21,6 +21,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Agency name, email, and password are required' }, { status: 400 });
     }
 
+    const digitsOnly = (phone || '').replace(/\D/g, '');
+    if (!phone || digitsOnly.length < 10) {
+      return NextResponse.json({ error: 'Official Agency WhatsApp phone number is required (minimum 10 digits)' }, { status: 400 });
+    }
+
     const cleanEmail = normalizeEmail(email);
     if (!isValidEmail(cleanEmail)) {
       return NextResponse.json({ error: 'Please provide a valid email address' }, { status: 400 });
@@ -51,10 +56,16 @@ export async function POST(req: Request) {
       name: cleanAgency,
       country: country || 'India',
       currency: currency || 'INR',
+      phone: cleanPhone,
+      whatsapp: cleanPhone,
+      ownerName: cleanName,
+      ownerEmail: cleanEmail,
       plan: 'Professional',
       bhkOptions: DEFAULT_BHK_OPTIONS,
       propertyTypes: DEFAULT_PROPERTY_TYPES,
       leadSources: DEFAULT_LEAD_SOURCES,
+      fontFamily: 'montserrat',
+      colorScheme: 'emerald',
       notificationPrefs: {
         'New lead assigned': { inApp: true, email: true },
         'Task reminder': { inApp: true, email: false },
@@ -65,8 +76,9 @@ export async function POST(req: Request) {
 
     db.users.push({
       id: userId,
-      name,
-      email: email.toLowerCase(),
+      name: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
       password: hashedPassword,
       passwordHash: hashedPassword,
       role: 'OWNER',

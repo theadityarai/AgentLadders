@@ -195,6 +195,11 @@ export default function SuperAdminPage() {
 
   const handleCreateAgency = async (e: React.FormEvent) => {
     e.preventDefault();
+    const digitsOnly = formData.ownerPhone.replace(/\D/g, '');
+    if (!formData.ownerPhone.trim() || digitsOnly.length < 10) {
+      showToast('Please enter a valid 10-digit official WhatsApp number for the agency', 'error');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const payload = {
@@ -1326,9 +1331,11 @@ export default function SuperAdminPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                     <div>
                       <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                        Owner Phone Number
+                        Agency Official WhatsApp Number *
                       </label>
                       <input
+                        required
+                        type="tel"
                         value={formData.ownerPhone}
                         onChange={e => setFormData({ ...formData, ownerPhone: e.target.value })}
                         placeholder="+91 98200 54321"

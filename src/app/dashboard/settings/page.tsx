@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { FONT_OPTIONS, COLOR_SCHEMES, applyTheme, getStoredTheme } from '@/lib/theme';
 import { 
   DEFAULT_BHK_OPTIONS, 
@@ -71,7 +72,7 @@ export default function SettingsPage() {
     }
   };
 
-  const [agencyData, setAgencyData] = useState({ name: '', country: 'India', currency: 'INR', plan: 'Professional', timezone: 'Asia/Kolkata' });
+  const [agencyData, setAgencyData] = useState({ name: '', country: 'India', currency: 'INR', plan: 'Professional', timezone: 'Asia/Kolkata', whatsapp: '' });
   const [users, setUsers] = useState<any[]>([]);
   const [configs, setConfigs] = useState({
     bhkOptions: [] as string[],
@@ -166,7 +167,8 @@ export default function SettingsPage() {
           country: data.agency.country, 
           currency: data.agency.currency,
           plan: data.agency.plan || 'Professional',
-          timezone: data.agency.timezone || 'Asia/Kolkata'
+          timezone: data.agency.timezone || 'Asia/Kolkata',
+          whatsapp: data.agency.whatsapp || data.agency.phone || data.agency.ownerPhone || ''
         });
         const loadedConfigs = {
           bhkOptions: (data.agency.bhkOptions && data.agency.bhkOptions.length > 0) ? data.agency.bhkOptions : DEFAULT_BHK_OPTIONS,
@@ -347,6 +349,11 @@ export default function SettingsPage() {
   };
 
   const handleSaveAgency = async () => {
+    const cleanWa = (agencyData.whatsapp || '').replace(/\D/g, '');
+    if (!agencyData.whatsapp || cleanWa.length < 10) {
+      showToast('error', 'Please enter a valid 10-digit WhatsApp number for your agency.', 'WhatsApp Number Required');
+      return;
+    }
     setSaving(true);
     await fetch('/api/settings', {
       method: 'PUT',
@@ -356,11 +363,12 @@ export default function SettingsPage() {
         agencyName: agencyData.name, 
         country: agencyData.country, 
         currency: agencyData.currency,
-        timezone: agencyData.timezone
+        timezone: agencyData.timezone,
+        whatsapp: agencyData.whatsapp
       })
     });
     setSaving(false);
-    showToast('success', 'Agency Profile and Timezone saved successfully!', 'Profile Updated');
+    showToast('success', 'Agency Profile and WhatsApp number saved successfully!', 'Profile Updated');
   };
 
   const handleConfirmUpgradePlan = async () => {
@@ -826,6 +834,23 @@ export default function SettingsPage() {
                         <option value="Asia/Singapore">Asia/Singapore (SGT +8:00)</option>
                         <option value="Australia/Sydney">Australia/Sydney (AEST +10:00)</option>
                       </select>
+                    </div>
+                    <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span>Official Broker WhatsApp Number *</span>
+                        <InfoTooltip text="This WhatsApp number is used when clients click 'Connect with me on WhatsApp' on public property listings." />
+                      </label>
+                      <input 
+                        type="tel" 
+                        value={agencyData.whatsapp || ''} 
+                        onChange={e => setAgencyData({...agencyData, whatsapp: e.target.value})} 
+                        placeholder="+91 98200 12345" 
+                        className={styles.input} 
+                        required
+                      />
+                      <span style={{ fontSize: 12, color: '#64748b', marginTop: 4, display: 'block' }}>
+                        💬 Leads clicking <strong>Connect with me on WhatsApp</strong> on public showcases will start a chat directly with this number.
+                      </span>
                     </div>
                   </div>
                   <div className={styles.formActions}>

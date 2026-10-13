@@ -12,10 +12,23 @@ export function sanitizeIndianPhone(phone: string): string {
 export function openWhatsAppDirect(phone: string, message: string) {
   const cleanPhone = sanitizeIndianPhone(phone);
   const encoded = encodeURIComponent(message);
-  const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+  const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://api.whatsapp.com/send?text=${encoded}`;
   if (typeof window !== 'undefined') {
-    window.open(url, '_blank');
+    const win = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!win) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   }
+}
+
+export function openWhatsApp(message: string, phone?: string) {
+  openWhatsAppDirect(phone || '', message);
 }
 
 export function generatePropertyPitchWhatsApp(property: {

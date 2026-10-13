@@ -61,6 +61,11 @@ export default function SignupPage() {
       setError('Please enter your full name.');
       return;
     }
+    const cleanPhoneDigits = form.phone.replace(/\D/g, '');
+    if (!cleanPhoneDigits || cleanPhoneDigits.length < 10) {
+      setError('Please enter your agency official 10-digit WhatsApp phone number.');
+      return;
+    }
     if (!form.email || !form.email.includes('@')) {
       setError('Please enter a valid work email address.');
       return;
@@ -293,7 +298,7 @@ export default function SignupPage() {
 
               <div className={styles.fieldGroup}>
                 <label htmlFor="signup-phone" className={styles.fieldLabel}>
-                  Mobile / WhatsApp *
+                  Official Agency WhatsApp *
                 </label>
                 <div className={styles.inputWrapper}>
                   <span className={styles.phonePrefix}>
@@ -305,6 +310,7 @@ export default function SignupPage() {
                     placeholder="98765 43210"
                     value={form.phone}
                     onChange={e => update('phone', e.target.value)}
+                    required
                     className={`${styles.inputField} ${styles.phoneField}`}
                     autoComplete="tel"
                   />

@@ -12,7 +12,7 @@ import {
   DEFAULT_PARKING_OPTIONS,
   DEFAULT_PROPERTY_STATUSES
 } from '@/lib/formatters';
-import { openWhatsAppDirect, generatePropertyPitchWhatsApp } from '@/lib/whatsapp-engine';
+import { openWhatsApp, openWhatsAppDirect, generatePropertyPitchWhatsApp } from '@/lib/whatsapp-engine';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -309,7 +309,7 @@ function PropertyCardItem({
             onClick={(e) => {
               e.stopPropagation();
               const msg = generatePropertyPitchWhatsApp(prop as any);
-              window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+              openWhatsApp(msg);
             }}
             style={{
               flex: 1,

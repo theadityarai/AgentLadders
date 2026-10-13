@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { formatINR } from '@/lib/formatters';
-import { generatePropertyPitchWhatsApp } from '@/lib/whatsapp-engine';
+import { generatePropertyPitchWhatsApp, openWhatsApp } from '@/lib/whatsapp-engine';
+import { ShareModal } from '@/components/ui/ShareModal';
 
 interface PublicPropertyMedia {
   id: string;
@@ -27,6 +28,7 @@ interface PublicProperty {
   agencyName: string;
   agentName: string;
   agentPhone: string;
+  agentWhatsApp?: string;
   bhk?: string;
   city?: string;
   locality?: string;
@@ -51,6 +53,9 @@ export default function PublicPropertyPage() {
   // Gallery state
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+
+  // Share Modal state
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Form State
   const [showInquiryModal, setShowInquiryModal] = useState(false);
@@ -116,25 +121,19 @@ export default function PublicPropertyPage() {
     }
   };
 
-  const handleWhatsApp = () => {
+  const handleConnectWhatsApp = () => {
     if (!property) return;
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://agentladders.com';
     const publicUrl = `${origin}/p/${property.publicToken || property.id}`;
     const priceText = property.price ? formatINR(property.price) : 'Price on Request';
-    const locationText = property.locality ? `${property.locality}, ${property.city || ''}` : (property.location || '');
-    const msg = `Hi ${property.agentName || 'Team'}, I am interested in your property listing:\n\n🏡 *${property.title}*\n💰 *Price*: ${priceText}\n📍 *Location*: ${locationText}\n\n🔗 *Showcase Link*:\n${publicUrl}\n\nPlease share floor plans and schedule a private site visit.`;
-    const phone = property.agentPhone ? property.agentPhone.replace(/\D/g, '') : '';
-    window.open(`https://wa.me/${phone ? (phone.startsWith('91') ? phone : '91'+phone) : ''}?text=${encodeURIComponent(msg)}`, '_blank');
+    const locationText = property.locality ? `${property.locality}, ${property.city || ''}` : (property.location || 'Prime Location');
+    const msg = `Hi ${property.agentName || 'there'}, I am interested in your property listing:\n\n🏡 *${property.title}*\n💰 *Price*: ${priceText}\n📍 *Location*: ${locationText}\n\n🔗 *Showcase Link*:\n${publicUrl}\n\nPlease share floor plans and schedule a private site visit.`;
+    const brokerPhone = property.agentWhatsApp || property.agentPhone || '';
+    openWhatsApp(msg, brokerPhone);
   };
 
-  const handleShareToWhatsApp = () => {
-    if (!property) return;
-    const msg = generatePropertyPitchWhatsApp(
-      property as any,
-      property.agencyName || 'AgentLadders Realty',
-      property.agentPhone || '+91 98200 98765'
-    );
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  const handleOpenShare = () => {
+    setShowShareModal(true);
   };
 
   // Normalize media
@@ -212,8 +211,8 @@ export default function PublicPropertyPage() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', pointerEvents: 'auto' }}>
           <button
             type="button"
-            onClick={handleShareToWhatsApp}
-            title="Share property listing on WhatsApp with photo & URL"
+            onClick={handleOpenShare}
+            title="Share property listing"
             style={{
               backgroundColor: 'rgba(37, 211, 102, 0.95)',
               color: '#ffffff',
@@ -532,36 +531,40 @@ export default function PublicPropertyPage() {
       </div>
 
       {/* Sticky Bottom Action Bar (Crucial for Mobile) */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', padding: '14px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: 10, zIndex: 40, boxShadow: '0 -4px 15px rgba(0,0,0,0.05)' }}>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: 8, zIndex: 40, boxShadow: '0 -4px 15px rgba(0,0,0,0.05)', flexWrap: 'wrap' }}>
         <button 
-          onClick={handleWhatsApp}
-          style={{ flex: 1, padding: '12px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+          type="button"
+          onClick={handleConnectWhatsApp}
+          style={{ flex: '1.2 1 180px', padding: '12px 14px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 2px 8px rgba(37,211,102,0.25)' }}
+          title="Connect directly with broker on WhatsApp"
         >
-          <span>💬</span> WhatsApp
+          <span style={{ fontSize: 16 }}>💬</span> Connect with me on WhatsApp
         </button>
         <button 
           type="button"
-          onClick={handleShareToWhatsApp}
-          title="Share property listing on WhatsApp with photo & URL"
-          style={{ padding: '12px 16px', backgroundColor: '#f0fdf4', color: '#15803d', border: '1.5px solid #bbf7d0', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+          onClick={handleOpenShare}
+          title="Share property listing across WhatsApp, Social & more"
+          style={{ padding: '12px 14px', backgroundColor: '#f0fdf4', color: '#15803d', border: '1.5px solid #bbf7d0', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
         >
           <span>📤</span> Share
         </button>
         <button 
+          type="button"
           onClick={() => {
             setModalMode('interest');
             setShowInquiryModal(true);
           }}
-          style={{ flex: 1.2, padding: '12px', backgroundColor: '#e11d48', color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 4px 12px rgba(225,29,72,0.25)' }}
+          style={{ flex: '1 1 120px', padding: '12px', backgroundColor: '#e11d48', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, boxShadow: '0 4px 12px rgba(225,29,72,0.25)' }}
         >
           <span>❤️</span> I'm Interested
         </button>
         <button 
+          type="button"
           onClick={() => {
             setModalMode('visit');
             setShowInquiryModal(true);
           }}
-          style={{ flex: 1, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+          style={{ flex: '0.9 1 100px', padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
         >
           Book Visit
         </button>
@@ -675,6 +678,15 @@ export default function PublicPropertyPage() {
             }
           `}</style>
         </div>
+      )}
+
+      {/* Multi-channel Share Modal */}
+      {property && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          property={property as any}
+        />
       )}
     </div>
   );

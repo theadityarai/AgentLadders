@@ -89,6 +89,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing agency name or owner email' }, { status: 400 });
     }
 
+    const digitsOnly = (ownerPhone || '').replace(/\D/g, '');
+    if (!ownerPhone || digitsOnly.length < 10) {
+      return NextResponse.json({ error: 'Official Agency WhatsApp number is required (min 10 digits)' }, { status: 400 });
+    }
+
     const cleanEmail = normalizeEmail(ownerEmail);
     if (!isValidEmail(cleanEmail)) {
       return NextResponse.json({ error: 'Please provide a valid owner email address' }, { status: 400 });
@@ -141,6 +146,8 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
       ownerName: cleanOwnerName,
       ownerEmail: cleanEmail,
+      phone: sanitizeString(ownerPhone, 30),
+      whatsapp: sanitizeString(ownerPhone, 30),
       ownerPhone: sanitizeString(ownerPhone, 30)
     };
 

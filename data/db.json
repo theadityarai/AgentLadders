@@ -94,6 +94,11 @@
       "name": "AgentLadders Realty India",
       "country": "India",
       "currency": "INR",
+      "phone": "+91 98200 98765",
+      "whatsapp": "+91 98200 98765",
+      "ownerName": "Aditya Sharma",
+      "ownerEmail": "aditya@agentladders.com",
+      "ownerPhone": "+91 98200 98765",
       "plan": "Professional",
       "propertyTypes": [
         "Apartment",
@@ -317,6 +322,9 @@
       "createdAt": "2026-08-10T08:00:00.000Z",
       "ownerName": "Marcus Vance",
       "ownerEmail": "marcus@vancerealty.com",
+      "ownerPhone": "+91 98200 12345",
+      "phone": "+91 98200 12345",
+      "whatsapp": "+91 98200 12345",
       "bhkOptions": [
         "1 RK",
         "1 BHK",

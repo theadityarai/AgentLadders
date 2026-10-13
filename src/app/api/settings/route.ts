@@ -107,6 +107,14 @@ export async function GET() {
       agency.colorScheme = 'emerald';
       modified = true;
     }
+    if (!agency.whatsapp) {
+      agency.whatsapp = agency.phone || agency.ownerPhone || '+91 98200 12345';
+      modified = true;
+    }
+    if (!agency.phone) {
+      agency.phone = agency.whatsapp;
+      modified = true;
+    }
     if (!agency.notificationPrefs) {
       agency.notificationPrefs = {
         'Support ticket updates': { inApp: true, email: true },
@@ -166,6 +174,15 @@ export async function PUT(req: Request) {
     if (data.country) db.agencies[agencyIndex].country = data.country;
     if (data.currency) db.agencies[agencyIndex].currency = data.currency;
     if (data.timezone) db.agencies[agencyIndex].timezone = data.timezone;
+    if (data.whatsapp !== undefined) {
+      const cleanWa = data.whatsapp.trim();
+      db.agencies[agencyIndex].whatsapp = cleanWa;
+      db.agencies[agencyIndex].phone = cleanWa;
+    } else if (data.phone !== undefined) {
+      const cleanPh = data.phone.trim();
+      db.agencies[agencyIndex].phone = cleanPh;
+      db.agencies[agencyIndex].whatsapp = cleanPh;
+    }
     if (data.logo !== undefined) {
       db.agencies[agencyIndex].logo = data.logo;
       db.agencies[agencyIndex].logoUrl = data.logo;
