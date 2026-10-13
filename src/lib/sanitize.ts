@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 /**
  * Security sanitization & validation utilities for AgentLadders.
  * Guards against XSS, script injection, payload bloat, and invalid inputs.
@@ -65,12 +67,12 @@ export function isValidPassword(password: string): { valid: boolean; reason?: st
 }
 
 /**
- * Generates a cryptographically random 12-digit numeric password.
+ * Generates a cryptographically secure random 12-digit numeric password.
  */
 export function generateRandom12Digits(): string {
-  let result = Math.floor(1 + Math.random() * 9).toString();
+  let result = (crypto.randomInt(1, 10)).toString();
   for (let i = 1; i < 12; i++) {
-    result += Math.floor(Math.random() * 10).toString();
+    result += (crypto.randomInt(0, 10)).toString();
   }
   return result;
 }

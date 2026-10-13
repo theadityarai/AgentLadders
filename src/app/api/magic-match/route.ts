@@ -11,16 +11,22 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const agencyId = (session.user as any).agencyId || 'ag_vance_01';
   const db = getDb();
+  const sessionUser = session.user as any;
+  const user = db.users.find(u => u.id === sessionUser.id || (sessionUser.email && u.email?.toLowerCase() === sessionUser.email.toLowerCase()));
+  if (!user) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  const agencyId = user.agencyId;
 
   const agencyLeads = (db.leads || []).filter(l => 
-    (!l.agencyId || l.agencyId === agencyId) && 
+    l.agencyId === agencyId && 
     !['Deal Closed', 'Won', 'Lost', 'Dead'].includes(l.status)
   );
 
   const agencyProps = (db.properties || []).filter(p => 
-    (!p.agencyId || p.agencyId === agencyId) && 
+    p.agencyId === agencyId && 
     (p.status === 'Available' || p.status === 'Under Offer')
   );
 

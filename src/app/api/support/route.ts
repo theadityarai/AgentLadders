@@ -121,12 +121,13 @@ export async function PUT(req: Request) {
 
   const now = new Date().toISOString();
   const ticket = db.supportTickets[ticketIndex];
+  const cleanMessage = sanitizeString(message, 2000);
 
   ticket.messages.push({
     id: 'msg_' + Math.random().toString(36).substring(2, 9),
     sender: user.name || 'Agency User',
     isStaff: false,
-    text: message,
+    text: cleanMessage,
     timestamp: now
   });
 

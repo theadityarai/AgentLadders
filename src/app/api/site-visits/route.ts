@@ -3,6 +3,9 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
+import { canMutateCRMRecords } from '@/lib/rbac';
+import { sanitizeString } from '@/lib/sanitize';
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -26,6 +29,10 @@ export async function POST(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to schedule site visits.' }, { status: 403 });
+  }
 
   const data = await req.json();
   let clientPhone = data.clientPhone || '';
@@ -65,6 +72,10 @@ export async function PUT(req: Request) {
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to modify site visits.' }, { status: 403 });
+  }
+
   const data = await req.json();
   if (!data.id) return NextResponse.json({ error: 'Missing visit id' }, { status: 400 });
 
@@ -75,6 +86,11 @@ export async function PUT(req: Request) {
   const updatedVisit = {
     ...db.siteVisits[index],
     ...data,
+    id: db.siteVisits[index].id, // IMMUTABLE
+    agencyId: db.siteVisits[index].agencyId, // IMMUTABLE: tenant isolation
+    feedback: data.feedback !== undefined ? sanitizeString(data.feedback, 1000) : db.siteVisits[index].feedback,
+    notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.siteVisits[index].notes,
+    status: data.status !== undefined ? sanitizeString(data.status, 50) : db.siteVisits[index].status,
     updatedAt: new Date().toISOString()
   };
 
@@ -91,6 +107,10 @@ export async function DELETE(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to delete site visits.' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');

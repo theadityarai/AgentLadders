@@ -23,7 +23,6 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXTAUTH_URL: resolvedAuthUrl,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'super-secret-nextauth-key-12345'
   },
   async headers() {
     return [

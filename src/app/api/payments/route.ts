@@ -3,6 +3,9 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
+import { canManageFinancials } from '@/lib/rbac';
+import { sanitizeString } from '@/lib/sanitize';
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -26,6 +29,10 @@ export async function POST(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canManageFinancials(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Only Owner, Managers, and Admins have permission to record payments.' }, { status: 403 });
+  }
 
   const data = await req.json();
   const newPayment = {
@@ -58,6 +65,10 @@ export async function PUT(req: Request) {
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+  if (!canManageFinancials(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Only Owner, Managers, and Admins have permission to modify payments.' }, { status: 403 });
+  }
+
   const data = await req.json();
   if (!data.id) return NextResponse.json({ error: 'Missing payment id' }, { status: 400 });
 
@@ -68,6 +79,11 @@ export async function PUT(req: Request) {
   const updatedPayment = {
     ...db.payments[index],
     ...data,
+    id: db.payments[index].id, // IMMUTABLE
+    agencyId: db.payments[index].agencyId, // IMMUTABLE: tenant isolation
+    payerName: data.payerName !== undefined ? sanitizeString(data.payerName, 100) : db.payments[index].payerName,
+    notes: data.notes !== undefined ? sanitizeString(data.notes, 500) : db.payments[index].notes,
+    reference: data.reference !== undefined ? sanitizeString(data.reference, 100) : db.payments[index].reference,
     amount: data.amount !== undefined ? parseFloat(data.amount) || 0 : db.payments[index].amount,
     updatedAt: new Date().toISOString()
   };
@@ -85,6 +101,10 @@ export async function DELETE(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canManageFinancials(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Only Owner, Managers, and Admins have permission to delete payments.' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');

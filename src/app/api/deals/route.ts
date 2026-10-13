@@ -3,6 +3,7 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { sanitizeString } from '@/lib/sanitize';
+import { canMutateCRMRecords } from '@/lib/rbac';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -27,6 +28,10 @@ export async function POST(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to create deals.' }, { status: 403 });
+  }
 
   const data = await req.json();
   const newDeal = {
@@ -65,6 +70,10 @@ export async function PUT(req: Request) {
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to modify deals.' }, { status: 403 });
+  }
+
   const data = await req.json();
   if (!data.id) return NextResponse.json({ error: 'Missing deal id' }, { status: 400 });
 
@@ -102,6 +111,10 @@ export async function DELETE(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to delete deals.' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');

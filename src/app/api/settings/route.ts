@@ -348,6 +348,19 @@ export async function PUT(req: Request) {
       ? data.backupCodes
       : Array.from({ length: 5 }, () => `${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`);
 
+    db.auditLogs = db.auditLogs || [];
+    db.auditLogs.unshift({
+      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      agencyId: user.agencyId,
+      userId: user.id,
+      userName: user.name || 'User',
+      action: 'UPDATE',
+      entity: 'UserSecurity',
+      entityId: user.id,
+      details: 'Two-Factor Authentication was enabled',
+      createdAt: new Date().toISOString()
+    });
+
     db.notifications = db.notifications || [];
     db.notifications.unshift({
       id: 'notif_' + Math.random().toString(36).substring(2, 10),
@@ -362,6 +375,19 @@ export async function PUT(req: Request) {
   }
   else if (action === 'disable2FA') {
     user.twoFactorEnabled = false;
+
+    db.auditLogs = db.auditLogs || [];
+    db.auditLogs.unshift({
+      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      agencyId: user.agencyId,
+      userId: user.id,
+      userName: user.name || 'User',
+      action: 'UPDATE',
+      entity: 'UserSecurity',
+      entityId: user.id,
+      details: 'Two-Factor Authentication was disabled',
+      createdAt: new Date().toISOString()
+    });
 
     db.notifications = db.notifications || [];
     db.notifications.unshift({

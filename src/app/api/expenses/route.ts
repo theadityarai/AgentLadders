@@ -3,6 +3,9 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
+import { canManageFinancials } from '@/lib/rbac';
+import { sanitizeString } from '@/lib/sanitize';
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -26,6 +29,10 @@ export async function POST(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canManageFinancials(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Only Owner, Managers, and Admins have permission to log expenses.' }, { status: 403 });
+  }
 
   const data = await req.json();
   const newExpense = {
@@ -58,6 +65,10 @@ export async function PUT(req: Request) {
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+  if (!canManageFinancials(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Only Owner, Managers, and Admins have permission to modify expenses.' }, { status: 403 });
+  }
+
   const data = await req.json();
   if (!data.id) return NextResponse.json({ error: 'Missing expense id' }, { status: 400 });
 
@@ -68,6 +79,11 @@ export async function PUT(req: Request) {
   const updatedExpense = {
     ...db.expenses[index],
     ...data,
+    id: db.expenses[index].id, // IMMUTABLE
+    agencyId: db.expenses[index].agencyId, // IMMUTABLE: tenant isolation
+    description: data.description !== undefined ? sanitizeString(data.description, 500) : db.expenses[index].description,
+    vendor: data.vendor !== undefined ? sanitizeString(data.vendor, 100) : db.expenses[index].vendor,
+    category: data.category !== undefined ? sanitizeString(data.category, 50) : db.expenses[index].category,
     amount: data.amount !== undefined ? parseFloat(data.amount) || 0 : db.expenses[index].amount,
     updatedAt: new Date().toISOString()
   };
@@ -85,6 +101,10 @@ export async function DELETE(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canManageFinancials(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Only Owner, Managers, and Admins have permission to delete expenses.' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');

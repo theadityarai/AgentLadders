@@ -12,7 +12,7 @@ const rateLimitStore = new Map<string, RateLimitRecord>();
 
 // Cleanup stale keys every 5 minutes to prevent memory leaks
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
+  const timer = setInterval(() => {
     const now = Date.now();
     for (const [key, record] of rateLimitStore.entries()) {
       if (record.resetAt <= now) {
@@ -20,6 +20,9 @@ if (typeof setInterval !== 'undefined') {
       }
     }
   }, 5 * 60 * 1000);
+  if (typeof timer === 'object' && timer && 'unref' in timer && typeof (timer as any).unref === 'function') {
+    (timer as any).unref();
+  }
 }
 
 export interface RateLimitOptions {

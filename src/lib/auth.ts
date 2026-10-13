@@ -108,5 +108,9 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-12345',
+  secret: process.env.NEXTAUTH_SECRET || (
+    process.env.NODE_ENV === 'production'
+      ? (() => { console.warn('CRITICAL SECURITY WARNING: NEXTAUTH_SECRET is not set in production!'); return 'fallback-secret-production-warning-12345'; })()
+      : 'fallback-secret-12345'
+  ),
 };
