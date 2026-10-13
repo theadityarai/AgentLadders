@@ -605,7 +605,7 @@ export function getDb(): DB {
   db.recycleBin = db.recycleBin || [];
   db.supportTickets = db.supportTickets || [];
   if (db.supportTickets.length === 0) {
-    const firstAgency = (db.agencies && db.agencies[0]) ? db.agencies[0] : { id: 'agency_1', name: 'Prestige Estates' };
+    const firstAgency = (db.agencies && db.agencies[0]) ? db.agencies[0] : { id: 'agency_1', name: 'Vance Luxury Realty' };
     db.supportTickets = [
       {
         id: 'tic_1',
@@ -616,12 +616,12 @@ export function getDb(): DB {
         category: 'Integrations',
         priority: 'Medium',
         status: 'In Review',
-        createdByName: 'Aditya Rai',
-        createdByEmail: 'aditya@agentladders.com',
+        createdByName: 'Marcus Vance',
+        createdByEmail: 'marcus@vancerealty.com',
         contractType: '',
         messages: [
-          { id: 'msg_1', sender: 'Aditya Rai', isStaff: false, text: 'Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.', timestamp: new Date(Date.now() - 86400000).toISOString() },
-          { id: 'msg_2', sender: 'AgentLadders Support HQ', isStaff: true, text: 'Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.', timestamp: new Date(Date.now() - 43200000).toISOString() }
+          { id: 'msg_1', sender: 'Marcus Vance', isStaff: false, text: 'Hi Support Team, we would like to confirm DNS records to connect properties.vancerealty.com to our public showcase pages.', timestamp: new Date(Date.now() - 86400000).toISOString() },
+          { id: 'msg_2', sender: 'AgentLadders Support HQ', isStaff: true, text: 'Hello Marcus, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.', timestamp: new Date(Date.now() - 43200000).toISOString() }
         ],
         createdAt: new Date(Date.now() - 86400000).toISOString()
       },
@@ -634,11 +634,11 @@ export function getDb(): DB {
         category: 'Contract Inquiry',
         priority: 'High',
         status: 'Open',
-        createdByName: 'Aditya Rai',
-        createdByEmail: 'aditya@agentladders.com',
+        createdByName: 'Marcus Vance',
+        createdByEmail: 'marcus@vancerealty.com',
         contractType: 'Sole Selling Rights (Exclusive Mandate Agreement)',
         messages: [
-          { id: 'msg_3', sender: 'Aditya Rai', isStaff: false, text: 'Hi Legal Team, we have an exclusive mandate opportunity for a 5,400 sq.ft luxury duplex penthouse in Gurgaon. Please advise if we can increase the post-termination protection clause from 180 to 270 days for introduced NRI buyers.', timestamp: new Date(Date.now() - 21600000).toISOString() }
+          { id: 'msg_3', sender: 'Marcus Vance', isStaff: false, text: 'Hi Legal Team, we have an exclusive mandate opportunity for a 5,400 sq.ft luxury duplex penthouse in Gurgaon. Please advise if we can increase the post-termination protection clause from 180 to 270 days for introduced NRI buyers.', timestamp: new Date(Date.now() - 21600000).toISOString() }
         ],
         createdAt: new Date(Date.now() - 21600000).toISOString()
       }
@@ -736,9 +736,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         isPublic: true,
         sharesCount: 34,
         viewsCount: 285,
-        agentName: 'Aditya Rai',
-        agentPhone: '+91 98200 12345',
-        agentEmail: 'aditya@agentladders.com',
+        agentName: 'Marcus Vance',
+        agentPhone: '+91 98201 23456',
+        agentEmail: 'marcus@vancerealty.com',
         createdAt: now 
       },
       { 
@@ -784,9 +784,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         isPublic: true,
         sharesCount: 42,
         viewsCount: 410,
-        agentName: 'Aditya Rai',
-        agentPhone: '+91 98200 12345',
-        agentEmail: 'aditya@agentladders.com',
+        agentName: 'Marcus Vance',
+        agentPhone: '+91 98201 23456',
+        agentEmail: 'marcus@vancerealty.com',
         createdAt: now 
       },
       { 
@@ -830,9 +830,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         isPublic: true,
         sharesCount: 19,
         viewsCount: 175,
-        agentName: 'Aditya Rai',
-        agentPhone: '+91 98200 12345',
-        agentEmail: 'aditya@agentladders.com',
+        agentName: 'Marcus Vance',
+        agentPhone: '+91 98201 23456',
+        agentEmail: 'marcus@vancerealty.com',
         createdAt: now 
       },
       { 
@@ -875,9 +875,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         isPublic: true,
         sharesCount: 15,
         viewsCount: 130,
-        agentName: 'Aditya Rai',
-        agentPhone: '+91 98200 12345',
-        agentEmail: 'aditya@agentladders.com',
+        agentName: 'Marcus Vance',
+        agentPhone: '+91 98201 23456',
+        agentEmail: 'marcus@vancerealty.com',
         createdAt: now 
       },
       {
@@ -920,9 +920,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         isPublic: true,
         sharesCount: 11,
         viewsCount: 94,
-        agentName: 'Aditya Rai',
-        agentPhone: '+91 98200 12345',
-        agentEmail: 'aditya@agentladders.com',
+        agentName: 'Marcus Vance',
+        agentPhone: '+91 98201 23456',
+        agentEmail: 'marcus@vancerealty.com',
         createdAt: now
       }
     );
@@ -951,7 +951,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         vastuPreference: 'East Facing Mandatory',
         requirement: 'Looking for ready sea-facing 4 BHK in Worli/Lower Parel. Minimum 2200 sqft carpet, 3 car parks for luxury cars.',
         priority: 'Hot 🔥',
-        assignedTo: 'Aditya Rai',
+        assignedTo: 'Marcus Vance',
         nextFollowUp: new Date(Date.now() + 86400000).toISOString().split('T')[0],
         notes: 'Very high intent. MD at Private Equity firm. Wife visited last week.',
         createdAt: now 
@@ -976,7 +976,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         vastuPreference: 'North or North-East',
         requirement: 'Golf course facing 3 or 4 BHK at DLF 5 / Golf Course Rd. High floor preferred.',
         priority: 'Hot 🔥',
-        assignedTo: 'Aditya Rai',
+        assignedTo: 'Marcus Vance',
         nextFollowUp: new Date().toISOString().split('T')[0],
         notes: 'Show DLF The Camellias 28th floor today at 11:30 AM.',
         createdAt: now 
@@ -1001,7 +1001,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         vastuPreference: 'East Facing',
         requirement: 'Indiranagar 3 BHK with 2 covered car parks. Ready to move only.',
         priority: 'High',
-        assignedTo: 'Aditya Rai',
+        assignedTo: 'Marcus Vance',
         nextFollowUp: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
         notes: 'Offered ₹3.75 Cr on Prestige Kingfisher. Waiting for seller response.',
         createdAt: now 
@@ -1026,7 +1026,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         vastuPreference: 'Any',
         requirement: '2 BHK near EON IT park Kharadi. Builder reputation matters.',
         priority: 'Hot 🔥',
-        assignedTo: 'Aditya Rai',
+        assignedTo: 'Marcus Vance',
         nextFollowUp: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
         notes: 'Senior Architect at Infosys. Interested in Godrej Sky Greens Kharadi.',
         createdAt: now 
@@ -1050,7 +1050,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         urgency: '1st of Next Month',
         requirement: 'Fully furnished 3 BHK in Central Park Resorts for corporate family lease.',
         priority: 'Medium',
-        assignedTo: 'Aditya Rai',
+        assignedTo: 'Marcus Vance',
         nextFollowUp: new Date().toISOString().split('T')[0],
         notes: 'Follow-up today with Central Park Resorts photo brochure.',
         createdAt: now 
@@ -1113,7 +1113,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         totalCommission: 1700000, // ₹17.0 Lakhs
         commissionRate: '2.0%',
         commissionAmount: 1700000,
-        assignedBroker: 'Aditya Rai',
+        assignedBroker: 'Marcus Vance',
         expectedCloseDate: '2026-10-15', 
         notes: 'Token ₹10 Lakhs received. Drafting Agreement to Sale (ATS).',
         createdAt: now 
@@ -1134,7 +1134,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         totalCommission: 2900000, // ₹29.0 Lakhs
         commissionRate: '2.0%',
         commissionAmount: 2900000,
-        assignedBroker: 'Aditya Rai',
+        assignedBroker: 'Marcus Vance',
         expectedCloseDate: '2026-10-30', 
         notes: 'ATS signed. Buyer clearing HDFC loan disbursement.',
         createdAt: now 
@@ -1155,7 +1155,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         totalCommission: 1155000, // ₹11.55 Lakhs
         commissionRate: '3.0%',
         commissionAmount: 1155000,
-        assignedBroker: 'Aditya Rai',
+        assignedBroker: 'Marcus Vance',
         expectedCloseDate: '2026-10-05', 
         notes: 'Sub-registrar appointment booked for Tuesday 11 AM.',
         createdAt: now 
@@ -1166,9 +1166,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
   // 8. Tasks
   if (!db.tasks.some(t => t.agencyId === agencyId)) {
     db.tasks.push(
-      { id: 'tsk_1', agencyId, title: 'Verify RERA Title Search & Encumbrance Certificate for Lodha Park', assignedTo: 'Aditya Rai', dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0], status: 'Pending', createdAt: now },
-      { id: 'tsk_2', agencyId, title: 'Send Camellias floorplan & VRV specs to Rahul Sharma on WhatsApp', assignedTo: 'Aditya Rai', dueDate: new Date().toISOString().split('T')[0], status: 'In Progress', createdAt: now },
-      { id: 'tsk_3', agencyId, title: 'Collect 1% TDS challan from Dr. Singhania for Prestige registration', assignedTo: 'Aditya Rai', dueDate: new Date(Date.now() + 86400000 * 4).toISOString().split('T')[0], status: 'Pending', createdAt: now }
+      { id: 'tsk_1', agencyId, title: 'Verify RERA Title Search & Encumbrance Certificate for Lodha Park', assignedTo: 'Marcus Vance', dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0], status: 'Pending', createdAt: now },
+      { id: 'tsk_2', agencyId, title: 'Send Camellias floorplan & VRV specs to Rahul Sharma on WhatsApp', assignedTo: 'Marcus Vance', dueDate: new Date().toISOString().split('T')[0], status: 'In Progress', createdAt: now },
+      { id: 'tsk_3', agencyId, title: 'Collect 1% TDS challan from Dr. Singhania for Prestige registration', assignedTo: 'Marcus Vance', dueDate: new Date(Date.now() + 86400000 * 4).toISOString().split('T')[0], status: 'Pending', createdAt: now }
     );
   }
 
@@ -1195,7 +1195,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         timeSlot: '04:30 PM - 05:30 PM',
         slotTime: '04:30 PM',
         locality: 'Worli, Mumbai',
-        accompaniedBy: 'Aditya Rai',
+        accompaniedBy: 'Marcus Vance',
         status: 'Scheduled', 
         interestLevel: 'Extremely Interested 🔥',
         actionRequired: 'Send location pin and gate pass code',
@@ -1213,7 +1213,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         timeSlot: '11:30 AM - 12:30 PM',
         slotTime: '11:30 AM',
         locality: 'Golf Course Road, Gurgaon',
-        accompaniedBy: 'Aditya Rai',
+        accompaniedBy: 'Marcus Vance',
         status: 'Scheduled', 
         interestLevel: 'Extremely Interested 🔥',
         actionRequired: 'Meet at Club Camellias reception',
@@ -1231,7 +1231,7 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         timeSlot: '10:00 AM - 11:00 AM',
         slotTime: '10:00 AM',
         locality: 'Indiranagar, Bengaluru',
-        accompaniedBy: 'Aditya Rai',
+        accompaniedBy: 'Marcus Vance',
         status: 'Scheduled', 
         interestLevel: 'Considering / Needs 2nd Viewing',
         actionRequired: '2nd visit with father to verify Vastu North-East Brahmasthan',
@@ -1288,10 +1288,10 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
   // 16. Documents
   if (!db.documents.some(d => d.agencyId === agencyId)) {
     db.documents.push(
-      { id: 'doc_1', agencyId, name: 'Agreement_To_Sale_Lodha_Park_Draft.pdf', type: 'Agreement to Sale', category: 'Contracts', size: '2.4 MB', uploadedBy: 'Aditya Rai', createdAt: now },
-      { id: 'doc_2', agencyId, name: 'RERA_Registration_Certificate_P51900001339.pdf', type: 'RERA Certificate', category: 'Compliance', size: '1.2 MB', uploadedBy: 'Aditya Rai', createdAt: now },
-      { id: 'doc_3', agencyId, name: 'DLF_Camellias_Maintenance_No_Objection_NOC.pdf', type: 'Society NOC', category: 'Title Deeds', size: '850 KB', uploadedBy: 'Aditya Rai', createdAt: now },
-      { id: 'doc_4', agencyId, name: 'Client_PAN_Aadhaar_KYC_Vikram_Malhotra.pdf', type: 'KYC / PAN / Aadhaar', category: 'KYC Documents', size: '1.1 MB', uploadedBy: 'Aditya Rai', createdAt: now }
+      { id: 'doc_1', agencyId, name: 'Agreement_To_Sale_Lodha_Park_Draft.pdf', type: 'Agreement to Sale', category: 'Contracts', size: '2.4 MB', uploadedBy: 'Marcus Vance', createdAt: now },
+      { id: 'doc_2', agencyId, name: 'RERA_Registration_Certificate_P51900001339.pdf', type: 'RERA Certificate', category: 'Compliance', size: '1.2 MB', uploadedBy: 'Marcus Vance', createdAt: now },
+      { id: 'doc_3', agencyId, name: 'DLF_Camellias_Maintenance_No_Objection_NOC.pdf', type: 'Society NOC', category: 'Title Deeds', size: '850 KB', uploadedBy: 'Marcus Vance', createdAt: now },
+      { id: 'doc_4', agencyId, name: 'Client_PAN_Aadhaar_KYC_Vikram_Malhotra.pdf', type: 'KYC / PAN / Aadhaar', category: 'KYC Documents', size: '1.1 MB', uploadedBy: 'Marcus Vance', createdAt: now }
     );
   }
 
@@ -1299,9 +1299,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
   if (!db.activities || !db.activities.some(a => a.agencyId === agencyId)) {
     db.activities = db.activities || [];
     db.activities.push(
-      { id: 'act_1', agencyId, actor: 'Aditya Rai', type: 'WhatsApp', relatedEntity: 'Lead', relatedId: 'lead_1', summary: 'Shared Lodha Park Worli 4 BHK WhatsApp pitch brochure', details: 'Client responded in 4 mins: "Looks perfect. Booking visit today at 4:30 PM with my wife."', createdAt: new Date(Date.now() - 3600000 * 2).toISOString() },
-      { id: 'act_2', agencyId, actor: 'Aditya Rai', type: 'Call', relatedEntity: 'Client', relatedId: 'cli_1', summary: 'Token payment confirmation call with Vikram Malhotra', details: 'Confirmed ₹10 Lakhs earnest money RTGS transfer to seller escrow.', createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
-      { id: 'act_3', agencyId, actor: 'Aditya Rai', type: 'Site Visit', relatedEntity: 'Property', relatedId: 'prop_2', summary: 'Prepared gate pass & private showing at DLF Camellias', details: 'Gate security confirmed pre-cleared access for Rahul Sharma.', createdAt: new Date(Date.now() - 3600000 * 18).toISOString() }
+      { id: 'act_1', agencyId, actor: 'Marcus Vance', type: 'WhatsApp', relatedEntity: 'Lead', relatedId: 'lead_1', summary: 'Shared Lodha Park Worli 4 BHK WhatsApp pitch brochure', details: 'Client responded in 4 mins: "Looks perfect. Booking visit today at 4:30 PM with my wife."', createdAt: new Date(Date.now() - 3600000 * 2).toISOString() },
+      { id: 'act_2', agencyId, actor: 'Marcus Vance', type: 'Call', relatedEntity: 'Client', relatedId: 'cli_1', summary: 'Token payment confirmation call with Vikram Malhotra', details: 'Confirmed ₹10 Lakhs earnest money RTGS transfer to seller escrow.', createdAt: new Date(Date.now() - 3600000 * 5).toISOString() },
+      { id: 'act_3', agencyId, actor: 'Marcus Vance', type: 'Site Visit', relatedEntity: 'Property', relatedId: 'prop_2', summary: 'Prepared gate pass & private showing at DLF Camellias', details: 'Gate security confirmed pre-cleared access for Rahul Sharma.', createdAt: new Date(Date.now() - 3600000 * 18).toISOString() }
     );
   }
 
@@ -1320,10 +1320,10 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
   if (!db.auditLogs || !db.auditLogs.some(a => a.agencyId === agencyId)) {
     db.auditLogs = db.auditLogs || [];
     db.auditLogs.push(
-      { id: 'aud_1', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'LOGIN', entity: 'Session', entityId: 'ses_1', details: 'Successful authenticated login from web console', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 3600000).toISOString() },
-      { id: 'aud_2', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'UPDATE', entity: 'Property', entityId: 'prop_1', details: 'Updated listing price and uploaded 3 new hero photos', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 7200000).toISOString() },
-      { id: 'aud_3', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'SHARE', entity: 'Property', entityId: 'prop_1', details: 'Shared public property link via WhatsApp channel', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 10800000).toISOString() },
-      { id: 'aud_4', agencyId, userId: 'usr_1', userName: 'Aditya Rai', action: 'CREATE', entity: 'Deal', entityId: 'deal_1', details: 'Created new Deal: Luxury Villa in Beverly Hills ($4.5M)', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 86400000).toISOString() }
+      { id: 'aud_1', agencyId, userId: 'usr_1', userName: 'Marcus Vance', action: 'LOGIN', entity: 'Session', entityId: 'ses_1', details: 'Successful authenticated login from web console', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 3600000).toISOString() },
+      { id: 'aud_2', agencyId, userId: 'usr_1', userName: 'Marcus Vance', action: 'UPDATE', entity: 'Property', entityId: 'prop_1', details: 'Updated listing price and uploaded 3 new hero photos', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 7200000).toISOString() },
+      { id: 'aud_3', agencyId, userId: 'usr_1', userName: 'Marcus Vance', action: 'SHARE', entity: 'Property', entityId: 'prop_1', details: 'Shared public property link via WhatsApp channel', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 10800000).toISOString() },
+      { id: 'aud_4', agencyId, userId: 'usr_1', userName: 'Marcus Vance', action: 'CREATE', entity: 'Deal', entityId: 'deal_1', details: 'Created new Deal: Luxury Villa in Beverly Hills ($4.5M)', ipAddress: '192.168.1.1', createdAt: new Date(Date.now() - 86400000).toISOString() }
     );
   }
 
@@ -1339,10 +1339,10 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         category: 'Integrations', 
         priority: 'Medium', 
         status: 'In Review', 
-        createdByName: 'Aditya Rai', 
+        createdByName: 'Marcus Vance', 
         messages: [
-          { id: 'msg_1', sender: 'Aditya Rai', isStaff: false, text: 'Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.', timestamp: new Date(Date.now() - 86400000).toISOString() },
-          { id: 'msg_2', sender: 'AgentLadders Support', isStaff: true, text: 'Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.', timestamp: new Date(Date.now() - 43200000).toISOString() }
+          { id: 'msg_1', sender: 'Marcus Vance', isStaff: false, text: 'Hi Support Team, we would like to confirm DNS records to connect properties.vancerealty.com to our public showcase pages.', timestamp: new Date(Date.now() - 86400000).toISOString() },
+          { id: 'msg_2', sender: 'AgentLadders Support', isStaff: true, text: 'Hello Marcus, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.', timestamp: new Date(Date.now() - 43200000).toISOString() }
         ],
         createdAt: new Date(Date.now() - 86400000).toISOString() 
       },
@@ -1354,9 +1354,9 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
         category: 'CRM Feature', 
         priority: 'High', 
         status: 'Resolved', 
-        createdByName: 'Aditya Rai', 
+        createdByName: 'Marcus Vance', 
         messages: [
-          { id: 'msg_3', sender: 'Aditya Rai', isStaff: false, text: 'All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table. Verified perfectly.', timestamp: new Date(Date.now() - 172800000).toISOString() }
+          { id: 'msg_3', sender: 'Marcus Vance', isStaff: false, text: 'All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table. Verified perfectly.', timestamp: new Date(Date.now() - 172800000).toISOString() }
         ],
         createdAt: new Date(Date.now() - 172800000).toISOString() 
       }

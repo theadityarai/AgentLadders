@@ -1,137 +1,58 @@
 {
   "users": [
     {
-      "id": "usr_nntlkcy7",
-      "name": "Adi",
-      "email": "adityarai366@gmail.com",
-      "password": "$2b$10$ORkavQ/fd9iGicIhXu7ceeJTWzyfFB1R6d0mLd374QVCkkxc.yjtW",
-      "role": "OWNER",
-      "agencyId": "ag_ql21vxnd",
-      "passwordHash": "$2b$10$ORkavQ/fd9iGicIhXu7ceeJTWzyfFB1R6d0mLd374QVCkkxc.yjtW"
-    },
-    {
-      "id": "usr_bt71mcv1",
-      "name": "Aditya",
-      "email": "aditya@agentladders.com",
-      "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "role": "SUPER_ADMIN",
-      "agencyId": "ag_ql21vxnd",
-      "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "avatar": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\"><circle cx=\"16\" cy=\"16\" r=\"14\" fill=\"%233b82f6\"/></svg>",
-      "image": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\"><circle cx=\"16\" cy=\"16\" r=\"14\" fill=\"%233b82f6\"/></svg>"
-    },
-    {
-      "id": "usr_super_admin",
-      "name": "Super Admin",
-      "email": "admin@agentladders.com",
-      "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "role": "SUPER_ADMIN",
-      "agencyId": "ag_ql21vxnd"
-    },
-    {
       "id": "usr_ag_vance_01",
+      "agencyId": "ag_vance_01",
       "name": "Marcus Vance",
       "email": "marcus@vancerealty.com",
       "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
       "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
       "role": "OWNER",
-      "agencyId": "ag_vance_01",
+      "phone": "+91 98201 23456",
+      "status": "Active",
       "avatar": "",
-      "image": ""
+      "image": "",
+      "createdAt": "2026-08-10T08:00:00.000Z"
     },
     {
-      "id": "usr_invited_marcus_comm",
-      "name": "Adi",
-      "email": "marcus@vancerealty.comm",
-      "password": "$2b$10$U5TZKG3bcliFpcYLKUia.ePHZZBzaFqIkqvqmjWJvGfiUUlPsfhlO",
-      "passwordHash": "$2b$10$U5TZKG3bcliFpcYLKUia.ePHZZBzaFqIkqvqmjWJvGfiUUlPsfhlO",
-      "role": "MANAGER",
+      "id": "usr_super_admin",
       "agencyId": "ag_vance_01",
-      "avatar": "",
-      "image": ""
-    },
-    {
-      "id": "usr_ag_skyline_02",
-      "name": "Eleanor Thorne",
-      "email": "eleanor@skylinecap.co.uk",
+      "name": "Super Admin",
+      "email": "admin@agentladders.com",
       "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
       "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "role": "OWNER",
-      "agencyId": "ag_skyline_02"
+      "role": "SUPER_ADMIN",
+      "phone": "+91 98200 00000",
+      "status": "Active",
+      "createdAt": "2026-08-10T08:00:00.000Z"
     },
     {
-      "id": "usr_ag_coastal_03",
-      "name": "Liam Hemsworth",
-      "email": "liam@coastalestates.com.au",
+      "id": "usr_super_admin_alt",
+      "agencyId": "ag_vance_01",
+      "name": "Super Admin HQ",
+      "email": "aditya@agentladders.com",
       "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
       "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "role": "OWNER",
-      "agencyId": "ag_coastal_03"
-    },
-    {
-      "id": "usr_ag_apex_04",
-      "name": "Tariq Al-Mansoor",
-      "email": "tariq@apexprime.ae",
-      "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "role": "OWNER",
-      "agencyId": "ag_apex_04"
-    },
-    {
-      "id": "usr_ag_horizon_05",
-      "name": "Sarah Jenkins",
-      "email": "sarah@horizonrealty.ca",
-      "password": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "passwordHash": "$2b$10$NltVaRciMqPWqI41tN.GwOtK8.LsYqLUl0.ZRnxUNOUx1NiMeQm7q",
-      "role": "OWNER",
-      "agencyId": "ag_horizon_05"
+      "role": "SUPER_ADMIN",
+      "phone": "+91 98200 00001",
+      "status": "Active",
+      "createdAt": "2026-08-10T08:00:00.000Z"
     }
   ],
   "agencies": [
     {
-      "id": "ag_ql21vxnd",
-      "name": "AgentLadders Realty India",
+      "id": "ag_vance_01",
+      "name": "Vance Luxury Realty",
       "country": "India",
       "currency": "INR",
-      "phone": "+91 98200 98765",
-      "whatsapp": "+91 98200 98765",
-      "ownerName": "Aditya Sharma",
-      "ownerEmail": "aditya@agentladders.com",
-      "ownerPhone": "+91 98200 98765",
-      "plan": "Professional",
-      "propertyTypes": [
-        "Apartment",
-        "House",
-        "Villa",
-        "Commercial"
-      ],
-      "leadSources": [
-        "Direct",
-        "Website",
-        "Referral",
-        "Listing Websites"
-      ],
-      "notificationPrefs": {
-        "New lead assigned": {
-          "inApp": true,
-          "email": true
-        },
-        "Task reminder": {
-          "inApp": true,
-          "email": false
-        },
-        "Site visit reminder": {
-          "inApp": true,
-          "email": true
-        },
-        "Support ticket updates": {
-          "inApp": true,
-          "email": true
-        }
-      },
+      "timezone": "Asia/Kolkata",
+      "plan": "Enterprise",
       "status": "Active",
-      "createdAt": "2026-08-01T10:00:00.000Z",
+      "ownerName": "Marcus Vance",
+      "ownerEmail": "marcus@vancerealty.com",
+      "ownerPhone": "+91 98201 23456",
+      "phone": "+91 98201 23456",
+      "whatsapp": "+91 98201 23456",
       "bhkOptions": [
         "1 RK",
         "1 BHK",
@@ -148,7 +69,28 @@
         "Commercial Bare Shell",
         "Furnished Office"
       ],
-      "logo": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\"><circle cx=\"16\" cy=\"16\" r=\"14\" fill=\"%2310b981\"/></svg>",
+      "propertyTypes": [
+        "Apartment",
+        "Villa / Bungalow",
+        "Independent Floor",
+        "Penthouse",
+        "Studio Apartment",
+        "Row House / Duplex",
+        "Plot / Land",
+        "Commercial Office",
+        "Retail Shop / Showroom",
+        "Farmhouse / Estate"
+      ],
+      "leadSources": [
+        "Direct",
+        "Website",
+        "Referral",
+        "Listing Websites",
+        "99acres",
+        "MagicBricks",
+        "Housing.com",
+        "WhatsApp Referral"
+      ],
       "propertySpecs": [
         "Unfurnished",
         "Semi-Furnished",
@@ -192,7 +134,6 @@
         "No Dedicated Parking",
         "Multi-Level Covered"
       ],
-      "timezone": "Asia/Kolkata",
       "propertyStatuses": [
         "Available",
         "Under Offer",
@@ -233,1324 +174,66 @@
         "Past Client",
         "Inactive"
       ],
-      "fontFamily": "montserrat",
-      "colorScheme": "emerald"
-    },
-    {
-      "id": "ag_0l04re04",
-      "name": "AgentLadders",
-      "country": "United States",
-      "currency": "USD",
-      "plan": "Professional",
-      "propertyTypes": [
-        "Apartment",
-        "House",
-        "Villa",
-        "Commercial"
-      ],
-      "leadSources": [
-        "Direct",
-        "Website",
-        "Referral",
-        "Listing Websites"
-      ],
-      "notificationPrefs": {
-        "New lead assigned": {
-          "inApp": true,
-          "email": true
-        },
-        "Task reminder": {
-          "inApp": true,
-          "email": false
-        },
-        "Site visit reminder": {
-          "inApp": true,
-          "email": true
-        }
-      },
-      "createdAt": "2026-09-22T10:22:05.159Z",
-      "status": "Active",
-      "bhkOptions": [
-        "1 RK",
-        "1 BHK",
-        "1.5 BHK",
-        "2 BHK",
-        "2.5 BHK",
-        "3 BHK",
-        "3.5 BHK",
-        "4 BHK",
-        "5+ BHK",
-        "Duplex",
-        "Penthouse",
-        "Plot / Land",
-        "Commercial Bare Shell",
-        "Furnished Office"
-      ],
-      "fontFamily": "montserrat",
-      "colorScheme": "emerald"
-    },
-    {
-      "id": "ag_vance_01",
-      "name": "Vance Luxury Realtyy",
-      "country": "United States",
-      "currency": "GBP",
-      "plan": "Enterprise",
-      "status": "Active",
-      "propertyTypes": [
-        "Luxury Villa",
-        "Penthouse",
-        "Mansion",
-        "Estate",
-        "n"
-      ],
-      "leadSources": [
-        "Direct",
-        "Website",
-        "Referral",
-        "Listing Websites"
-      ],
       "notificationPrefs": {
         "New lead assigned": {
           "inApp": true,
           "email": true
         },
         "Support ticket updates": {
+          "inApp": true,
+          "email": true
+        },
+        "Site visit alerts": {
+          "inApp": true,
+          "email": true
+        },
+        "Deal stage updates": {
           "inApp": true,
           "email": true
         }
       },
       "createdAt": "2026-08-10T08:00:00.000Z",
-      "ownerName": "Marcus Vance",
-      "ownerEmail": "marcus@vancerealty.com",
-      "ownerPhone": "+91 98200 12345",
-      "phone": "+91 98200 12345",
-      "whatsapp": "+91 98200 12345",
-      "bhkOptions": [
-        "1 RK",
-        "1 BHK",
-        "1.5 BHK",
-        "2 BHK",
-        "2.5 BHK",
-        "3 BHK",
-        "3.5 BHK",
-        "4 BHK",
-        "5+ BHK",
-        "Duplex",
-        "Penthouse",
-        "Plot / Land",
-        "Commercial Bare Shell",
-        "Furnished Office"
-      ],
-      "fontFamily": "montserrat",
-      "colorScheme": "emerald",
-      "logo": "",
-      "logoUrl": "",
-      "propertySpecs": [
-        "Unfurnished",
-        "Semi-Furnished",
-        "Fully Furnished",
-        "Bare Shell (Commercial / Penthouse)",
-        "Warm Shell (With Flooring & AC)",
-        "Luxury Designer Furnished"
-      ],
-      "constructionStages": [
-        "Ready to Move (OC Received)",
-        "Under Construction (Possession in 3-6 Months)",
-        "Under Construction (Possession in 1-2 Years)",
-        "Newly Launched / Booking Open",
-        "Pre-Launch / Expression of Interest"
-      ],
-      "vastuOptions": [
-        "East Facing (Vastu Compliant)",
-        "North Facing (Vastu Compliant)",
-        "North-East / Ishanya (Highly Auspicious)",
-        "North-West Facing",
-        "West Facing",
-        "South-East Facing",
-        "South Facing",
-        "Not Applicable"
-      ],
-      "dealStages": [
-        "Negotiation",
-        "Token Received",
-        "Agreement Drafted",
-        "Registration Pending",
-        "Closed Won",
-        "Lost"
-      ],
-      "parkingOptions": [
-        "1 Covered Car Park",
-        "2 Covered Car Parks",
-        "3+ Covered Car Parks",
-        "1 Open Car Park",
-        "2 Open Car Parks",
-        "Stilt Parking",
-        "No Dedicated Parking",
-        "Multi-Level Covered"
-      ],
-      "timezone": "Asia/Kolkata",
-      "propertyStatuses": [
-        "Available",
-        "Under Offer",
-        "Under Negotiation",
-        "Sold",
-        "Rented",
-        "Off Market"
-      ],
-      "leadStatuses": [
-        "New Inbound",
-        "Contacted",
-        "Qualified",
-        "Site Visit Scheduled",
-        "Negotiation",
-        "Won",
-        "Lost",
-        "Dead"
-      ],
-      "siteVisitStatuses": [
-        "Scheduled",
-        "Confirmed",
-        "Completed",
-        "Rescheduled",
-        "Cancelled",
-        "No Show"
-      ],
-      "taskStatuses": [
-        "Pending",
-        "In Progress",
-        "Completed",
-        "Overdue",
-        "Cancelled"
-      ],
-      "clientStatuses": [
-        "Active Search",
-        "In Contract",
-        "Closed Client",
-        "Past Client",
-        "Inactive"
-      ]
-    },
-    {
-      "id": "ag_skyline_02",
-      "name": "Skyline Commercial Capital",
-      "country": "United Kingdom",
-      "currency": "GBP",
-      "plan": "Enterprise",
-      "status": "Active",
-      "propertyTypes": [
-        "Office Tower",
-        "Retail Park",
-        "Industrial Hub"
-      ],
-      "leadSources": [
-        "Direct",
-        "Website",
-        "Referral",
-        "Listing Websites"
-      ],
-      "notificationPrefs": {
-        "New lead assigned": {
-          "inApp": true,
-          "email": true
-        }
-      },
-      "createdAt": "2026-08-18T10:30:00.000Z",
-      "ownerName": "Eleanor Thorne",
-      "ownerEmail": "eleanor@skylinecap.co.uk",
-      "bhkOptions": [
-        "1 RK",
-        "1 BHK",
-        "1.5 BHK",
-        "2 BHK",
-        "2.5 BHK",
-        "3 BHK",
-        "3.5 BHK",
-        "4 BHK",
-        "5+ BHK",
-        "Duplex",
-        "Penthouse",
-        "Plot / Land",
-        "Commercial Bare Shell",
-        "Furnished Office"
-      ],
-      "fontFamily": "montserrat",
-      "colorScheme": "emerald"
-    },
-    {
-      "id": "ag_coastal_03",
-      "name": "Coastal Estates International",
-      "country": "Australia",
-      "currency": "AUD",
-      "plan": "Professional",
-      "status": "Active",
-      "propertyTypes": [
-        "Beachfront House",
-        "Coastal Villa",
-        "Waterfront Penthouse"
-      ],
-      "leadSources": [
-        "Direct",
-        "Website",
-        "Referral",
-        "Listing Websites"
-      ],
-      "notificationPrefs": {
-        "New lead assigned": {
-          "inApp": true,
-          "email": true
-        }
-      },
-      "createdAt": "2026-09-01T14:15:00.000Z",
-      "ownerName": "Liam Hemsworth",
-      "ownerEmail": "liam@coastalestates.com.au",
-      "bhkOptions": [
-        "1 RK",
-        "1 BHK",
-        "1.5 BHK",
-        "2 BHK",
-        "2.5 BHK",
-        "3 BHK",
-        "3.5 BHK",
-        "4 BHK",
-        "5+ BHK",
-        "Duplex",
-        "Penthouse",
-        "Plot / Land",
-        "Commercial Bare Shell",
-        "Furnished Office"
-      ],
-      "fontFamily": "montserrat",
-      "colorScheme": "emerald"
-    },
-    {
-      "id": "ag_apex_04",
-      "name": "Apex Prime Properties",
-      "country": "UAE",
-      "currency": "AED",
-      "plan": "Professional",
-      "status": "Suspended",
-      "propertyTypes": [
-        "Downtown Apartment",
-        "Palm Villa",
-        "Marina Suite"
-      ],
-      "leadSources": [
-        "Direct",
-        "Website",
-        "Referral",
-        "Listing Websites"
-      ],
-      "notificationPrefs": {
-        "New lead assigned": {
-          "inApp": true,
-          "email": true
-        }
-      },
-      "createdAt": "2026-08-25T11:00:00.000Z",
-      "ownerName": "Tariq Al-Mansoor",
-      "ownerEmail": "tariq@apexprime.ae",
-      "bhkOptions": [
-        "1 RK",
-        "1 BHK",
-        "1.5 BHK",
-        "2 BHK",
-        "2.5 BHK",
-        "3 BHK",
-        "3.5 BHK",
-        "4 BHK",
-        "5+ BHK",
-        "Duplex",
-        "Penthouse",
-        "Plot / Land",
-        "Commercial Bare Shell",
-        "Furnished Office"
-      ],
-      "fontFamily": "montserrat",
-      "colorScheme": "emerald"
-    },
-    {
-      "id": "ag_horizon_05",
-      "name": "Horizon Real Estate Partners",
-      "country": "Canada",
-      "currency": "CAD",
-      "plan": "Starter",
-      "status": "Trial",
-      "propertyTypes": [
-        "Condo",
-        "Townhouse",
-        "Suburban Home"
-      ],
-      "leadSources": [
-        "Direct",
-        "Website",
-        "Referral",
-        "Listing Websites"
-      ],
-      "notificationPrefs": {
-        "New lead assigned": {
-          "inApp": true,
-          "email": true
-        }
-      },
-      "createdAt": "2026-09-15T09:45:00.000Z",
-      "ownerName": "Sarah Jenkins",
-      "ownerEmail": "sarah@horizonrealty.ca",
-      "bhkOptions": [
-        "1 RK",
-        "1 BHK",
-        "1.5 BHK",
-        "2 BHK",
-        "2.5 BHK",
-        "3 BHK",
-        "3.5 BHK",
-        "4 BHK",
-        "5+ BHK",
-        "Duplex",
-        "Penthouse",
-        "Plot / Land",
-        "Commercial Bare Shell",
-        "Furnished Office"
-      ],
+      "updatedAt": "2026-10-13T08:59:47.311Z",
       "fontFamily": "montserrat",
       "colorScheme": "emerald"
     }
   ],
   "notifications": [
     {
-      "id": "notif_kyp3wrqo",
-      "agencyId": "ag_ql21vxnd",
-      "userId": "",
-      "title": "New Direct Inquiry (Self-Interested) 🎯",
-      "message": "Aarav Singhania marked direct interest in \"4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park\". Tag: [Created by user itself]. Phone: 9820098200",
-      "type": "info",
-      "read": false,
-      "createdAt": "2026-10-12T19:52:37.778Z"
-    },
-    {
-      "id": "notif_2i8zzip",
-      "agencyId": "ag_vance_01",
-      "userId": "",
-      "title": "Support Response Received",
-      "message": "AgentLadders HQ replied to your ticket TICK-5633 \"Inquiry: How do WhatsApp pitch links work?\".",
-      "type": "info",
-      "read": false,
-      "createdAt": "2026-10-12T19:05:12.727Z"
-    },
-    {
-      "id": "notif_2lbkmr8",
-      "agencyId": "ag_vance_01",
-      "userId": "",
-      "title": "Support Response Received",
-      "message": "AgentLadders HQ replied to your ticket TICK-5633 \"Inquiry: How do WhatsApp pitch links work?\".",
-      "type": "info",
-      "read": false,
-      "createdAt": "2026-10-12T17:13:46.932Z"
-    },
-    {
-      "id": "notif_svy3avvv",
+      "id": "notif_1",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
-      "title": "Site Visit Confirmed 📅",
-      "message": "Client Priya Mehta confirmed 3BHK visit at Lodha Park for tomorrow 11:30 AM.",
-      "type": "info",
-      "read": true,
-      "createdAt": "2026-10-12T15:21:03.352Z"
+      "title": "Site Visit in 1 Hour ⏰",
+      "message": "Site visit with Priya & Rahul Sharma at DLF The Camellias begins at 11:30 AM.",
+      "type": "Site Visit",
+      "read": false,
+      "createdAt": "2026-10-13T08:29:47.320Z"
     },
     {
-      "id": "notif_welcome_1791807069138",
+      "id": "notif_2",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
-      "title": "Welcome to AgentLadders! 🚀",
-      "message": "Your high-performance real estate brokerage cockpit is live. Start by exploring properties or logging site visits.",
-      "type": "info",
-      "read": true,
-      "createdAt": "2026-10-12T12:11:09.138Z"
+      "title": "Token Advance Confirmed 💰",
+      "message": "Vikram Malhotra confirmed ₹10 Lakhs token RTGS for Lodha Park Worli.",
+      "type": "Deal",
+      "read": false,
+      "createdAt": "2026-10-13T06:59:47.320Z"
     },
     {
-      "id": "notif_tip_1791807069139",
+      "id": "notif_3",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
-      "title": "Agency Configuration Ready ⚙️",
-      "message": "You can customize your BHK layouts, Property Types, and Lead Sources anytime from Settings > Configuration.",
-      "type": "system",
+      "title": "New High-Intent Inquiry 🔥",
+      "message": "Ananya Sen submitted buy inquiry for Bandra West 2 BHK.",
+      "type": "Lead",
       "read": true,
-      "createdAt": "2026-10-12T11:11:09.138Z"
-    },
-    {
-      "id": "notif_7kmpeli",
-      "agencyId": "ag_ql21vxnd",
-      "userId": "all",
-      "title": "🚨 New Property Inquiry & Lead Captured",
-      "message": "Victoria Sterling just submitted an inquiry for \"Luxury Villa in Beverly Hills\". Lead automatically added to CRM pipeline.",
-      "type": "lead",
-      "read": false,
-      "createdAt": "2026-09-22T09:07:30.495Z"
-    },
-    {
-      "id": "notif_00ctc4s0",
-      "title": "Welcome to AgentLadders",
-      "message": "Your agency account has been created successfully.",
-      "read": true,
-      "userId": "usr_nntlkcy7",
-      "createdAt": "2026-09-21T11:34:10.173Z"
-    },
-    {
-      "id": "notif_hfkmz55k",
-      "title": "Welcome to AgentLadders",
-      "message": "Your agency account has been created successfully.",
-      "type": "info",
-      "read": false,
-      "userId": "usr_bt71mcv1",
-      "createdAt": "2026-09-22T10:22:05.170Z"
+      "createdAt": "2026-10-12T08:59:47.320Z"
     }
   ],
   "properties": [
     {
-      "id": "prop_ag_vance_01_1",
-      "agencyId": "ag_vance_01",
-      "title": "Vance Luxury Realty Flagship Listing",
-      "type": "Luxury Villa",
-      "price": 1850000,
-      "location": "Beverly Hills, CA",
-      "status": "Available",
-      "bedrooms": 4,
-      "bathrooms": 4,
-      "areaSqFt": 3800,
-      "sharesCount": 13,
-      "createdAt": "2026-08-10T08:00:00.000Z",
-      "publicToken": "tok_3lkxify14a",
-      "privacyMode": "Public",
-      "purpose": "For Sale",
-      "carpetAreaSqFt": 3040,
-      "furnishing": "Semi-Furnished",
-      "parking": "2",
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_vance_01_1_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Vance Luxury Realty Flagship Listing - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_vance_01_1_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_vance_01_1_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_vance_01_1_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_vance_01_1_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_vance_01_1_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_vance_01_1_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ],
-      "updatedAt": "2026-10-12T19:32:08.594Z",
-      "viewsCount": 219,
-      "bhk": "2 BHK",
-      "city": "Mumbai",
-      "locality": "",
-      "possessionStatus": "Ready to Move (OC Received)",
-      "vastuFacing": "East Facing (Vastu Compliant)",
-      "description": "",
-      "privateNotes": ""
-    },
-    {
-      "id": "prop_ag_vance_01_2",
-      "agencyId": "ag_vance_01",
-      "title": "Vance Luxury Realty Luxury Residence",
-      "type": "Penthouse",
-      "price": 3200000,
-      "location": "Exclusive Enclave",
-      "status": "Under Contract",
-      "bedrooms": 5,
-      "bathrooms": 6,
-      "areaSqFt": 5200,
-      "sharesCount": 28,
-      "createdAt": "2026-08-10T08:00:00.000Z",
-      "purpose": "For Rent",
-      "carpetAreaSqFt": 4160,
-      "furnishing": "Unfurnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_vance_01_2_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Vance Luxury Realty Luxury Residence - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_vance_01_2_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_vance_01_2_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_vance_01_2_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_vance_01_2_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_vance_01_2_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_vance_01_2_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ],
-      "publicToken": "tok_propagvance012"
-    },
-    {
-      "id": "prop_ag_skyline_02_1",
-      "agencyId": "ag_skyline_02",
-      "title": "Skyline Commercial Capital Flagship Listing",
-      "type": "Office Tower",
-      "price": 1850000,
-      "location": "Mayfair, London",
-      "status": "Available",
-      "bedrooms": 4,
-      "bathrooms": 4,
-      "areaSqFt": 3800,
-      "sharesCount": 12,
-      "createdAt": "2026-08-18T10:30:00.000Z",
-      "purpose": "For Sale",
-      "carpetAreaSqFt": 3040,
-      "furnishing": "Fully Furnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_skyline_02_1_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Skyline Commercial Capital Flagship Listing - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_1_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_1_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_1_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_1_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_1_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_skyline_02_1_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ]
-    },
-    {
-      "id": "prop_ag_skyline_02_2",
-      "agencyId": "ag_skyline_02",
-      "title": "Skyline Commercial Capital Luxury Residence",
-      "type": "Retail Park",
-      "price": 3200000,
-      "location": "Exclusive Enclave",
-      "status": "Under Contract",
-      "bedrooms": 5,
-      "bathrooms": 6,
-      "areaSqFt": 5200,
-      "sharesCount": 28,
-      "createdAt": "2026-08-18T10:30:00.000Z",
-      "purpose": "For Rent",
-      "carpetAreaSqFt": 4160,
-      "furnishing": "Semi-Furnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_skyline_02_2_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Skyline Commercial Capital Luxury Residence - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_2_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_2_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_2_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_2_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_skyline_02_2_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_skyline_02_2_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ]
-    },
-    {
-      "id": "prop_ag_coastal_03_1",
-      "agencyId": "ag_coastal_03",
-      "title": "Coastal Estates International Flagship Listing",
-      "type": "Beachfront House",
-      "price": 1850000,
-      "location": "Prime District",
-      "status": "Available",
-      "bedrooms": 4,
-      "bathrooms": 4,
-      "areaSqFt": 3800,
-      "sharesCount": 12,
-      "createdAt": "2026-09-01T14:15:00.000Z",
-      "purpose": "For Sale",
-      "carpetAreaSqFt": 3040,
-      "furnishing": "Unfurnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_coastal_03_1_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Coastal Estates International Flagship Listing - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_1_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_1_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_1_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_1_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_1_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_coastal_03_1_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ]
-    },
-    {
-      "id": "prop_ag_coastal_03_2",
-      "agencyId": "ag_coastal_03",
-      "title": "Coastal Estates International Luxury Residence",
-      "type": "Coastal Villa",
-      "price": 3200000,
-      "location": "Exclusive Enclave",
-      "status": "Under Contract",
-      "bedrooms": 5,
-      "bathrooms": 6,
-      "areaSqFt": 5200,
-      "sharesCount": 28,
-      "createdAt": "2026-09-01T14:15:00.000Z",
-      "purpose": "For Rent",
-      "carpetAreaSqFt": 4160,
-      "furnishing": "Fully Furnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_coastal_03_2_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Coastal Estates International Luxury Residence - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_2_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_2_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_2_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_2_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_coastal_03_2_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_coastal_03_2_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ]
-    },
-    {
-      "id": "prop_ag_apex_04_1",
-      "agencyId": "ag_apex_04",
-      "title": "Apex Prime Properties Flagship Listing",
-      "type": "Downtown Apartment",
-      "price": 1850000,
-      "location": "Prime District",
-      "status": "Available",
-      "bedrooms": 4,
-      "bathrooms": 4,
-      "areaSqFt": 3800,
-      "sharesCount": 12,
-      "createdAt": "2026-08-25T11:00:00.000Z",
-      "purpose": "For Sale",
-      "carpetAreaSqFt": 3040,
-      "furnishing": "Semi-Furnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_apex_04_1_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Apex Prime Properties Flagship Listing - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_apex_04_1_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_apex_04_1_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_apex_04_1_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_apex_04_1_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_apex_04_1_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_apex_04_1_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ]
-    },
-    {
-      "id": "prop_ag_apex_04_2",
-      "agencyId": "ag_apex_04",
-      "title": "Apex Prime Properties Luxury Residence",
-      "type": "Palm Villa",
-      "price": 3200000,
-      "location": "Exclusive Enclave",
-      "status": "Under Contract",
-      "bedrooms": 5,
-      "bathrooms": 6,
-      "areaSqFt": 5200,
-      "sharesCount": 28,
-      "createdAt": "2026-08-25T11:00:00.000Z",
-      "purpose": "For Rent",
-      "carpetAreaSqFt": 4160,
-      "furnishing": "Unfurnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_apex_04_2_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Apex Prime Properties Luxury Residence - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_apex_04_2_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_apex_04_2_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_apex_04_2_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_apex_04_2_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_apex_04_2_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_apex_04_2_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ]
-    },
-    {
-      "id": "prop_ag_horizon_05_1",
-      "agencyId": "ag_horizon_05",
-      "title": "Horizon Real Estate Partners Flagship Listing",
-      "type": "Condo",
-      "price": 1850000,
-      "location": "Prime District",
-      "status": "Available",
-      "bedrooms": 4,
-      "bathrooms": 4,
-      "areaSqFt": 3800,
-      "sharesCount": 12,
-      "createdAt": "2026-09-15T09:45:00.000Z",
-      "purpose": "For Sale",
-      "carpetAreaSqFt": 3040,
-      "furnishing": "Fully Furnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_horizon_05_1_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Horizon Real Estate Partners Flagship Listing - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_1_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_1_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_1_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_1_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_1_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_horizon_05_1_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ],
-      "viewsCount": 3
-    },
-    {
-      "id": "prop_ag_horizon_05_2",
-      "agencyId": "ag_horizon_05",
-      "title": "Horizon Real Estate Partners Luxury Residence",
-      "type": "Townhouse",
-      "price": 3200000,
-      "location": "Exclusive Enclave",
-      "status": "Under Contract",
-      "bedrooms": 5,
-      "bathrooms": 6,
-      "areaSqFt": 5200,
-      "sharesCount": 28,
-      "createdAt": "2026-09-15T09:45:00.000Z",
-      "purpose": "For Rent",
-      "carpetAreaSqFt": 4160,
-      "furnishing": "Semi-Furnished",
-      "parking": 2,
-      "sellerName": "Verified Property Owner",
-      "sellerPhone": "+1 (555) 234-9876",
-      "keyLocationNotes": "Key in lockbox #4920 on front door; call listing agent 2 hours prior.",
-      "media": [
-        {
-          "id": "m_prop_ag_horizon_05_2_1",
-          "url": "/images/property_hero.jpg",
-          "tag": "Exterior / Facade",
-          "isCover": true,
-          "caption": "Horizon Real Estate Partners Luxury Residence - Main Facade"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_2_2",
-          "url": "/images/deal_closing.jpg",
-          "tag": "Hall / Living Area",
-          "isCover": false,
-          "caption": "Open Living & Entertainment Hall"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_2_3",
-          "url": "/images/luxury_bedroom.jpg",
-          "tag": "Master Bedroom",
-          "isCover": false,
-          "caption": "Spacious Master Bedroom Suite"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_2_4",
-          "url": "/images/luxury_kitchen.jpg",
-          "tag": "Kitchen",
-          "isCover": false,
-          "caption": "Designer Modular Kitchen"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_2_5",
-          "url": "/images/luxury_washroom.jpg",
-          "tag": "Washroom",
-          "isCover": false,
-          "caption": "Designer Luxury Bathroom"
-        },
-        {
-          "id": "m_prop_ag_horizon_05_2_6",
-          "url": "/images/hero_dashboard.jpg",
-          "tag": "Balcony",
-          "isCover": false,
-          "caption": "Private Balcony with Skyline View"
-        }
-      ],
-      "images": [
-        "/images/property_hero.jpg",
-        "/images/deal_closing.jpg",
-        "/images/luxury_bedroom.jpg",
-        "/images/luxury_kitchen.jpg",
-        "/images/luxury_washroom.jpg",
-        "/images/hero_dashboard.jpg"
-      ],
-      "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_prop_ag_horizon_05_2_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Architectural Walkthrough Tour",
-          "type": "video"
-        }
-      ]
-    },
-    {
       "id": "prop_1",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
       "title": "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
       "type": "Apartment",
       "bhk": "4 BHK",
@@ -1565,16 +248,16 @@
       "areaSqFt": 3100,
       "carpetAreaSqFt": 2450,
       "floor": "42nd of 55 Floors",
-      "vastuFacing": "East",
+      "vastuFacing": "East Facing (Vastu Compliant)",
       "reraId": "P51900001339",
-      "possessionStatus": "Ready to Move",
+      "possessionStatus": "Ready to Move (OC Received)",
       "furnishing": "Fully Furnished",
-      "parking": "3 Reserved Covered",
+      "parking": "3+ Covered Car Parks",
       "maintenanceMonthly": 38000,
       "listingType": "For Sale",
       "sellerName": "Sunil & Neeta Singhania",
       "sellerPhone": "+91 98201 54321",
-      "keyLocationNotes": "Keys with caretaker Ramesh at Tower C gate. Society requires 2 hrs prior intimation.",
+      "keyLocationNotes": "Keys with concierge Ramesh at Tower C gate. Society requires 2 hrs prior intimation.",
       "ownerName": "Sunil Singhania",
       "description": "Spectacular 4 BHK palatial residence with unobstructed Arabian Sea views at Lodha Park Worli. Features Italian marble flooring, 11 ft clear ceiling height, private elevator lobby, Poggenpohl designer modular kitchen, servant room with separate washroom, and 7-acre private society park with Olympic-size pool.",
       "images": [
@@ -1630,37 +313,28 @@
         }
       ],
       "videoTourUrl": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-      "virtualTourUrl": "https://my.matterport.com/show/?m=sample360",
-      "videos": [
-        {
-          "id": "v_1",
-          "url": "https://www.youtube.com/watch?v=ScMzIvxBSi4",
-          "title": "4K Cinematic Walkthrough - Lodha Park Worli",
-          "type": "video"
-        }
-      ],
       "features": [
         "Arabian Sea View",
         "RERA Approved",
         "Vastu Compliant",
         "Private Elevator Lobby",
         "3 Covered Car Parks",
-        "Olympic Size Pool & 50,000 sqft Clubhouse",
+        "Olympic Size Pool",
         "100% DG Power Backup"
       ],
       "publicToken": "tok_lodha_worli_850cr",
       "privacyMode": "Public",
       "isPublic": true,
-      "sharesCount": 34,
-      "viewsCount": 288,
-      "agentName": "Aditya Rai",
-      "agentPhone": "+91 98200 12345",
-      "agentEmail": "aditya@agentladders.com",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "sharesCount": 38,
+      "viewsCount": 320,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "prop_2",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
       "title": "3 BHK High-Rise Golf Course Apartment, DLF The Camellias",
       "type": "Apartment",
       "bhk": "3 BHK",
@@ -1675,16 +349,16 @@
       "areaSqFt": 4600,
       "carpetAreaSqFt": 3850,
       "floor": "28th of 35 Floors",
-      "vastuFacing": "North-East",
+      "vastuFacing": "North-East / Ishanya (Highly Auspicious)",
       "reraId": "HRERA-PKL-GGM-1085-2019",
-      "possessionStatus": "Ready to Move",
+      "possessionStatus": "Ready to Move (OC Received)",
       "furnishing": "Semi-Furnished",
-      "parking": "3 Reserved Stilt",
+      "parking": "3+ Covered Car Parks",
       "maintenanceMonthly": 52000,
       "listingType": "For Sale",
       "sellerName": "Rajeev Mehra (CMD, Mehra Exports)",
       "sellerPhone": "+91 98110 98765",
-      "keyLocationNotes": "Biometric lock. Call owner 3 hours before confirming site visit.",
+      "keyLocationNotes": "Biometric smart lock. Call owner 3 hours before confirming site visit.",
       "ownerName": "Rajeev Mehra",
       "description": "Trophy 3 BHK residence at India’s most prestigious address: DLF The Camellias, overlooking the lush greens of the Arnold Palmer Golf Course. Features soaring 12 ft ceilings, sound-insulated double-glazed facade, automated VRV climate control, concierge 24/7, and access to the world-renowned Camellias Club.",
       "images": [
@@ -1735,16 +409,16 @@
       "publicToken": "tok_dlf_camellias_145cr",
       "privacyMode": "Public",
       "isPublic": true,
-      "sharesCount": 42,
-      "viewsCount": 410,
-      "agentName": "Aditya Rai",
-      "agentPhone": "+91 98200 12345",
-      "agentEmail": "aditya@agentladders.com",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "sharesCount": 46,
+      "viewsCount": 480,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "prop_3",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
       "title": "3 BHK Prime Garden Flat, Prestige Kingfisher",
       "type": "Apartment",
       "bhk": "3 BHK",
@@ -1759,11 +433,11 @@
       "areaSqFt": 2280,
       "carpetAreaSqFt": 1850,
       "floor": "8th of 16 Floors",
-      "vastuFacing": "East",
+      "vastuFacing": "East Facing (Vastu Compliant)",
       "reraId": "PRM/KA/RERA/1251/310/PR/170915/000234",
-      "possessionStatus": "Ready to Move",
+      "possessionStatus": "Ready to Move (OC Received)",
       "furnishing": "Semi-Furnished",
-      "parking": "2 Covered",
+      "parking": "2 Covered Car Parks",
       "maintenanceMonthly": 12500,
       "listingType": "For Sale",
       "sellerName": "Karthik Venkataraman",
@@ -1809,16 +483,16 @@
       "publicToken": "tok_prestige_indiranagar_385cr",
       "privacyMode": "Public",
       "isPublic": true,
-      "sharesCount": 19,
-      "viewsCount": 175,
-      "agentName": "Aditya Rai",
-      "agentPhone": "+91 98200 12345",
-      "agentEmail": "aditya@agentladders.com",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "sharesCount": 22,
+      "viewsCount": 210,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "prop_4",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
       "title": "2 BHK Smart Corner Home, Godrej Sky Greens",
       "type": "Apartment",
       "bhk": "2 BHK",
@@ -1833,14 +507,14 @@
       "areaSqFt": 1080,
       "carpetAreaSqFt": 840,
       "floor": "14th of 22 Floors",
-      "vastuFacing": "North",
+      "vastuFacing": "North Facing (Vastu Compliant)",
       "reraId": "P52100021482",
-      "possessionStatus": "Under Construction (Dec 2026)",
+      "possessionStatus": "Under Construction (Possession in 3-6 Months)",
       "furnishing": "Unfurnished",
-      "parking": "1 Covered",
+      "parking": "1 Covered Car Park",
       "maintenanceMonthly": 4500,
       "listingType": "For Sale",
-      "sellerName": "Adarsh Shinde (Direct Builder Allottee)",
+      "sellerName": "Adarsh Shinde",
       "sellerPhone": "+91 97654 33221",
       "keyLocationNotes": "Sample flat open for visits 10 AM to 6 PM daily.",
       "ownerName": "Adarsh Shinde",
@@ -1874,16 +548,83 @@
       "publicToken": "tok_godrej_kharadi_92l",
       "privacyMode": "Public",
       "isPublic": true,
-      "sharesCount": 15,
-      "viewsCount": 130,
-      "agentName": "Aditya Rai",
-      "agentPhone": "+91 98200 12345",
-      "agentEmail": "aditya@agentladders.com",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "sharesCount": 18,
+      "viewsCount": 165,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "prop_5",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
+      "title": "5 BHK Signature Seafront Villa, Bandra Bandstand",
+      "type": "Villa / Bungalow",
+      "bhk": "5+ BHK",
+      "purpose": "For Sale",
+      "city": "Mumbai",
+      "locality": "Bandra West",
+      "location": "Bandstand Promenade, Bandra West, Mumbai, Maharashtra",
+      "price": 280000000,
+      "status": "Available",
+      "bedrooms": 5,
+      "bathrooms": 6,
+      "areaSqFt": 6200,
+      "carpetAreaSqFt": 5100,
+      "floor": "Independent G+2 Floors",
+      "vastuFacing": "West Facing",
+      "reraId": "P51800008920",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "furnishing": "Luxury Designer Furnished",
+      "parking": "3+ Covered Car Parks",
+      "maintenanceMonthly": 65000,
+      "listingType": "For Sale",
+      "sellerName": "Rustom Framjee (Industrialist)",
+      "sellerPhone": "+91 98200 77112",
+      "keyLocationNotes": "Private driveway. Prior appointment mandatory 24 hours in advance.",
+      "ownerName": "Rustom Framjee",
+      "description": "Ultra-exclusive private seafront bungalow on Bandra Bandstand with private lap pool, elevator, rooftop sky lounge overlooking the Arabian Sea, home theater, and landscaped Zen garden.",
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg"
+      ],
+      "media": [
+        {
+          "id": "m_51",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Private Seafront Villa G+2"
+        },
+        {
+          "id": "m_52",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": false,
+          "caption": "Double Height Living Room"
+        }
+      ],
+      "features": [
+        "Arabian Sea Promenade",
+        "Private Swimming Pool",
+        "Private Elevator",
+        "Rooftop Sky Lounge",
+        "High Security Zone"
+      ],
+      "publicToken": "tok_bandra_villa_28cr",
+      "privacyMode": "Restricted",
+      "isPublic": true,
+      "sharesCount": 12,
+      "viewsCount": 140,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "prop_6",
+      "agencyId": "ag_vance_01",
       "title": "3 BHK Corporate Rental, Central Park Resorts",
       "type": "Apartment",
       "bhk": "3 BHK",
@@ -1897,33 +638,33 @@
       "bathrooms": 3,
       "areaSqFt": 2650,
       "carpetAreaSqFt": 2150,
-      "floor": "18th Floor",
-      "vastuFacing": "East",
+      "floor": "18th of 26 Floors",
+      "vastuFacing": "East Facing (Vastu Compliant)",
       "reraId": "HRERA-145-2018",
-      "possessionStatus": "Ready to Move",
+      "possessionStatus": "Ready to Move (OC Received)",
       "furnishing": "Fully Furnished",
-      "parking": "2 Covered",
+      "parking": "2 Covered Car Parks",
       "maintenanceMonthly": 12000,
       "listingType": "For Rent",
       "sellerName": "Col. Sanjiv Dewan",
       "sellerPhone": "+91 98101 22334",
-      "keyLocationNotes": "Available for immediate MNC / expat family lease.",
+      "keyLocationNotes": "Available for immediate MNC corporate executive lease.",
       "ownerName": "Col. Sanjiv Dewan",
-      "description": "Resort-style living in Central Park 2. Fully furnished with 55-inch smart TVs, imported leather recliners, golf carts within campus, heated swimming pool, 24/7 room service.",
+      "description": "Resort-style living in Central Park 2. Fully furnished with 55-inch smart TVs, imported leather recliners, internal golf cart mobility, heated swimming pool, 24/7 room service dining.",
       "images": [
         "/images/deal_closing.jpg",
         "/images/luxury_kitchen.jpg"
       ],
       "media": [
         {
-          "id": "m_51",
+          "id": "m_61",
           "url": "/images/deal_closing.jpg",
           "tag": "Hall / Living Area",
           "isCover": true,
           "caption": "Designer Furnished Living Room"
         },
         {
-          "id": "m_52",
+          "id": "m_62",
           "url": "/images/luxury_kitchen.jpg",
           "tag": "Kitchen",
           "isCover": false,
@@ -1939,158 +680,361 @@
       "publicToken": "tok_central_park_120k",
       "privacyMode": "Public",
       "isPublic": true,
-      "sharesCount": 11,
-      "viewsCount": 94,
-      "agentName": "Aditya Rai",
-      "agentPhone": "+91 98200 12345",
-      "agentEmail": "aditya@agentladders.com",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "sharesCount": 15,
+      "viewsCount": 120,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
-      "title": "Sobha Jist",
-      "purpose": "For Rent",
-      "type": "Estate",
+      "id": "prop_7",
+      "agencyId": "ag_vance_01",
+      "title": "2 BHK Fully Furnished Sea-Breeze Flat, Hiranandani Estate",
+      "type": "Apartment",
       "bhk": "2 BHK",
+      "purpose": "For Rent",
       "city": "Mumbai",
-      "locality": "Bandra",
-      "price": 25000,
-      "carpetAreaSqFt": 2500,
+      "locality": "Thane West",
+      "location": "Ghodbunder Road, Thane West, Maharashtra",
+      "price": 65000,
       "status": "Available",
-      "furnishing": "Fully Furnished",
-      "possessionStatus": "Ready to Move (OC Received)",
-      "vastuFacing": "East Facing (Vastu Compliant)",
-      "parking": "2 Open Car Parks",
+      "bedrooms": 2,
       "bathrooms": 2,
-      "description": "@bhk fully furnished with full electronics",
-      "privateNotes": "Owner is rahul 70169855",
+      "areaSqFt": 1150,
+      "carpetAreaSqFt": 890,
+      "floor": "22nd of 28 Floors",
+      "vastuFacing": "North Facing (Vastu Compliant)",
+      "reraId": "P51700000122",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "furnishing": "Fully Furnished",
+      "parking": "1 Covered Car Park",
+      "maintenanceMonthly": 6000,
+      "listingType": "For Rent",
+      "sellerName": "Nitin Sawant",
+      "sellerPhone": "+91 98205 66778",
+      "keyLocationNotes": "Keys with society gate manager. Family or IT professional preferred.",
+      "ownerName": "Nitin Sawant",
+      "description": "Neoclassical architecture at Hiranandani Estate Thane. Fully air-conditioned 2 BHK flat overlooking the Yeoor Hills and Ulhas river stream. Walking distance to Bayer, TCS Olympus.",
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/luxury_bedroom.jpg"
+      ],
       "media": [
         {
-          "id": "1791826007165",
-          "url": "blob:http://localhost:3000/28b18251-3baa-4105-a4d4-2eeebe1b77c4",
-          "tag": "General",
-          "isCover": true
-        },
-        {
-          "id": "1791826021696",
-          "url": "blob:http://localhost:3000/08b75df2-fdd5-4a4f-a726-63abecc77467",
-          "tag": "Home",
-          "isCover": false
-        },
-        {
-          "id": "1791826027024",
-          "url": "blob:http://localhost:3000/a965b17a-15ca-4724-9a85-9bc0a9d98ec2",
-          "tag": "General",
-          "isCover": false
+          "id": "m_71",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Hiranandani Neoclassical Facade"
         }
       ],
-      "id": "prop_haww6ptk",
+      "features": [
+        "Yeoor Hills View",
+        "Clubhouse & Squash Court",
+        "Air Conditioned",
+        "Ready to Move"
+      ],
+      "publicToken": "tok_thane_hiranandani_65k",
+      "privacyMode": "Public",
+      "isPublic": true,
+      "sharesCount": 9,
+      "viewsCount": 88,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "prop_8",
       "agencyId": "ag_vance_01",
-      "location": "City Center",
-      "bedrooms": 3,
-      "areaSqFt": 1800,
-      "amenities": [
-        "24/7 Security",
-        "Balcony",
-        "Elevator"
-      ],
-      "listingType": "For Rent",
-      "sellerName": "",
-      "sellerPhone": "",
-      "keyLocationNotes": "",
-      "ownerName": "",
+      "title": "4 BHK Sky Duplex Penthouse, Oberoi Sky City",
+      "type": "Penthouse",
+      "bhk": "4 BHK",
+      "purpose": "For Sale",
+      "city": "Mumbai",
+      "locality": "Lower Parel",
+      "location": "Western Express Highway, Borivali East, Mumbai, Maharashtra",
+      "price": 62000000,
+      "status": "Under Offer",
+      "bedrooms": 4,
+      "bathrooms": 5,
+      "areaSqFt": 2850,
+      "carpetAreaSqFt": 2200,
+      "floor": "58th Floor (Top Penthouse)",
+      "vastuFacing": "East Facing (Vastu Compliant)",
+      "reraId": "P51800003582",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "furnishing": "Semi-Furnished",
+      "parking": "3+ Covered Car Parks",
+      "maintenanceMonthly": 28000,
+      "listingType": "For Sale",
+      "sellerName": "Dr. Vivek Ranade",
+      "sellerPhone": "+91 98201 99887",
+      "keyLocationNotes": "Offer received from Singhania family. Legal draft under review.",
+      "ownerName": "Dr. Vivek Ranade",
+      "description": "Breathtaking 4 BHK penthouse with national park greenery views on one side and skyline on the other. Direct metro station connectivity inside campus, Oberoi Mall right next door.",
       "images": [
-        "blob:http://localhost:3000/28b18251-3baa-4105-a4d4-2eeebe1b77c4",
-        "blob:http://localhost:3000/08b75df2-fdd5-4a4f-a726-63abecc77467",
-        "blob:http://localhost:3000/a965b17a-15ca-4724-9a85-9bc0a9d98ec2"
+        "/images/deal_closing.jpg",
+        "/images/luxury_bedroom.jpg"
       ],
-      "videos": [],
-      "videoTourUrl": "",
-      "virtualTourUrl": "",
-      "createdAt": "2026-10-12T17:27:17.504Z",
-      "publicToken": "tok_prophaww6ptk",
-      "viewsCount": 2
+      "media": [
+        {
+          "id": "m_81",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": true,
+          "caption": "Sky Lounge Living Room"
+        }
+      ],
+      "features": [
+        "National Park Green View",
+        "Direct Metro Access",
+        "Double Height Balcony",
+        "3 Covered Parks"
+      ],
+      "publicToken": "tok_oberoi_skycity_62cr",
+      "privacyMode": "Public",
+      "isPublic": true,
+      "sharesCount": 29,
+      "viewsCount": 310,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "prop_9",
+      "agencyId": "ag_vance_01",
+      "title": "3 BHK Luxury Earth Home, Total Environment Windmills",
+      "type": "Apartment",
+      "bhk": "3 BHK",
+      "purpose": "For Sale",
+      "city": "Bengaluru",
+      "locality": "Whitefield",
+      "location": "EPIP Zone, Whitefield, Bengaluru, Karnataka",
+      "price": 41000000,
+      "status": "Under Offer",
+      "bedrooms": 3,
+      "bathrooms": 4,
+      "areaSqFt": 2750,
+      "carpetAreaSqFt": 2180,
+      "floor": "12th of 19 Floors",
+      "vastuFacing": "North-East / Ishanya (Highly Auspicious)",
+      "reraId": "PRM/KA/RERA/1251/446/PR/171015/000431",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "furnishing": "Luxury Designer Furnished",
+      "parking": "2 Covered Car Parks",
+      "maintenanceMonthly": 16000,
+      "listingType": "For Sale",
+      "sellerName": "Anil Chandy",
+      "sellerPhone": "+91 98450 66554",
+      "keyLocationNotes": "Token payment scheduled for Friday.",
+      "ownerName": "Anil Chandy",
+      "description": "Signature Total Environment craftsmanship with handcrafted natural stone, wire-cut brickwork, private cantilevered terrace garden with automated drip irrigation, and heated jacuzzi.",
+      "images": [
+        "/images/property_hero.jpg",
+        "/images/luxury_kitchen.jpg"
+      ],
+      "media": [
+        {
+          "id": "m_91",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Cantilevered Terrace Garden"
+        }
+      ],
+      "features": [
+        "Terrace Garden with Grass",
+        "Handcrafted Natural Stone",
+        "Microbrewery in Complex",
+        "100% Backed Up"
+      ],
+      "publicToken": "tok_total_env_41cr",
+      "privacyMode": "Public",
+      "isPublic": true,
+      "sharesCount": 24,
+      "viewsCount": 220,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "prop_10",
+      "agencyId": "ag_vance_01",
+      "title": "3.5 BHK Sunlit Golf View Residence, DLF Magnolias",
+      "type": "Apartment",
+      "bhk": "3.5 BHK",
+      "purpose": "For Sale",
+      "city": "Gurgaon (Delhi NCR)",
+      "locality": "Golf Course Road",
+      "location": "DLF Phase 5, Golf Course Road, Gurgaon, Haryana",
+      "price": 128000000,
+      "status": "Sold",
+      "bedrooms": 3,
+      "bathrooms": 4,
+      "areaSqFt": 4360,
+      "carpetAreaSqFt": 3500,
+      "floor": "16th of 24 Floors",
+      "vastuFacing": "North Facing (Vastu Compliant)",
+      "reraId": "HRERA-302-2017",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "furnishing": "Fully Furnished",
+      "parking": "3+ Covered Car Parks",
+      "maintenanceMonthly": 44000,
+      "listingType": "For Sale",
+      "sellerName": "Brijmohan Munjal Estate",
+      "sellerPhone": "+91 98111 22334",
+      "keyLocationNotes": "Sold to Tarun Kapoor. Registered at Gurgaon tehsil.",
+      "ownerName": "Tarun Kapoor",
+      "description": "Super-luxury residence at DLF Magnolias overlooking the signature golf course lake. Private elevator foyer, teakwood doors, imported Italian floorings, and Magnolias Club concierge.",
+      "images": [
+        "/images/deal_closing.jpg",
+        "/images/property_hero.jpg"
+      ],
+      "media": [
+        {
+          "id": "m_101",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": true,
+          "caption": "Living Area Overlooking Lake"
+        }
+      ],
+      "features": [
+        "Golf Course Lake Front",
+        "Sold by Marcus Vance",
+        "2% Full Commission Realized"
+      ],
+      "publicToken": "tok_dlf_magnolias_128cr",
+      "privacyMode": "Public",
+      "isPublic": true,
+      "sharesCount": 52,
+      "viewsCount": 590,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "prop_11",
+      "agencyId": "ag_vance_01",
+      "title": "2 BHK Seafront Haven, Rustomjee Elements",
+      "type": "Apartment",
+      "bhk": "2 BHK",
+      "purpose": "For Sale",
+      "city": "Mumbai",
+      "locality": "Juhu",
+      "location": "Upper Juhu, Andheri West / Juhu Circle, Mumbai",
+      "price": 47500000,
+      "status": "Sold",
+      "bedrooms": 2,
+      "bathrooms": 2,
+      "areaSqFt": 1350,
+      "carpetAreaSqFt": 1020,
+      "floor": "11th of 15 Floors",
+      "vastuFacing": "West Facing",
+      "reraId": "P51800001382",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "furnishing": "Semi-Furnished",
+      "parking": "2 Covered Car Parks",
+      "maintenanceMonthly": 19000,
+      "listingType": "For Sale",
+      "sellerName": "Kunal Kapoor",
+      "sellerPhone": "+91 98200 44332",
+      "keyLocationNotes": "Sold and registered. Handover completed.",
+      "ownerName": "Kunal Kapoor",
+      "description": "Designed by James Law Cybertecture. 40,000 sq ft landscaped podium, infinity rooftop pool, Toddler play zone, and spa wellness pavilion.",
+      "images": [
+        "/images/property_hero.jpg"
+      ],
+      "media": [
+        {
+          "id": "m_111",
+          "url": "/images/property_hero.jpg",
+          "tag": "Exterior / Facade",
+          "isCover": true,
+          "caption": "Rustomjee Elements Facade"
+        }
+      ],
+      "features": [
+        "Upper Juhu Prime Hub",
+        "Celebrity Enclave",
+        "Sold & Registered"
+      ],
+      "publicToken": "tok_rustomjee_elements_475cr",
+      "privacyMode": "Public",
+      "isPublic": true,
+      "sharesCount": 31,
+      "viewsCount": 280,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "prop_12",
+      "agencyId": "ag_vance_01",
+      "title": "3 BHK High-Floor Furnished Suite, Experion Windchants",
+      "type": "Apartment",
+      "bhk": "3 BHK",
+      "purpose": "For Rent",
+      "city": "Gurgaon (Delhi NCR)",
+      "locality": "Sector 112",
+      "location": "Dwarka Expressway, Sector 112, Gurgaon, Haryana",
+      "price": 95000,
+      "status": "Rented",
+      "bedrooms": 3,
+      "bathrooms": 3,
+      "areaSqFt": 2800,
+      "carpetAreaSqFt": 2200,
+      "floor": "24th of 28 Floors",
+      "vastuFacing": "East Facing (Vastu Compliant)",
+      "reraId": "HRERA-89-2018",
+      "possessionStatus": "Ready to Move (OC Received)",
+      "furnishing": "Fully Furnished",
+      "parking": "2 Covered Car Parks",
+      "maintenanceMonthly": 9500,
+      "listingType": "For Rent",
+      "sellerName": "Harpreet Singh Bindra",
+      "sellerPhone": "+91 98112 33445",
+      "keyLocationNotes": "Leased for 2 years to Rajesh Goel. 1 month commission received.",
+      "ownerName": "Harpreet Singh Bindra",
+      "description": "Asia’s largest residential skywalk, Experion Windchants. Full open green views, luxury clubhouse, indoor heated pool, and seamless connectivity to IGI Airport via Dwarka Expressway.",
+      "images": [
+        "/images/deal_closing.jpg"
+      ],
+      "media": [
+        {
+          "id": "m_121",
+          "url": "/images/deal_closing.jpg",
+          "tag": "Hall / Living Area",
+          "isCover": true,
+          "caption": "Skywalk Tower Living Suite"
+        }
+      ],
+      "features": [
+        "Skywalk on 7th Floor",
+        "IGI Airport 15 Mins",
+        "Rented & Tenanted"
+      ],
+      "publicToken": "tok_windchants_95k",
+      "privacyMode": "Public",
+      "isPublic": true,
+      "sharesCount": 16,
+      "viewsCount": 135,
+      "agentName": "Marcus Vance",
+      "agentPhone": "+91 98201 23456",
+      "agentEmail": "marcus@vancerealty.com",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "leads": [
     {
-      "id": "lead_bfpqjcjf",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Aarav Singhania",
-      "email": "aarav@singhania.com",
-      "phone": "9820098200",
-      "status": "New Inbound",
-      "source": "Self-Created (Public Listing)",
-      "isSelfCreated": true,
-      "selfCreatedTag": "Created by User (Self-Interest)",
-      "urgency": "Immediate (Hot Buyer)",
-      "leadPurpose": "Buy",
-      "propertyTypeNeeded": "Apartment",
-      "bhkNeeded": [
-        "4 BHK"
-      ],
-      "budgetMax": 85000000,
-      "city": "Mumbai",
-      "preferredLocalities": "Worli",
-      "requirement": "Direct Interest in 4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park (4 BHK Apartment)",
-      "notes": "Self-interested buyer from public listing for \"4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park\".",
-      "createdAt": "2026-10-12T19:52:37.778Z"
-    },
-    {
       "id": "lead_1",
       "agencyId": "ag_vance_01",
-      "name": "Brooklyn Lean",
-      "email": "brooklyn@example.com",
-      "phone": "+1 (555) 234-5678",
-      "status": "Qualified",
-      "source": "Luxury Portfolio",
-      "createdAt": "2026-09-22T16:55:32.971Z",
-      "leadPurpose": "Buy",
-      "propertyTypeNeeded": "Apartment",
-      "bhkNeeded": [
-        "2 BHK"
-      ],
-      "city": "Mumbai",
-      "preferredLocalities": "",
-      "urgency": "Within 1 Month",
-      "furnishingPreference": "Any",
-      "constructionStagePreference": "Any",
-      "vastuPreference": "Any",
-      "parkingPreference": "Any",
-      "updatedAt": "2026-10-12T19:33:58.029Z"
-    },
-    {
-      "id": "lead_2",
-      "agencyId": "ag_vance_01",
-      "name": "James Wilson",
-      "email": "james.w@example.com",
-      "phone": "+1 (555) 345-6789",
-      "status": "New",
-      "source": "Referral",
-      "createdAt": "2026-09-22T16:55:32.971Z"
-    },
-    {
-      "id": "lead_3",
-      "agencyId": "ag_vance_01",
-      "name": "Sarah Connor",
-      "email": "sarah.c@example.com",
-      "phone": "+1 (555) 456-7890",
-      "status": "Contacted",
-      "source": "Zillow",
-      "createdAt": "2026-09-22T16:55:32.971Z"
-    },
-    {
-      "id": "lead_4",
-      "agencyId": "ag_vance_01",
-      "name": "Alexander Wright",
-      "email": "alex.wright@horizon.com",
-      "phone": "+1 (555) 789-0123",
-      "status": "Qualified",
-      "source": "Property Finder",
-      "createdAt": "2026-09-22T16:55:32.971Z"
-    },
-    {
-      "id": "lead_1",
-      "agencyId": "ag_ql21vxnd",
       "name": "Vikram Malhotra",
       "email": "vikram.malhotra@induscap.in",
       "phone": "+91 98200 45678",
@@ -2103,30 +1047,23 @@
         "Lower Parel",
         "Bandra West"
       ],
-      "bhkNeeded": [
-        "4 BHK"
-      ],
+      "bhkNeeded": "4 BHK",
       "budgetMin": 70000000,
       "budgetMax": 95000000,
       "budget": "₹7.0 Cr - ₹9.5 Cr",
-      "financingStatus": "Pre-Approved HDFC Loan ₹5 Cr + Self-Funded",
+      "financingStatus": "Pre-Approved HDFC Loan ₹5 Cr + Self-Funded Escrow",
       "urgency": "Immediate (Within 30 Days)",
       "vastuPreference": "East Facing Mandatory",
-      "requirement": "Looking for ready sea-facing 4 BHK in Worli/Lower Parel. Minimum 2200 sqft carpet, 3 car parks for luxury cars.",
+      "requirement": "Looking for ready sea-facing 4 BHK in Worli/Lower Parel. Minimum 2400 sqft carpet, 3 car parks for luxury cars.",
       "priority": "Hot 🔥",
-      "assignedTo": "Aditya Rai",
-      "nextFollowUp": "2026-09-30",
-      "notes": "Very high intent. MD at Private Equity firm. Wife visited last week.",
-      "createdAt": "2026-09-29T08:42:17.171Z",
-      "propertyTypeNeeded": "Apartment",
-      "furnishingPreference": "Any",
-      "constructionStagePreference": "Any",
-      "parkingPreference": "Any",
-      "updatedAt": "2026-10-12T19:31:51.927Z"
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-13",
+      "notes": "Managing Director at Indus Capital PE. Highly decisive. Token ₹10 Lakhs ready for Lodha Park Worli.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "lead_2",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
       "name": "Priya & Rahul Sharma",
       "email": "rahul.sharma@techglobal.com",
       "phone": "+91 98100 89012",
@@ -2137,29 +1074,29 @@
       "preferredLocalities": [
         "Golf Course Road",
         "DLF Phase 5",
-        "Golf Course Ext"
+        "Golf Course Ext Road"
       ],
       "bhkNeeded": "3 BHK",
       "budgetMin": 120000000,
       "budgetMax": 160000000,
       "budget": "₹12.0 Cr - ₹16.0 Cr",
-      "financingStatus": "100% Self-Funded (ESOP Liquidation)",
+      "financingStatus": "100% Self-Funded (US Tech Stock Liquidation)",
       "urgency": "Within 45 Days",
       "vastuPreference": "North or North-East",
-      "requirement": "Golf course facing 3 or 4 BHK at DLF 5 / Golf Course Rd. High floor preferred.",
+      "requirement": "Golf course facing 3 or 4 BHK at DLF Camellias or Magnolias. High floor unobstructed greens view.",
       "priority": "Hot 🔥",
-      "assignedTo": "Aditya Rai",
-      "nextFollowUp": "2026-09-29",
-      "notes": "Show DLF The Camellias 28th floor today at 11:30 AM.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-13",
+      "notes": "Site visit confirmed today 11:30 AM at DLF The Camellias Tower 2.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "lead_3",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
       "name": "Dr. Arvind Singhania",
       "email": "arvind.singhania@apollo.org",
       "phone": "+91 98451 23456",
-      "status": "Offer Made",
+      "status": "Qualified",
       "source": "Direct Referral",
       "leadPurpose": "Buy",
       "city": "Bengaluru",
@@ -2171,23 +1108,79 @@
       "budgetMin": 35000000,
       "budgetMax": 42000000,
       "budget": "₹3.5 Cr - ₹4.2 Cr",
-      "financingStatus": "SBI Home Loan in Process",
+      "financingStatus": "SBI Special Medical Professional Home Loan Pre-Approved",
       "urgency": "Immediate",
-      "vastuPreference": "East Facing",
+      "vastuPreference": "East Facing (Vastu Compliant)",
       "requirement": "Indiranagar 3 BHK with 2 covered car parks. Ready to move only.",
       "priority": "High",
-      "assignedTo": "Aditya Rai",
-      "nextFollowUp": "2026-10-01",
-      "notes": "Offered ₹3.75 Cr on Prestige Kingfisher. Waiting for seller response.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-15",
+      "notes": "Chief of Cardiology at Apollo. Finalizing sub-registrar date for Prestige Kingfisher.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "lead_4",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
+      "name": "Rajesh & Neha Goel",
+      "email": "rajesh.goel@goelbuilders.com",
+      "phone": "+91 98115 67890",
+      "status": "Site Visit Scheduled",
+      "source": "WhatsApp Referral",
+      "leadPurpose": "Rent",
+      "city": "Gurgaon (Delhi NCR)",
+      "preferredLocalities": [
+        "Sector 48",
+        "Golf Course Ext Road"
+      ],
+      "bhkNeeded": "3 BHK",
+      "budgetMin": 100000,
+      "budgetMax": 130000,
+      "budget": "₹1.00 L - ₹1.30 L / mo",
+      "financingStatus": "Company Corporate Lease",
+      "urgency": "1st of Next Month",
+      "requirement": "Fully furnished 3 BHK in Central Park Resorts for corporate family lease with resort clubhouse access.",
+      "priority": "High",
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-13",
+      "notes": "Site showing scheduled today at 06:00 PM.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "lead_5",
+      "agencyId": "ag_vance_01",
+      "name": "Siddharth Singhania",
+      "email": "siddharth@singhaniatex.com",
+      "phone": "+91 98202 33445",
+      "status": "Negotiation",
+      "source": "MagicBricks",
+      "leadPurpose": "Buy",
+      "city": "Mumbai",
+      "preferredLocalities": [
+        "Lower Parel",
+        "Worli",
+        "Bandra West"
+      ],
+      "bhkNeeded": "4 BHK",
+      "budgetMin": 58000000,
+      "budgetMax": 65000000,
+      "budget": "₹5.8 Cr - ₹6.5 Cr",
+      "financingStatus": "Pre-Approved Axis Bank",
+      "urgency": "Within 30 Days",
+      "vastuPreference": "East Facing (Vastu Compliant)",
+      "requirement": "4 BHK duplex penthouse in Oberoi Sky City. Offer submitted at ₹6.10 Cr against asking ₹6.20 Cr.",
+      "priority": "High",
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-16",
+      "notes": "In direct price parity negotiation with seller Dr. Ranade.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "lead_6",
+      "agencyId": "ag_vance_01",
       "name": "Sneha Kulkarni",
       "email": "sneha.kulkarni@infosys.com",
       "phone": "+91 97650 99887",
-      "status": "Hot Buyer 🔥",
+      "status": "Contacted",
       "source": "MagicBricks",
       "leadPurpose": "Buy",
       "city": "Pune",
@@ -2201,137 +1194,147 @@
       "budgetMax": 10000000,
       "budget": "₹80 L - ₹1.00 Cr",
       "financingStatus": "Pre-Sanctioned ICICI Bank",
-      "urgency": "Within 2 Months",
-      "vastuPreference": "Any",
-      "requirement": "2 BHK near EON IT park Kharadi. Builder reputation matters.",
-      "priority": "Hot 🔥",
-      "assignedTo": "Aditya Rai",
-      "nextFollowUp": "2026-10-02",
-      "notes": "Senior Architect at Infosys. Interested in Godrej Sky Greens Kharadi.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
-    },
-    {
-      "id": "lead_5",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Amitabh Verma (Director, Barclays)",
-      "email": "amitabh.verma@barclays.com",
-      "phone": "+91 98115 67890",
-      "status": "Contacted",
-      "source": "WhatsApp Referral",
-      "leadPurpose": "Rent",
-      "city": "Gurgaon (Delhi NCR)",
-      "preferredLocalities": [
-        "Sector 48",
-        "Golf Course Ext"
-      ],
-      "bhkNeeded": "3 BHK",
-      "budgetMin": 100000,
-      "budgetMax": 130000,
-      "budget": "₹1.00 L - ₹1.30 L / mo",
-      "financingStatus": "Company Lease",
-      "urgency": "1st of Next Month",
-      "requirement": "Fully furnished 3 BHK in Central Park Resorts for corporate family lease.",
+      "urgency": "Within 60 Days",
+      "vastuPreference": "North Facing (Vastu Compliant)",
+      "requirement": "2 BHK near EON Free Zone Kharadi. Builder reputation and OC timeline crucial.",
       "priority": "Medium",
-      "assignedTo": "Aditya Rai",
-      "nextFollowUp": "2026-09-29",
-      "notes": "Follow-up today with Central Park Resorts photo brochure.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-15",
+      "notes": "Principal Architect at Infosys. Interested in Godrej Sky Greens Kharadi.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
-      "name": "Pooja Verma",
-      "phone": "9988776655",
-      "email": "",
-      "leadPurpose": "Buy",
-      "propertyTypeNeeded": "Apartment",
-      "bhkNeeded": [
-        "2 BHK"
-      ],
-      "city": "Mumbai",
-      "preferredLocalities": "",
-      "urgency": "Within 1 Month",
+      "id": "lead_7",
+      "agencyId": "ag_vance_01",
+      "name": "Ananya Sen",
+      "email": "ananya.sen@morganstanley.com",
+      "phone": "+91 98209 11223",
       "status": "New Inbound",
       "source": "Website",
-      "furnishingPreference": "Any",
-      "constructionStagePreference": "Any",
-      "vastuPreference": "Any",
-      "parkingPreference": "Any",
-      "id": "lead_1bxyuxic",
-      "agencyId": "ag_ql21vxnd",
-      "leadType": "Buyer",
-      "requirement": "",
-      "budget": "",
-      "locationPreference": "",
+      "leadPurpose": "Buy",
+      "city": "Mumbai",
+      "preferredLocalities": [
+        "Bandra West",
+        "Khar West"
+      ],
+      "bhkNeeded": "2 BHK",
+      "budgetMin": 35000000,
+      "budgetMax": 45000000,
+      "budget": "₹3.5 Cr - ₹4.5 Cr",
+      "financingStatus": "Self-Funded",
+      "urgency": "Exploring (3-6 Months)",
+      "requirement": "Prime Bandra West 2 BHK within walking distance to Carter Road or Hill Road.",
       "priority": "Medium",
-      "assignedTo": "Unassigned",
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-16",
+      "notes": "Inquiry received via Vance Luxury Realty showcase portal.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "lead_8",
+      "agencyId": "ag_vance_01",
+      "name": "Alok Deshmukh",
+      "email": "alok.deshmukh@emiratesnri.ae",
+      "phone": "+971 50 123 4567",
+      "status": "New Inbound",
+      "source": "Direct",
+      "leadPurpose": "Buy",
+      "city": "Pune",
+      "preferredLocalities": [
+        "Kharadi",
+        "Baner"
+      ],
+      "bhkNeeded": "2 BHK",
+      "budgetMin": 9000000,
+      "budgetMax": 11000000,
+      "budget": "₹90 L - ₹1.10 Cr",
+      "financingStatus": "NRE Bank Wire",
+      "urgency": "Next India Trip (December)",
+      "requirement": "High rental yield residential unit in Pune IT corridors for NRI investment portfolio.",
+      "priority": "Medium",
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "2026-10-18",
+      "notes": "Wants 360-virtual video tour and rent yield projection sheet.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "lead_9",
+      "agencyId": "ag_vance_01",
+      "name": "Tarun Kapoor",
+      "email": "tarun.kapoor@kapoorlogistics.in",
+      "phone": "+91 98110 55667",
+      "status": "Won",
+      "source": "Direct Referral",
+      "leadPurpose": "Buy",
+      "city": "Gurgaon (Delhi NCR)",
+      "preferredLocalities": [
+        "Golf Course Road"
+      ],
+      "bhkNeeded": "3.5 BHK",
+      "budgetMin": 120000000,
+      "budgetMax": 135000000,
+      "budget": "₹12.80 Cr",
+      "financingStatus": "All Cash / Business Funds",
+      "urgency": "Closed",
+      "requirement": "DLF Magnolias 3.5 BHK Golf View unit. Deal completed.",
+      "priority": "High",
+      "assignedTo": "Marcus Vance",
       "nextFollowUp": "",
-      "notes": "",
-      "createdAt": "2026-10-12T19:54:31.497Z"
+      "notes": "Client successfully bought DLF Magnolias 3.5 BHK for ₹12.80 Cr. Full commission received.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "lead_10",
+      "agencyId": "ag_vance_01",
+      "name": "Deepak Jain",
+      "email": "deepak.jain@suratgems.com",
+      "phone": "+91 98251 77889",
+      "status": "Lost",
+      "source": "Housing.com",
+      "leadPurpose": "Buy",
+      "city": "Mumbai",
+      "preferredLocalities": [
+        "Bandra West"
+      ],
+      "bhkNeeded": "Commercial Bare Shell",
+      "budgetMin": 50000000,
+      "budgetMax": 60000000,
+      "budget": "₹5.0 Cr",
+      "financingStatus": "Business Loan",
+      "urgency": "Cancelled",
+      "requirement": "High street retail showroom in Bandra. Landlord rejected restaurant NOC; client moved to BKC.",
+      "priority": "Low",
+      "assignedTo": "Marcus Vance",
+      "nextFollowUp": "",
+      "notes": "Deal closed lost due to municipal zoning license restrictions.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "deals": [
     {
-      "id": "deal_ag_vance_01_1",
-      "agencyId": "ag_vance_01",
-      "title": "Acquisition of Vance Luxury Realty Flagship",
-      "amount": 1850000,
-      "stage": "Closed Won",
-      "probability": 100,
-      "commissionAmount": 46250,
-      "assignedBroker": "Marcus Vance",
-      "expectedCloseDate": "2026-09-10",
-      "createdAt": "2026-08-10T08:00:00.000Z"
-    },
-    {
-      "id": "deal_ag_skyline_02_1",
-      "agencyId": "ag_skyline_02",
-      "title": "Acquisition of Skyline Commercial Capital Flagship",
-      "amount": 1850000,
-      "stage": "Closed Won",
-      "probability": 100,
-      "commissionAmount": 46250,
-      "assignedBroker": "Eleanor Thorne",
-      "expectedCloseDate": "2026-09-10",
-      "createdAt": "2026-08-18T10:30:00.000Z"
-    },
-    {
-      "id": "deal_ag_coastal_03_1",
-      "agencyId": "ag_coastal_03",
-      "title": "Acquisition of Coastal Estates International Flagship",
-      "amount": 1850000,
-      "stage": "Closed Won",
-      "probability": 100,
-      "commissionAmount": 46250,
-      "assignedBroker": "Liam Hemsworth",
-      "expectedCloseDate": "2026-09-10",
-      "createdAt": "2026-09-01T14:15:00.000Z"
-    },
-    {
-      "id": "deal_ag_apex_04_1",
-      "agencyId": "ag_apex_04",
-      "title": "Acquisition of Apex Prime Properties Flagship",
-      "amount": 1850000,
-      "stage": "Closed Won",
-      "probability": 100,
-      "commissionAmount": 46250,
-      "assignedBroker": "Tariq Al-Mansoor",
-      "expectedCloseDate": "2026-09-10",
-      "createdAt": "2026-08-25T11:00:00.000Z"
-    },
-    {
-      "id": "deal_ag_horizon_05_1",
-      "agencyId": "ag_horizon_05",
-      "title": "Acquisition of Horizon Real Estate Partners Flagship",
-      "amount": 1850000,
-      "stage": "Closed Won",
-      "probability": 100,
-      "commissionAmount": 46250,
-      "assignedBroker": "Sarah Jenkins",
-      "expectedCloseDate": "2026-09-10",
-      "createdAt": "2026-09-15T09:45:00.000Z"
-    },
-    {
       "id": "deal_1",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
+      "title": "Oberoi Sky City 4 BHK Duplex Sale",
+      "propertyId": "prop_8",
+      "propertyName": "4 BHK Sky Duplex Penthouse, Oberoi Sky City",
+      "leadId": "lead_5",
+      "clientName": "Siddharth Singhania",
+      "dealType": "Outright Sale",
+      "amount": 62000000,
+      "stage": "Negotiation",
+      "buyerCommissionPercent": 1,
+      "sellerCommissionPercent": 1,
+      "totalCommission": 1240000,
+      "commissionRate": "2.0%",
+      "commissionAmount": 1240000,
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-10-28",
+      "notes": "Buyer offered ₹6.10 Cr, seller firm at ₹6.20 Cr with Italian modular kitchen included. Closing gap.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "deal_2",
+      "agencyId": "ag_vance_01",
       "title": "Lodha Park Worli 4 BHK Outright Sale",
       "propertyId": "prop_1",
       "propertyName": "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
@@ -2339,20 +1342,20 @@
       "clientName": "Vikram Malhotra",
       "dealType": "Outright Sale",
       "amount": 85000000,
-      "stage": "Token / Bayana Received",
+      "stage": "Token Received",
       "buyerCommissionPercent": 1,
       "sellerCommissionPercent": 1,
       "totalCommission": 1700000,
       "commissionRate": "2.0%",
       "commissionAmount": 1700000,
-      "assignedBroker": "Aditya Rai",
-      "expectedCloseDate": "2026-10-15",
-      "notes": "Token ₹10 Lakhs received. Drafting Agreement to Sale (ATS).",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-10-23",
+      "notes": "Earnest bayana token ₹10 Lakhs credited to seller escrow account. Drafting Agreement to Sale (ATS).",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
-      "id": "deal_2",
-      "agencyId": "ag_ql21vxnd",
+      "id": "deal_3",
+      "agencyId": "ag_vance_01",
       "title": "DLF The Camellias 3 BHK Resale",
       "propertyId": "prop_2",
       "propertyName": "3 BHK High-Rise Golf Course Apartment, DLF The Camellias",
@@ -2360,20 +1363,20 @@
       "clientName": "Priya & Rahul Sharma",
       "dealType": "Outright Sale",
       "amount": 145000000,
-      "stage": "Agreement to Sale (ATS)",
+      "stage": "Agreement Drafted",
       "buyerCommissionPercent": 1,
       "sellerCommissionPercent": 1,
       "totalCommission": 2900000,
       "commissionRate": "2.0%",
       "commissionAmount": 2900000,
-      "assignedBroker": "Aditya Rai",
-      "expectedCloseDate": "2026-10-30",
-      "notes": "ATS signed. Buyer clearing HDFC loan disbursement.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-10-28",
+      "notes": "Bilingual ATS vetted by both advocates. HDFC Bank sanction letter released.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
-      "id": "deal_3",
-      "agencyId": "ag_ql21vxnd",
+      "id": "deal_4",
+      "agencyId": "ag_vance_01",
       "title": "Prestige Kingfisher Indiranagar 3 BHK",
       "propertyId": "prop_3",
       "propertyName": "3 BHK Prime Garden Flat, Prestige Kingfisher",
@@ -2381,1195 +1384,1200 @@
       "clientName": "Dr. Arvind Singhania",
       "dealType": "Outright Sale",
       "amount": 38500000,
-      "stage": "Stamp Duty & Registration",
+      "stage": "Registration Pending",
       "buyerCommissionPercent": 2,
       "sellerCommissionPercent": 1,
       "totalCommission": 1155000,
       "commissionRate": "3.0%",
       "commissionAmount": 1155000,
-      "assignedBroker": "Aditya Rai",
-      "expectedCloseDate": "2026-10-05",
-      "notes": "Sub-registrar appointment booked for Tuesday 11 AM.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-10-16",
+      "notes": "Sub-registrar appointment booked for Dr. Singhania. 1% TDS challan 26QB paid.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
-      "title": "Test Deal 1",
-      "clientName": "Vikram Malhotra",
-      "propertyName": "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
-      "amount": 5000000,
+      "id": "deal_5",
+      "agencyId": "ag_vance_01",
+      "title": "DLF Magnolias 3.5 BHK Golf View Resale",
+      "propertyId": "prop_10",
+      "propertyName": "3.5 BHK Sunlit Golf View Residence, DLF Magnolias",
+      "leadId": "lead_9",
+      "clientName": "Tarun Kapoor",
       "dealType": "Outright Sale",
-      "stage": "Token Received",
-      "id": "deal_5c2p5fdm",
-      "agencyId": "ag_ql21vxnd",
-      "propertyId": "",
-      "leadId": "",
-      "probability": 50,
-      "commissionRate": "2.5%",
-      "commissionAmount": 125000,
+      "amount": 128000000,
+      "stage": "Closed Won",
+      "buyerCommissionPercent": 1,
+      "sellerCommissionPercent": 1,
+      "totalCommission": 2560000,
+      "commissionRate": "2.0%",
+      "commissionAmount": 2560000,
       "assignedBroker": "Marcus Vance",
-      "expectedCloseDate": "2026-11-11",
-      "createdAt": "2026-10-12T18:18:52.602Z",
-      "updatedAt": "2026-10-12T19:57:35.351Z"
+      "expectedCloseDate": "2026-10-12",
+      "notes": "Completed registry at Gurgaon tehsil. Full ₹25.60 L commission received via RTGS.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "deal_6",
+      "agencyId": "ag_vance_01",
+      "title": "Experion Windchants Corporate Lease",
+      "propertyId": "prop_12",
+      "propertyName": "3 BHK High-Floor Furnished Suite, Experion Windchants",
+      "leadId": "lead_4",
+      "clientName": "Rajesh & Neha Goel",
+      "dealType": "Rental Lease",
+      "amount": 1140000,
+      "stage": "Closed Won",
+      "buyerCommissionPercent": 8.33,
+      "sellerCommissionPercent": 0,
+      "totalCommission": 95000,
+      "commissionRate": "1 Month Rent",
+      "commissionAmount": 95000,
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-10-12",
+      "notes": "Corporate leave and license registered for 24 months. Security deposit escrow exchanged.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "deal_7",
+      "agencyId": "ag_vance_01",
+      "title": "Bandra West High Street Retail Showroom",
+      "propertyId": "prop_5",
+      "propertyName": "5 BHK Signature Seafront Villa, Bandra Bandstand",
+      "leadId": "lead_10",
+      "clientName": "Deepak Jain",
+      "dealType": "Outright Sale",
+      "amount": 90000000,
+      "stage": "Lost",
+      "buyerCommissionPercent": 1,
+      "sellerCommissionPercent": 1,
+      "totalCommission": 1800000,
+      "commissionRate": "2.0%",
+      "commissionAmount": 1800000,
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-10-12",
+      "notes": "Municipal restaurant NOC denied by housing society. Client retracted deposit.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "clients": [
     {
-      "id": "cli_gyty864g",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Aarav Singhania",
-      "email": "aarav@singhania.com",
-      "phone": "9820098200",
-      "type": "Direct Buyer (Self-Created)",
-      "source": "Self-Created (Public Listing)",
-      "isSelfCreated": true,
-      "selfCreatedTag": "Created by User (Self-Interest)",
-      "requirement": "Interested in 4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park (4 BHK Apartment)",
-      "budget": "₹8,50,00,000",
-      "preferredLocation": "Worli",
-      "notes": "Marked direct interest via public listing showcase page.",
-      "createdAt": "2026-10-12T19:52:37.778Z"
-    },
-    {
-      "id": "cli_1",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Jonathan Reynolds",
-      "email": "jreynolds@invest.org",
-      "phone": "+1 (555) 890-1234",
-      "type": "Buyer",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "cli_2",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Sophia Martinez",
-      "email": "smartinez@designlab.co",
-      "phone": "+1 (555) 901-2345",
-      "type": "Renter",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "cli_3",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Oliver Zhang",
-      "email": "oliver.zhang@capital.hk",
-      "phone": "+1 (555) 012-3456",
-      "type": "Investor",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
       "id": "cli_1",
       "agencyId": "ag_vance_01",
-      "name": "Jonathan Reynolds",
-      "email": "jreynolds@invest.org",
-      "phone": "+1 (555) 890-1234",
+      "name": "Vikram Malhotra",
+      "email": "vikram.malhotra@induscap.in",
+      "phone": "+91 98200 45678",
       "type": "Buyer",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "source": "WhatsApp Referral",
+      "requirement": "4 BHK Luxury Sea-Facing Flat, Worli Sea Face",
+      "budget": "₹8.50 Cr",
+      "preferredLocation": "Worli, Mumbai",
+      "assignedManager": "Marcus Vance",
+      "notes": "MD at Indus Capital Advisors. High net worth, fast closing.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "cli_2",
       "agencyId": "ag_vance_01",
-      "name": "Sophia Martinez",
-      "email": "smartinez@designlab.co",
-      "phone": "+1 (555) 901-2345",
-      "type": "Renter",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Priya & Rahul Sharma",
+      "email": "rahul.sharma@techglobal.com",
+      "phone": "+91 98100 89012",
+      "type": "Buyer",
+      "source": "99acres",
+      "requirement": "3 BHK High-Rise Golf Course Apartment, DLF Phase 5",
+      "budget": "₹14.50 Cr",
+      "preferredLocation": "Golf Course Road, Gurgaon",
+      "assignedManager": "Marcus Vance",
+      "notes": "Silicon Valley tech founder family.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "cli_3",
       "agencyId": "ag_vance_01",
-      "name": "Oliver Zhang",
-      "email": "oliver.zhang@capital.hk",
-      "phone": "+1 (555) 012-3456",
-      "type": "Investor",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Dr. Arvind Singhania",
+      "email": "arvind.singhania@apollo.org",
+      "phone": "+91 98451 23456",
+      "type": "Buyer",
+      "source": "Direct Referral",
+      "requirement": "3 BHK Prime Garden Flat, Indiranagar",
+      "budget": "₹3.85 Cr",
+      "preferredLocation": "Indiranagar, Bengaluru",
+      "assignedManager": "Marcus Vance",
+      "notes": "Apollo Hospitals Senior Consultant.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "cli_4",
+      "agencyId": "ag_vance_01",
+      "name": "Sneha Kulkarni",
+      "email": "sneha.kulkarni@infosys.com",
+      "phone": "+91 97650 99887",
+      "type": "Buyer",
+      "source": "MagicBricks",
+      "requirement": "2 BHK Smart Corner Home, Kharadi IT Park",
+      "budget": "₹92 Lakhs",
+      "preferredLocation": "Kharadi, Pune",
+      "assignedManager": "Marcus Vance",
+      "notes": "Infosys Principal Architect.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "cli_5",
+      "agencyId": "ag_vance_01",
+      "name": "Rajesh & Neha Goel",
+      "email": "rajesh.goel@goelbuilders.com",
+      "phone": "+91 98115 67890",
+      "type": "Tenant",
+      "source": "WhatsApp Referral",
+      "requirement": "3 BHK Corporate Lease, Central Park Resorts",
+      "budget": "₹1.20 L / mo",
+      "preferredLocation": "Sector 48, Gurgaon",
+      "assignedManager": "Marcus Vance",
+      "notes": "Corporate MNC lease contract.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "cli_6",
+      "agencyId": "ag_vance_01",
+      "name": "Tarun Kapoor",
+      "email": "tarun.kapoor@kapoorlogistics.in",
+      "phone": "+91 98110 55667",
+      "type": "Buyer",
+      "source": "Direct Referral",
+      "requirement": "DLF Magnolias 3.5 BHK Resale",
+      "budget": "₹12.80 Cr",
+      "preferredLocation": "Golf Course Road, Gurgaon",
+      "assignedManager": "Marcus Vance",
+      "notes": "Closed client. Managing partner at Kapoor Logistics.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "cli_7",
+      "agencyId": "ag_vance_01",
+      "name": "Siddharth Singhania",
+      "email": "siddharth@singhaniatex.com",
+      "phone": "+91 98202 33445",
+      "type": "Buyer",
+      "source": "MagicBricks",
+      "requirement": "Oberoi Sky City 4 BHK Sky Duplex",
+      "budget": "₹6.20 Cr",
+      "preferredLocation": "Lower Parel, Mumbai",
+      "assignedManager": "Marcus Vance",
+      "notes": "Director at Singhania Textiles.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "companies": [
     {
       "id": "comp_1",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Apex Horizon Capital",
-      "industry": "Private Equity / Real Estate",
-      "website": "https://apexhorizon.example.com",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "comp_2",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Sterling Development Group",
-      "industry": "Commercial Property Development",
-      "website": "https://sterlingdev.example.com",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "comp_3",
-      "agencyId": "ag_ql21vxnd",
-      "name": "OmniGlobal Hospitality",
-      "industry": "Hotels & Serviced Residences",
-      "website": "https://omniglobal.example.com",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "comp_1",
       "agencyId": "ag_vance_01",
-      "name": "Apex Horizon Capital",
-      "industry": "Private Equity / Real Estate",
-      "website": "https://apexhorizon.example.com",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Indus Capital Advisors",
+      "industry": "Private Equity & Venture Capital",
+      "website": "https://induscap.in",
+      "contactPerson": "Vikram Malhotra",
+      "phone": "+91 98200 45678",
+      "email": "vikram.malhotra@induscap.in",
+      "address": "One BKC, Bandra Kurla Complex, Mumbai",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "comp_2",
       "agencyId": "ag_vance_01",
-      "name": "Sterling Development Group",
-      "industry": "Commercial Property Development",
-      "website": "https://sterlingdev.example.com",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Barclays Global Service Centre",
+      "industry": "Investment Banking",
+      "website": "https://barclays.in",
+      "contactPerson": "Corporate Relocations Desk",
+      "phone": "+91 98115 67890",
+      "email": "leasing@barclays.example.com",
+      "address": "DLF Cyber City, Tower 10, Gurgaon",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "comp_3",
       "agencyId": "ag_vance_01",
-      "name": "OmniGlobal Hospitality",
-      "industry": "Hotels & Serviced Residences",
-      "website": "https://omniglobal.example.com",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Mehra Exports Pvt Ltd",
+      "industry": "Textile & Garment Exports",
+      "website": "https://mehraexports.example.com",
+      "contactPerson": "Rajeev Mehra",
+      "phone": "+91 98110 98765",
+      "email": "mehra@mehraexports.example.com",
+      "address": "Udyog Vihar Phase 4, Gurgaon",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "comp_4",
+      "agencyId": "ag_vance_01",
+      "name": "Apollo Health Enterprises",
+      "industry": "Healthcare & Hospitals",
+      "website": "https://apollohospitals.com",
+      "contactPerson": "Dr. Arvind Singhania",
+      "phone": "+91 98451 23456",
+      "email": "arvind.singhania@apollo.org",
+      "address": "Bannerghatta Road, Bengaluru",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "owners": [
     {
       "id": "own_1",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Richard Davenport",
-      "email": "richard@davenport.co",
-      "phone": "+1 (555) 111-2233",
-      "propertiesCount": 4,
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "own_2",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Eleanor Vance",
-      "email": "evance@estateholdings.com",
-      "phone": "+1 (555) 222-3344",
-      "propertiesCount": 2,
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "own_3",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Robert Chen",
-      "email": "rchen@pacificridge.io",
-      "phone": "+1 (555) 333-4455",
-      "propertiesCount": 6,
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "own_1",
       "agencyId": "ag_vance_01",
-      "name": "Richard Davenport",
-      "email": "richard@davenport.co",
-      "phone": "+1 (555) 111-2233",
-      "propertiesCount": 4,
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Sunil & Neeta Singhania",
+      "email": "sunil.singhania@lodhapark.in",
+      "phone": "+91 98201 54321",
+      "propertiesCount": 2,
+      "ownerType": "HNI Individual Landlord",
+      "primaryProperty": "Lodha Park Worli 4 BHK",
+      "notes": "Exclusive sales mandate granted to Vance Luxury Realty for 90 days.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "own_2",
       "agencyId": "ag_vance_01",
-      "name": "Eleanor Vance",
-      "email": "evance@estateholdings.com",
-      "phone": "+1 (555) 222-3344",
-      "propertiesCount": 2,
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Rajeev Mehra",
+      "email": "mehra@dlfcamellias.in",
+      "phone": "+91 98110 98765",
+      "propertiesCount": 1,
+      "ownerType": "Corporate Industrialist",
+      "primaryProperty": "DLF The Camellias 3 BHK",
+      "notes": "Owner of Mehra Exports. Selling Camellias unit to upgrade to 5 BHK penthouse.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "own_3",
       "agencyId": "ag_vance_01",
-      "name": "Robert Chen",
-      "email": "rchen@pacificridge.io",
-      "phone": "+1 (555) 333-4455",
-      "propertiesCount": 6,
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Karthik Venkataraman",
+      "email": "karthik.v@gmail.com",
+      "phone": "+91 98450 11223",
+      "propertiesCount": 1,
+      "ownerType": "NRI Landlord",
+      "primaryProperty": "Prestige Kingfisher Indiranagar 3 BHK",
+      "notes": "Based out of Singapore. Given Power of Attorney to local advocate for registration.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "own_4",
+      "agencyId": "ag_vance_01",
+      "name": "Col. Sanjiv Dewan",
+      "email": "sanjiv.dewan@gmail.com",
+      "phone": "+91 98101 22334",
+      "propertiesCount": 2,
+      "ownerType": "HNI Landlord",
+      "primaryProperty": "Central Park Resorts 3 BHK",
+      "notes": "Prefers long-term multinational corporate executive tenants.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "own_5",
+      "agencyId": "ag_vance_01",
+      "name": "Adarsh Shinde",
+      "email": "adarsh.shinde@builderallottee.in",
+      "phone": "+91 97654 33221",
+      "propertiesCount": 1,
+      "ownerType": "First Allottee Investor",
+      "primaryProperty": "Godrej Sky Greens Kharadi 2 BHK",
+      "notes": "Bought during pre-launch. Liquidating for ~35% capital appreciation.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "brokers": [
     {
       "id": "brk_1",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Marcus Vance",
-      "agency": "Vance & Partners Luxury Real Estate",
-      "commissionSplit": "70/30",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "brk_2",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Elena Rostova",
-      "agency": "Metropolitan Commercial Realty",
-      "commissionSplit": "50/50",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "brk_3",
-      "agencyId": "ag_ql21vxnd",
-      "name": "David Sterling",
-      "agency": "Prime Coastal Estates",
-      "commissionSplit": "60/40",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "brk_1",
       "agencyId": "ag_vance_01",
-      "name": "Marcus Vance",
-      "agency": "Vance & Partners Luxury Real Estate",
-      "commissionSplit": "70/30",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Sanjay Chhabra",
+      "agency": "Chhabra Associates Gurgaon",
+      "commissionSplit": "50/50 Channel Partner Split",
+      "phone": "+91 98101 77665",
+      "email": "sanjay@chhabraassociates.in",
+      "licenseNumber": "HRERA-AGENT-2021-089",
+      "territory": "Gurgaon Golf Course Road & DLF 5",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "brk_2",
       "agencyId": "ag_vance_01",
-      "name": "Elena Rostova",
-      "agency": "Metropolitan Commercial Realty",
-      "commissionSplit": "50/50",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Manish Parekh",
+      "agency": "South Mumbai Luxury Homes",
+      "commissionSplit": "50/50 Co-Brokerage Split",
+      "phone": "+91 98200 88990",
+      "email": "manish@somuluxury.in",
+      "licenseNumber": "MAHARERA-A519000124",
+      "territory": "Worli, Lower Parel & Malabar Hill",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "brk_3",
       "agencyId": "ag_vance_01",
-      "name": "David Sterling",
-      "agency": "Prime Coastal Estates",
-      "commissionSplit": "60/40",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "Girish Rao",
+      "agency": "Bangalore Prime Properties",
+      "commissionSplit": "60/40 Co-Brokerage Split",
+      "phone": "+91 98450 33445",
+      "email": "girish@bangaloreprime.in",
+      "licenseNumber": "KARERA-AGENT-2020-045",
+      "territory": "Indiranagar, Koramangala & Lavelle Road",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "invoices": [
     {
       "id": "inv_1",
-      "agencyId": "ag_ql21vxnd",
-      "number": "INV-2026-001",
-      "clientName": "Jonathan Reynolds",
-      "amount": 90000,
-      "status": "Paid",
-      "dueDate": "2026-08-30",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "inv_2",
-      "agencyId": "ag_ql21vxnd",
-      "number": "INV-2026-002",
-      "clientName": "Sophia Martinez",
-      "amount": 18000,
-      "status": "Pending",
-      "dueDate": "2026-10-15",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "inv_3",
-      "agencyId": "ag_ql21vxnd",
-      "number": "INV-2026-003",
-      "clientName": "Apex Horizon Capital",
-      "amount": 45000,
-      "status": "Overdue",
-      "dueDate": "2026-09-10",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "inv_1",
       "agencyId": "ag_vance_01",
       "number": "INV-2026-001",
-      "clientName": "Jonathan Reynolds",
-      "amount": 90000,
+      "clientName": "Tarun Kapoor",
+      "amount": 2560000,
       "status": "Paid",
-      "dueDate": "2026-08-30",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "dueDate": "2026-10-12",
+      "dealRef": "DLF Magnolias 3.5 BHK Golf View Resale",
+      "issueDate": "2026-09-29",
+      "notes": "2% Brokerage on DLF Magnolias Sale (₹12.80 Cr @ 2% + 18% GST). Full payment received.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "inv_2",
       "agencyId": "ag_vance_01",
       "number": "INV-2026-002",
-      "clientName": "Sophia Martinez",
-      "amount": 18000,
-      "status": "Pending",
-      "dueDate": "2026-10-15",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "clientName": "Dr. Arvind Singhania",
+      "amount": 1155000,
+      "status": "Paid",
+      "dueDate": "2026-10-12",
+      "dealRef": "Prestige Kingfisher Indiranagar 3 BHK",
+      "issueDate": "2026-10-06",
+      "notes": "3% Brokerage on Prestige Indiranagar Sale (₹3.85 Cr @ 3%). Cleared via RTGS.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "inv_3",
       "agencyId": "ag_vance_01",
       "number": "INV-2026-003",
-      "clientName": "Apex Horizon Capital",
-      "amount": 45000,
-      "status": "Overdue",
-      "dueDate": "2026-09-10",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "clientName": "Vikram Malhotra",
+      "amount": 850000,
+      "status": "Pending",
+      "dueDate": "2026-10-23",
+      "dealRef": "Lodha Park Worli 4 BHK Outright Sale",
+      "issueDate": "2026-10-13",
+      "notes": "1% Buyer Milestone Commission on Lodha Park ATS execution (₹8.50 L + GST).",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "inv_4",
+      "agencyId": "ag_vance_01",
+      "number": "INV-2026-004",
+      "clientName": "Sunil & Neeta Singhania",
+      "amount": 850000,
+      "status": "Pending",
+      "dueDate": "2026-10-23",
+      "dealRef": "Lodha Park Worli 4 BHK Outright Sale",
+      "issueDate": "2026-10-13",
+      "notes": "1% Exclusive Seller Mandate Commission on Lodha Park Worli closing.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "inv_5",
+      "agencyId": "ag_vance_01",
+      "number": "INV-2026-005",
+      "clientName": "Priya & Rahul Sharma",
+      "amount": 1450000,
+      "status": "Draft",
+      "dueDate": "2026-10-28",
+      "dealRef": "DLF The Camellias 3 BHK Resale",
+      "issueDate": "2026-10-13",
+      "notes": "1% Buyer Commission on DLF The Camellias resale transaction milestone.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "payments": [
     {
       "id": "pay_1",
-      "agencyId": "ag_ql21vxnd",
-      "reference": "TXN-984210",
-      "invoiceNumber": "INV-2026-001",
-      "amount": 90000,
-      "method": "Bank Transfer",
-      "status": "Completed",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "pay_2",
-      "agencyId": "ag_ql21vxnd",
-      "reference": "TXN-984211",
-      "invoiceNumber": "INV-2026-002",
-      "amount": 5000,
-      "method": "Credit Card",
-      "status": "Processing",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "pay_1",
       "agencyId": "ag_vance_01",
-      "reference": "TXN-984210",
+      "reference": "RTGS-HDFC-09823412",
       "invoiceNumber": "INV-2026-001",
-      "amount": 90000,
-      "method": "Bank Transfer",
+      "amount": 2560000,
+      "method": "NEFT / RTGS",
       "status": "Completed",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "paymentDate": "2026-10-12",
+      "payerName": "Tarun Kapoor",
+      "notes": "Full clearance for DLF Magnolias brokerage.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "pay_2",
       "agencyId": "ag_vance_01",
-      "reference": "TXN-984211",
+      "reference": "NEFT-ICICI-44129803",
       "invoiceNumber": "INV-2026-002",
-      "amount": 5000,
-      "method": "Credit Card",
-      "status": "Processing",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "amount": 1155000,
+      "method": "NEFT / RTGS",
+      "status": "Completed",
+      "paymentDate": "2026-10-12",
+      "payerName": "Dr. Arvind Singhania",
+      "notes": "Brokerage fee for Prestige Kingfisher transaction.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "pay_3",
+      "agencyId": "ag_vance_01",
+      "reference": "ESCROW-TOKEN-2026-01",
+      "invoiceNumber": "INV-2026-003",
+      "amount": 1000000,
+      "method": "Cheque / Escrow",
+      "status": "Completed",
+      "paymentDate": "2026-10-13",
+      "payerName": "Vikram Malhotra",
+      "notes": "Earnest Bayana deposit held in escrow for Lodha Park Worli.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "expenses": [
     {
       "id": "exp_1",
-      "agencyId": "ag_ql21vxnd",
-      "category": "Marketing",
-      "description": "Zillow & Bayut Premium Featured Placement",
-      "amount": 2400,
-      "date": "2026-09-05",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "exp_2",
-      "agencyId": "ag_ql21vxnd",
-      "category": "Software",
-      "description": "Matterport 3D Virtual Tour Hosting",
-      "amount": 350,
-      "date": "2026-09-10",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "exp_3",
-      "agencyId": "ag_ql21vxnd",
-      "category": "Office",
-      "description": "Agency Client Hospitality & Escrow Closing Dinner",
-      "amount": 720,
-      "date": "2026-09-18",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "exp_1",
       "agencyId": "ag_vance_01",
       "category": "Marketing",
-      "description": "Zillow & Bayut Premium Featured Placement",
-      "amount": 2400,
-      "date": "2026-09-05",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "description": "99acres & MagicBricks Premium Verified Super-Boost Ads",
+      "amount": 45000,
+      "date": "2026-10-01",
+      "vendor": "99acres Info Edge India Ltd",
+      "paymentMethod": "Corporate Credit Card",
+      "taxDeductible": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "exp_2",
       "agencyId": "ag_vance_01",
-      "category": "Software",
-      "description": "Matterport 3D Virtual Tour Hosting",
-      "amount": 350,
-      "date": "2026-09-10",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "category": "Marketing",
+      "description": "Meta Ads & Instagram Reels Ultra-Luxury Video Campaign",
+      "amount": 28000,
+      "date": "2026-10-05",
+      "vendor": "Meta Platforms Ireland",
+      "paymentMethod": "Corporate Credit Card",
+      "taxDeductible": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "exp_3",
       "agencyId": "ag_vance_01",
-      "category": "Office",
-      "description": "Agency Client Hospitality & Escrow Closing Dinner",
-      "amount": 720,
-      "date": "2026-09-18",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "category": "Legal & Title Search",
+      "description": "High Court Advocate Title Verification & Encumbrance Search (Worli & DLF Camellias)",
+      "amount": 22500,
+      "date": "2026-10-08",
+      "vendor": "Adv. S. Ramanathan & Associates",
+      "paymentMethod": "Bank Transfer (IMPS)",
+      "taxDeductible": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "exp_4",
+      "agencyId": "ag_vance_01",
+      "category": "Travel & Site Visits",
+      "description": "Chauffeur-Driven Luxury Car Showings & Client Hospitality",
+      "amount": 12800,
+      "date": "2026-10-11",
+      "vendor": "Taj City Tours & Premier Chauffeurs",
+      "paymentMethod": "UPI / Corporate Debit Card",
+      "taxDeductible": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "exp_5",
+      "agencyId": "ag_vance_01",
+      "category": "Office Admin",
+      "description": "Matterport 3D 360-Virtual Tour Cloud & Professional Drone Pilot",
+      "amount": 18000,
+      "date": "2026-10-12",
+      "vendor": "SkyVision Media Labs",
+      "paymentMethod": "Bank Transfer (NEFT)",
+      "taxDeductible": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "tasks": [
     {
       "id": "tsk_1",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Prepare Escrow & Title Documents for Beverly Hills Villa",
-      "assignedTo": "Adi",
-      "dueDate": "2026-09-23",
-      "status": "Pending",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "tsk_2",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Finalize Lease Agreement with Sophia Martinez",
-      "assignedTo": "Adi",
-      "dueDate": "2026-09-25",
-      "status": "In Progress",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "tsk_3",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Inspect Miami Waterfront property before buyer handover",
-      "assignedTo": "Marcus Vance",
-      "dueDate": "2026-09-27",
-      "status": "Completed",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "tsk_1",
       "agencyId": "ag_vance_01",
-      "title": "Prepare Escrow & Title Documents for Beverly Hills Villa",
-      "assignedTo": "Adi",
-      "dueDate": "2026-09-24",
+      "title": "Verify RERA Title Search & 30-Year Encumbrance Certificate for Lodha Park",
+      "assignedTo": "Marcus Vance",
+      "dueDate": "2026-10-15",
       "status": "Pending",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "priority": "High",
+      "category": "Legal Due Diligence",
+      "description": "Ensure Nil Encumbrance Certificate (EC) is obtained from Sub-Registrar office for Vikram Malhotra.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "tsk_2",
       "agencyId": "ag_vance_01",
-      "title": "Finalize Lease Agreement with Sophia Martinez",
-      "assignedTo": "Adi",
-      "dueDate": "2026-09-26",
+      "title": "Send Camellias floorplan & VRV climate specs to Rahul Sharma on WhatsApp",
+      "assignedTo": "Marcus Vance",
+      "dueDate": "2026-10-13",
       "status": "In Progress",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "priority": "High",
+      "category": "Client Presentation",
+      "description": "Client requested high-resolution architectural layout and maintenance schedule.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "tsk_3",
       "agencyId": "ag_vance_01",
-      "title": "Inspect Miami Waterfront property before buyer handover",
+      "title": "Coordinate Sub-Registrar biometric registration slot for Dr. Arvind Singhania",
       "assignedTo": "Marcus Vance",
-      "dueDate": "2026-09-28",
+      "dueDate": "2026-10-16",
+      "status": "Pending",
+      "priority": "High",
+      "category": "Registration & Registry",
+      "description": "Book Tuesday 11:00 AM appointment at Indiranagar sub-registrar office.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "tsk_4",
+      "agencyId": "ag_vance_01",
+      "title": "Collect 1% TDS challan (Form 26QB) from Vikram Malhotra for Lodha Park ATS",
+      "assignedTo": "Marcus Vance",
+      "dueDate": "2026-10-18",
+      "status": "Pending",
+      "priority": "Medium",
+      "category": "Tax & Compliance",
+      "description": "Ensure Section 194-IA 1% TDS challan counterfoil is filed before ATS execution.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "tsk_5",
+      "agencyId": "ag_vance_01",
+      "title": "Complete professional drone walkthrough shoot for Bandra Bandstand Seafront Villa",
+      "assignedTo": "Marcus Vance",
+      "dueDate": "2026-10-12",
       "status": "Completed",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "priority": "High",
+      "category": "Media & Marketing",
+      "description": "Cinematic 4K drone footage capturing the Arabian Sea panoramic view.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "tsk_6",
+      "agencyId": "ag_vance_01",
+      "title": "Renew 99acres & MagicBricks verified agency listing badges for Q4",
+      "assignedTo": "Marcus Vance",
+      "dueDate": "2026-10-12",
+      "status": "Completed",
+      "priority": "Medium",
+      "category": "Portal Management",
+      "description": "Verified partner badge activation for Vance Luxury Realty inventory.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "calendarEvents": [
     {
       "id": "cal_1",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Exclusive Viewing: Downtown Sky Penthouse",
-      "date": "2026-09-21",
-      "time": "11:00 AM",
-      "type": "Viewing",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "cal_2",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Contract Signing: Brooklyn Lean & Escrow Agent",
-      "date": "2026-09-22",
-      "time": "02:30 PM",
-      "type": "Meeting",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "cal_3",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Follow-up Call with Marcus Vance (Split Review)",
-      "date": "2026-09-24",
-      "time": "10:00 AM",
-      "type": "Call",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "cal_1",
       "agencyId": "ag_vance_01",
-      "title": "Exclusive Viewing: Downtown Sky Penthouse",
-      "date": "2026-09-22",
-      "time": "11:00 AM",
+      "title": "Site Showing: DLF The Camellias with Rahul & Priya Sharma",
+      "date": "2026-10-13",
+      "time": "11:30 AM",
       "type": "Viewing",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "location": "DLF The Camellias, Golf Course Rd Gurgaon",
+      "attendees": "Rahul Sharma, Priya Sharma, Marcus Vance",
+      "notes": "Meet at Club Camellias reception.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "cal_2",
       "agencyId": "ag_vance_01",
-      "title": "Contract Signing: Brooklyn Lean & Escrow Agent",
-      "date": "2026-09-23",
-      "time": "02:30 PM",
-      "type": "Meeting",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "title": "Site Showing: Lodha Park Worli with Vikram Malhotra",
+      "date": "2026-10-13",
+      "time": "04:30 PM",
+      "type": "Viewing",
+      "location": "Lodha Park Tower C, Worli Sea Face Mumbai",
+      "attendees": "Vikram Malhotra, Architect Ritesh, Marcus Vance",
+      "notes": "Focus on sunset sea view and car parking bays.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "cal_3",
       "agencyId": "ag_vance_01",
-      "title": "Follow-up Call with Marcus Vance (Split Review)",
-      "date": "2026-09-25",
-      "time": "10:00 AM",
-      "type": "Call",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "title": "Corporate Walkthrough: Central Park Resorts with Rajesh Goel",
+      "date": "2026-10-13",
+      "time": "06:00 PM",
+      "type": "Viewing",
+      "location": "Central Park Resorts, Sohna Rd Gurgaon",
+      "attendees": "Rajesh Goel, Neha Goel, Marcus Vance",
+      "notes": "Corporate lease inspection.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "cal_4",
+      "agencyId": "ag_vance_01",
+      "title": "Sub-Registrar Biometric Registry: Dr. Arvind Singhania",
+      "date": "2026-10-16",
+      "time": "11:00 AM",
+      "type": "Registration",
+      "location": "Sub-Registrar Office, Indiranagar Bengaluru",
+      "attendees": "Dr. Arvind Singhania, Karthik Venkataraman, Marcus Vance",
+      "notes": "Biometric execution for Prestige Kingfisher sale.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "siteVisits": [
     {
-      "id": "vis_4cv3ttgw",
-      "agencyId": "ag_vance_01",
-      "property": "Vance Luxury Realty Flagship Listing",
-      "client": "Vikram Singhania",
-      "clientPhone": "9811223344",
-      "clientEmail": "vikram@singhania.in",
-      "date": "2026-10-15",
-      "timeSlot": "04:00 PM",
-      "accompaniedBy": "Agent",
-      "status": "Scheduled",
-      "source": "Client Portal",
-      "notes": "Self-booked via public listing page. Note: Interested in top floor penthouse with sea view",
-      "createdAt": "2026-10-12T08:25:00.411Z"
-    },
-    {
-      "id": "vis_8dzirtol",
-      "agencyId": "ag_vance_01",
-      "property": "Vance Luxury Realty Flagship Listing",
-      "client": "as",
-      "clientPhone": "999999999999999999999999",
-      "clientEmail": "a@a.com",
-      "date": "2026-10-08",
-      "timeSlot": "02:53",
-      "accompaniedBy": "Agent",
-      "status": "Scheduled",
-      "source": "Client Portal",
-      "notes": "Self-booked via public listing page. Note: scvway",
-      "createdAt": "2026-10-07T18:23:16.037Z"
-    },
-    {
       "id": "vis_1",
       "agencyId": "ag_vance_01",
-      "property": "Luxury Villa in Beverly Hills",
-      "client": "Jonathan Reynolds",
-      "date": "2026-09-22",
-      "status": "Scheduled",
-      "createdAt": "2026-09-22T16:55:32.971Z"
-    },
-    {
-      "id": "vis_2",
-      "agencyId": "ag_vance_01",
-      "property": "Downtown Sky Penthouse",
-      "client": "Sophia Martinez",
-      "date": "2026-09-20",
-      "status": "Completed",
-      "createdAt": "2026-09-22T16:55:32.971Z"
-    },
-    {
-      "id": "vis_3",
-      "agencyId": "ag_vance_01",
-      "property": "Modern Waterfront Residence",
-      "client": "Oliver Zhang",
-      "date": "2026-09-25",
-      "status": "Scheduled",
-      "createdAt": "2026-09-22T16:55:32.971Z"
-    },
-    {
-      "id": "vis_1",
-      "agencyId": "ag_ql21vxnd",
-      "property": "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
-      "propertyId": "prop_1",
-      "client": "Vikram Malhotra",
-      "clientPhone": "+91 98200 45678",
-      "date": "2026-09-29",
-      "timeSlot": "04:30 PM - 05:30 PM",
-      "slotTime": "04:30 PM",
-      "locality": "Worli, Mumbai",
-      "accompaniedBy": "Aditya Rai",
-      "status": "Confirmed",
-      "interestLevel": "Extremely Interested 🔥",
-      "actionRequired": "Send location pin and gate pass code",
-      "notes": "Buyer coming with wife and interior architect. Focus on sea view and car parking.",
-      "createdAt": "2026-09-29T08:42:17.171Z",
-      "updatedAt": "2026-10-12T19:56:25.733Z"
-    },
-    {
-      "id": "vis_2",
-      "agencyId": "ag_ql21vxnd",
       "property": "3 BHK High-Rise Golf Course Apartment, DLF The Camellias",
       "propertyId": "prop_2",
       "client": "Priya & Rahul Sharma",
       "clientPhone": "+91 98100 89012",
-      "date": "2026-09-29",
+      "date": "2026-10-13",
       "timeSlot": "11:30 AM - 12:30 PM",
       "slotTime": "11:30 AM",
       "locality": "Golf Course Road, Gurgaon",
-      "accompaniedBy": "Aditya Rai",
-      "status": "Scheduled",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Confirmed",
+      "purpose": "Buy",
+      "priority": "High Priority",
       "interestLevel": "Extremely Interested 🔥",
-      "actionRequired": "Meet at Club Camellias reception",
-      "notes": "Carried DLF gate pass. Client has pre-arranged driver.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "actionRequired": "Meet at Club Camellias reception with gate pass pre-cleared",
+      "notes": "High net-worth couple. Carried DLF gate pass. Focus on panoramic golf course green views from 28th floor.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "vis_2",
+      "agencyId": "ag_vance_01",
+      "property": "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
+      "propertyId": "prop_1",
+      "client": "Vikram Malhotra",
+      "clientPhone": "+91 98200 45678",
+      "date": "2026-10-13",
+      "timeSlot": "04:30 PM - 05:30 PM",
+      "slotTime": "04:30 PM",
+      "locality": "Worli, Mumbai",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Confirmed",
+      "purpose": "Buy",
+      "priority": "High Priority",
+      "interestLevel": "Extremely Interested 🔥",
+      "actionRequired": "Send location pin and gate security PIN on WhatsApp",
+      "notes": "Buyer visiting with interior architect and wife. High intent for immediate closing before Diwali.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "vis_3",
-      "agencyId": "ag_ql21vxnd",
+      "agencyId": "ag_vance_01",
+      "property": "3 BHK Corporate Rental, Central Park Resorts",
+      "propertyId": "prop_6",
+      "client": "Rajesh & Neha Goel",
+      "clientPhone": "+91 98115 67890",
+      "date": "2026-10-13",
+      "timeSlot": "06:00 PM - 07:00 PM",
+      "slotTime": "06:00 PM",
+      "locality": "Sector 48, Gurgaon",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Scheduled",
+      "purpose": "Rent",
+      "priority": "Medium Priority",
+      "interestLevel": "Very High",
+      "actionRequired": "Show clubhouse golf cart ride and furnished master bedroom suite",
+      "notes": "Corporate lease. Wants immediate move-in from 1st of next month.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "vis_4",
+      "agencyId": "ag_vance_01",
       "property": "3 BHK Prime Garden Flat, Prestige Kingfisher",
       "propertyId": "prop_3",
       "client": "Dr. Arvind Singhania",
       "clientPhone": "+91 98451 23456",
-      "date": "2026-09-30",
+      "date": "2026-10-14",
       "timeSlot": "10:00 AM - 11:00 AM",
       "slotTime": "10:00 AM",
       "locality": "Indiranagar, Bengaluru",
-      "accompaniedBy": "Aditya Rai",
+      "accompaniedBy": "Marcus Vance",
       "status": "Scheduled",
-      "interestLevel": "Considering / Needs 2nd Viewing",
-      "actionRequired": "2nd visit with father to verify Vastu North-East Brahmasthan",
-      "notes": "Doctor requested quiet viewing before his hospital clinic hours.",
-      "createdAt": "2026-09-29T08:42:17.171Z"
+      "purpose": "Buy",
+      "priority": "High Priority",
+      "interestLevel": "Finalizing Deal",
+      "actionRequired": "2nd viewing with parents to confirm Vastu compliance",
+      "notes": "Doctor requested morning tour before hospital clinic duties.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "vis_5",
+      "agencyId": "ag_vance_01",
+      "property": "2 BHK Smart Corner Home, Godrej Sky Greens",
+      "propertyId": "prop_4",
+      "client": "Sneha Kulkarni",
+      "clientPhone": "+91 97650 99887",
+      "date": "2026-10-15",
+      "timeSlot": "02:00 PM - 03:00 PM",
+      "slotTime": "02:00 PM",
+      "locality": "Kharadi, Pune",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Scheduled",
+      "purpose": "Buy",
+      "priority": "Medium Priority",
+      "interestLevel": "Considering",
+      "actionRequired": "Inspect builder sample flat and verify RERA possession date",
+      "notes": "Infosys architect interested in corner unit lighting and terrace layout.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "vis_6",
+      "agencyId": "ag_vance_01",
+      "property": "3.5 BHK Sunlit Golf View Residence, DLF Magnolias",
+      "propertyId": "prop_10",
+      "client": "Tarun Kapoor",
+      "clientPhone": "+91 98110 55667",
+      "date": "2026-10-12",
+      "timeSlot": "03:00 PM - 04:30 PM",
+      "slotTime": "03:00 PM",
+      "locality": "Golf Course Road, Gurgaon",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Completed",
+      "purpose": "Buy",
+      "priority": "High Priority",
+      "feedback": "Client was completely captivated by golf course lake views. Decided to proceed directly with formal purchase agreement.",
+      "interestLevel": "Converted to Deal Won 🔥",
+      "notes": "Tour went smoothly. Full registry completed.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "vis_7",
+      "agencyId": "ag_vance_01",
+      "property": "4 BHK Sky Duplex Penthouse, Oberoi Sky City",
+      "propertyId": "prop_8",
+      "client": "Siddharth Singhania",
+      "clientPhone": "+91 98202 33445",
+      "date": "2026-10-10",
+      "timeSlot": "04:00 PM - 05:00 PM",
+      "slotTime": "04:00 PM",
+      "locality": "Lower Parel, Mumbai",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Completed",
+      "purpose": "Buy",
+      "priority": "High Priority",
+      "feedback": "Family loved the double-height ceiling and direct metro link. Submitted offer at ₹6.10 Cr.",
+      "interestLevel": "Negotiation",
+      "notes": "Detailed discussion held with owner regarding kitchen fittings.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "vis_8",
+      "agencyId": "ag_vance_01",
+      "property": "3 BHK High-Floor Furnished Suite, Experion Windchants",
+      "propertyId": "prop_12",
+      "client": "Rajesh & Neha Goel",
+      "clientPhone": "+91 98115 67890",
+      "date": "2026-10-08",
+      "timeSlot": "05:30 PM - 06:30 PM",
+      "slotTime": "05:30 PM",
+      "locality": "Sector 112, Gurgaon",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Completed",
+      "purpose": "Rent",
+      "priority": "High Priority",
+      "feedback": "Approved society amenities and signed corporate lease.",
+      "interestLevel": "Closed Rented",
+      "notes": "Handover complete.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "vis_9",
+      "agencyId": "ag_vance_01",
+      "property": "2 BHK Fully Furnished Sea-Breeze Flat, Hiranandani Estate",
+      "propertyId": "prop_7",
+      "client": "Alok Deshmukh",
+      "clientPhone": "+971 50 123 4567",
+      "date": "2026-10-11",
+      "timeSlot": "11:00 AM - 12:00 PM",
+      "slotTime": "11:00 AM",
+      "locality": "Thane West, Mumbai",
+      "accompaniedBy": "Marcus Vance",
+      "status": "Cancelled",
+      "purpose": "Rent",
+      "priority": "Low Priority",
+      "feedback": "Client had sudden flight rescheduling back to Dubai. Requested video tour instead.",
+      "interestLevel": "Rescheduled for December",
+      "notes": "Sent 3D virtual tour video link on WhatsApp.",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "listings": [
     {
       "id": "list_1",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Luxury Villa in Beverly Hills",
-      "platform": "Property Finder",
-      "status": "Active",
-      "views": 1420,
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "list_2",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Downtown Sky Penthouse",
-      "platform": "Bayut",
-      "status": "Active",
-      "views": 890,
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "list_3",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Modern Waterfront Residence",
-      "platform": "Zillow",
-      "status": "Active",
-      "views": 2310,
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "list_4",
-      "agencyId": "ag_ql21vxnd",
-      "title": "Silicon Valley Executive Condo",
-      "platform": "Company Website",
-      "status": "Draft",
-      "views": 150,
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "list_1",
       "agencyId": "ag_vance_01",
-      "title": "Luxury Villa in Beverly Hills",
-      "platform": "Property Finder",
+      "title": "Lodha Park Worli 4 BHK Sea-Facing Ultra Luxury Flat",
+      "platform": "99acres",
       "status": "Active",
-      "views": 1420,
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "views": 3420,
+      "price": 85000000,
+      "featured": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "list_2",
       "agencyId": "ag_vance_01",
-      "title": "Downtown Sky Penthouse",
-      "platform": "Bayut",
+      "title": "DLF The Camellias 3 BHK Golf Course Residence",
+      "platform": "MagicBricks",
       "status": "Active",
-      "views": 890,
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "views": 5890,
+      "price": 145000000,
+      "featured": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "list_3",
       "agencyId": "ag_vance_01",
-      "title": "Modern Waterfront Residence",
-      "platform": "Zillow",
+      "title": "Prestige Kingfisher Indiranagar 3 BHK Garden Flat",
+      "platform": "Housing.com",
       "status": "Active",
-      "views": 2310,
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "views": 2610,
+      "price": 38500000,
+      "featured": false,
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "list_4",
       "agencyId": "ag_vance_01",
-      "title": "Silicon Valley Executive Condo",
-      "platform": "Company Website",
-      "status": "Draft",
-      "views": 150,
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "title": "Godrej Sky Greens Kharadi 2 BHK Smart Home",
+      "platform": "Direct WhatsApp Network",
+      "status": "Active",
+      "views": 1450,
+      "price": 9200000,
+      "featured": true,
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "list_5",
+      "agencyId": "ag_vance_01",
+      "title": "Central Park Resorts 3 BHK Corporate MNC Lease",
+      "platform": "99acres",
+      "status": "Active",
+      "views": 1890,
+      "price": 120000,
+      "featured": false,
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "documents": [
     {
-      "id": "doc_y69vsjdd",
-      "agencyId": "ag_ql21vxnd",
-      "name": "sw",
-      "type": "PDF",
-      "size": "1.2 MB",
-      "uploadedBy": "Adi",
-      "createdAt": "2026-09-21T13:30:53.654Z"
-    },
-    {
       "id": "doc_1",
       "agencyId": "ag_vance_01",
-      "name": "Sales_Purchase_Agreement_Villa_4B.pdf",
-      "type": "Sales Contract",
+      "name": "Agreement_To_Sale_Lodha_Park_Worli_Draft.pdf",
+      "type": "Agreement to Sale",
       "category": "Contracts",
       "size": "2.4 MB",
-      "uploadedBy": "Adi",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "uploadedBy": "Marcus Vance",
+      "relatedTo": "Lodha Park Worli 4 BHK",
+      "version": "v2.1 Final Draft",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "doc_2",
       "agencyId": "ag_vance_01",
-      "name": "Title_Deed_Certificate_Downtown_Sky.pdf",
-      "type": "Title Deed",
-      "category": "Title Deeds",
-      "size": "1.8 MB",
-      "uploadedBy": "Adi",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "name": "MahaRERA_Registration_Certificate_P51900001339.pdf",
+      "type": "RERA Certificate",
+      "category": "Compliance",
+      "size": "1.2 MB",
+      "uploadedBy": "Marcus Vance",
+      "relatedTo": "Lodha Park Worli",
+      "version": "Official Govt Copy",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "doc_3",
       "agencyId": "ag_vance_01",
-      "name": "Client_KYC_Passport_Jonathan_Reynolds.pdf",
-      "type": "KYC / Passport",
-      "category": "KYC Documents",
+      "name": "DLF_Camellias_Maintenance_Society_NOC.pdf",
+      "type": "Society NOC",
+      "category": "Title Deeds",
       "size": "850 KB",
-      "uploadedBy": "Adi",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "uploadedBy": "Marcus Vance",
+      "relatedTo": "DLF The Camellias",
+      "version": "Executed Copy",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "doc_4",
+      "agencyId": "ag_vance_01",
+      "name": "Client_PAN_Aadhaar_KYC_Vikram_Malhotra.pdf",
+      "type": "KYC / PAN / Aadhaar",
+      "category": "KYC Documents",
+      "size": "1.1 MB",
+      "uploadedBy": "Marcus Vance",
+      "relatedTo": "Vikram Malhotra",
+      "version": "Verified KYC",
+      "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "doc_5",
+      "agencyId": "ag_vance_01",
+      "name": "Prestige_Indiranagar_30Year_Search_Report.pdf",
+      "type": "Legal Opinion Report",
+      "category": "Title Deeds",
+      "size": "3.8 MB",
+      "uploadedBy": "Marcus Vance",
+      "relatedTo": "Prestige Kingfisher",
+      "version": "Advocate Certified",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "reports": [
     {
       "id": "rep_1",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Q3 Agency Commission & Deal Performance",
-      "type": "Financial",
-      "frequency": "Quarterly",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "rep_2",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Lead Acquisition & Portal ROI Audit",
-      "type": "Sales",
-      "frequency": "Monthly",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "rep_3",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Active Inventory Valuation & Absorption Rate",
-      "type": "Performance",
-      "frequency": "Weekly",
-      "createdAt": "2026-09-21T13:40:15.322Z"
-    },
-    {
-      "id": "rep_1",
       "agencyId": "ag_vance_01",
-      "name": "Q3 Agency Commission & Deal Performance",
+      "name": "Q3 Vance Luxury Realty Deal & Commission Performance Report",
       "type": "Financial",
       "frequency": "Quarterly",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "dateRange": "Q3 2026",
+      "format": "PDF / Executive Dashboard",
+      "scope": "Agency Wide",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "rep_2",
       "agencyId": "ag_vance_01",
-      "name": "Lead Acquisition & Portal ROI Audit",
+      "name": "Indian Real Estate Portals ROI & Inquiry Conversion Matrix",
       "type": "Sales",
       "frequency": "Monthly",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "dateRange": "September 2026",
+      "format": "Spreadsheet",
+      "scope": "99acres vs MagicBricks vs WhatsApp",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "rep_3",
       "agencyId": "ag_vance_01",
-      "name": "Active Inventory Valuation & Absorption Rate",
+      "name": "Luxury Micro-Market Absorption (Worli vs Golf Course Road)",
       "type": "Performance",
       "frequency": "Weekly",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "dateRange": "Current Week",
+      "format": "Interactive Charts",
+      "scope": "Ultra-Luxury Segment",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "activities": [
     {
-      "id": "act_9bp5g73",
+      "id": "act_1",
       "agencyId": "ag_vance_01",
       "actor": "Marcus Vance",
-      "type": "Property Share",
-      "relatedEntity": "Property",
-      "relatedId": "prop_ag_vance_01_1",
-      "summary": "Shared \"Vance Luxury Realty Flagship Listing\" on WhatsApp",
-      "details": "Channel: WhatsApp, Privacy Mode: Public, Link: http://localhost:3000/p/tok_3lkxify14a",
-      "createdAt": "2026-09-22T16:36:00.323Z"
-    },
-    {
-      "id": "act_o307uzo",
-      "agencyId": "ag_ql21vxnd",
-      "actor": "Aditya",
-      "type": "Property Share",
-      "relatedEntity": "Property",
-      "relatedId": "prop_1",
-      "summary": "Shared \"Luxury Villa in Beverly Hills\" on QR Code",
-      "details": "Channel: QR Code, Privacy Mode: Public, Link: http://localhost:3000/p/tok_vp76qx9n0i",
-      "createdAt": "2026-09-22T11:04:38.241Z"
-    },
-    {
-      "id": "act_h8bmrhf",
-      "agencyId": "ag_ql21vxnd",
-      "actor": "Public Client",
       "type": "WhatsApp",
       "relatedEntity": "Lead",
-      "relatedId": "lead_7zfmzve",
-      "summary": "Inquiry received from Victoria Sterling for Luxury Villa in Beverly Hills",
-      "details": "Client email: victoria@sterlingholdings.com, phone: +1 (310) 992-1144. Message: Requesting private viewing this weekend.",
-      "createdAt": "2026-09-22T09:07:30.495Z"
+      "relatedId": "lead_1",
+      "summary": "Shared Lodha Park Worli 4 BHK WhatsApp pitch brochure with Vikram Malhotra",
+      "details": "Client responded in 3 minutes: \"Looks perfect. Confirmed for 4:30 PM site visit with my wife and interior architect.\"",
+      "createdAt": "2026-10-13T06:59:47.320Z"
+    },
+    {
+      "id": "act_2",
+      "agencyId": "ag_vance_01",
+      "actor": "Marcus Vance",
+      "type": "Call",
+      "relatedEntity": "Client",
+      "relatedId": "cli_1",
+      "summary": "Token payment escrow confirmation call with Vikram Malhotra",
+      "details": "Confirmed ₹10 Lakhs earnest bayana RTGS deposit credited to seller escrow account.",
+      "createdAt": "2026-10-13T03:59:47.320Z"
+    },
+    {
+      "id": "act_3",
+      "agencyId": "ag_vance_01",
+      "actor": "Marcus Vance",
+      "type": "Site Visit",
+      "relatedEntity": "Property",
+      "relatedId": "prop_2",
+      "summary": "Pre-cleared Club Camellias gate pass for Rahul & Priya Sharma",
+      "details": "Security desk confirmed private vehicle access pre-authorized for 11:30 AM tour.",
+      "createdAt": "2026-10-13T00:59:47.320Z"
+    },
+    {
+      "id": "act_4",
+      "agencyId": "ag_vance_01",
+      "actor": "Marcus Vance",
+      "type": "Deal Update",
+      "relatedEntity": "Deal",
+      "relatedId": "deal_4",
+      "summary": "Deal advanced to Registration Pending for Prestige Kingfisher Indiranagar",
+      "details": "Dr. Arvind Singhania completed 1% TDS challan 26QB. Sub-registrar slot confirmed.",
+      "createdAt": "2026-10-12T14:59:47.320Z"
     }
   ],
   "marketingCampaigns": [
     {
       "id": "mkt_1",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Ultra-Luxury Villa Showcase Q3",
-      "platform": "Meta Ads",
-      "status": "Active",
-      "budget": 3500,
-      "spend": 2150,
-      "leadsGenerated": 42,
-      "dealsClosed": 2,
-      "utmSource": "instagram_reels_luxury",
-      "startDate": "2026-09-01",
-      "createdAt": "2026-09-22T10:47:39.948Z"
-    },
-    {
-      "id": "mkt_2",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Property Finder Verified Featured Boost",
-      "platform": "Property Finder",
-      "status": "Active",
-      "budget": 5000,
-      "spend": 3800,
-      "leadsGenerated": 68,
-      "dealsClosed": 4,
-      "utmSource": "property_finder_featured",
-      "startDate": "2026-08-15",
-      "createdAt": "2026-09-22T10:47:39.948Z"
-    },
-    {
-      "id": "mkt_3",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Google Search High-Intent Buyers",
-      "platform": "Google Ads",
-      "status": "Active",
-      "budget": 2800,
-      "spend": 1940,
-      "leadsGenerated": 31,
-      "dealsClosed": 1,
-      "utmSource": "google_search_penthouses",
-      "startDate": "2026-09-05",
-      "createdAt": "2026-09-22T10:47:39.948Z"
-    },
-    {
-      "id": "mkt_4",
-      "agencyId": "ag_ql21vxnd",
-      "name": "Private Investor WhatsApp Broadcast VIP",
-      "platform": "WhatsApp Broadcast",
-      "status": "Completed",
-      "budget": 400,
-      "spend": 250,
-      "leadsGenerated": 19,
-      "dealsClosed": 2,
-      "utmSource": "whatsapp_vip_network",
-      "startDate": "2026-09-10",
-      "endDate": "2026-09-15",
-      "createdAt": "2026-09-22T10:47:39.948Z"
-    },
-    {
-      "id": "mkt_1",
       "agencyId": "ag_vance_01",
-      "name": "Ultra-Luxury Villa Showcase Q3",
+      "name": "South Mumbai Ultra-Luxury Showcase (Worli & Bandra)",
       "platform": "Meta Ads",
       "status": "Active",
-      "budget": 3500,
-      "spend": 2150,
-      "leadsGenerated": 42,
+      "budget": 150000,
+      "spend": 98000,
+      "leadsGenerated": 54,
       "dealsClosed": 2,
-      "utmSource": "instagram_reels_luxury",
+      "utmSource": "instagram_reels_mumbai_luxury",
       "startDate": "2026-09-01",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "mkt_2",
       "agencyId": "ag_vance_01",
-      "name": "Property Finder Verified Featured Boost",
-      "platform": "Property Finder",
+      "name": "Gurgaon Golf Course Corridor High-Intent Google Search",
+      "platform": "Google Ads",
       "status": "Active",
-      "budget": 5000,
-      "spend": 3800,
-      "leadsGenerated": 68,
-      "dealsClosed": 4,
-      "utmSource": "property_finder_featured",
+      "budget": 200000,
+      "spend": 142000,
+      "leadsGenerated": 62,
+      "dealsClosed": 3,
+      "utmSource": "google_search_camellias_magnolias",
       "startDate": "2026-08-15",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "mkt_3",
       "agencyId": "ag_vance_01",
-      "name": "Google Search High-Intent Buyers",
-      "platform": "Google Ads",
+      "name": "Private Investor WhatsApp Broadcast VIP Network",
+      "platform": "WhatsApp Broadcast",
       "status": "Active",
-      "budget": 2800,
-      "spend": 1940,
-      "leadsGenerated": 31,
-      "dealsClosed": 1,
-      "utmSource": "google_search_penthouses",
-      "startDate": "2026-09-05",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "budget": 25000,
+      "spend": 18000,
+      "leadsGenerated": 28,
+      "dealsClosed": 2,
+      "utmSource": "whatsapp_vip_network",
+      "startDate": "2026-09-10",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     },
     {
       "id": "mkt_4",
       "agencyId": "ag_vance_01",
-      "name": "Private Investor WhatsApp Broadcast VIP",
-      "platform": "WhatsApp Broadcast",
+      "name": "Bengaluru Tech Leadership Penthouses Q3",
+      "platform": "Property Finder",
       "status": "Completed",
-      "budget": 400,
-      "spend": 250,
-      "leadsGenerated": 19,
+      "budget": 100000,
+      "spend": 100000,
+      "leadsGenerated": 45,
       "dealsClosed": 2,
-      "utmSource": "whatsapp_vip_network",
-      "startDate": "2026-09-10",
-      "endDate": "2026-09-15",
-      "createdAt": "2026-09-22T16:55:32.971Z"
+      "utmSource": "portal_bengaluru_tech",
+      "startDate": "2026-08-01",
+      "endDate": "2026-09-01",
+      "createdAt": "2026-10-13T08:59:47.311Z"
     }
   ],
   "auditLogs": [
     {
-      "id": "aud_0zfsizp",
+      "id": "aud_1",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "LOGIN",
+      "entity": "Session",
+      "entityId": "ses_1",
+      "details": "Marcus Vance authenticated into Vance Luxury Realty Cockpit",
+      "ipAddress": "192.168.1.1",
+      "createdAt": "2026-10-13T07:59:47.320Z"
+    },
+    {
+      "id": "aud_2",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "UPDATE",
+      "entity": "Property",
+      "entityId": "prop_1",
+      "details": "Updated Lodha Park Worli status and uploaded verified photo media",
+      "ipAddress": "192.168.1.1",
+      "createdAt": "2026-10-13T06:59:47.320Z"
+    },
+    {
+      "id": "aud_3",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
       "userName": "Marcus Vance",
       "action": "SHARE",
       "entity": "Property",
-      "entityId": "prop_ag_vance_01_1",
-      "details": "Shared property \"Vance Luxury Realty Flagship Listing\" via WhatsApp",
-      "createdAt": "2026-09-22T16:36:00.323Z"
-    },
-    {
-      "id": "aud_jjtwcy1",
-      "agencyId": "ag_ql21vxnd",
-      "userId": "usr_bt71mcv1",
-      "userName": "Aditya",
-      "action": "SHARE",
-      "entity": "Property",
       "entityId": "prop_1",
-      "details": "Shared property \"Luxury Villa in Beverly Hills\" via QR Code",
-      "createdAt": "2026-09-22T11:04:38.241Z"
-    },
-    {
-      "id": "aud_1",
-      "agencyId": "ag_ql21vxnd",
-      "userId": "usr_1",
-      "userName": "Aditya Rai",
-      "action": "LOGIN",
-      "entity": "Session",
-      "entityId": "ses_1",
-      "details": "Successful authenticated login from web console",
+      "details": "Shared luxury WhatsApp flyer with Vikram Malhotra (+91 98200 45678)",
       "ipAddress": "192.168.1.1",
-      "createdAt": "2026-09-22T09:47:39.949Z"
-    },
-    {
-      "id": "aud_2",
-      "agencyId": "ag_ql21vxnd",
-      "userId": "usr_1",
-      "userName": "Aditya Rai",
-      "action": "UPDATE",
-      "entity": "Property",
-      "entityId": "prop_1",
-      "details": "Updated listing price and uploaded 3 new hero photos",
-      "ipAddress": "192.168.1.1",
-      "createdAt": "2026-09-22T08:47:39.949Z"
-    },
-    {
-      "id": "aud_3",
-      "agencyId": "ag_ql21vxnd",
-      "userId": "usr_1",
-      "userName": "Aditya Rai",
-      "action": "SHARE",
-      "entity": "Property",
-      "entityId": "prop_1",
-      "details": "Shared public property link via WhatsApp channel",
-      "ipAddress": "192.168.1.1",
-      "createdAt": "2026-09-22T07:47:39.949Z"
+      "createdAt": "2026-10-13T05:59:47.320Z"
     },
     {
       "id": "aud_4",
-      "agencyId": "ag_ql21vxnd",
-      "userId": "usr_1",
-      "userName": "Aditya Rai",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
       "action": "CREATE",
       "entity": "Deal",
-      "entityId": "deal_1",
-      "details": "Created new Deal: Luxury Villa in Beverly Hills ($4.5M)",
+      "entityId": "deal_2",
+      "details": "Recorded bayana token received for Lodha Park Worli 4 BHK Outright Sale",
       "ipAddress": "192.168.1.1",
-      "createdAt": "2026-09-21T10:47:39.949Z"
+      "createdAt": "2026-10-12T08:59:47.320Z"
     }
   ],
   "recycleBin": [],
   "supportTickets": [
     {
-      "id": "tic_cm6yuvm",
+      "id": "tic_1",
       "agencyId": "ag_vance_01",
       "agencyName": "Vance Luxury Realty",
-      "ticketNumber": "TICK-5633",
-      "subject": "Inquiry: How do WhatsApp pitch links work?",
-      "category": "General",
+      "ticketNumber": "TICK-4091",
+      "subject": "Custom Domain SSL for Agency Public Properties (properties.vancerealty.com)",
+      "category": "Integrations",
       "priority": "Medium",
       "status": "In Review",
+      "createdByName": "Marcus Vance",
+      "createdByEmail": "marcus@vancerealty.com",
       "contractType": "",
+      "messages": [
+        {
+          "id": "msg_1",
+          "sender": "Marcus Vance",
+          "isStaff": false,
+          "text": "Hi Support Team, we would like to confirm DNS records to connect properties.vancerealty.com to our public showcase pages.",
+          "timestamp": "2026-10-12T08:59:47.320Z"
+        },
+        {
+          "id": "msg_2",
+          "sender": "AgentLadders Support HQ",
+          "isStaff": true,
+          "text": "Hello Marcus, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Once added, our automated system will provision the SSL certificate within 15 minutes.",
+          "timestamp": "2026-10-12T20:59:47.320Z"
+        }
+      ],
+      "createdAt": "2026-10-12T08:59:47.320Z"
+    },
+    {
+      "id": "tic_2",
+      "agencyId": "ag_vance_01",
+      "agencyName": "Vance Luxury Realty",
+      "ticketNumber": "TICK-4092",
+      "subject": "Sole Selling Rights Exclusive Mandate Agreement Review for Worli Penthouse",
+      "category": "Contract Inquiry",
+      "priority": "High",
+      "status": "Open",
+      "createdByName": "Marcus Vance",
+      "createdByEmail": "marcus@vancerealty.com",
+      "contractType": "Sole Selling Rights (Exclusive Mandate Agreement)",
+      "messages": [
+        {
+          "id": "msg_3",
+          "sender": "Marcus Vance",
+          "isStaff": false,
+          "text": "Hi Legal Team, we have an exclusive mandate opportunity for a 5,100 sq.ft luxury duplex penthouse in Worli. Please advise if we can increase the post-termination protection clause from 180 to 270 days for introduced NRI buyers.",
+          "timestamp": "2026-10-13T02:59:47.320Z"
+        }
+      ],
+      "createdAt": "2026-10-13T02:59:47.320Z"
+    },
+    {
+      "id": "tic_3",
+      "agencyId": "ag_vance_01",
+      "agencyName": "Vance Luxury Realty",
+      "ticketNumber": "TICK-4093",
+      "subject": "WhatsApp Direct Click-to-Chat Webhook Sync Verification",
+      "category": "CRM Feature",
+      "priority": "High",
+      "status": "Resolved",
       "createdByName": "Marcus Vance",
       "createdByEmail": "marcus@vancerealty.com",
       "messages": [
         {
-          "id": "msg_2ek6hj1",
+          "id": "msg_4",
           "sender": "Marcus Vance",
           "isStaff": false,
-          "text": "Please confirm if clients can directly book site visits from the WhatsApp link.",
-          "timestamp": "2026-10-12T16:53:59.538Z"
-        },
-        {
-          "id": "msg_g1j26bs",
-          "sender": "Aditya",
-          "isStaff": true,
-          "text": "Thank you for your feedback! This feature enhancement has been logged with our core product engineering team.",
-          "timestamp": "2026-10-12T17:13:46.932Z"
-        },
-        {
-          "id": "msg_reeueb9",
-          "sender": "Aditya",
-          "isStaff": true,
-          "text": "j",
-          "timestamp": "2026-10-12T19:05:12.727Z"
+          "text": "All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table with source tracking. Verified perfectly.",
+          "timestamp": "2026-10-11T08:59:47.320Z"
         }
       ],
-      "createdAt": "2026-10-12T16:53:59.538Z"
-    },
-    {
-      "id": "tic_1",
-      "agencyId": "ag_ql21vxnd",
-      "ticketNumber": "TICK-4091",
-      "subject": "Custom Domain SSL for Agency Public Properties",
-      "category": "Integrations",
-      "priority": "Medium",
-      "status": "In Review",
-      "createdByName": "Aditya Rai",
-      "messages": [
-        {
-          "id": "msg_1",
-          "sender": "Aditya Rai",
-          "isStaff": false,
-          "text": "Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.",
-          "timestamp": "2026-09-21T10:47:39.949Z"
-        },
-        {
-          "id": "msg_2",
-          "sender": "AgentLadders Support",
-          "isStaff": true,
-          "text": "Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.",
-          "timestamp": "2026-09-21T22:47:39.949Z"
-        }
-      ],
-      "createdAt": "2026-09-21T10:47:39.949Z"
-    },
-    {
-      "id": "tic_2",
-      "agencyId": "ag_ql21vxnd",
-      "ticketNumber": "TICK-4092",
-      "subject": "Automated WhatsApp Webhook Sync Verification",
-      "category": "CRM Feature",
-      "priority": "High",
-      "status": "Resolved",
-      "createdByName": "Aditya Rai",
-      "messages": [
-        {
-          "id": "msg_3",
-          "sender": "Aditya Rai",
-          "isStaff": false,
-          "text": "All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table. Verified perfectly.",
-          "timestamp": "2026-09-20T10:47:39.949Z"
-        }
-      ],
-      "createdAt": "2026-09-20T10:47:39.949Z"
-    },
-    {
-      "id": "tic_1",
-      "agencyId": "ag_vance_01",
-      "ticketNumber": "TICK-4091",
-      "subject": "Custom Domain SSL for Agency Public Properties",
-      "category": "Integrations",
-      "priority": "Medium",
-      "status": "In Review",
-      "createdByName": "Aditya Rai",
-      "messages": [
-        {
-          "id": "msg_1",
-          "sender": "Aditya Rai",
-          "isStaff": false,
-          "text": "Hi Support Team, we would like to confirm DNS records to connect properties.viewagency.com to our public showcase pages.",
-          "timestamp": "2026-09-21T16:55:32.973Z"
-        },
-        {
-          "id": "msg_2",
-          "sender": "AgentLadders Support",
-          "isStaff": true,
-          "text": "Hello Aditya, thank you for reaching out! Your CNAME record should point to proxy.agentladders.com. Let us know once added and our automated system will provision the SSL certificate.",
-          "timestamp": "2026-09-22T04:55:32.973Z"
-        }
-      ],
-      "createdAt": "2026-09-21T16:55:32.973Z"
-    },
-    {
-      "id": "tic_2",
-      "agencyId": "ag_vance_01",
-      "ticketNumber": "TICK-4092",
-      "subject": "Automated WhatsApp Webhook Sync Verification",
-      "category": "CRM Feature",
-      "priority": "High",
-      "status": "Resolved",
-      "createdByName": "Aditya Rai",
-      "messages": [
-        {
-          "id": "msg_3",
-          "sender": "Aditya Rai",
-          "isStaff": false,
-          "text": "All incoming WhatsApp click-to-chat inquiries are now capturing directly into the leads table. Verified perfectly.",
-          "timestamp": "2026-09-20T16:55:32.973Z"
-        }
-      ],
-      "createdAt": "2026-09-20T16:55:32.973Z"
+      "createdAt": "2026-10-11T08:59:47.320Z"
     }
   ],
-  "sharedLinks": [
-    {
-      "id": "sh_w3jomyd",
-      "agencyId": "ag_vance_01",
-      "propertyId": "prop_ag_vance_01_1",
-      "propertyTitle": "Vance Luxury Realty Flagship Listing",
-      "channel": "WhatsApp",
-      "publicUrl": "http://localhost:3000/p/tok_3lkxify14a",
-      "sharedBy": "Marcus Vance",
-      "privacyMode": "Public",
-      "createdAt": "2026-09-22T16:36:00.323Z"
-    },
-    {
-      "id": "sh_vmuv08k",
-      "agencyId": "ag_ql21vxnd",
-      "propertyId": "prop_1",
-      "propertyTitle": "Luxury Villa in Beverly Hills",
-      "channel": "QR Code",
-      "publicUrl": "http://localhost:3000/p/tok_vp76qx9n0i",
-      "sharedBy": "Aditya",
-      "privacyMode": "Public",
-      "createdAt": "2026-09-22T11:04:38.241Z"
-    }
-  ]
+  "sharedLinks": []
 }
