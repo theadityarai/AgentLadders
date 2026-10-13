@@ -51,6 +51,10 @@ export function isValidPassword(password: string): { valid: boolean; reason?: st
   if (password.length < 8) {
     return { valid: false, reason: 'Password must be at least 8 characters long' };
   }
+  // Allow 12+ numeric digits (e.g. randomly generated 12-digit PIN/passwords) or letter+number passwords
+  if (/^\d{12,}$/.test(password)) {
+    return { valid: true };
+  }
   if (!/[a-zA-Z]/.test(password)) {
     return { valid: false, reason: 'Password must contain at least one letter' };
   }
@@ -58,6 +62,17 @@ export function isValidPassword(password: string): { valid: boolean; reason?: st
     return { valid: false, reason: 'Password must contain at least one number' };
   }
   return { valid: true };
+}
+
+/**
+ * Generates a cryptographically random 12-digit numeric password.
+ */
+export function generateRandom12Digits(): string {
+  let result = Math.floor(1 + Math.random() * 9).toString();
+  for (let i = 1; i < 12; i++) {
+    result += Math.floor(Math.random() * 10).toString();
+  }
+  return result;
 }
 
 /**

@@ -41,6 +41,17 @@
       "image": ""
     },
     {
+      "id": "usr_invited_marcus_comm",
+      "name": "Adi",
+      "email": "marcus@vancerealty.comm",
+      "password": "$2b$10$U5TZKG3bcliFpcYLKUia.ePHZZBzaFqIkqvqmjWJvGfiUUlPsfhlO",
+      "passwordHash": "$2b$10$U5TZKG3bcliFpcYLKUia.ePHZZBzaFqIkqvqmjWJvGfiUUlPsfhlO",
+      "role": "MANAGER",
+      "agencyId": "ag_vance_01",
+      "avatar": "",
+      "image": ""
+    },
+    {
       "id": "usr_ag_skyline_02",
       "name": "Eleanor Thorne",
       "email": "eleanor@skylinecap.co.uk",

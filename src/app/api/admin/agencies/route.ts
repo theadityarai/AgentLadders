@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import bcrypt from 'bcryptjs';
 import { DEFAULT_BHK_OPTIONS, DEFAULT_PROPERTY_TYPES, DEFAULT_LEAD_SOURCES } from '@/lib/formatters';
-import { isValidEmail, isValidPassword, sanitizeString, normalizeEmail } from '@/lib/sanitize';
+import { isValidEmail, isValidPassword, sanitizeString, normalizeEmail, generateRandom12Digits } from '@/lib/sanitize';
 
 function isSuperAdminUser(session: any) {
   if (!session?.user) return false;
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
     const isInvite = mode === 'invite';
     const finalStatus = inputStatus || (isInvite ? 'Pending Invite' : 'Active');
     const inviteToken = 'inv_' + Math.random().toString(36).substring(2, 12);
-    const rawPassword = ownerPassword || (isInvite ? Math.random().toString(36).substring(2, 10) + 'A1!' : 'welcome123');
+    const rawPassword = ownerPassword || generateRandom12Digits();
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
     const newAgency = {

@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../auth/[...nextauth]/route';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { isValidPassword, isValidEmail, sanitizeString } from '@/lib/sanitize';
+import { isValidPassword, isValidEmail, sanitizeString, generateRandom12Digits } from '@/lib/sanitize';
 import { 
   DEFAULT_BHK_OPTIONS, 
   DEFAULT_PROPERTY_TYPES, 
@@ -145,6 +145,7 @@ export async function PUT(req: Request) {
   const { action } = data;
   const userRole = (user.role || '').toUpperCase();
   const canManageUsers = ['OWNER', 'ADMIN', 'SUPER_ADMIN'].includes(userRole) || user.email === 'aditya@agentladders.com' || user.email === 'admin@agentladders.com';
+  let invitedTemporaryPassword: string | undefined = undefined;
 
   if (action === 'updateAgency') {
     if (data.agencyName) db.agencies[agencyIndex].name = data.agencyName;
@@ -204,8 +205,10 @@ export async function PUT(req: Request) {
     const existing = db.users.find(u => u.email.toLowerCase() === data.email.toLowerCase());
     if (existing) return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     
-    // Default password for invited users: welcome123
-    const defaultPassword = await bcrypt.hash('welcome123', 10);
+    // Generate random 12-digit temporary password
+    const temporaryPassword = generateRandom12Digits();
+    const defaultPassword = await bcrypt.hash(temporaryPassword, 10);
+    invitedTemporaryPassword = temporaryPassword;
     const newUserId = 'usr_' + Math.random().toString(36).substring(2, 10);
     const newUser = {
       id: newUserId,
@@ -227,7 +230,7 @@ export async function PUT(req: Request) {
       agencyId: user.agencyId,
       userId: user.id,
       title: 'New Team Member Invited 👥',
-      message: `${cleanName} (${data.email}) was invited as ${data.role || 'MANAGER'}. Temporary password is welcome123.`,
+      message: `${cleanName} (${data.email}) was invited as ${data.role || 'MANAGER'}. Temporary password is ${temporaryPassword}.`,
       type: 'info',
       read: false,
       createdAt: new Date().toISOString()
@@ -343,6 +346,7 @@ export async function PUT(req: Request) {
   }));
   return NextResponse.json({
     success: true,
+    temporaryPassword: invitedTemporaryPassword,
     agency: db.agencies[agencyIndex],
     user: {
       id: user.id,

@@ -391,11 +391,13 @@ export default function SettingsPage() {
       body: JSON.stringify({ action: 'inviteUser', email: inviteForm.email, name: inviteForm.name, role: inviteForm.role.toUpperCase() })
     });
     if (res.ok) {
-      const invitedData = { name: inviteForm.name, email: inviteForm.email, role: inviteForm.role.toUpperCase(), password: 'welcome123' };
+      const resData = await res.json();
+      const generatedPass = resData.temporaryPassword || '123456789012';
+      const invitedData = { name: inviteForm.name, email: inviteForm.email, role: inviteForm.role.toUpperCase(), password: generatedPass };
       setShowInviteModal(false);
       setInviteForm({ name: '', email: '', role: 'MANAGER' });
       setInvitedUserResult(invitedData);
-      showToast('success', `${invitedData.name} invited! Temporary password: welcome123`, 'Invitation Created');
+      showToast('success', `${invitedData.name} invited! Temporary password: ${generatedPass}`, 'Invitation Created');
       // reload users
       fetch('/api/settings').then(res => res.json()).then(data => setUsers(data.users || []));
     } else {

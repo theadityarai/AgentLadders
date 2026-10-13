@@ -1,8 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 
-const DB_PATH = path.join(process.cwd(), 'data', 'db.json');
+const STATIC_DB_PATH = path.join(process.cwd(), 'data', 'db.json');
 const LEGACY_MOCK_PATH = path.join(process.cwd(), 'mock-db.json');
+const IS_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const SERVERLESS_TMP_PATH = '/tmp/agentladders_db.json';
+
+// In serverless environments (e.g. Vercel), /var/task is read-only.
+// /tmp is the writable storage directory available.
+const DB_PATH = IS_SERVERLESS ? SERVERLESS_TMP_PATH : STATIC_DB_PATH;
 
 export interface User {
   id: string;
@@ -496,8 +502,10 @@ export interface DB {
 }
 
 // Ensure the data directory exists
-if (!fs.existsSync(path.dirname(DB_PATH))) {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+if (!IS_SERVERLESS && !fs.existsSync(path.dirname(STATIC_DB_PATH))) {
+  try {
+    fs.mkdirSync(path.dirname(STATIC_DB_PATH), { recursive: true });
+  } catch {}
 }
 
 // High-performance in-memory DB cache singleton
@@ -505,6 +513,19 @@ let _cachedDb: DB | null = null;
 let _cachedMtime: number = 0;
 
 export function getDb(): DB {
+  // If in serverless (e.g. Vercel), copy seed DB to writable /tmp if it doesn't exist yet
+  if (IS_SERVERLESS && !fs.existsSync(SERVERLESS_TMP_PATH)) {
+    try {
+      if (fs.existsSync(STATIC_DB_PATH)) {
+        fs.copyFileSync(STATIC_DB_PATH, SERVERLESS_TMP_PATH);
+      } else if (fs.existsSync(LEGACY_MOCK_PATH)) {
+        fs.copyFileSync(LEGACY_MOCK_PATH, SERVERLESS_TMP_PATH);
+      }
+    } catch (e) {
+      console.error('Error copying db to serverless /tmp:', e);
+    }
+  }
+
   // Fast path: if cache exists and file hasn't changed on disk, return cache immediately
   if (_cachedDb && fs.existsSync(DB_PATH)) {
     try {
@@ -527,6 +548,12 @@ export function getDb(): DB {
       } catch {
         _cachedMtime = Date.now();
       }
+    } catch {
+      db = {};
+    }
+  } else if (fs.existsSync(STATIC_DB_PATH)) {
+    try {
+      db = JSON.parse(fs.readFileSync(STATIC_DB_PATH, 'utf8'));
     } catch {
       db = {};
     }
