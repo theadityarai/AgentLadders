@@ -3,11 +3,40 @@
 import React, { useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import {
+  HomeIcon,
+  BuildingIcon,
+  UsersIcon,
+  BriefcaseIcon,
+  MapPinIcon,
+  UserIcon,
+  CalendarIcon,
+  FolderIcon,
+  ReceiptIcon,
+  CreditCardIcon,
+  IndianRupeeIcon,
+  CheckSquareIcon,
+  BarChartIcon,
+  TrendingUpIcon,
+  ZapIcon,
+  MegaphoneIcon,
+  GlobeIcon,
+  ClockIcon,
+  ShieldIcon,
+  MessageCircleIcon,
+  SettingsIcon,
+  CrownIcon,
+  ChevronRightIcon,
+  LockIcon,
+  BellIcon,
+  PhoneIcon,
+  InfoIcon
+} from '@/components/icons/NavIcons';
 
 export interface BreadcrumbItem {
   label: string;
   href?: string;
-  icon?: string;
+  icon?: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; style?: React.CSSProperties }> | React.ReactNode;
 }
 
 interface BreadcrumbsProps {
@@ -17,34 +46,67 @@ interface BreadcrumbsProps {
   style?: React.CSSProperties;
 }
 
-const ROUTE_LABELS: Record<string, { label: string; icon?: string }> = {
-  dashboard: { label: 'Cockpit', icon: '◈' },
-  properties: { label: 'Properties', icon: '🏠' },
-  leads: { label: 'Inquiries', icon: '👥' },
-  deals: { label: 'Deals Pipeline', icon: '💼' },
-  'site-visits': { label: 'Site Visits', icon: '📍' },
-  clients: { label: 'Clients', icon: '🤝' },
-  calendar: { label: 'Calendar', icon: '📅' },
-  documents: { label: 'Documents', icon: '📁' },
-  invoices: { label: 'Invoices', icon: '🧾' },
-  expenses: { label: 'Expenses', icon: '💳' },
-  payments: { label: 'Payments', icon: '💰' },
-  tasks: { label: 'Tasks', icon: '✅' },
-  reports: { label: 'Reports', icon: '📊' },
-  analytics: { label: 'Analytics', icon: '📈' },
-  insights: { label: 'Performance Insights', icon: '⚡' },
-  marketing: { label: 'Marketing', icon: '📢' },
-  brokerage: { label: 'Brokerage & Splits', icon: '🤝' },
-  owners: { label: 'Property Owners', icon: '👤' },
-  companies: { label: 'Companies', icon: '🏢' },
-  listings: { label: 'Portal Listings', icon: '🌐' },
-  timeline: { label: 'Activity Timeline', icon: '⏳' },
-  'audit-logs': { label: 'Audit Logs', icon: '🛡️' },
-  support: { label: 'Help & Support', icon: '💬' },
-  settings: { label: 'Settings', icon: '⚙️' },
-  admin: { label: 'Super Admin', icon: '👑' },
-  p: { label: 'Showcase', icon: '🏡' },
+const ROUTE_LABELS: Record<string, { label: string; icon?: React.ComponentType<any> }> = {
+  dashboard: { label: 'Dashboard', icon: HomeIcon },
+  properties: { label: 'Properties', icon: BuildingIcon },
+  leads: { label: 'Inquiries', icon: UsersIcon },
+  deals: { label: 'Deals Pipeline', icon: BriefcaseIcon },
+  'site-visits': { label: 'Site Visits', icon: MapPinIcon },
+  clients: { label: 'Clients', icon: UsersIcon },
+  calendar: { label: 'Calendar', icon: CalendarIcon },
+  documents: { label: 'Documents', icon: FolderIcon },
+  invoices: { label: 'Invoices', icon: ReceiptIcon },
+  expenses: { label: 'Expenses', icon: CreditCardIcon },
+  payments: { label: 'Payments', icon: IndianRupeeIcon },
+  tasks: { label: 'Tasks', icon: CheckSquareIcon },
+  reports: { label: 'Reports', icon: BarChartIcon },
+  analytics: { label: 'Analytics', icon: TrendingUpIcon },
+  insights: { label: 'Performance Insights', icon: ZapIcon },
+  marketing: { label: 'Marketing', icon: MegaphoneIcon },
+  brokerage: { label: 'Brokerage & Splits', icon: IndianRupeeIcon },
+  owners: { label: 'Property Owners', icon: UserIcon },
+  companies: { label: 'Companies', icon: BuildingIcon },
+  listings: { label: 'Portal Listings', icon: GlobeIcon },
+  timeline: { label: 'Activity Timeline', icon: ClockIcon },
+  'audit-logs': { label: 'Audit Logs', icon: ShieldIcon },
+  support: { label: 'Help & Support', icon: MessageCircleIcon },
+  settings: { label: 'Settings', icon: SettingsIcon },
+  admin: { label: 'Super Admin', icon: CrownIcon },
+  p: { label: 'Showcase', icon: BuildingIcon },
 };
+
+function renderCrumbIcon(
+  icon: BreadcrumbItem['icon'],
+  compact: boolean,
+  isLast: boolean
+) {
+  if (!icon) return null;
+  const iconSize = compact ? 13 : 14;
+  const iconColor = isLast ? '#059669' : '#64748b';
+
+  if (React.isValidElement(icon)) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>
+        {icon}
+      </span>
+    );
+  }
+
+  if (typeof icon === 'function') {
+    const IconComp = icon as React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; style?: React.CSSProperties }>;
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>
+        <IconComp size={iconSize} color={iconColor} strokeWidth={1.8} />
+      </span>
+    );
+  }
+
+  if (typeof icon === 'string') {
+    return <span style={{ fontSize: compact ? '11px' : '12px', lineHeight: 1 }}>{icon}</span>;
+  }
+
+  return null;
+}
 
 function BreadcrumbsInner({ items, compact = false, className, style }: BreadcrumbsProps) {
   const pathname = usePathname();
@@ -55,17 +117,17 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
       return items;
     }
 
-    if (!pathname) return [{ label: 'Dashboard', href: '/dashboard', icon: '◈' }];
+    if (!pathname) return [{ label: 'Dashboard', href: '/dashboard', icon: HomeIcon }];
 
     const segments = pathname.split('/').filter(Boolean);
     const result: BreadcrumbItem[] = [];
 
-    // Always start with Cockpit/Dashboard if inside dashboard
+    // Always start with Dashboard if inside dashboard
     if (segments[0] === 'dashboard') {
       result.push({
         label: 'Dashboard',
         href: '/dashboard',
-        icon: '◈'
+        icon: HomeIcon
       });
 
       if (segments.length > 1) {
@@ -88,7 +150,7 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
       result.push({
         label: 'Super Admin',
         href: '/admin',
-        icon: '👑'
+        icon: CrownIcon
       });
       if (segments.length > 1) {
         for (let i = 1; i < segments.length; i++) {
@@ -102,11 +164,11 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
       result.push({
         label: 'Properties',
         href: '/dashboard/properties',
-        icon: '🏠'
+        icon: BuildingIcon
       });
       result.push({
         label: 'Public Property Listing',
-        icon: '🏡'
+        icon: BuildingIcon
       });
     } else {
       let currentPath = '';
@@ -128,20 +190,21 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
     if (searchParams) {
       const tab = searchParams.get('tab');
       if (tab) {
-        const tabLabels: Record<string, string> = {
-          config: 'System Configuration',
-          agency: 'Agency Profile',
-          team: 'Team & Roles',
-          security: 'Security & 2FA',
-          billing: 'Plan & Billing',
-          notifications: 'Notifications',
-          tickets: 'My Tickets',
-          faqs: 'FAQs & Articles',
-          contact: 'Contact Support'
+        const tabMeta: Record<string, { label: string; icon?: React.ComponentType<any> }> = {
+          config: { label: 'System Configuration', icon: SettingsIcon },
+          agency: { label: 'Agency Profile', icon: BuildingIcon },
+          team: { label: 'Team & Roles', icon: UsersIcon },
+          security: { label: 'Security & 2FA', icon: LockIcon },
+          billing: { label: 'Plan & Billing', icon: CreditCardIcon },
+          notifications: { label: 'Notifications', icon: BellIcon },
+          tickets: { label: 'My Tickets', icon: MessageCircleIcon },
+          faqs: { label: 'FAQs & Articles', icon: InfoIcon },
+          contact: { label: 'Contact Support', icon: PhoneIcon }
         };
-        if (tabLabels[tab]) {
+        if (tabMeta[tab]) {
           result.push({
-            label: tabLabels[tab]
+            label: tabMeta[tab].label,
+            icon: tabMeta[tab].icon
           });
         }
       }
@@ -169,7 +232,7 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
         display: 'flex',
         alignItems: 'center',
         flexWrap: 'wrap',
-        gap: compact ? '4px' : '6px',
+        gap: compact ? '2px' : '4px',
         listStyle: 'none',
         margin: 0,
         padding: 0
@@ -192,12 +255,12 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '5px',
                     color: '#64748b',
                     textDecoration: 'none',
                     fontWeight: 500,
-                    padding: compact ? '1px 4px' : '2px 6px',
-                    borderRadius: '4px',
+                    padding: compact ? '2px 5px' : '3px 7px',
+                    borderRadius: '5px',
                     transition: 'all 0.15s ease'
                   }}
                   onMouseEnter={e => {
@@ -209,7 +272,7 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                 >
-                  {crumb.icon && <span style={{ fontSize: compact ? '11px' : '12px' }}>{crumb.icon}</span>}
+                  {renderCrumbIcon(crumb.icon, compact, false)}
                   <span>{crumb.label}</span>
                 </Link>
               ) : (
@@ -217,13 +280,13 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px',
+                    gap: '5px',
                     color: isLast ? '#0f172a' : '#64748b',
-                    fontWeight: isLast ? 700 : 500,
-                    padding: compact ? '1px 4px' : '2px 6px'
+                    fontWeight: isLast ? 650 : 500,
+                    padding: compact ? '2px 5px' : '3px 7px'
                   }}
                 >
-                  {crumb.icon && <span style={{ fontSize: compact ? '11px' : '12px' }}>{crumb.icon}</span>}
+                  {renderCrumbIcon(crumb.icon, compact, isLast)}
                   <span>{crumb.label}</span>
                 </span>
               )}
@@ -233,13 +296,13 @@ function BreadcrumbsInner({ items, compact = false, className, style }: Breadcru
                   aria-hidden="true" 
                   style={{ 
                     color: '#cbd5e1', 
-                    fontSize: compact ? '10px' : '11px',
                     userSelect: 'none',
                     display: 'inline-flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    margin: '0 1px'
                   }}
                 >
-                  ›
+                  <ChevronRightIcon size={compact ? 11 : 12} color="#94a3b8" strokeWidth={2} />
                 </span>
               )}
             </li>

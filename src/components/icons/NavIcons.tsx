@@ -143,6 +143,31 @@ export const ChevronDownIcon = ({ size = 16, color = 'currentColor', strokeWidth
   </svg>
 );
 
+export const ChevronRightIcon = ({ size = 14, color = 'currentColor', strokeWidth = 2, style }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <polyline points="9 18 15 12 9 6"/>
+  </svg>
+);
+
+export const FolderIcon = ({ size = 16, color = 'currentColor', strokeWidth = 1.75, style }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+  </svg>
+);
+
+export const CrownIcon = ({ size = 16, color = 'currentColor', strokeWidth = 1.75, style }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5v-2z"/>
+  </svg>
+);
+
+export const MegaphoneIcon = ({ size = 16, color = 'currentColor', strokeWidth = 1.75, style }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <path d="M3 11l18-5v12L3 13v-2z"/>
+    <path d="M11.6 16.8a3 3 0 11-5.8-1.6"/>
+  </svg>
+);
+
 export const LogOutIcon = ({ size = 16, color = 'currentColor', strokeWidth = 1.75, style }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
     <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
