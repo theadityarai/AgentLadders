@@ -35,7 +35,8 @@ export async function POST(req: Request) {
     agencyId: user.agencyId,
     title: data.title || 'New Deal',
     propertyId: data.propertyId || '',
-    propertyName: data.propertyName || '',
+    propertyName: data.propertyName || (Array.isArray(data.properties) && data.properties.length > 0 ? data.properties[0] : ''),
+    properties: Array.isArray(data.properties) ? data.properties : (data.propertyName ? [data.propertyName] : []),
     leadId: data.leadId || '',
     clientName: data.clientName || '',
     dealType: data.dealType || 'Sale Acquisition',
@@ -81,7 +82,10 @@ export async function PUT(req: Request) {
     notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.deals[index].notes,
     amount: data.amount !== undefined ? parseFloat(data.amount) || 0 : db.deals[index].amount,
     probability: data.probability !== undefined ? parseInt(data.probability) || 50 : db.deals[index].probability,
-    commissionAmount: data.amount !== undefined ? (parseFloat(data.amount) * 0.025 || 0) : db.deals[index].commissionAmount,
+    propertyName: data.propertyName !== undefined 
+      ? data.propertyName 
+      : (Array.isArray(data.properties) && data.properties.length > 0 ? data.properties[0] : db.deals[index].propertyName),
+    properties: Array.isArray(data.properties) ? data.properties : db.deals[index].properties,
     updatedAt: new Date().toISOString()
   };
 

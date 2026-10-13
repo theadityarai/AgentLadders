@@ -5,6 +5,8 @@ import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { DEFAULT_SITE_VISIT_STATUSES } from '@/lib/formatters';
+import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
+import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { 
   CalendarIcon, 
   EditIcon, 
@@ -25,6 +27,7 @@ import {
 interface SiteVisit {
   id: string;
   property: string;
+  properties?: string[];
   propertyId?: string;
   client: string;
   clientPhone?: string;
@@ -59,10 +62,21 @@ export default function SiteVisitsPage() {
   };
 
   const [clientsList, setClientsList] = useState<{name: string; phone?: string}[]>([]);
-  const [propertiesList, setPropertiesList] = useState<{title: string; purpose?: string; listingType?: string}[]>([]);
+  const [propertiesList, setPropertiesList] = useState<{title: string; purpose?: string; listingType?: string; locality?: string; bhk?: string; price?: number}[]>([]);
   const [siteVisitStatuses, setSiteVisitStatuses] = useState<string[]>(DEFAULT_SITE_VISIT_STATUSES);
 
-  const [formData, setFormData] = useState({ client: '', clientPhone: '', property: '', date: '', timeSlot: '', purpose: 'Buy', notes: '', status: 'Scheduled', priority: 'High Priority' });
+  const [formData, setFormData] = useState({ 
+    client: '', 
+    clientPhone: '', 
+    property: '', 
+    properties: [] as string[], 
+    date: '', 
+    timeSlot: '', 
+    purpose: 'Buy' as 'Buy' | 'Rent', 
+    notes: '', 
+    status: 'Scheduled', 
+    priority: 'High Priority' 
+  });
 
   const getVisitPurpose = (visit: SiteVisit): 'Buy' | 'Rent' => {
     if (visit.purpose === 'Rent' || (visit as any).visitType === 'Rent') return 'Rent';
@@ -109,13 +123,19 @@ export default function SiteVisitsPage() {
 
     setLoading(true);
     Promise.all([
-      fetch('/api/site-visits').then(res => res.json()),
-      fetch('/api/leads').then(res => res.json()),
-      fetch('/api/properties').then(res => res.json()),
-      fetch('/api/settings').then(res => res.json())
-    ]).then(([svJson, leadsJson, propsJson, settingsJson]) => {
+      fetch('/api/site-visits').then(res => res.json()).catch(() => ({ siteVisits: [] })),
+      fetch('/api/leads').then(res => res.json()).catch(() => ({ leads: [] })),
+      fetch('/api/clients').then(res => res.json()).catch(() => ({ clients: [] })),
+      fetch('/api/properties').then(res => res.json()).catch(() => ({ properties: [] })),
+      fetch('/api/settings').then(res => res.json()).catch(() => ({}))
+    ]).then(([svJson, leadsJson, clientsJson, propsJson, settingsJson]) => {
       if (svJson.siteVisits) setData(svJson.siteVisits);
-      if (leadsJson.leads) setClientsList(leadsJson.leads);
+      const combinedClients = [
+        ...(leadsJson.leads || []),
+        ...(clientsJson?.clients || [])
+      ];
+      const uniqueClients = Array.from(new Map(combinedClients.map(c => [c.name, c])).values());
+      setClientsList(uniqueClients);
       if (propsJson.properties) setPropertiesList(propsJson.properties);
       if (settingsJson?.agency?.siteVisitStatuses && Array.isArray(settingsJson.agency.siteVisitStatuses) && settingsJson.agency.siteVisitStatuses.length > 0) {
         setSiteVisitStatuses(settingsJson.agency.siteVisitStatuses);
@@ -148,7 +168,13 @@ export default function SiteVisitsPage() {
     if (filter === 'Cancelled') return v.status === 'Cancelled';
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      return v.client?.toLowerCase().includes(q) || v.property?.toLowerCase().includes(q) || v.notes?.toLowerCase().includes(q);
+      return (
+        v.client?.toLowerCase().includes(q) ||
+        v.clientPhone?.toLowerCase().includes(q) ||
+        v.property?.toLowerCase().includes(q) ||
+        (Array.isArray(v.properties) && v.properties.some(p => p.toLowerCase().includes(q))) ||
+        v.notes?.toLowerCase().includes(q)
+      );
     }
     return true;
   }).sort((a, b) => {
@@ -216,16 +242,32 @@ export default function SiteVisitsPage() {
 
   const handleOpenAdd = () => {
     setEditingVisit(null);
-    setFormData({ client: '', clientPhone: '', property: '', date: '', timeSlot: '', purpose: 'Buy', notes: '', status: 'Scheduled', priority: 'High Priority' });
+    setFormData({ 
+      client: '', 
+      clientPhone: '', 
+      property: '', 
+      properties: [], 
+      date: today, 
+      timeSlot: '11:30 AM - 12:30 PM', 
+      purpose: 'Buy', 
+      notes: '', 
+      status: 'Scheduled', 
+      priority: 'High Priority' 
+    });
     setShowModal(true);
   };
 
   const handleOpenEdit = (visit: SiteVisit) => {
     setEditingVisit(visit);
+    const initialProps = Array.isArray(visit.properties) && visit.properties.length > 0
+      ? visit.properties
+      : (visit.property ? [visit.property] : []);
+
     setFormData({
       client: visit.client || '',
       clientPhone: visit.clientPhone || '',
-      property: visit.property || '',
+      property: visit.property || (initialProps[0] || ''),
+      properties: initialProps,
       date: visit.date || '',
       timeSlot: visit.timeSlot || '',
       purpose: getVisitPurpose(visit),
@@ -265,12 +307,27 @@ export default function SiteVisitsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.client.trim()) {
+      showToast('error', 'Please select or enter client name.', 'Client Required');
+      return;
+    }
+    if (formData.properties.length === 0 && !formData.property) {
+      showToast('error', 'Please select at least one property to visit.', 'Property Required');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      const primaryProperty = formData.properties.length > 0 ? formData.properties[0] : (formData.property || 'Property Showing');
+      const finalProperties = formData.properties.length > 0 ? formData.properties : [primaryProperty];
+
       const payload = {
         ...(editingVisit ? { id: editingVisit.id } : {}),
-        ...formData
+        ...formData,
+        property: primaryProperty,
+        properties: finalProperties
       };
+
       const method = editingVisit ? 'PUT' : 'POST';
       const res = await fetch('/api/site-visits', {
         method,
@@ -283,7 +340,18 @@ export default function SiteVisitsPage() {
         setData(prev => [created, ...prev.filter(v => v.id !== created.id)]);
         setShowModal(false);
         setEditingVisit(null);
-        setFormData({ client: '', clientPhone: '', property: '', date: '', timeSlot: '', purpose: 'Buy', notes: '', status: 'Scheduled', priority: 'High Priority' });
+        setFormData({ 
+          client: '', 
+          clientPhone: '', 
+          property: '', 
+          properties: [], 
+          date: '', 
+          timeSlot: '', 
+          purpose: 'Buy', 
+          notes: '', 
+          status: 'Scheduled', 
+          priority: 'High Priority' 
+        });
         showToast('success', editingVisit ? `Site visit updated for "${formData.client}"!` : `Site visit booked for "${formData.client}"!`, editingVisit ? 'Visit Updated' : 'Visit Booked');
         fetch('/api/site-visits').then(r => r.json()).then(j => { if (j.siteVisits) setData(j.siteVisits); });
       } else {
@@ -349,54 +417,58 @@ export default function SiteVisitsPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Client Name *</label>
-                <select 
-                  required 
+                <SearchableCombobox
+                  label="Client Name & Phone Number"
+                  required
                   value={formData.client}
-                  onChange={e => { 
-                    if (e.target.value === 'NEW') {
-                      window.location.href = '/dashboard/leads?new=true';
-                    } else {
-                      const matched = clientsList.find(c => c.name === e.target.value);
-                      setFormData({
-                        ...formData,
-                        client: e.target.value,
-                        clientPhone: matched?.phone || formData.clientPhone
-                      });
-                    }
+                  placeholder="Select or search client by name or phone..."
+                  searchPlaceholder="Type client name or phone number (e.g. 98200...)"
+                  options={clientsList.map(c => ({
+                    value: c.name,
+                    label: c.name,
+                    sublabel: c.phone || 'No Phone',
+                    badge: (c as any).leadPurpose || (c as any).status || 'Client'
+                  }))}
+                  onChange={(val, opt) => {
+                    const phoneToUse = opt?.sublabel && opt.sublabel !== 'No Phone' ? opt.sublabel : formData.clientPhone;
+                    setFormData(prev => ({
+                      ...prev,
+                      client: val,
+                      clientPhone: phoneToUse
+                    }));
                   }}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                >
-                  <option value="">Select a client...</option>
-                  {clientsList.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                  <option value="NEW" style={{ fontWeight: 700 }}>+ Add New Client...</option>
-                </select>
+                  onAddNew={() => {
+                    window.location.href = '/dashboard/leads?new=true';
+                  }}
+                  addNewLabel="+ Add New Client / Inquiry..."
+                />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Property *</label>
-                <select 
-                  required 
-                  value={formData.property}
-                  onChange={e => { 
-                    if (e.target.value === 'NEW') {
-                      window.location.href = '/dashboard/properties?new=true';
-                    } else {
-                      const matched = propertiesList.find(p => p.title === e.target.value);
-                      const isRent = (matched && ((matched as any).purpose === 'For Rent' || (matched as any).listingType === 'For Rent')) || e.target.value.toLowerCase().includes('rent') || e.target.value.toLowerCase().includes('lease');
-                      setFormData({
-                        ...formData,
-                        property: e.target.value,
-                        purpose: isRent ? 'Rent' : 'Buy'
-                      });
-                    }
+                <MultiPropertySelector
+                  availableProperties={propertiesList.map(p => ({
+                    title: p.title,
+                    locality: p.locality,
+                    bhk: p.bhk,
+                    price: p.price,
+                    purpose: p.purpose
+                  }))}
+                  selectedProperties={formData.properties}
+                  onChange={(newProps) => {
+                    const firstProp = newProps[0] || '';
+                    const matched = propertiesList.find(p => p.title === firstProp);
+                    const isRent = (matched && ((matched as any).purpose === 'For Rent' || (matched as any).listingType === 'For Rent')) || firstProp.toLowerCase().includes('rent') || firstProp.toLowerCase().includes('lease');
+                    setFormData(prev => ({
+                      ...prev,
+                      properties: newProps,
+                      property: firstProp,
+                      purpose: newProps.length > 0 ? (isRent ? 'Rent' : 'Buy') : prev.purpose
+                    }));
                   }}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                >
-                  <option value="">Select a property...</option>
-                  {propertiesList.map(p => <option key={p.title} value={p.title}>{p.title}</option>)}
-                  <option value="NEW" style={{ fontWeight: 700 }}>+ Add New Property...</option>
-                </select>
+                  onAddNewProperty={() => {
+                    window.location.href = '/dashboard/properties?new=true';
+                  }}
+                />
               </div>
 
               <div className="responsive-grid-3">
@@ -687,14 +759,30 @@ export default function SiteVisitsPage() {
 
                     <div className="responsive-grid-2">
                       <div>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 4, textTransform: 'uppercase' }}>Property</div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{visit.property}</div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 4, textTransform: 'uppercase' }}>
+                          {visit.properties && visit.properties.length > 1 ? `Showing Tour (${visit.properties.length} Stops)` : 'Property'}
+                        </div>
+                        {visit.properties && visit.properties.length > 1 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                            {visit.properties.map((p, idx) => (
+                              <div key={idx} style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 6px', borderRadius: 4, backgroundColor: '#0f172a', color: '#fff', flexShrink: 0 }}>
+                                  Stop {idx + 1}
+                                </span>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>{visit.property}</div>
+                        )}
                       </div>
                       <div>
                         <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 4, textTransform: 'uppercase' }}>Client</div>
                         <div style={{ fontSize: 14, fontWeight: 600, color: '#475569', display: 'flex', alignItems: 'center', gap: 6 }}>
                           <UserIcon size={13} color="#94a3b8" />
                           <span>{visit.client}</span>
+                          {visit.clientPhone && <span style={{ fontSize: 12, color: '#64748b' }}>({visit.clientPhone})</span>}
                         </div>
                       </div>
                     </div>
@@ -715,7 +803,10 @@ export default function SiteVisitsPage() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            openWa(visit.clientPhone, `Hi ${visit.client}, this is regarding your upcoming site visit for ${visit.property} on ${formatDate(visit.date)} (${visit.timeSlot || 'Scheduled Time'}). Please let me know if you need location directions!`);
+                            const tourText = visit.properties && visit.properties.length > 1
+                              ? `your upcoming showing tour on ${formatDate(visit.date)} (${visit.timeSlot || 'Scheduled Time'}):\n` + visit.properties.map((p, i) => `Stop ${i + 1}: ${p}`).join('\n') + `\n\nPlease let me know if you need any directions or gate passes!`
+                              : `your upcoming site visit for ${visit.property} on ${formatDate(visit.date)} (${visit.timeSlot || 'Scheduled Time'}). Please let me know if you need location directions!`;
+                            openWa(visit.clientPhone, `Hi ${visit.client}, this is regarding ${tourText}`);
                           }}
                           style={{ backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'opacity 0.15s ease' }}
                           onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}

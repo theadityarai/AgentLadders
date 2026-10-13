@@ -15,6 +15,8 @@ import {
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
+import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { 
   EditIcon, 
   TrashIcon, 
@@ -60,6 +62,8 @@ export default function LeadsPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
+  const [clientsList, setClientsList] = useState<{name: string; phone?: string; email?: string; preferredLocation?: string; type?: string}[]>([]);
+  const [propertiesList, setPropertiesList] = useState<{title: string; locality?: string; city?: string; bhk?: string; price?: number; purpose?: string}[]>([]);
 
   const isLeadRent = (l: Lead) => {
     const p = ((l as any).leadPurpose || (l as any).purpose || (l as any).leadType || (l as any).dealType || '').toLowerCase();
@@ -109,16 +113,45 @@ export default function LeadsPage() {
     furnishingPreference: 'Any',
     constructionStagePreference: 'Any',
     vastuPreference: 'Any',
-    parkingPreference: 'Any'
+    parkingPreference: 'Any',
+    inquiredProperty: '',
+    properties: [] as string[]
   });
 
   const loadData = () => {
-    fetch('/api/leads')
-      .then(res => res.json())
-      .then(json => {
-        if (json.leads) setData(json.leads);
-      })
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch('/api/leads').then(res => res.json()).catch(() => ({ leads: [] })),
+      fetch('/api/clients').then(res => res.json()).catch(() => ({ clients: [] })),
+      fetch('/api/properties').then(res => res.json()).catch(() => ({ properties: [] }))
+    ]).then(([leadsJson, clientsJson, propsJson]) => {
+      if (leadsJson.leads) setData(leadsJson.leads);
+      const combined = [
+        ...(clientsJson.clients || []),
+        ...(leadsJson.leads || [])
+      ];
+      const unique = Array.from(new Map(combined.map(c => [c.name, c])).values());
+      setClientsList(unique);
+      if (propsJson.properties) setPropertiesList(propsJson.properties);
+    }).finally(() => setLoading(false));
+  };
+
+  const handleStatusChange = async (leadId: string, newStatus: string) => {
+    setData(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: leadId, status: newStatus })
+      });
+      if (res.ok) {
+        showToast('success', `Inquiry status updated to "${newStatus}".`, 'Status Updated');
+      } else {
+        showToast('error', 'Failed to update status on server.', 'Update Failed');
+      }
+    } catch (err) {
+      console.error('Failed to update status', err);
+      showToast('error', 'Network error while updating inquiry status.', 'Network Error');
+    }
   };
 
   useEffect(() => {
@@ -193,7 +226,9 @@ export default function LeadsPage() {
       furnishingPreference: 'Any',
       constructionStagePreference: 'Any',
       vastuPreference: 'Any',
-      parkingPreference: 'Any'
+      parkingPreference: 'Any',
+      inquiredProperty: '',
+      properties: []
     });
     setShowModal(true);
   };
@@ -217,7 +252,11 @@ export default function LeadsPage() {
       furnishingPreference: lead.furnishingPreference || 'Any',
       constructionStagePreference: lead.constructionStagePreference || 'Any',
       vastuPreference: lead.vastuPreference || 'Any',
-      parkingPreference: lead.parkingPreference || 'Any'
+      parkingPreference: lead.parkingPreference || 'Any',
+      inquiredProperty: (lead as any).inquiredProperty || '',
+      properties: Array.isArray((lead as any).properties) && (lead as any).properties.length > 0
+        ? (lead as any).properties
+        : ((lead as any).inquiredProperty ? [(lead as any).inquiredProperty] : [])
     });
     setShowModal(true);
   };
@@ -253,9 +292,12 @@ export default function LeadsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const primaryProperty = formData.properties[0] || formData.inquiredProperty || '';
       const payload = {
         ...(editingLead ? { id: editingLead.id } : {}),
         ...formData,
+        inquiredProperty: primaryProperty,
+        properties: formData.properties,
         budgetMax: formData.budgetMax ? Number(formData.budgetMax) : undefined,
         bhkNeeded: [formData.bhkNeeded]
       };
@@ -279,7 +321,9 @@ export default function LeadsPage() {
           furnishingPreference: 'Any',
           constructionStagePreference: 'Any',
           vastuPreference: 'Any',
-          parkingPreference: 'Any'
+          parkingPreference: 'Any',
+          inquiredProperty: '',
+          properties: []
         });
       } else {
         const err = await res.json().catch(() => ({}));
@@ -442,6 +486,42 @@ export default function LeadsPage() {
                 </div>
               </div>
 
+              {/* Client Selection (Searchable with Phone display or manual enter) */}
+              <div>
+                <SearchableCombobox
+                  label="Select Registered Client (Optional)"
+                  value={formData.name}
+                  placeholder="Search existing clients by name or phone..."
+                  searchPlaceholder="Type client name or phone (e.g. 98200...)"
+                  options={clientsList.map(c => ({
+                    value: c.name,
+                    label: c.name,
+                    sublabel: c.phone || 'No Phone',
+                    badge: (c as any).type || (c as any).status || 'Client'
+                  }))}
+                  onChange={(val, opt) => {
+                    if (!val) {
+                      setFormData(prev => ({ ...prev, name: '', phone: '', email: '' }));
+                      return;
+                    }
+                    const matched = clientsList.find(c => c.name === val);
+                    const phoneVal = (matched && matched.phone) || (opt?.sublabel && opt.sublabel !== 'No Phone' ? opt.sublabel : formData.phone);
+                    setFormData(prev => ({
+                      ...prev,
+                      name: val,
+                      phone: phoneVal,
+                      email: (matched && matched.email) || prev.email,
+                      city: (matched as any)?.city || (matched as any)?.preferredLocation || prev.city
+                    }));
+                  }}
+                  onAddNew={() => {}}
+                  addNewLabel="+ New Client"
+                />
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                  Select an existing contact to auto-fill details or type new client information below.
+                </div>
+              </div>
+
               <div className="responsive-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Full Name *</label>
@@ -475,6 +555,52 @@ export default function LeadsPage() {
               <div style={{ height: 1, backgroundColor: 'var(--border)', margin: '4px 0' }} />
 
               <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: '#0f172a' }}>Requirements</h3>
+
+              {/* Property Inquired About (MultiPropertySelector) */}
+              <div>
+                <MultiPropertySelector
+                  label="Inquired / Shortlisted Properties (Optional)"
+                  required={false}
+                  itemPrefix="Property"
+                  itemBadgeLabel="Properties Inquired"
+                  addFirstLabel="Select Inquired Property"
+                  addMoreLabel="+ Add Another Inquired Property"
+                  availableProperties={propertiesList.map(p => ({
+                    title: p.title,
+                    locality: p.locality,
+                    bhk: p.bhk,
+                    price: p.price,
+                    purpose: p.purpose
+                  }))}
+                  selectedProperties={formData.properties}
+                  onChange={(newProps) => {
+                    const firstProp = newProps[0] || '';
+                    const matched = propertiesList.find(p => p.title === firstProp);
+                    if (matched) {
+                      const isRent = ((matched as any).purpose === 'For Rent' || (matched as any).listingType === 'For Rent') || matched.title.toLowerCase().includes('rent');
+                      setFormData(prev => ({
+                        ...prev,
+                        properties: newProps,
+                        inquiredProperty: firstProp,
+                        leadPurpose: isRent ? 'Rent' : 'Buy',
+                        bhkNeeded: matched.bhk || prev.bhkNeeded,
+                        preferredLocalities: matched.locality || prev.preferredLocalities,
+                        city: matched.city || prev.city,
+                        budgetMax: matched.price ? matched.price.toString() : prev.budgetMax
+                      }));
+                    } else {
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        properties: newProps,
+                        inquiredProperty: firstProp 
+                      }));
+                    }
+                  }}
+                  onAddNewProperty={() => {
+                    window.location.href = '/dashboard/properties?new=true';
+                  }}
+                />
+              </div>
 
               <div className="responsive-grid-2">
                 <div>
@@ -851,8 +977,27 @@ export default function LeadsPage() {
                     </div>
                   </td>
 
-                  <td style={{ padding: '16px 20px' }}>
-                    {getStatusBadge(lead.status)}
+                  <td style={{ padding: '16px 20px' }} onClick={e => e.stopPropagation()}>
+                    <select
+                      value={lead.status}
+                      onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        padding: '5px 10px',
+                        borderRadius: 6,
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#fff',
+                        color: '#334155',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                      }}
+                    >
+                      {leadStatuses.map(st => (
+                        <option key={st} value={st}>{st}</option>
+                      ))}
+                    </select>
                   </td>
 
                   <td style={{ padding: '16px 20px', textAlign: 'right' }}>
@@ -1117,8 +1262,26 @@ export default function LeadsPage() {
               </div>
 
               {/* Status & Badges */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                {getStatusBadge(lead.status)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
+                <select
+                  value={lead.status}
+                  onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                  style={{
+                    fontSize: 11.5,
+                    fontWeight: 600,
+                    padding: '4px 8px',
+                    borderRadius: 6,
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#fff',
+                    color: '#334155',
+                    cursor: 'pointer',
+                    outline: 'none'
+                  }}
+                >
+                  {leadStatuses.map(st => (
+                    <option key={st} value={st}>{st}</option>
+                  ))}
+                </select>
                 {getSourceBadge(lead.source)}
                 {((lead as any).isSelfCreated || (lead.source || '').toLowerCase().includes('self-created') || (lead.source || '').toLowerCase().includes('public listing')) && (
                   <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>

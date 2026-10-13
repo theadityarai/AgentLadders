@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
+import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
+import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { 
   EditIcon, 
   TrashIcon, 
@@ -23,6 +25,7 @@ interface Deal {
   title: string;
   clientName?: string;
   propertyName?: string;
+  properties?: string[];
   amount: number;
   stage: string;
   expectedCloseDate: string;
@@ -38,8 +41,8 @@ export default function DealsPage() {
   const [dealTypeFilter, setDealTypeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [clientsList, setClientsList] = useState<{name: string}[]>([]);
-  const [propertiesList, setPropertiesList] = useState<{title: string; purpose?: string; listingType?: string}[]>([]);
+  const [clientsList, setClientsList] = useState<{name: string; phone?: string; email?: string; type?: string}[]>([]);
+  const [propertiesList, setPropertiesList] = useState<{title: string; locality?: string; city?: string; bhk?: string; price?: number; purpose?: string; listingType?: string}[]>([]);
 
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [deletingDeal, setDeletingDeal] = useState<Deal | null>(null);
@@ -51,7 +54,15 @@ export default function DealsPage() {
     setToast({ id: Date.now().toString(), type, message, title });
   };
 
-  const [formData, setFormData] = useState({ title: '', clientName: '', propertyName: '', amount: '', dealType: 'Outright Sale', stage: 'Negotiation' });
+  const [formData, setFormData] = useState({ 
+    title: '', 
+    clientName: '', 
+    propertyName: '', 
+    properties: [] as string[],
+    amount: '', 
+    dealType: 'Outright Sale', 
+    stage: 'Negotiation' 
+  });
 
   const isDealRent = (d: Deal) => {
     const dt = (d.dealType || '').toLowerCase();
@@ -107,12 +118,18 @@ export default function DealsPage() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch('/api/deals').then(res => res.json()),
-      fetch('/api/leads').then(res => res.json()),
-      fetch('/api/properties').then(res => res.json())
-    ]).then(([dealsJson, leadsJson, propsJson]) => {
+      fetch('/api/deals').then(res => res.json()).catch(() => ({ deals: [] })),
+      fetch('/api/leads').then(res => res.json()).catch(() => ({ leads: [] })),
+      fetch('/api/clients').then(res => res.json()).catch(() => ({ clients: [] })),
+      fetch('/api/properties').then(res => res.json()).catch(() => ({ properties: [] }))
+    ]).then(([dealsJson, leadsJson, clientsJson, propsJson]) => {
       if (dealsJson.deals) setData(dealsJson.deals);
-      if (leadsJson.leads) setClientsList(leadsJson.leads);
+      const combinedClients = [
+        ...(leadsJson.leads || []),
+        ...(clientsJson?.clients || [])
+      ];
+      const uniqueClients = Array.from(new Map(combinedClients.map(c => [c.name, c])).values());
+      setClientsList(uniqueClients);
       if (propsJson.properties) setPropertiesList(propsJson.properties);
     }).finally(() => setLoading(false));
   }, []);
@@ -178,7 +195,8 @@ export default function DealsPage() {
       return (
         d.title?.toLowerCase().includes(q) ||
         d.clientName?.toLowerCase().includes(q) ||
-        d.propertyName?.toLowerCase().includes(q)
+        d.propertyName?.toLowerCase().includes(q) ||
+        (Array.isArray(d.properties) && d.properties.some(p => p.toLowerCase().includes(q)))
       );
     }
     return true;
@@ -194,16 +212,28 @@ export default function DealsPage() {
 
   const handleOpenAdd = () => {
     setEditingDeal(null);
-    setFormData({ title: '', clientName: '', propertyName: '', amount: '', dealType: 'Outright Sale', stage: 'Negotiation' });
+    setFormData({ 
+      title: '', 
+      clientName: '', 
+      propertyName: '', 
+      properties: [], 
+      amount: '', 
+      dealType: 'Outright Sale', 
+      stage: 'Negotiation' 
+    });
     setShowModal(true);
   };
 
   const handleOpenEdit = (deal: Deal) => {
     setEditingDeal(deal);
+    const initialProps = Array.isArray(deal.properties) && deal.properties.length > 0
+      ? deal.properties
+      : (deal.propertyName ? [deal.propertyName] : []);
     setFormData({
       title: deal.title || '',
       clientName: deal.clientName || '',
       propertyName: deal.propertyName || '',
+      properties: initialProps,
       amount: deal.amount !== undefined ? deal.amount.toString() : '',
       dealType: deal.dealType || 'Outright Sale',
       stage: deal.stage || 'Negotiation'
@@ -242,9 +272,12 @@ export default function DealsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const primaryProperty = formData.properties[0] || formData.propertyName || '';
       const payload = {
         ...(editingDeal ? { id: editingDeal.id } : {}),
         ...formData,
+        propertyName: primaryProperty,
+        properties: formData.properties,
         amount: parseFloat(formData.amount) || 0
       };
       const method = editingDeal ? 'PUT' : 'POST';
@@ -259,7 +292,15 @@ export default function DealsPage() {
         setData(prev => [created, ...prev.filter(d => d.id !== created.id)]);
         setShowModal(false);
         setEditingDeal(null);
-        setFormData({ title: '', clientName: '', propertyName: '', amount: '', dealType: 'Outright Sale', stage: 'Negotiation' });
+        setFormData({ 
+          title: '', 
+          clientName: '', 
+          propertyName: '', 
+          properties: [], 
+          amount: '', 
+          dealType: 'Outright Sale', 
+          stage: 'Negotiation' 
+        });
         showToast('success', editingDeal ? `Deal "${formData.title}" updated successfully!` : `Deal "${formData.title}" added to pipeline!`, editingDeal ? 'Deal Updated' : 'Deal Created');
         fetch('/api/deals').then(r => r.json()).then(j => { if (j.deals) setData(j.deals); });
       } else {
@@ -309,48 +350,68 @@ export default function DealsPage() {
                 <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="e.g. 3BHK Lodha - Rahul" />
               </div>
 
-              <div className="responsive-grid-2">
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Client Name *</label>
-                  <select 
-                    required 
-                    value={formData.clientName}
-                    onChange={e => { 
-                       if (e.target.value === 'NEW') window.location.href = '/dashboard/leads?new=true';
-                      else setFormData({...formData, clientName: e.target.value});
-                    }}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                  >
-                    <option value="">Select a client...</option>
-                    {clientsList.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                    <option value="NEW" style={{ fontWeight: 700 }}>+ Add New Client...</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Property Name *</label>
-                  <select 
-                    required 
-                    value={formData.propertyName}
-                    onChange={e => { 
-                      if (e.target.value === 'NEW') {
-                        window.location.href = '/dashboard/properties?new=true';
-                      } else {
-                        const matched = propertiesList.find(p => p.title === e.target.value);
-                        const isRent = (matched && ((matched as any).purpose === 'For Rent' || (matched as any).listingType === 'For Rent')) || e.target.value.toLowerCase().includes('rent') || e.target.value.toLowerCase().includes('lease');
-                        setFormData({
-                          ...formData,
-                          propertyName: e.target.value,
-                          dealType: isRent ? 'Rental Lease' : 'Outright Sale'
-                        });
-                      }
-                    }}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                  >
-                    <option value="">Select a property...</option>
-                    {propertiesList.map(p => <option key={p.title} value={p.title}>{p.title}</option>)}
-                    <option value="NEW" style={{ fontWeight: 700 }}>+ Add New Property...</option>
-                  </select>
-                </div>
+              <div>
+                <SearchableCombobox
+                  label="Client Name & Phone Number"
+                  required
+                  value={formData.clientName}
+                  placeholder="Select or search client by name or phone..."
+                  searchPlaceholder="Type client name or phone (e.g. 98200...)"
+                  options={clientsList.map(c => ({
+                    value: c.name,
+                    label: c.name,
+                    sublabel: c.phone || 'No Phone',
+                    badge: c.type || (c as any).leadPurpose || (c as any).status || 'Client'
+                  }))}
+                  onChange={(val) => {
+                    setFormData(prev => ({ ...prev, clientName: val }));
+                  }}
+                  onAddNew={() => {
+                    window.location.href = '/dashboard/leads?new=true';
+                  }}
+                  addNewLabel="+ Add New Client / Inquiry..."
+                />
+              </div>
+
+              <div>
+                <MultiPropertySelector
+                  label="Property Assets in Deal"
+                  required
+                  itemPrefix="Property"
+                  itemBadgeLabel="Properties in Deal"
+                  addFirstLabel="Select Property Asset for Deal"
+                  addMoreLabel="+ Add Another Property to this Deal"
+                  availableProperties={propertiesList.map(p => ({
+                    title: p.title,
+                    locality: p.locality,
+                    bhk: p.bhk,
+                    price: p.price,
+                    purpose: p.purpose
+                  }))}
+                  selectedProperties={formData.properties}
+                  onChange={(newProps) => {
+                    const firstProp = newProps[0] || '';
+                    const matched = propertiesList.find(p => p.title === firstProp);
+                    const isRent = (matched && ((matched as any).purpose === 'For Rent' || (matched as any).listingType === 'For Rent')) || firstProp.toLowerCase().includes('rent') || firstProp.toLowerCase().includes('lease');
+                    
+                    let totalEstimatedPrice = 0;
+                    newProps.forEach(pt => {
+                      const match = propertiesList.find(p => p.title === pt);
+                      if (match?.price) totalEstimatedPrice += match.price;
+                    });
+
+                    setFormData(prev => ({
+                      ...prev,
+                      properties: newProps,
+                      propertyName: firstProp,
+                      dealType: newProps.length > 0 ? (isRent ? 'Rental Lease' : 'Outright Sale') : prev.dealType,
+                      amount: totalEstimatedPrice > 0 && (!prev.amount || prev.amount === '0') ? totalEstimatedPrice.toString() : prev.amount
+                    }));
+                  }}
+                  onAddNewProperty={() => {
+                    window.location.href = '/dashboard/properties?new=true';
+                  }}
+                />
               </div>
 
               <div className="responsive-grid-2">
@@ -630,10 +691,27 @@ export default function DealsPage() {
                         <UserIcon size={13} color="#94a3b8" />
                         <span>{deal.clientName}</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                        <BuildingIcon size={13} color="#94a3b8" />
-                        <span>{deal.propertyName}</span>
-                      </div>
+                      {deal.properties && deal.properties.length > 1 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 700 }}>
+                            <BuildingIcon size={13} color="var(--primary)" />
+                            <span>{deal.properties.length} Properties in Deal:</span>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 18 }}>
+                            {deal.properties.map((prop, idx) => (
+                              <div key={idx} style={{ fontSize: 11.5, color: '#0f172a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: 'var(--primary)', flexShrink: 0 }} />
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prop}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
+                          <BuildingIcon size={13} color="#94a3b8" />
+                          <span>{deal.propertyName || (deal.properties && deal.properties[0]) || 'No Property Assigned'}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px dashed var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

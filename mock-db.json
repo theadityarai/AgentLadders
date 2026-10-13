@@ -326,7 +326,7 @@
       "privacyMode": "Public",
       "isPublic": true,
       "sharesCount": 38,
-      "viewsCount": 320,
+      "viewsCount": 324,
       "agentName": "Marcus Vance",
       "agentPhone": "+91 98201 23456",
       "agentEmail": "marcus@vancerealty.com",
@@ -681,7 +681,7 @@
       "privacyMode": "Public",
       "isPublic": true,
       "sharesCount": 15,
-      "viewsCount": 120,
+      "viewsCount": 122,
       "agentName": "Marcus Vance",
       "agentPhone": "+91 98201 23456",
       "agentEmail": "marcus@vancerealty.com",
@@ -1457,6 +1457,28 @@
       "expectedCloseDate": "2026-10-12",
       "notes": "Municipal restaurant NOC denied by housing society. Client retracted deposit.",
       "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "title": "Multi-Unit Portfolio Deal",
+      "clientName": "Vikram Malhotra",
+      "propertyName": "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
+      "properties": [
+        "4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park",
+        "3 BHK High-Rise Golf Course Apartment, DLF The Camellias"
+      ],
+      "amount": 150000000,
+      "dealType": "Outright Sale",
+      "stage": "Negotiation",
+      "id": "deal_vrsnehu0",
+      "agencyId": "ag_vance_01",
+      "propertyId": "",
+      "leadId": "",
+      "probability": 50,
+      "commissionRate": "2.5%",
+      "commissionAmount": 3750000,
+      "assignedBroker": "Marcus Vance",
+      "expectedCloseDate": "2026-11-12",
+      "createdAt": "2026-10-13T09:53:08.167Z"
     }
   ],
   "clients": [
