@@ -20,7 +20,8 @@ import {
   InfoIcon,
   AlertCircleIcon,
   CheckIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  CompassIcon
 } from '@/components/icons/NavIcons';
 
 export function Topbar() {
@@ -363,6 +364,7 @@ export function Topbar() {
                 { href: '/dashboard/properties', label: 'Properties', icon: BuildingIcon },
                 { href: '/dashboard/site-visits', label: 'Site Visits', icon: UsersIcon },
                 { href: '/dashboard/deals', label: 'Deals Pipeline', icon: BriefcaseIcon },
+                { href: '/dashboard/tutorial', label: 'Playbook & Tour (मार्गदर्शिका)', icon: CompassIcon },
                 { href: '/dashboard/insights', label: 'Performance Insights', icon: BuildingIcon },
                 { href: '/dashboard/support', label: 'Help & Support', icon: MessageCircleIcon },
                 { href: '/dashboard/settings', label: 'Settings', icon: SettingsIcon },
@@ -431,6 +433,36 @@ export function Topbar() {
             </div>
           </Link>
         )}
+
+        {/* Deal Playbook & Interactive Tour Quick Link */}
+        <Link href="/dashboard/tutorial" style={{ textDecoration: 'none' }} title="Interactive CRM Guide & Deal Flowchart">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '6px 12px',
+            borderRadius: '20px',
+            backgroundColor: '#ecfdf5',
+            color: '#065f46',
+            border: '1px solid #a7f3d0',
+            fontSize: '12.5px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = '#d1fae5';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = '#ecfdf5';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+          >
+            <CompassIcon size={14} color="#059669" />
+            <span className="hide-on-mobile">Playbook</span>
+          </div>
+        </Link>
 
         {/* Notifications Popover */}
         <div ref={notifRef} style={{ position: 'relative' }}>

@@ -17,7 +17,8 @@ import {
   BarChartIcon,
   MessageCircleIcon,
   SettingsIcon,
-  ShieldIcon
+  ShieldIcon,
+  CompassIcon
 } from '@/components/icons/NavIcons';
 
 interface NavItemConfig {
@@ -34,6 +35,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   { href: '/dashboard/properties', label: 'Properties', icon: BuildingIcon, exact: false },
   { href: '/dashboard/site-visits', label: 'Site Visits', icon: MapPinIcon, exact: false, badge: 'KEY' },
   { href: '/dashboard/deals', label: 'Deals', icon: BriefcaseIcon, exact: false },
+  { href: '/dashboard/tutorial', label: 'Deal Playbook', icon: CompassIcon, exact: false, badge: 'GUIDE' },
   { href: '/dashboard/insights', label: 'Insights', icon: TrendingUpIcon, exact: false },
 ];
 
