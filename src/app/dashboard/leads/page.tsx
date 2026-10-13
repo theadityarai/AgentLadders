@@ -18,6 +18,9 @@ import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { FilterTabs } from '@/components/ui/FilterTabs';
+import { Pagination } from '@/components/ui/Pagination';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { 
   EditIcon, 
   TrashIcon, 
@@ -360,6 +363,17 @@ export default function LeadsPage() {
     }
     return true;
   });
+
+  // Leads Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter, purposeFilter, sourceFilter]);
+
+  const paginatedLeads = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getStatusBadge = (s: string) => {
     const map: Record<string, { bg: string; color: string; dot: string }> = {
@@ -766,102 +780,36 @@ export default function LeadsPage() {
       </div>
 
       {/* Primary Type / Purpose Filter (Buy vs Rent) */}
-      <div className="responsive-pills-scroll" style={{ alignItems: 'center', marginBottom: 14 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap', flexShrink: 0 }}>
-          Inquiry Type:
-        </span>
-        {[
-          { id: 'All', label: 'All Inquiries', count: data.length, icon: ListIcon },
-          { id: 'Buy', label: 'Buy / Purchase', count: buyCount, icon: HomeIcon },
-          { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: KeyIcon }
-        ].map(tab => {
-          const IconComp = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setPurposeFilter(tab.id as any)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 14px',
-                borderRadius: 20,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
-                color: purposeFilter === tab.id ? '#fff' : '#475569',
-                border: 'none'
-              }}
-            >
-              <IconComp size={14} color={purposeFilter === tab.id ? '#fff' : '#64748b'} />
-              <span>{tab.label}</span>
-              <span style={{
-                padding: '1px 6px',
-                borderRadius: 10,
-                fontSize: 11,
-                backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: purposeFilter === tab.id ? '#fff' : '#64748b'
-              }}>
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
+      <div style={{ marginBottom: 14 }}>
+        <FilterTabs
+          label="Inquiry Type:"
+          tabs={[
+            { id: 'All', label: 'All Inquiries', count: data.length, icon: <ListIcon size={14} /> },
+            { id: 'Buy', label: 'Buy / Purchase', count: buyCount, icon: <HomeIcon size={14} /> },
+            { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: <KeyIcon size={14} /> }
+          ]}
+          activeTab={purposeFilter}
+          onChange={(tabId) => setPurposeFilter(tabId as any)}
+        />
       </div>
 
       {/* Filters & Search */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
         {/* Status Filter Pills Row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
-            Status:
-          </span>
-          <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {[
-              { id: 'All', label: 'All', count: data.length },
-              { id: 'Active', label: 'Active Pipeline', count: data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length },
-              ...leadStatuses.map(s => ({
-                id: s,
-                label: s,
-                count: data.filter(l => l.status === s).length
-              }))
-            ].map(f => (
-              <button 
-                key={f.id}
-                onClick={() => setFilter(f.id)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 20,
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  backgroundColor: filter === f.id ? '#0f172a' : '#f1f5f9',
-                  color: filter === f.id ? '#fff' : '#475569',
-                  border: 'none',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6
-                }}
-              >
-                <span>{f.label}</span>
-                <span style={{
-                  padding: '1px 6px',
-                  borderRadius: 10,
-                  fontSize: 10.5,
-                  backgroundColor: filter === f.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
-                  color: filter === f.id ? '#fff' : '#64748b'
-                }}>
-                  {f.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <FilterTabs
+          label="Status:"
+          tabs={[
+            { id: 'All', label: 'All', count: data.length },
+            { id: 'Active', label: 'Active Pipeline', count: data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length },
+            ...leadStatuses.map(s => ({
+              id: s,
+              label: s,
+              count: data.filter(l => l.status === s).length
+            }))
+          ]}
+          activeTab={filter}
+          onChange={(tabId) => setFilter(tabId)}
+        />
 
         {/* Dropdowns & Search Toolbar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
@@ -952,11 +900,11 @@ export default function LeadsPage() {
                 </td>
               </tr>
             ) : (
-              filteredData.map((lead, i) => (
+              paginatedLeads.map((lead, i) => (
                 <tr 
                   key={lead.id} 
                   onClick={() => handleOpenEdit(lead)}
-                  style={{ cursor: 'pointer', borderBottom: i === filteredData.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background-color 0.15s ease' }} 
+                  style={{ cursor: 'pointer', borderBottom: i === paginatedLeads.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background-color 0.15s ease' }} 
                   onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'} 
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
@@ -1187,7 +1135,7 @@ export default function LeadsPage() {
             <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
           </div>
         ) : (
-          filteredData.map(lead => (
+          paginatedLeads.map(lead => (
             <div
               key={`m-${lead.id}`}
               onClick={() => handleOpenEdit(lead)}
@@ -1387,6 +1335,24 @@ export default function LeadsPage() {
           ))
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {filteredData.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredData.length}
+          pageSize={pageSize}
+          pageSizeOptions={[10, 20, 50]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          itemLabel="inquiries"
+          style={{ marginTop: 20 }}
+        />
+      )}
     </div>
 
       {/* Delete Confirmation Modal */}

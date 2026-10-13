@@ -18,6 +18,9 @@ import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { FilterTabs } from '@/components/ui/FilterTabs';
+import { Pagination } from '@/components/ui/Pagination';
+import { EmptyState } from '@/components/ui/EmptyState';
 import {
   HomeIcon,
   BuildingIcon,
@@ -818,6 +821,17 @@ export default function PropertiesPage() {
     return true;
   });
 
+  // Property Pagination State (9 per page for a balanced grid)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter, purposeFilter]);
+
+  const paginatedProperties = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   const getCoverImage = (media?: PropertyMedia[]) => {
     if (!media || media.length === 0) return 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=80';
     const cover = media.find(m => m.isCover);
@@ -1219,96 +1233,32 @@ export default function PropertiesPage() {
       {/* Main Filter Toolbar */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
         {/* Main Type / Purpose Filter Pills (Buy vs Rent) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Listing Type:
-          </span>
-          {[
+        <FilterTabs
+          label="Listing Type:"
+          tabs={[
             { id: 'All', label: 'All Inventory', count: data.length },
             { id: 'Buy', label: 'For Sale', count: buyCount },
             { id: 'Rent', label: 'For Rent', count: rentCount }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setPurposeFilter(tab.id as any)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 14px',
-                borderRadius: 20,
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
-                color: purposeFilter === tab.id ? '#fff' : '#475569',
-                border: 'none'
-              }}
-            >
-              <span>{tab.label}</span>
-              <span style={{
-                padding: '1px 6px',
-                borderRadius: 10,
-                fontSize: 11,
-                backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                color: purposeFilter === tab.id ? '#fff' : '#64748b'
-              }}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
+          ]}
+          activeTab={purposeFilter}
+          onChange={(tabId) => setPurposeFilter(tabId as any)}
+        />
 
         {/* Status Filter Pills */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
-            Property Status:
-          </span>
-          <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {[
-              { id: 'All', label: 'All Statuses', count: data.length },
-              { id: 'Available', label: 'Available', count: data.filter(p => p.status === 'Available').length },
-              { id: 'Under Offer', label: 'Under Offer', count: data.filter(p => p.status === 'Under Offer').length },
-              { id: 'Under Contract', label: 'Under Contract', count: data.filter(p => p.status === 'Under Contract').length },
-              { id: 'Sold', label: 'Sold', count: data.filter(p => p.status === 'Sold').length },
-              { id: 'Rented', label: 'Rented', count: data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length },
-              { id: 'Off Market', label: 'Off Market', count: data.filter(p => p.status === 'Off Market').length },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setFilter(tab.id)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  borderRadius: 20,
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  backgroundColor: filter === tab.id ? '#0f172a' : '#f1f5f9',
-                  color: filter === tab.id ? '#fff' : '#475569',
-                  border: 'none',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0
-                }}
-              >
-                <span>{tab.label}</span>
-                <span style={{
-                  padding: '1px 6px',
-                  borderRadius: 10,
-                  fontSize: 10.5,
-                  backgroundColor: filter === tab.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
-                  color: filter === tab.id ? '#fff' : '#64748b'
-                }}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+        <FilterTabs
+          label="Property Status:"
+          tabs={[
+            { id: 'All', label: 'All Statuses', count: data.length },
+            { id: 'Available', label: 'Available', count: data.filter(p => p.status === 'Available').length },
+            { id: 'Under Offer', label: 'Under Offer', count: data.filter(p => p.status === 'Under Offer').length },
+            { id: 'Under Contract', label: 'Under Contract', count: data.filter(p => p.status === 'Under Contract').length },
+            { id: 'Sold', label: 'Sold', count: data.filter(p => p.status === 'Sold').length },
+            { id: 'Rented', label: 'Rented', count: data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length },
+            { id: 'Off Market', label: 'Off Market', count: data.filter(p => p.status === 'Off Market').length },
+          ]}
+          activeTab={filter}
+          onChange={(tabId) => setFilter(tabId)}
+        />
 
         {/* Search and Status Dropdown */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1349,7 +1299,7 @@ export default function PropertiesPage() {
 
       {/* Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
-        {filteredData.map(prop => (
+        {paginatedProperties.map(prop => (
           <PropertyCardItem 
             key={prop.id} 
             prop={prop} 
@@ -1362,17 +1312,40 @@ export default function PropertiesPage() {
           />
         ))}
       </div>
+
+      {/* Pagination Bar */}
+      {filteredData.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={filteredData.length}
+          pageSize={pageSize}
+          pageSizeOptions={[6, 9, 18, 36]}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          itemLabel="properties"
+          style={{ marginTop: 24, borderRadius: 12, border: '1px solid #e2e8f0' }}
+        />
+      )}
       
+      {/* Empty State */}
       {filteredData.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#94a3b8' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
-            <BuildingIcon size={44} color="#94a3b8" />
-          </div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>No properties found</div>
-          <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
-            Try switching listing type (Buy / Rent) or clear search filters.
-          </div>
-        </div>
+        <EmptyState
+          icon={<BuildingIcon size={32} color="#64748b" />}
+          title="No properties found"
+          description="Try switching listing type (Buy / Rent), adjusting filters, or clearing your search keywords."
+          action={{
+            label: "Clear All Filters",
+            onClick: () => { setSearch(''); setFilter('All'); setPurposeFilter('All'); }
+          }}
+          secondaryAction={{
+            label: "+ Add Property",
+            onClick: handleOpenAdd
+          }}
+        />
       )}
       </div>
 

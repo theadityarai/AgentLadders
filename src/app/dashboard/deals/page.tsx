@@ -9,6 +9,8 @@ import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { FilterTabs } from '@/components/ui/FilterTabs';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { 
   EditIcon, 
   TrashIcon, 
@@ -517,79 +519,19 @@ export default function DealsPage() {
       </div>
 
       {/* Deals Filter Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Deal Type:
-          </span>
-          {[
-            { id: 'All', label: 'All Deals', count: data.length, icon: ListIcon },
-            { id: 'Buy', label: 'Sale / Buy Deals', count: saleCount, icon: HomeIcon },
-            { id: 'Rent', label: 'Rental / Lease Deals', count: rentCount, icon: KeyIcon }
-          ].map(tab => {
-            const IconComp = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setDealTypeFilter(tab.id as any)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  backgroundColor: dealTypeFilter === tab.id ? '#0f172a' : '#f1f5f9',
-                  color: dealTypeFilter === tab.id ? '#fff' : '#475569',
-                  border: 'none'
-                }}
-              >
-                <IconComp size={14} color={dealTypeFilter === tab.id ? '#fff' : '#64748b'} />
-                <span>{tab.label}</span>
-                <span style={{
-                  padding: '1px 6px',
-                  borderRadius: 10,
-                  fontSize: 11,
-                  backgroundColor: dealTypeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                  color: dealTypeFilter === tab.id ? '#fff' : '#64748b'
-                }}>
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+        <FilterTabs
+          label="Deal Type:"
+          tabs={[
+            { id: 'All', label: 'All Deals', count: data.length, icon: <ListIcon size={14} /> },
+            { id: 'Buy', label: 'Sale / Buy Deals', count: saleCount, icon: <HomeIcon size={14} /> },
+            { id: 'Rent', label: 'Rental / Lease Deals', count: rentCount, icon: <KeyIcon size={14} /> }
+          ]}
+          activeTab={dealTypeFilter}
+          onChange={(tabId) => setDealTypeFilter(tabId as any)}
+        />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Stage Filter:</span>
-            <select
-              value={stageFilter}
-              onChange={e => setStageFilter(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                borderRadius: 10,
-                border: '1.5px solid var(--border)',
-                backgroundColor: stageFilter === 'All' ? '#fff' : '#ecfdf5',
-                color: stageFilter === 'All' ? '#334155' : '#047857',
-                fontSize: 13,
-                fontWeight: 700,
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="All">All Stages ({data.length})</option>
-              <option value="Active">Active Pipeline ({activeDealsCount})</option>
-              {allStagesList.map(s => {
-                const cnt = data.filter(d => d.stage === s).length;
-                return <option key={s} value={s}>{s} ({cnt})</option>;
-              })}
-            </select>
-          </div>
-
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -600,12 +542,10 @@ export default function DealsPage() {
       </div>
 
       {/* Deal Status / Pipeline Stage Filter Pills Row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
-          Deal Stage:
-        </span>
-        <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {[
+      <div style={{ marginBottom: 20 }}>
+        <FilterTabs
+          label="Deal Stage:"
+          tabs={[
             { id: 'All', label: 'All Stages', count: data.length },
             { id: 'Active', label: 'Active Pipeline', count: activeDealsCount },
             ...allStagesList.map(s => ({
@@ -613,40 +553,10 @@ export default function DealsPage() {
               label: s,
               count: data.filter(d => d.stage === s).length
             }))
-          ].map(st => (
-            <button
-              key={st.id}
-              onClick={() => setStageFilter(st.id)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
-                borderRadius: 20,
-                fontSize: 12.5,
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: stageFilter === st.id ? '#0f172a' : '#f1f5f9',
-                color: stageFilter === st.id ? '#fff' : '#475569',
-                border: 'none',
-                whiteSpace: 'nowrap',
-                flexShrink: 0
-              }}
-            >
-              <span>{st.label}</span>
-              <span style={{
-                padding: '1px 6px',
-                borderRadius: 10,
-                fontSize: 10.5,
-                backgroundColor: stageFilter === st.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
-                color: stageFilter === st.id ? '#fff' : '#64748b'
-              }}>
-                {st.count}
-              </span>
-            </button>
-          ))}
-        </div>
+          ]}
+          activeTab={stageFilter}
+          onChange={(tabId) => setStageFilter(tabId)}
+        />
       </div>
 
       {/* Kanban Board */}

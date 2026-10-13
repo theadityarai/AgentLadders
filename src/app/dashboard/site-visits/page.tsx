@@ -8,6 +8,8 @@ import { DEFAULT_SITE_VISIT_STATUSES } from '@/lib/formatters';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { FilterTabs } from '@/components/ui/FilterTabs';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { 
   CalendarIcon, 
   EditIcon, 
@@ -567,78 +569,19 @@ export default function SiteVisitsPage() {
       </div>
 
       {/* Main Type / Purpose Filter (Buy vs Rent) */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Showing Type:
-          </span>
-          {[
-            { id: 'All', label: 'All Showings', count: data.length, icon: ListIcon },
-            { id: 'Buy', label: 'Buy Visits', count: buyCount, icon: HomeIcon },
-            { id: 'Rent', label: 'Rent Visits', count: rentCount, icon: KeyIcon }
-          ].map(tab => {
-            const IconComp = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setPurposeFilter(tab.id as any)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  backgroundColor: purposeFilter === tab.id ? '#0f172a' : '#f1f5f9',
-                  color: purposeFilter === tab.id ? '#fff' : '#475569',
-                  border: 'none'
-                }}
-              >
-                <IconComp size={14} color={purposeFilter === tab.id ? '#fff' : '#64748b'} />
-                <span>{tab.label}</span>
-                <span style={{
-                  padding: '1px 6px',
-                  borderRadius: 10,
-                  fontSize: 11,
-                  backgroundColor: purposeFilter === tab.id ? 'rgba(255,255,255,0.2)' : '#e2e8f0',
-                  color: purposeFilter === tab.id ? '#fff' : '#64748b'
-                }}>
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+        <FilterTabs
+          label="Showing Type:"
+          tabs={[
+            { id: 'All', label: 'All Showings', count: data.length, icon: <ListIcon size={14} /> },
+            { id: 'Buy', label: 'Buy Visits', count: buyCount, icon: <HomeIcon size={14} /> },
+            { id: 'Rent', label: 'Rent Visits', count: rentCount, icon: <KeyIcon size={14} /> }
+          ]}
+          activeTab={purposeFilter}
+          onChange={(tabId) => setPurposeFilter(tabId as any)}
+        />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Status:</span>
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-              style={{
-                padding: '8px 12px',
-                borderRadius: 10,
-                border: '1.5px solid var(--border)',
-                backgroundColor: statusFilter === 'All' ? '#fff' : '#ecfdf5',
-                color: statusFilter === 'All' ? '#334155' : '#047857',
-                fontSize: 13,
-                fontWeight: 700,
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="All">All Statuses ({data.length})</option>
-              {siteVisitStatuses.map(s => {
-                const cnt = data.filter(v => v.status === s).length;
-                return <option key={s} value={s}>{s} ({cnt})</option>;
-              })}
-            </select>
-          </div>
-
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
@@ -649,73 +592,34 @@ export default function SiteVisitsPage() {
       </div>
 
       {/* Visit Status Filter Pills Row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>
-          Visit Status:
-        </span>
-        <div className="responsive-pills-scroll" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {[
+      <div style={{ marginBottom: 14 }}>
+        <FilterTabs
+          label="Visit Status:"
+          tabs={[
             { id: 'All', label: 'All Statuses', count: data.length },
             ...siteVisitStatuses.map(s => ({
               id: s,
               label: s,
               count: data.filter(v => v.status === s).length
             }))
-          ].map(st => (
-            <button
-              key={st.id}
-              onClick={() => setStatusFilter(st.id)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
-                borderRadius: 20,
-                fontSize: 12.5,
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                backgroundColor: statusFilter === st.id ? '#0f172a' : '#f1f5f9',
-                color: statusFilter === st.id ? '#fff' : '#475569',
-                border: 'none',
-                whiteSpace: 'nowrap',
-                flexShrink: 0
-              }}
-            >
-              <span>{st.label}</span>
-              <span style={{
-                padding: '1px 6px',
-                borderRadius: 10,
-                fontSize: 10.5,
-                backgroundColor: statusFilter === st.id ? 'rgba(255,255,255,0.25)' : '#e2e8f0',
-                color: statusFilter === st.id ? '#fff' : '#64748b'
-              }}>
-                {st.count}
-              </span>
-            </button>
-          ))}
-        </div>
+          ]}
+          activeTab={statusFilter}
+          onChange={(tabId) => setStatusFilter(tabId)}
+        />
       </div>
 
       {/* Date Range Tabs */}
-      <div className="responsive-pills-scroll" style={{ marginBottom: 32, borderBottom: '1px solid var(--border)', paddingBottom: 16 }}>
-        {['All Dates', 'Upcoming', 'Past', 'Cancelled'].map(f => (
-          <button key={f}
-            onClick={() => setFilter(f)}
-            style={{
-              padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s ease',
-              backgroundColor: filter === f ? 'var(--primary)' : 'transparent',
-              color: filter === f ? '#fff' : '#64748b',
-              border: 'none',
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}
-            onMouseEnter={e => { if (filter !== f) e.currentTarget.style.backgroundColor = '#f1f5f9' }}
-            onMouseLeave={e => { if (filter !== f) e.currentTarget.style.backgroundColor = 'transparent' }}
-          >
-            {f}
-          </button>
-        ))}
+      <div style={{ marginBottom: 28 }}>
+        <FilterTabs
+          label="Schedule:"
+          tabs={['All Dates', 'Upcoming', 'Past', 'Cancelled'].map(f => ({
+            id: f,
+            label: f,
+            count: f === 'All Dates' ? data.length : undefined
+          }))}
+          activeTab={filter}
+          onChange={(tabId) => setFilter(tabId)}
+        />
       </div>
 
       {/* Timeline View */}
