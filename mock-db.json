@@ -200,6 +200,16 @@
   ],
   "notifications": [
     {
+      "id": "notif_q8au5rd",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "title": "Support Reply: TICK-4092 💬",
+      "message": "AgentLadders HQ replied: \"Our legal compliance team has reviewed the draft mandate. The exclusivity clause for ...\" on ticket \"Sole Selling Rights Exclusive Mandate Agreement Review for Worli Penthouse\".",
+      "type": "info",
+      "read": false,
+      "createdAt": "2026-10-13T16:30:39.649Z"
+    },
+    {
       "id": "notif_1",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
@@ -2574,6 +2584,13 @@
           "isStaff": false,
           "text": "Hi Legal Team, we have an exclusive mandate opportunity for a 5,100 sq.ft luxury duplex penthouse in Worli. Please advise if we can increase the post-termination protection clause from 180 to 270 days for introduced NRI buyers.",
           "timestamp": "2026-10-13T02:59:47.320Z"
+        },
+        {
+          "id": "msg_ucyur0k",
+          "sender": "Super Admin HQ",
+          "isStaff": true,
+          "text": "Our legal compliance team has reviewed the draft mandate. The exclusivity clause for 90 days conforms with RERA guidelines. You may proceed with the client's signature.",
+          "timestamp": "2026-10-13T16:30:39.649Z"
         }
       ],
       "createdAt": "2026-10-13T02:59:47.320Z"
