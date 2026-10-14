@@ -930,6 +930,7 @@ export default function LeadsPage() {
                   itemBadgeLabel="Properties Inquired"
                   addFirstLabel="Select Inquired Property"
                   addMoreLabel="+ Add Another Inquired Property"
+                  selectActionLabel="+ Select"
                   availableProperties={propertiesList.map(p => ({
                     title: p.title,
                     locality: p.locality,

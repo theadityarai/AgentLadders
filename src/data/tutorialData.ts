@@ -5,7 +5,6 @@ import {
   BuildingIcon,
   MapPinIcon,
   BriefcaseIcon,
-  TrendingUpIcon,
   FileTextIcon,
   ReceiptIcon,
   CheckSquareIcon,
@@ -657,120 +656,6 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
         { id: 2, x: 88, y: 19, title: '+ New Deal Button', description: 'Log a new negotiated deal with agreed price, token advance, and commission percentage.', actionHint: 'Click to create deal' },
         { id: 3, x: 36, y: 48, title: 'Token Paid Stage & Receipt', description: 'Shows earnest money paid; click to generate official stamped Token Advance Receipt.', actionHint: 'Issue token receipt' },
         { id: 4, x: 85, y: 48, title: 'Closed Won & GST Invoice', description: 'Sub-Registrar registry completed; 1-click generates GST tax invoice for commission.', actionHint: 'Generate GST invoice' }
-      ]
-    }
-  },
-  {
-    id: 'insights',
-    name: 'Performance Insights & Analytics',
-    shortName: 'Insights',
-    category: 'core',
-    icon: TrendingUpIcon,
-    url: '/dashboard/insights',
-    screenshotUrl: '/images/tutorials/insights.png',
-    badge: 'METRICS & CONVERSION FUNNEL',
-    badgeColor: '#7c3aed',
-    reraComplianceTag: 'Agency Performance & Revenue Audit',
-    primaryGoal: 'Analyze lead-to-showing conversion rates, top performing localities, and agent revenue productivity.',
-    frequency: 'Weekly team review & Monthly strategic agency planning',
-    targetRole: 'Agency Owners, Branch Managers & Top-Performing Agents',
-    closingImpact: 'Identifies leaky funnel stages to increase overall closing ratio by 25-40%.',
-    tagline: 'Deep real estate metrics to pinpoint high-margin localities and optimize team efficiency.',
-    overview: 'The Performance Insights dashboard replaces gut feeling with hard transactional data. Visualize your complete sales funnel: Inquiries -> Qualified -> Site Visits -> Deals -> Closed Revenue. See which property micro-markets generate the fastest sales and which marketing channels bring high-intent buyers.',
-    whenToUse: [
-      'During Monday morning agency briefings to review pipeline velocity.',
-      'To identify why certain inquiries are dropping off before site visits.',
-      'To reward top-performing brokers based on closed commission metrics.'
-    ],
-    steps: [
-      {
-        number: 1,
-        title: 'Audit Full-Lifecycle Sales Funnel',
-        action: 'Inspect the drop-off percentage between Qualified Inquiries, Completed Site Visits, and Signed Deals.',
-        exactFieldOrButton: 'Sales Conversion Funnel Chart',
-        sampleInput: 'Funnel: 100 Leads -> 35 Showings (35%) -> 10 Deals (28%) -> 8 Closed Won',
-        result: 'Reveals whether agents need coaching on telephone qualification or closing scripts.',
-        proTip: 'Aim for at least 30% conversion from physical site visit to formal negotiation offer.',
-        hotspotIndex: 1
-      },
-      {
-        number: 2,
-        title: 'Configure Timeframe & Filters',
-        action: 'Select timeframe: This Month, Last Quarter, or Financial Year (FY 2024-25). Filter by individual agent or entire agency.',
-        exactFieldOrButton: 'Date Range & Agent Selector',
-        sampleInput: 'Range: FY 2024-25 | Scope: Entire Agency (6 Agents)',
-        result: 'Recalculates gross volume, total commission, and conversion rates across the selected period.',
-        proTip: 'Review quarterly trends to understand seasonal real estate spikes around festival periods.',
-        hotspotIndex: 2
-      },
-      {
-        number: 3,
-        title: 'Analyze Micro-Market Hotspots',
-        action: 'Examine the \'Revenue by Locality\' breakdown (e.g. Whitefield vs Indiranagar vs Bellandur).',
-        exactFieldOrButton: 'Locality Revenue Breakdown',
-        sampleInput: 'Whitefield: ₹19.2 Lakhs | Indiranagar: ₹14.5 Lakhs | Bellandur: ₹8.5 Lakhs',
-        result: 'Tells you where to focus your inventory sourcing and exclusive mandate outreach.',
-        proTip: 'Source exclusive resale mandates in localities with high demand scores.',
-        hotspotIndex: 3
-      },
-      {
-        number: 4,
-        title: 'Export Executive PDF Summary',
-        action: 'Click \'Export PDF Summary\'. File compiles high-resolution charts, revenue tables, and commission splits.',
-        exactFieldOrButton: 'Export PDF Summary Button',
-        sampleInput: 'Export: Q2 Performance Brief for Agency Partners',
-        result: 'Produces professional document ready for banking audits or partner meetings.',
-        proTip: 'Use the export for monthly agent incentive and bonus disbursements.',
-        hotspotIndex: 4
-      }
-    ],
-    keyControls: [
-      {
-        name: 'Full-Lifecycle Sales Funnel',
-        type: 'toggle',
-        description: 'Tracks conversion percentages across each stage of the broker journey.',
-        bestPractice: 'Aim for at least 30% conversion from physical site visit to formal negotiation offer.'
-      },
-      {
-        name: 'Locality Demand Matrix',
-        type: 'filter',
-        description: 'Pinpoints which micro-markets have the highest buyer demand relative to available inventory.',
-        bestPractice: 'Source exclusive mandates in localities with high demand scores.'
-      },
-      {
-        name: 'Agent Revenue Leaderboard',
-        type: 'export',
-        description: 'Compares individual broker metrics: site visits completed, avg time to close, and commission earned.',
-        bestPractice: 'Use to calculate monthly agent incentives and bonuses.'
-      }
-    ],
-    whatsAppVault: [
-      {
-        title: 'Monthly Partner Performance Brief',
-        useCase: 'Share performance metrics with agency partners and investors',
-        hinglishScript: 'Team update! Is mahine AgentLadders par humne ₹{GrossValue} Cr gross deal volume aur ₹{TotalCommission} L net commission achieve kiya across {DealsClosed} closed transactions. Top performing micro-market: {TopLocality}. Keep pushing!',
-        englishScript: 'Monthly agency update: In the last 30 days, we achieved ₹{GrossValue} Cr in gross transactional volume and ₹{TotalCommission} L in realized commissions across {DealsClosed} closed deeds. Top micro-market: {TopLocality}. Congratulations team!'
-      }
-    ],
-    closingTactics: {
-      proTip: 'Measure your Cost-Per-Showing, not just Cost-Per-Lead. A portal with cheap ₹200 leads that rarely book site visits costs more than an expensive channel that delivers serious buyers.',
-      legalTrapToAvoid: 'Never share confidential agent commission payout figures across open staff channels; maintain individual agent permission tiers.',
-      statOrMetric: 'Agencies reviewing weekly funnel metrics close deals 42% faster than agencies operating without analytics.'
-    },
-    mockPreview: {
-      windowTitle: 'AgentLadders • Performance Insights & Analytics (/dashboard/insights)',
-      subtitle: 'Agency Analytics: ₹48.2 Lakhs YTD Commission • 22.4% Full Funnel Conversion',
-      stats: [
-        { label: 'Total Revenue', value: '₹48.2 Lakhs', color: '#059669' },
-        { label: 'Conversion', value: '22.4%', color: '#7c3aed' },
-        { label: 'Top Locality', value: 'Whitefield (₹19L)', color: '#2563eb' },
-        { label: 'Avg Time to Close', value: '21 Days', color: '#b45309' }
-      ],
-      hotspots: [
-        { id: 1, x: 35, y: 19, title: 'Gross Revenue Bar', description: 'Total closed commissions earned year-to-date with monthly trajectory comparison.', actionHint: 'View revenue pulse' },
-        { id: 2, x: 88, y: 19, title: 'Date Range Selector & Export', description: 'Filter metrics by Month, Quarter, or FY; download executive PDF.', actionHint: 'Change date range' },
-        { id: 3, x: 38, y: 55, title: 'Funnel Conversion Stages', description: 'Shows exact drop-off between inquiry, showing, and signed deal stages.', actionHint: 'Analyze funnel drop' },
-        { id: 4, x: 80, y: 55, title: 'Locality Contribution Chart', description: 'Visualizes which Bangalore/Mumbai micro-markets yield the highest broker margins.', actionHint: 'Inspect top localities' }
       ]
     }
   },

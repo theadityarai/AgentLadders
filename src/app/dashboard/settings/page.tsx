@@ -21,13 +21,16 @@ import {
   DEFAULT_LEAD_STATUSES,
   DEFAULT_SITE_VISIT_STATUSES,
   DEFAULT_TASK_STATUSES,
-  DEFAULT_CLIENT_STATUSES
+  DEFAULT_CLIENT_STATUSES,
+  DEFAULT_INVOICE_SETTINGS,
+  AgencyInvoiceSettings
 } from '@/lib/formatters';
 import styles from './settings.module.css';
 
 const tabs = [
   { key: 'agency', label: 'Agency Profile' },
   { key: 'appearance', label: 'Theme & Typography' },
+  { key: 'invoice', label: 'Invoice Settings' },
   { key: 'users', label: 'Users & Roles' },
   { key: 'billing', label: 'Subscription & Billing' },
   { key: 'notifications', label: 'Notifications' },
@@ -104,6 +107,10 @@ export default function SettingsPage() {
   const [savingLogo, setSavingLogo] = useState(false);
   const [userAvatar, setUserAvatar] = useState('');
   const [savingAvatar, setSavingAvatar] = useState(false);
+
+  // Invoice & Tax Settings State
+  const [invoiceSettings, setInvoiceSettings] = useState<AgencyInvoiceSettings>(DEFAULT_INVOICE_SETTINGS);
+  const [savingInvoiceSettings, setSavingInvoiceSettings] = useState(false);
 
   // Current Authenticated User & 2FA State
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -200,6 +207,15 @@ export default function SettingsPage() {
         if (data.agency.fontFamily || data.agency.colorScheme) {
           applyTheme(apiFont, apiColor);
         }
+        if (data.agency.invoiceSettings) {
+          setInvoiceSettings(data.agency.invoiceSettings);
+        } else if (data.agency.name) {
+          setInvoiceSettings({
+            ...DEFAULT_INVOICE_SETTINGS,
+            agencyName: data.agency.name,
+            accountName: `${data.agency.name} Escrow Advisory`
+          });
+        }
       }
       if (data.users) {
         setUsers(data.users);
@@ -266,6 +282,43 @@ export default function SettingsPage() {
     setSelectedColor('emerald');
     applyTheme('jakarta', 'emerald');
     showToast('info', 'Reset to Plus Jakarta Sans & Emerald Prosperity theme.', 'Default Restored');
+  };
+
+  const handleSaveInvoiceSettings = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSavingInvoiceSettings(true);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateInvoiceSettings',
+          invoiceSettings
+        })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.invoiceSettings) {
+          setInvoiceSettings(result.invoiceSettings);
+        }
+        showToast('success', 'Invoice & Tax configuration updated successfully.', 'Invoice Settings Saved');
+      } else {
+        showToast('error', 'Failed to save invoice settings. Please try again.', 'Save Error');
+      }
+    } catch {
+      showToast('error', 'Network error while saving invoice settings.', 'Network Error');
+    } finally {
+      setSavingInvoiceSettings(false);
+    }
+  };
+
+  const handleResetInvoiceSettings = () => {
+    setInvoiceSettings({
+      ...DEFAULT_INVOICE_SETTINGS,
+      agencyName: agencyData.name || DEFAULT_INVOICE_SETTINGS.agencyName,
+      accountName: `${agencyData.name || DEFAULT_INVOICE_SETTINGS.agencyName} Escrow Advisory`
+    });
+    showToast('info', 'Invoice settings reset to default values. Click Save to apply.', 'Defaults Loaded');
   };
 
   const handleSaveAgencyLogo = async (logoVal?: string) => {
@@ -1154,6 +1207,355 @@ export default function SettingsPage() {
                     {savingTheme ? 'Saving Branding...' : 'Save Brand Settings'}
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'invoice' && (
+            <div className={styles.formSection} style={{ maxWidth: 960 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 24 }}>
+                <div>
+                  <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>
+                    Invoice &amp; Tax Settings
+                  </h2>
+                  <p style={{ color: '#64748b', fontSize: 13.5, margin: '6px 0 0' }}>
+                    Configure legal entity name, GSTIN, RERA registration, bank remittance account, place of supply, and SAC code printed on official client invoices and tax receipts.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <Button variant="outline" size="sm" type="button" onClick={handleResetInvoiceSettings}>
+                    Reset Defaults
+                  </Button>
+                  <Button variant="primary" size="sm" type="button" onClick={handleSaveInvoiceSettings} disabled={savingInvoiceSettings}>
+                    {savingInvoiceSettings ? 'Saving Settings...' : 'Save Invoice Settings'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Section 1: Agency Legal & RERA Identifiers */}
+              <div style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid var(--border-color)',
+                borderRadius: 14,
+                padding: '22px 24px',
+                marginBottom: 20,
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <span style={{ fontSize: 22 }}>🏢</span>
+                  <div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#0f172a' }}>Legal Entity &amp; RERA Registration</h3>
+                    <p style={{ fontSize: 12.5, color: '#64748b', margin: '2px 0 0' }}>
+                      Official company details shown on invoice headers and statutory compliance footers.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.formGrid}>
+                  <div className={styles.inputGroup}>
+                    <label>
+                      Agency / Legal Entity Name *
+                      <InfoTooltip text="Full legal brokerage name printed on invoice header (e.g. Vance Luxury Realty)" />
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={invoiceSettings.agencyName}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, agencyName: e.target.value })}
+                      placeholder="e.g. Vance Luxury Realty"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      Business Tagline / Service Subtitle
+                      <InfoTooltip text="Service classification printed beneath agency name (e.g. Licensed Real Estate Advisory & Brokerage Firm)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.tagline}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, tagline: e.target.value })}
+                      placeholder="e.g. Licensed Real Estate Advisory & Brokerage Firm"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      GSTIN (Goods &amp; Services Tax ID)
+                      <InfoTooltip text="15-digit State GST identification number (e.g. 27AABCA1234F1Z5 for Maharashtra)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.gstin}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, gstin: e.target.value.toUpperCase() })}
+                      placeholder="e.g. 27AABCA1234F1Z5"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      RERA Registration No.
+                      <InfoTooltip text="State Real Estate Regulatory Authority broker license number (e.g. A51800029384)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.reraReg}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, reraReg: e.target.value.toUpperCase() })}
+                      placeholder="e.g. A51800029384"
+                      className={styles.input}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Remittance & Bank Account Details */}
+              <div style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid var(--border-color)',
+                borderRadius: 14,
+                padding: '22px 24px',
+                marginBottom: 20,
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <span style={{ fontSize: 22 }}>💳</span>
+                  <div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#0f172a' }}>Remittance &amp; Bank Account Details</h3>
+                    <p style={{ fontSize: 12.5, color: '#64748b', margin: '2px 0 0' }}>
+                      Current account, NEFT/RTGS IFSC, and UPI handle for client payments and brokerage remittance.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.formGrid}>
+                  <div className={styles.inputGroup}>
+                    <label>
+                      Account Holder Name
+                      <InfoTooltip text="Bank account beneficiary name (e.g. Vance Luxury Realty Escrow Advisory)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.accountName}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, accountName: e.target.value })}
+                      placeholder="e.g. Vance Luxury Realty Escrow Advisory"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      Bank Name
+                      <InfoTooltip text="Commercial bank name (e.g. HDFC Bank Ltd)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.bankName}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, bankName: e.target.value })}
+                      placeholder="e.g. HDFC Bank Ltd"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      Current A/c No.
+                      <InfoTooltip text="Bank account number for brokerage wire remittance (e.g. 50200088921102)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.accountNumber}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, accountNumber: e.target.value })}
+                      placeholder="e.g. 50200088921102"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      IFSC Code
+                      <InfoTooltip text="11-character Indian Financial System Code (e.g. HDFC0000128)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.ifscCode}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, ifscCode: e.target.value.toUpperCase() })}
+                      placeholder="e.g. HDFC0000128"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                    <label>
+                      UPI / QR Remittance ID
+                      <InfoTooltip text="Virtual payment address (VPA) for instant UPI payments (e.g. agency.realty@hdfcbank)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.upiId}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, upiId: e.target.value.toLowerCase() })}
+                      placeholder="e.g. agency.realty@hdfcbank"
+                      className={styles.input}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Tax Jurisdiction & SAC Code */}
+              <div style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid var(--border-color)',
+                borderRadius: 14,
+                padding: '22px 24px',
+                marginBottom: 20,
+                boxShadow: 'var(--shadow-sm)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <span style={{ fontSize: 22 }}>⚖️</span>
+                  <div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: '#0f172a' }}>Tax Jurisdiction &amp; Service Classification</h3>
+                    <p style={{ fontSize: 12.5, color: '#64748b', margin: '2px 0 0' }}>
+                      GST place of supply and HSN/SAC service accounting code for real estate brokerage advisory.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.formGrid}>
+                  <div className={styles.inputGroup}>
+                    <label>
+                      Place of Supply (State &amp; Code)
+                      <InfoTooltip text="State name and 2-digit GST code (e.g. Maharashtra (27))" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.placeOfSupply}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, placeOfSupply: e.target.value })}
+                      placeholder="e.g. Maharashtra (27)"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      SAC Code (Services Accounting Code)
+                      <InfoTooltip text="Standard 6-digit SAC for Real Estate Services on a Fee or Contract Basis (e.g. 997221)" />
+                    </label>
+                    <input
+                      type="text"
+                      value={invoiceSettings.sacCode}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, sacCode: e.target.value })}
+                      placeholder="e.g. 997221"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                    <label>
+                      Default Payment Terms &amp; Remittance Notes
+                      <InfoTooltip text="Standard terms and payment conditions printed on invoices (e.g. Brokerage advisory fees payable upon formal title verification and registration.)" />
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={invoiceSettings.defaultNotes || ''}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, defaultNotes: e.target.value })}
+                      placeholder="e.g. Brokerage advisory fees payable upon formal title verification and registration."
+                      className={styles.input}
+                      style={{ resize: 'vertical' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Preview Card */}
+              <div style={{
+                backgroundColor: '#f8fafc',
+                border: '1.5px dashed #cbd5e1',
+                borderRadius: 14,
+                padding: '20px 24px',
+                marginBottom: 24
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
+                    Live Tax Invoice Header &amp; Remittance Preview
+                  </span>
+                  <span style={{ fontSize: 11, backgroundColor: '#e2e8f0', color: '#334155', padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>
+                    Auto-Updates Live
+                  </span>
+                </div>
+
+                <div style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 10,
+                  padding: '20px',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                }}>
+                  {/* Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #0f172a', paddingBottom: 14, marginBottom: 14, flexWrap: 'wrap', gap: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
+                        {invoiceSettings.agencyName || 'Your Agency Legal Name'}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+                        {invoiceSettings.tagline || 'Licensed Real Estate Advisory & Brokerage Firm'}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
+                        GSTIN: <strong>{invoiceSettings.gstin || '27AABCA1234F1Z5'}</strong> • RERA Reg: <strong>{invoiceSettings.reraReg || 'A51800029384'}</strong>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 16, fontWeight: 800, color: '#059669' }}>TAX INVOICE</div>
+                      <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
+                        Place of Supply: <strong>{invoiceSettings.placeOfSupply || 'Maharashtra (27)'}</strong>
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#64748b' }}>
+                        SAC Code: <strong>{invoiceSettings.sacCode || '997221'}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Remittance preview */}
+                  <div style={{
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 8,
+                    padding: '12px 14px',
+                    fontSize: 12,
+                    color: '#475569'
+                  }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 3 }}>Remittance &amp; Bank Account Details:</div>
+                    <div>Account Name: <strong>{invoiceSettings.accountName || `${invoiceSettings.agencyName} Escrow Advisory`}</strong></div>
+                    <div>Bank: <strong>{invoiceSettings.bankName || 'Bank Name'} • Current A/c No: {invoiceSettings.accountNumber || 'Account No'}</strong> • IFSC: <strong>{invoiceSettings.ifscCode || 'IFSC'}</strong></div>
+                    {invoiceSettings.upiId && <div style={{ marginTop: 2 }}>UPI / QR Remittance ID: <strong>{invoiceSettings.upiId}</strong></div>}
+                  </div>
+
+                  {/* Payment Terms & Remittance Notes Preview */}
+                  <div style={{
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 8,
+                    padding: '12px 14px',
+                    fontSize: 12,
+                    color: '#475569',
+                    marginTop: 10
+                  }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 3 }}>Payment Terms &amp; Remittance Notes:</div>
+                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, color: '#334155' }}>
+                      {invoiceSettings.defaultNotes || 'Brokerage advisory fees payable upon formal title verification and registration.'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                <Button variant="outline" type="button" onClick={handleResetInvoiceSettings}>
+                  Reset Defaults
+                </Button>
+                <Button variant="primary" type="button" onClick={handleSaveInvoiceSettings} disabled={savingInvoiceSettings}>
+                  {savingInvoiceSettings ? 'Saving Settings...' : 'Save Invoice Settings'}
+                </Button>
               </div>
             </div>
           )}

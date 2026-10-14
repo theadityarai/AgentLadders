@@ -14,7 +14,6 @@ import {
   BuildingIcon,
   MapPinIcon,
   BriefcaseIcon,
-  TrendingUpIcon,
   FileTextIcon,
   ReceiptIcon,
   CheckSquareIcon,
@@ -528,7 +527,6 @@ export function Topbar() {
                 { href: '/dashboard/properties', label: 'Properties & Inventory', icon: BuildingIcon },
                 { href: '/dashboard/site-visits', label: 'Site Visits', icon: MapPinIcon },
                 { href: '/dashboard/deals', label: 'Deals Pipeline', icon: BriefcaseIcon },
-                { href: '/dashboard/insights', label: 'Performance Insights', icon: TrendingUpIcon },
               ].map(item => {
                 const ItemIcon = item.icon;
                 return (

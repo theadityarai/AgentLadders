@@ -19,7 +19,8 @@ import {
   DEFAULT_LEAD_STATUSES,
   DEFAULT_SITE_VISIT_STATUSES,
   DEFAULT_TASK_STATUSES,
-  DEFAULT_CLIENT_STATUSES
+  DEFAULT_CLIENT_STATUSES,
+  DEFAULT_INVOICE_SETTINGS
 } from '@/lib/formatters';
 
 export async function GET() {
@@ -127,6 +128,14 @@ export async function GET() {
       agency.notificationPrefs['Support ticket updates'] = { inApp: true, email: true };
       modified = true;
     }
+    if (!agency.invoiceSettings) {
+      agency.invoiceSettings = {
+        ...DEFAULT_INVOICE_SETTINGS,
+        agencyName: agency.name || DEFAULT_INVOICE_SETTINGS.agencyName,
+        accountName: `${agency.name || DEFAULT_INVOICE_SETTINGS.agencyName} Escrow Advisory`
+      };
+      modified = true;
+    }
     if (modified) saveDb(db);
   }
 
@@ -224,6 +233,25 @@ export async function PUT(req: Request) {
     if (data.siteVisitStatuses) db.agencies[agencyIndex].siteVisitStatuses = data.siteVisitStatuses;
     if (data.taskStatuses) db.agencies[agencyIndex].taskStatuses = data.taskStatuses;
     if (data.clientStatuses) db.agencies[agencyIndex].clientStatuses = data.clientStatuses;
+  }
+  else if (action === 'updateInvoiceSettings') {
+    const inv = data.invoiceSettings || {};
+    db.agencies[agencyIndex].invoiceSettings = {
+      agencyName: sanitizeString(inv.agencyName || db.agencies[agencyIndex].name || DEFAULT_INVOICE_SETTINGS.agencyName),
+      tagline: sanitizeString(inv.tagline || DEFAULT_INVOICE_SETTINGS.tagline),
+      gstin: sanitizeString(inv.gstin || ''),
+      reraReg: sanitizeString(inv.reraReg || ''),
+      accountName: sanitizeString(inv.accountName || ''),
+      bankName: sanitizeString(inv.bankName || ''),
+      accountNumber: sanitizeString(inv.accountNumber || ''),
+      ifscCode: sanitizeString(inv.ifscCode || ''),
+      upiId: sanitizeString(inv.upiId || ''),
+      placeOfSupply: sanitizeString(inv.placeOfSupply || DEFAULT_INVOICE_SETTINGS.placeOfSupply),
+      sacCode: sanitizeString(inv.sacCode || DEFAULT_INVOICE_SETTINGS.sacCode),
+      defaultNotes: sanitizeString(inv.defaultNotes || DEFAULT_INVOICE_SETTINGS.defaultNotes || '')
+    };
+    saveDb(db);
+    return NextResponse.json({ success: true, invoiceSettings: db.agencies[agencyIndex].invoiceSettings });
   }
   else if (action === 'updateNotifications') {
     db.agencies[agencyIndex].notificationPrefs = data.notificationPrefs;

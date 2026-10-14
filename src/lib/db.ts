@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { AgencyInvoiceSettings, DEFAULT_INVOICE_SETTINGS } from './formatters';
 
 const STATIC_DB_PATH = path.join(process.cwd(), 'data', 'db.json');
 const LEGACY_MOCK_PATH = path.join(process.cwd(), 'mock-db.json');
@@ -58,10 +59,14 @@ export interface Agency {
   taskStatuses?: string[];
   clientStatuses?: string[];
   notificationPrefs?: Record<string, { inApp: boolean; email: boolean }>;
+  invoiceSettings?: AgencyInvoiceSettings;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown;
 }
+
+export type { AgencyInvoiceSettings };
+export { DEFAULT_INVOICE_SETTINGS };
 
 export interface Notification {
   id: string;
@@ -267,14 +272,28 @@ export interface Invoice {
   agencyId: string;
   number: string;
   clientName: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  clientAddress?: string;
+  clientGstin?: string;
   amount: number;
+  totalAmount?: number;
+  taxType?: string;
+  taxRate?: string | number;
   status: string;
   dueDate: string;
   dealRef?: string;
   issueDate?: string;
-  taxRate?: string;
   notes?: string;
+  items?: Array<{ id?: string; description: string; sacCode?: string; amount: number }>;
+  paymentDetails?: {
+    paidAt?: string;
+    paymentMode?: string;
+    transactionRef?: string;
+  };
   createdAt: string;
+  updatedAt?: string;
+  [key: string]: unknown;
 }
 
 export interface Payment {

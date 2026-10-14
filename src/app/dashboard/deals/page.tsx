@@ -443,6 +443,7 @@ export default function DealsPage() {
                   itemBadgeLabel="Properties in Deal"
                   addFirstLabel="Select Property Asset for Deal"
                   addMoreLabel="+ Add Another Property to this Deal"
+                  selectActionLabel="+ Select"
                   availableProperties={propertiesList.map(p => ({
                     title: p.title,
                     locality: p.locality,

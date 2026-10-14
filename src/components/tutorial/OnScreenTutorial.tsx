@@ -12,7 +12,6 @@ import {
   BuildingIcon,
   MapPinIcon,
   BriefcaseIcon,
-  TrendingUpIcon,
   FileTextIcon,
   ReceiptIcon,
   CheckSquareIcon,
@@ -110,21 +109,6 @@ const PAGE_GUIDES: QuickGuideItem[] = [
       'Drag through Legal Check -> Sale Agreement -> Closed Won, then generate GST invoice.'
     ],
     keyActionName: 'Issue Token Receipt & Advance Stage'
-  },
-  {
-    id: 'insights',
-    name: 'Insights & Analytics',
-    path: '/dashboard/insights',
-    icon: TrendingUpIcon,
-    accentColor: '#7c3aed',
-    badge: 'ANALYTICS',
-    tagline: 'Track conversion funnel drop-offs and high-margin micro-markets.',
-    threeSteps: [
-      'Review your Lead-to-Showing conversion rate to spot follow-up bottlenecks.',
-      'Inspect the Micro-Market Revenue breakdown to see top closing localities.',
-      'Export PDF performance summaries for partner and agency briefings.'
-    ],
-    keyActionName: 'Inspect Sales Conversion Funnel'
   },
   {
     id: 'documents',

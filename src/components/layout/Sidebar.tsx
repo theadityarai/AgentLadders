@@ -10,7 +10,6 @@ import {
   BuildingIcon,
   MapPinIcon,
   BriefcaseIcon,
-  TrendingUpIcon,
   FileTextIcon,
   ReceiptIcon,
   CheckSquareIcon,
@@ -35,7 +34,6 @@ const NAV_ITEMS: NavItemConfig[] = [
   { href: '/dashboard/properties', label: 'Properties', icon: BuildingIcon, exact: false },
   { href: '/dashboard/site-visits', label: 'Site Visits', icon: MapPinIcon, exact: false, badge: 'KEY' },
   { href: '/dashboard/deals', label: 'Deals', icon: BriefcaseIcon, exact: false },
-  { href: '/dashboard/insights', label: 'Insights', icon: TrendingUpIcon, exact: false },
 ];
 
 const MORE_ITEMS: NavItemConfig[] = [

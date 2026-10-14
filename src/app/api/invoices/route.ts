@@ -34,19 +34,30 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+  const baseAmount = parseFloat(data.amount) || 0;
+  const totalAmount = data.totalAmount !== undefined ? parseFloat(data.totalAmount) : (baseAmount * 1.18);
+
   const newInvoice = {
     ...data,
     id: 'inv_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
     number: data.number || `INV-${Date.now().toString().slice(-4)}`,
-    clientName: data.clientName || 'Valued Client',
-    amount: parseFloat(data.amount) || 0,
+    clientName: data.clientName ? sanitizeString(data.clientName, 100) : 'Valued Client',
+    clientPhone: data.clientPhone ? sanitizeString(data.clientPhone, 30) : '',
+    clientEmail: data.clientEmail ? sanitizeString(data.clientEmail, 80) : '',
+    clientAddress: data.clientAddress ? sanitizeString(data.clientAddress, 250) : '',
+    clientGstin: data.clientGstin ? sanitizeString(data.clientGstin, 30).toUpperCase() : '',
+    amount: baseAmount,
+    totalAmount: isNaN(totalAmount) ? baseAmount : totalAmount,
+    taxType: data.taxType || 'intra',
     status: data.status || 'Pending',
     dueDate: data.dueDate || new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
-    dealRef: data.dealRef || '',
+    dealRef: data.dealRef ? sanitizeString(data.dealRef, 200) : '',
     issueDate: data.issueDate || new Date().toISOString().split('T')[0],
-    taxRate: data.taxRate || '5%',
-    notes: data.notes || '',
+    taxRate: data.taxRate !== undefined ? Number(data.taxRate) : 18,
+    items: Array.isArray(data.items) ? data.items : undefined,
+    notes: data.notes ? sanitizeString(data.notes, 1000) : '',
+    paymentDetails: data.paymentDetails || undefined,
     createdAt: new Date().toISOString()
   };
 
@@ -76,14 +87,29 @@ export async function PUT(req: Request) {
   const index = db.invoices.findIndex(i => i.id === data.id && i.agencyId === user.agencyId);
   if (index === -1) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
 
+  const baseAmount = data.amount !== undefined ? parseFloat(data.amount) || 0 : db.invoices[index].amount;
+  const totalAmount = data.totalAmount !== undefined 
+    ? parseFloat(data.totalAmount) 
+    : (db.invoices[index].totalAmount || baseAmount * 1.18);
+
   const updatedInvoice = {
     ...db.invoices[index],
     ...data,
     id: db.invoices[index].id, // IMMUTABLE
     agencyId: db.invoices[index].agencyId, // IMMUTABLE: tenant isolation
     clientName: data.clientName !== undefined ? sanitizeString(data.clientName, 100) : db.invoices[index].clientName,
+    clientPhone: data.clientPhone !== undefined ? sanitizeString(data.clientPhone, 30) : db.invoices[index].clientPhone,
+    clientEmail: data.clientEmail !== undefined ? sanitizeString(data.clientEmail, 80) : db.invoices[index].clientEmail,
+    clientAddress: data.clientAddress !== undefined ? sanitizeString(data.clientAddress, 250) : db.invoices[index].clientAddress,
+    clientGstin: data.clientGstin !== undefined ? sanitizeString(data.clientGstin, 30).toUpperCase() : db.invoices[index].clientGstin,
+    dealRef: data.dealRef !== undefined ? sanitizeString(data.dealRef, 200) : db.invoices[index].dealRef,
     notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.invoices[index].notes,
-    amount: data.amount !== undefined ? parseFloat(data.amount) || 0 : db.invoices[index].amount,
+    amount: baseAmount,
+    totalAmount: isNaN(totalAmount) ? baseAmount : totalAmount,
+    taxType: data.taxType || db.invoices[index].taxType || 'intra',
+    taxRate: data.taxRate !== undefined ? Number(data.taxRate) : (db.invoices[index].taxRate ?? 18),
+    items: data.items !== undefined ? (Array.isArray(data.items) ? data.items : db.invoices[index].items) : db.invoices[index].items,
+    paymentDetails: data.paymentDetails !== undefined ? data.paymentDetails : db.invoices[index].paymentDetails,
     updatedAt: new Date().toISOString()
   };
 

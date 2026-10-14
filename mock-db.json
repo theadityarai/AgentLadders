@@ -195,7 +195,20 @@
       "createdAt": "2026-08-10T08:00:00.000Z",
       "updatedAt": "2026-10-13T08:59:47.311Z",
       "fontFamily": "montserrat",
-      "colorScheme": "emerald"
+      "colorScheme": "emerald",
+      "invoiceSettings": {
+        "agencyName": "Vance Luxury Realty",
+        "tagline": "Licensed Real Estate Advisory & Brokerage Firm",
+        "gstin": "27AABCA1234F1Z5",
+        "reraReg": "A51800029384",
+        "accountName": "Vance Luxury Realty Escrow Advisory",
+        "bankName": "HDFC Bank Ltd",
+        "accountNumber": "50200088921102",
+        "ifscCode": "HDFC0000128",
+        "upiId": "agency.realty@hdfcbank",
+        "placeOfSupply": "Maharashtra (27)",
+        "sacCode": "997221"
+      }
     }
   ],
   "notifications": [
@@ -1813,6 +1826,23 @@
       "issueDate": "2026-10-13",
       "notes": "1% Buyer Commission on DLF The Camellias resale transaction milestone.",
       "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "number": "INV-2026-6242",
+      "clientName": "Sneha Kulkarni",
+      "clientPhone": "+91 97650 99887",
+      "clientEmail": "sneha.kulkarni@infosys.com",
+      "dealRef": "Oberoi Sky City 4 BHK Duplex Sale",
+      "amount": 1240000,
+      "taxRate": 18,
+      "issueDate": "2026-10-14",
+      "dueDate": "2026-10-28",
+      "status": "Pending",
+      "notes": "50% advance upon title agreement, 50% on deed execution. Bank transfer only.",
+      "id": "inv_ja8kb4q3",
+      "agencyId": "ag_vance_01",
+      "createdAt": "2026-10-14T18:14:44.400Z",
+      "updatedAt": "2026-10-14T18:56:03.852Z"
     }
   ],
   "payments": [

@@ -25,6 +25,76 @@ export function formatINR(amount: number | string | undefined | null): string {
   }
 }
 
+/** Formats number as full standard Indian currency with 2 decimals, e.g. ₹11,80,000.00 */
+export function formatINRFull(amount: number | string | undefined | null): string {
+  if (amount === undefined || amount === null || amount === '') return '₹0.00';
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(num)) return '₹0.00';
+  return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** Converts number to words in Indian Rupees (e.g. INR Eleven Lakh Eighty Thousand Only) */
+export function numberToIndianWords(amount: number | string | undefined | null): string {
+  if (amount === undefined || amount === null || amount === '') return 'Zero Rupees Only';
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(num) || num <= 0) return 'Zero Rupees Only';
+
+  const singleDigits = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+  const teenDigits = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const tenDigits = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+  function convertTwoDigits(n: number): string {
+    if (n < 10) return singleDigits[n];
+    if (n >= 10 && n < 20) return teenDigits[n - 10];
+    const ten = Math.floor(n / 10);
+    const rem = n % 10;
+    return `${tenDigits[ten]}${rem ? ' ' + singleDigits[rem] : ''}`.trim();
+  }
+
+  function convertThreeDigits(n: number): string {
+    const hundred = Math.floor(n / 100);
+    const rem = n % 100;
+    let res = '';
+    if (hundred > 0) {
+      res += `${singleDigits[hundred]} Hundred`;
+      if (rem > 0) res += ' ';
+    }
+    if (rem > 0) {
+      res += convertTwoDigits(rem);
+    }
+    return res.trim();
+  }
+
+  let integerPart = Math.floor(num);
+  let words = '';
+
+  const crore = Math.floor(integerPart / 10000000);
+  integerPart %= 10000000;
+
+  const lakh = Math.floor(integerPart / 100000);
+  integerPart %= 100000;
+
+  const thousand = Math.floor(integerPart / 1000);
+  integerPart %= 1000;
+
+  const remaining = integerPart;
+
+  if (crore > 0) {
+    words += `${convertTwoDigits(crore)} Crore `;
+  }
+  if (lakh > 0) {
+    words += `${convertTwoDigits(lakh)} Lakh `;
+  }
+  if (thousand > 0) {
+    words += `${convertTwoDigits(thousand)} Thousand `;
+  }
+  if (remaining > 0) {
+    words += `${convertThreeDigits(remaining)} `;
+  }
+
+  return `INR ${words.trim()} Only`;
+}
+
 export function formatINRAmountOnly(amount: number | string | undefined | null): string {
   if (amount === undefined || amount === null || amount === '') return '0';
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -213,4 +283,42 @@ export const DEFAULT_CLIENT_STATUSES = [
 
 export const VASTU_FACINGS = DEFAULT_VASTU_FACINGS;
 export const POSSESSION_STAGES = DEFAULT_CONSTRUCTION_STAGES;
+
+export interface AgencyInvoiceSettings {
+  agencyName: string;
+  tagline: string;
+  gstin: string;
+  reraReg: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  pan?: string;
+  accountName: string;
+  bankName: string;
+  accountNumber: string;
+  ifscCode: string;
+  upiId: string;
+  placeOfSupply: string;
+  sacCode: string;
+  defaultNotes?: string;
+}
+
+export const DEFAULT_INVOICE_SETTINGS: AgencyInvoiceSettings = {
+  agencyName: 'Vance Luxury Realty',
+  tagline: 'Licensed Real Estate Advisory & Brokerage Firm',
+  gstin: '27AABCA1234F1Z5',
+  reraReg: 'A51800029384',
+  address: 'Level 14, Tower 2, One World Center, Lower Parel, Mumbai, Maharashtra 400013',
+  phone: '+91 98201 23456',
+  email: 'accounts@vancerealty.com',
+  pan: 'AABCA1234F',
+  accountName: 'Vance Luxury Realty Escrow Advisory',
+  bankName: 'HDFC Bank Ltd',
+  accountNumber: '50200088921102',
+  ifscCode: 'HDFC0000128',
+  upiId: 'agency.realty@hdfcbank',
+  placeOfSupply: 'Maharashtra (27)',
+  sacCode: '997221',
+  defaultNotes: 'Brokerage advisory fees payable upon formal title verification and registration.'
+};
 

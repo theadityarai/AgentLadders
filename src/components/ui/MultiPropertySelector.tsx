@@ -36,6 +36,7 @@ interface MultiPropertySelectorProps {
   addFirstLabel?: string;
   addMoreLabel?: string;
   itemBadgeLabel?: string;
+  selectActionLabel?: string;
 }
 
 export function MultiPropertySelector({
@@ -48,8 +49,10 @@ export function MultiPropertySelector({
   itemPrefix = 'Stop',
   addFirstLabel,
   addMoreLabel,
-  itemBadgeLabel
+  itemBadgeLabel,
+  selectActionLabel
 }: MultiPropertySelectorProps) {
+  const isTour = itemPrefix === 'Stop';
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -129,7 +132,7 @@ export function MultiPropertySelector({
             backgroundColor: selectedProperties.length > 1 ? '#dcfce7' : '#f1f5f9',
             color: selectedProperties.length > 1 ? '#15803d' : '#475569'
           }}>
-            {selectedProperties.length} {selectedProperties.length === 1 ? `${itemPrefix} Selected` : (itemBadgeLabel || 'Properties in Tour Itinerary')}
+            {selectedProperties.length} {selectedProperties.length === 1 ? `${itemPrefix} Selected` : (itemBadgeLabel || (isTour ? 'Properties in Tour Itinerary' : 'Properties Selected'))}
           </span>
         )}
       </div>
@@ -190,7 +193,7 @@ export function MultiPropertySelector({
                       type="button"
                       disabled={idx === 0}
                       onClick={() => handleMoveUp(idx)}
-                      title="Move Up in Tour"
+                      title={isTour ? 'Move Up in Tour' : 'Move Up'}
                       style={{
                         background: 'none',
                         border: '1px solid #cbd5e1',
@@ -208,7 +211,7 @@ export function MultiPropertySelector({
                       type="button"
                       disabled={idx === selectedProperties.length - 1}
                       onClick={() => handleMoveDown(idx)}
-                      title="Move Down in Tour"
+                      title={isTour ? 'Move Down in Tour' : 'Move Down'}
                       style={{
                         background: 'none',
                         border: '1px solid #cbd5e1',
@@ -228,7 +231,7 @@ export function MultiPropertySelector({
                 <button
                   type="button"
                   onClick={() => handleRemoveProperty(idx)}
-                  title="Remove from Tour"
+                  title={isTour ? 'Remove from Tour' : 'Remove'}
                   style={{
                     backgroundColor: '#fee2e2',
                     border: '1px solid #fecaca',
@@ -286,8 +289,8 @@ export function MultiPropertySelector({
           <PlusIcon size={15} color="currentColor" strokeWidth={2.5} />
           <span>
             {selectedProperties.length === 0 
-              ? (addFirstLabel || 'Select Property Asset') 
-              : (addMoreLabel || `+ Add Another Property (${itemPrefix} ${selectedProperties.length + 1})`)}
+              ? (addFirstLabel || (isTour ? 'Select First Stop / Property' : 'Select Property Asset')) 
+              : (addMoreLabel || (isTour ? `+ Add Another Stop (${itemPrefix} ${selectedProperties.length + 1})` : `+ Add Another Property`))}
           </span>
         </button>
 
@@ -387,11 +390,11 @@ export function MultiPropertySelector({
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                         {isAlreadyAdded ? (
                           <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: 4 }}>
-                            Added
+                            {isTour ? 'Added' : 'Selected'}
                           </span>
                         ) : (
                           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary, #10b981)' }}>
-                            + Add Stop
+                            {selectActionLabel || (isTour ? '+ Add Stop' : '+ Select')}
                           </span>
                         )}
                       </div>
