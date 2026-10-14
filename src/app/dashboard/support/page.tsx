@@ -946,13 +946,19 @@ export default function SupportPage() {
       />
 
       {/* Top Level Nav Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        borderBottom: '2px solid #e2e8f0',
-        marginBottom: 24,
-        paddingBottom: 2
-      }}>
+      <div 
+        className="responsive-pills-scroll"
+        style={{
+          display: 'flex',
+          gap: 8,
+          borderBottom: '2px solid #e2e8f0',
+          marginBottom: 24,
+          paddingBottom: 2,
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none'
+        }}
+      >
         {[
           { key: 'faqs', label: 'Broker FAQs & Guides', icon: '💡' },
           { key: 'contracts', label: 'Legal Contracts & Mandates', icon: '⚖️' },
@@ -975,7 +981,9 @@ export default function SupportPage() {
                 fontSize: 14,
                 border: 'none',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
               <span>{tab.icon}</span>
@@ -1192,7 +1200,7 @@ export default function SupportPage() {
               No contracts found matching "{contractSearch}". Try adjusting your search query or category filter!
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 20 }}>
               {filteredContracts.map(contract => (
                 <div
                   key={contract.id}
@@ -1258,7 +1266,7 @@ export default function SupportPage() {
 
       {/* TAB 3: TICKETS & INQUIRIES */}
       {activeTab === 'tickets' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 380px) 1fr', gap: 20, alignItems: 'start' }}>
+        <div className="support-tickets-grid" style={{ alignItems: 'start' }}>
           {/* Left Column: Tickets List */}
           <div style={{ backgroundColor: '#fff', borderRadius: 14, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
             <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>

@@ -39,14 +39,14 @@ export async function POST(req: Request) {
     ...data,
     id: 'pay_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    reference: data.reference || `TXN-${Math.floor(100000 + Math.random() * 900000)}`,
-    invoiceNumber: data.invoiceNumber || 'INV-GENERAL',
-    amount: parseFloat(data.amount) || 0,
-    method: data.method || 'Bank Transfer',
-    paymentDate: data.paymentDate || new Date().toISOString().split('T')[0],
-    payerName: data.payerName || '',
-    notes: data.notes || '',
-    status: data.status || 'Completed',
+    reference: sanitizeString(data.reference || `TXN-${Math.floor(100000 + Math.random() * 900000)}`, 100),
+    invoiceNumber: sanitizeString(data.invoiceNumber || 'INV-GENERAL', 50),
+    amount: Math.max(0, parseFloat(data.amount) || 0),
+    method: sanitizeString(data.method || 'Bank Transfer', 50),
+    paymentDate: sanitizeString(data.paymentDate || new Date().toISOString().split('T')[0], 50),
+    payerName: sanitizeString(data.payerName || '', 100),
+    notes: sanitizeString(data.notes || '', 500),
+    status: sanitizeString(data.status || 'Completed', 50),
     createdAt: new Date().toISOString()
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   formatINR, 
@@ -67,7 +67,17 @@ interface Property {
   publicToken?: string;
 }
 
-function PropertyCardItem({ 
+const getStatusStyle = (s: string) => {
+  switch(s) {
+    case 'Available': return { bg: '#d1fae5', color: '#065f46' };
+    case 'Under Offer': return { bg: '#fef3c7', color: '#92400e' };
+    case 'Sold': return { bg: '#e2e8f0', color: '#475569' };
+    case 'Rented': return { bg: '#e2e8f0', color: '#475569' };
+    default: return { bg: '#f1f5f9', color: '#475569' };
+  }
+};
+
+const PropertyCardItem = React.memo(function PropertyCardItem({ 
   prop, 
   statusStyle, 
   priceFormatted,
@@ -464,7 +474,7 @@ function PropertyCardItem({
       </div>
     </div>
   );
-}
+});
 
 export default function PropertiesPage() {
   const [data, setData] = useState<Property[]>([]);
@@ -472,6 +482,8 @@ export default function PropertiesPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
   const [sharingProperty, setSharingProperty] = useState<Property | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   
@@ -481,14 +493,22 @@ export default function PropertiesPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCopyPitchLink = (title: string) => {
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter, purposeFilter]);
+
+  const isPropertyRent = useCallback((p: Property) => {
+    return p.purpose === 'For Rent' || p.listingType === 'For Rent';
+  }, []);
+
+  const handleCopyPitchLink = useCallback((title: string) => {
     setToast({
       id: Date.now().toString(),
       type: 'success',
       title: 'Pitch Link Copied! 📋',
       message: `Ready to send: Public showcase link for "${title}" copied to clipboard.`
     });
-  };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -591,7 +611,7 @@ export default function PropertiesPage() {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const handleOpenAdd = () => {
+  const handleOpenAdd = useCallback(() => {
     setEditingProperty(null);
     setFormData({
       title: '', purpose: 'For Sale', type: 'Apartment', bhk: '2 BHK',
@@ -605,9 +625,9 @@ export default function PropertiesPage() {
     });
     setMediaItems([]);
     setShowModal(true);
-  };
+  }, [propertySpecs, constructionStages, vastuOptions, parkingOptions]);
 
-  const handleOpenEdit = (prop: Property) => {
+  const handleOpenEdit = useCallback((prop: Property) => {
     setEditingProperty(prop);
     setFormData({
       title: prop.title || '',
@@ -639,9 +659,9 @@ export default function PropertiesPage() {
           : []);
     setMediaItems(existingMedia);
     setShowModal(true);
-  };
+  }, [propertySpecs, constructionStages, vastuOptions, parkingOptions]);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!deletingProperty) return;
     setIsDeleting(true);
     try {
@@ -680,50 +700,50 @@ export default function PropertiesPage() {
       setIsDeleting(false);
       setDeletingProperty(null);
     }
-  };
+  }, [deletingProperty, editingProperty]);
 
-  const handleAddMediaUrl = () => {
+  const handleAddMediaUrl = useCallback(() => {
     if (!newMediaUrl) return;
-    setMediaItems([
-      ...mediaItems,
+    setMediaItems(prev => [
+      ...prev,
       {
         id: Date.now().toString(),
         url: newMediaUrl,
         tag: newMediaTag || 'General',
-        isCover: mediaItems.length === 0
+        isCover: prev.length === 0
       }
     ]);
     setNewMediaUrl('');
     setNewMediaTag('');
-  };
+  }, [newMediaUrl, newMediaTag]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     
     // Create an object URL for local preview (in a real app, this would upload to S3/Cloudinary)
     const url = URL.createObjectURL(files[0]);
     
-    setMediaItems([
-      ...mediaItems,
+    setMediaItems(prev => [
+      ...prev,
       {
         id: Date.now().toString(),
         url: url,
         tag: newMediaTag || 'General',
-        isCover: mediaItems.length === 0
+        isCover: prev.length === 0
       }
     ]);
     
     // Reset file input and tag
     e.target.value = '';
     setNewMediaTag('');
-  };
+  }, [newMediaTag]);
 
-  const handleRemoveMedia = (id: string) => {
-    setMediaItems(mediaItems.filter(m => m.id !== id));
-  };
+  const handleRemoveMedia = useCallback((id: string) => {
+    setMediaItems(prev => prev.filter(m => m.id !== id));
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -792,61 +812,56 @@ export default function PropertiesPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [editingProperty, formData, mediaItems, propertySpecs, constructionStages, vastuOptions, parkingOptions]);
 
-  const buyCount = data.filter(p => !(p.purpose === 'For Rent' || p.listingType === 'For Rent')).length;
-  const rentCount = data.filter(p => (p.purpose === 'For Rent' || p.listingType === 'For Rent')).length;
-
-  const filteredData = data.filter(p => {
-    if (purposeFilter !== 'All') {
-      const isRent = p.purpose === 'For Rent' || p.listingType === 'For Rent';
-      if (purposeFilter === 'Rent' && !isRent) return false;
-      if (purposeFilter === 'Buy' && isRent) return false;
-    }
-    if (filter !== 'All') {
-      if (filter === 'Rented') {
-        if (p.status !== 'Rented' && !p.status?.toLowerCase().includes('rent') && !p.status?.toLowerCase().includes('lease')) return false;
-      } else if (p.status !== filter) {
-        return false;
+  // Memoized Buy/Rent Counts in a single pass
+  const { buyCount, rentCount } = useMemo(() => {
+    let buy = 0;
+    let rent = 0;
+    for (let i = 0; i < data.length; i++) {
+      if (isPropertyRent(data[i])) {
+        rent++;
+      } else {
+        buy++;
       }
     }
-    if (search) {
-      const q = search.toLowerCase();
-      return (
-        p.title?.toLowerCase().includes(q) ||
-        p.locality?.toLowerCase().includes(q) ||
-        p.bhk?.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+    return { buyCount: buy, rentCount: rent };
+  }, [data, isPropertyRent]);
 
-  // Property Pagination State (9 per page for a balanced grid)
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(9);
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+  // Memoized Filtered Properties
+  const filteredData = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return data.filter(p => {
+      if (purposeFilter !== 'All') {
+        const isRent = isPropertyRent(p);
+        if (purposeFilter === 'Rent' && !isRent) return false;
+        if (purposeFilter === 'Buy' && isRent) return false;
+      }
+      if (filter !== 'All') {
+        if (filter === 'Rented') {
+          const s = p.status?.toLowerCase() || '';
+          if (p.status !== 'Rented' && !s.includes('rent') && !s.includes('lease')) return false;
+        } else if (p.status !== filter) {
+          return false;
+        }
+      }
+      if (q) {
+        return (
+          p.title?.toLowerCase().includes(q) ||
+          p.locality?.toLowerCase().includes(q) ||
+          p.bhk?.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [data, purposeFilter, filter, search, isPropertyRent]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, filter, purposeFilter]);
-
-  const paginatedProperties = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  const getCoverImage = (media?: PropertyMedia[]) => {
-    if (!media || media.length === 0) return 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=80';
-    const cover = media.find(m => m.isCover);
-    return cover ? cover.url : media[0].url;
-  };
-
-  const getStatusStyle = (s: string) => {
-    switch(s) {
-      case 'Available': return { bg: '#d1fae5', color: '#065f46' };
-      case 'Under Offer': return { bg: '#fef3c7', color: '#92400e' };
-      case 'Sold': return { bg: '#e2e8f0', color: '#475569' };
-      case 'Rented': return { bg: '#e2e8f0', color: '#475569' };
-      default: return { bg: '#f1f5f9', color: '#475569' };
-    }
-  };
+  // Memoized Pagination calculations
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredData.length / pageSize)), [filteredData.length, pageSize]);
+  const paginatedProperties = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredData.slice(start, start + pageSize);
+  }, [filteredData, currentPage, pageSize]);
 
   if (loading) {
     return (
@@ -1260,7 +1275,7 @@ export default function PropertiesPage() {
           onChange={(tabId) => setFilter(tabId)}
         />
 
-        {/* Search and Status Dropdown */}
+        {/* Search Toolbar */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
           <SearchBar 
             value={search}
@@ -1268,37 +1283,11 @@ export default function PropertiesPage() {
             placeholder="Search by title, location, BHK..."
             maxWidth={320}
           />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Filter by Status:</span>
-            <select 
-              value={filter} 
-              onChange={e => setFilter(e.target.value)}
-              style={{
-                padding: '9px 14px',
-                borderRadius: 8,
-                border: '1.5px solid var(--border)',
-                fontSize: 13,
-                fontWeight: 700,
-                outline: 'none',
-                backgroundColor: filter === 'All' ? '#fff' : '#ecfdf5',
-                color: filter === 'All' ? '#334155' : '#047857',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="All">All Statuses ({data.length})</option>
-              <option value="Available">Available ({data.filter(p => p.status === 'Available').length})</option>
-              <option value="Under Offer">Under Offer ({data.filter(p => p.status === 'Under Offer').length})</option>
-              <option value="Under Contract">Under Contract ({data.filter(p => p.status === 'Under Contract').length})</option>
-              <option value="Sold">Sold ({data.filter(p => p.status === 'Sold').length})</option>
-              <option value="Rented">Rented / Leased ({data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length})</option>
-              <option value="Off Market">Off Market ({data.filter(p => p.status === 'Off Market').length})</option>
-            </select>
-          </div>
         </div>
       </div>
 
       {/* Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
         {paginatedProperties.map(prop => (
           <PropertyCardItem 
             key={prop.id} 
@@ -1308,7 +1297,7 @@ export default function PropertiesPage() {
             onCopyPitchLink={handleCopyPitchLink}
             onShare={setSharingProperty}
             onEdit={handleOpenEdit}
-            onDelete={(p) => setDeletingProperty(p)}
+            onDelete={setDeletingProperty}
           />
         ))}
       </div>

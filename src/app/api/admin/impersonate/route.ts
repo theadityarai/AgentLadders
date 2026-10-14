@@ -27,6 +27,20 @@ export async function POST(req: Request) {
   const dbUser = db.users.find((u: any) => u.id === user.id);
   if (dbUser) {
     dbUser.agencyId = targetAgencyId;
+
+    db.auditLogs = db.auditLogs || [];
+    db.auditLogs.unshift({
+      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      agencyId: targetAgencyId,
+      userId: user.id,
+      userName: user.name || 'Super Admin',
+      action: 'UPDATE',
+      entity: 'SuperAdminImpersonation',
+      entityId: targetAgencyId,
+      details: `Super Admin switched active tenant scope to ${targetAgency ? targetAgency.name : targetAgencyId}`,
+      createdAt: new Date().toISOString()
+    });
+
     saveDb(db);
   }
 

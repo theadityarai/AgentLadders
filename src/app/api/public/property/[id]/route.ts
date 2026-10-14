@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/lib/db';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getClientIp(req);
+  const limitCheck = checkRateLimit(`public_prop_${ip}`, { limit: 120, windowMs: 60 * 1000 });
+  if (!limitCheck.allowed) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const { id } = await params;
   const db = getDb();
 

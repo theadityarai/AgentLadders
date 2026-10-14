@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { formatINR, DEFAULT_DEAL_STAGES } from '@/lib/formatters';
 import Link from 'next/link';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
@@ -35,6 +35,23 @@ interface Deal {
   dealType?: string;
 }
 
+function getStageColor(s: string) {
+  const lower = s.toLowerCase();
+  if (lower.includes('token') || lower.includes('won') || lower.includes('closed')) {
+    return { border: '#bbf7d0', bg: '#f0fdf4', badge: '#059669', badgeBg: '#d1fae5', bar: '#10b981' };
+  }
+  if (lower.includes('lost') || lower.includes('drop') || lower.includes('cancel')) {
+    return { border: '#fecaca', bg: '#fef2f2', badge: '#b91c1c', badgeBg: '#fee2e2', bar: '#ef4444' };
+  }
+  if (lower.includes('agreement') || lower.includes('draft') || lower.includes('legal')) {
+    return { border: '#bfdbfe', bg: '#eff6ff', badge: '#1d4ed8', badgeBg: '#dbeafe', bar: '#3b82f6' };
+  }
+  if (lower.includes('registration') || lower.includes('pending') || lower.includes('loan')) {
+    return { border: '#fde68a', bg: '#fffbeb', badge: '#b45309', badgeBg: '#fef3c7', bar: '#f59e0b' };
+  }
+  return { border: '#e2e8f0', bg: '#f8fafc', badge: '#475569', badgeBg: '#f1f5f9', bar: '#94a3b8' };
+}
+
 export default function DealsPage() {
   const [data, setData] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,9 +71,9 @@ export default function DealsPage() {
   
   // Toast notification state
   const [toast, setToast] = useState<ToastMessage | null>(null);
-  const showToast = (type: 'success' | 'error' | 'info' | 'warning', message: string, title?: string) => {
+  const showToast = useCallback((type: 'success' | 'error' | 'info' | 'warning', message: string, title?: string) => {
     setToast({ id: Date.now().toString(), type, message, title });
-  };
+  }, []);
 
   const [formData, setFormData] = useState({ 
     title: '', 
@@ -68,12 +85,12 @@ export default function DealsPage() {
     stage: 'Negotiation' 
   });
 
-  const isDealRent = (d: Deal) => {
+  const isDealRent = useCallback((d: Deal) => {
     const dt = (d.dealType || '').toLowerCase();
     const t = (d.title || '').toLowerCase();
     const p = (d.propertyName || '').toLowerCase();
     return dt.includes('rent') || dt.includes('lease') || t.includes('rent') || t.includes('lease') || p.includes('rent') || p.includes('lease');
-  };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -138,34 +155,9 @@ export default function DealsPage() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const getStageColor = (s: string) => {
-    const lower = s.toLowerCase();
-    if (lower.includes('token') || lower.includes('won') || lower.includes('closed')) {
-      return { border: '#bbf7d0', bg: '#f0fdf4', badge: '#059669', badgeBg: '#d1fae5', bar: '#10b981' };
-    }
-    if (lower.includes('lost') || lower.includes('drop') || lower.includes('cancel')) {
-      return { border: '#fecaca', bg: '#fef2f2', badge: '#b91c1c', badgeBg: '#fee2e2', bar: '#ef4444' };
-    }
-    if (lower.includes('agreement') || lower.includes('draft') || lower.includes('legal')) {
-      return { border: '#bfdbfe', bg: '#eff6ff', badge: '#1d4ed8', badgeBg: '#dbeafe', bar: '#3b82f6' };
-    }
-    if (lower.includes('registration') || lower.includes('pending') || lower.includes('loan')) {
-      return { border: '#fde68a', bg: '#fffbeb', badge: '#b45309', badgeBg: '#fef3c7', bar: '#f59e0b' };
-    }
-    return { border: '#e2e8f0', bg: '#f8fafc', badge: '#475569', badgeBg: '#f1f5f9', bar: '#94a3b8' };
-  };
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12 }}>
-        <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <span style={{ color: '#64748b', fontSize: 14 }}>Loading pipeline...</span>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
 
-  const handleMoveStage = async (dealId: string, newStage: string) => {
+  const handleMoveStage = useCallback(async (dealId: string, newStage: string) => {
     const targetDeal = data.find(d => d.id === dealId);
     setData(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d));
     try {
@@ -183,41 +175,48 @@ export default function DealsPage() {
       console.error('Failed to update deal stage', err);
       showToast('error', 'Network error while moving deal stage.', 'Network Error');
     }
-  };
+  }, [data, showToast]);
 
-  const saleCount = data.filter(d => !isDealRent(d)).length;
-  const rentCount = data.filter(d => isDealRent(d)).length;
+  const { saleCount, rentCount } = useMemo(() => {
+    let sale = 0;
+    let rent = 0;
+    for (const d of data) {
+      if (isDealRent(d)) rent++;
+      else sale++;
+    }
+    return { saleCount: sale, rentCount: rent };
+  }, [data, isDealRent]);
 
   const allStagesList = useMemo(() => {
     return Array.from(new Set([...stages, 'Closed Won', 'Lost']));
   }, [stages]);
 
-  const activeDealsCount = data.filter(d => !['Closed Won', 'Lost'].includes(d.stage)).length;
-
-  const filteredDeals = data.filter(d => {
-    if (dealTypeFilter !== 'All') {
-      const isRent = isDealRent(d);
-      if (dealTypeFilter === 'Rent' && !isRent) return false;
-      if (dealTypeFilter === 'Buy' && isRent) return false;
-    }
-    if (stageFilter !== 'All') {
-      if (stageFilter === 'Active') {
-        if (['Closed Won', 'Lost'].includes(d.stage)) return false;
-      } else if (d.stage !== stageFilter) {
-        return false;
+  const filteredDeals = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return data.filter(d => {
+      if (dealTypeFilter !== 'All') {
+        const isRent = isDealRent(d);
+        if (dealTypeFilter === 'Rent' && !isRent) return false;
+        if (dealTypeFilter === 'Buy' && isRent) return false;
       }
-    }
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return (
-        d.title?.toLowerCase().includes(q) ||
-        d.clientName?.toLowerCase().includes(q) ||
-        d.propertyName?.toLowerCase().includes(q) ||
-        (Array.isArray(d.properties) && d.properties.some(p => p.toLowerCase().includes(q)))
-      );
-    }
-    return true;
-  });
+      if (stageFilter !== 'All') {
+        if (stageFilter === 'Active') {
+          if (['Closed Won', 'Lost'].includes(d.stage)) return false;
+        } else if (d.stage !== stageFilter) {
+          return false;
+        }
+      }
+      if (q) {
+        return (
+          d.title?.toLowerCase().includes(q) ||
+          d.clientName?.toLowerCase().includes(q) ||
+          d.propertyName?.toLowerCase().includes(q) ||
+          (Array.isArray(d.properties) && d.properties.some(p => p.toLowerCase().includes(q)))
+        );
+      }
+      return true;
+    });
+  }, [data, dealTypeFilter, stageFilter, searchQuery, isDealRent]);
 
   const columnsToDisplay = useMemo(() => {
     if (stageFilter === 'All') return stages;
@@ -225,15 +224,28 @@ export default function DealsPage() {
     return [stageFilter];
   }, [stages, stageFilter]);
 
-  // Calculate totals per stage
-  const stageTotals = allStagesList.reduce((acc, stage) => {
-    acc[stage] = filteredDeals.filter(d => d.stage === stage).reduce((sum, d) => sum + (d.amount || 0), 0);
-    return acc;
-  }, {} as Record<string, number>);
+  // Calculate totals per stage in a single O(N) pass
+  const { stageTotals, activePipelineValue, activeDealsCount } = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const s of allStagesList) totals[s] = 0;
+    let pipelineVal = 0;
+    let activeCount = 0;
 
-  const activePipelineValue = filteredDeals.filter(d => !['Closed Won', 'Lost'].includes(d.stage)).reduce((a, b) => a + (b.amount || 0), 0);
+    for (const d of filteredDeals) {
+      const amt = d.amount || 0;
+      if (totals[d.stage] !== undefined) totals[d.stage] += amt;
+      else totals[d.stage] = amt;
 
-  const handleOpenAdd = () => {
+      if (!['Closed Won', 'Lost'].includes(d.stage)) {
+        pipelineVal += amt;
+        activeCount++;
+      }
+    }
+
+    return { stageTotals: totals, activePipelineValue: pipelineVal, activeDealsCount: activeCount };
+  }, [filteredDeals, allStagesList]);
+
+  const handleOpenAdd = useCallback(() => {
     setEditingDeal(null);
     setFormData({ 
       title: '', 
@@ -245,9 +257,9 @@ export default function DealsPage() {
       stage: 'Negotiation' 
     });
     setShowModal(true);
-  };
+  }, []);
 
-  const handleOpenEdit = (deal: Deal) => {
+  const handleOpenEdit = useCallback((deal: Deal) => {
     setEditingDeal(deal);
     const initialProps = Array.isArray(deal.properties) && deal.properties.length > 0
       ? deal.properties
@@ -262,9 +274,9 @@ export default function DealsPage() {
       stage: deal.stage || 'Negotiation'
     });
     setShowModal(true);
-  };
+  }, []);
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = useCallback(async () => {
     if (!deletingDeal) return;
     setIsDeleting(true);
     try {
@@ -289,9 +301,9 @@ export default function DealsPage() {
       setIsDeleting(false);
       setDeletingDeal(null);
     }
-  };
+  }, [deletingDeal, editingDeal, showToast]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -335,7 +347,17 @@ export default function DealsPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, editingDeal, showToast]);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12 }}>
+        <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <span style={{ color: '#64748b', fontSize: 14 }}>Loading pipeline...</span>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <>

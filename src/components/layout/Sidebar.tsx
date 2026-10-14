@@ -35,7 +35,6 @@ const NAV_ITEMS: NavItemConfig[] = [
   { href: '/dashboard/properties', label: 'Properties', icon: BuildingIcon, exact: false },
   { href: '/dashboard/site-visits', label: 'Site Visits', icon: MapPinIcon, exact: false, badge: 'KEY' },
   { href: '/dashboard/deals', label: 'Deals', icon: BriefcaseIcon, exact: false },
-  { href: '/dashboard/tutorial', label: 'Deal Playbook', icon: CompassIcon, exact: false, badge: 'GUIDE' },
   { href: '/dashboard/insights', label: 'Insights', icon: TrendingUpIcon, exact: false },
 ];
 
@@ -48,6 +47,7 @@ const MORE_ITEMS: NavItemConfig[] = [
 
 const BOTTOM_ITEMS: NavItemConfig[] = [
   { href: '/dashboard/support', label: 'Help & Support', icon: MessageCircleIcon, exact: false },
+  { href: '/dashboard/tutorial', label: 'Playbook & Tutorial', icon: CompassIcon, exact: false },
   { href: '/dashboard/settings', label: 'Settings', icon: SettingsIcon, exact: false },
 ];
 
@@ -248,7 +248,7 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Actions & User Profile */}
-      <div style={{ padding: '12px 10px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ padding: '12px 10px 28px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {isSuperAdmin && (
           <Link href="/admin" style={{ textDecoration: 'none' }}>
             <div style={{

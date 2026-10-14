@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       subject: `[${newTicket.ticketNumber}] Ticket Received: ${newTicket.subject}`,
       template: 'ticket_created',
       ticket: newTicket as any,
-      messageText: data.message || data.subject,
+      messageText: cleanMessage,
       recipientRole: 'broker'
     });
   }
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
     subject: `[NEW TICKET] ${newTicket.ticketNumber} from ${newTicket.agencyName}: ${newTicket.subject}`,
     template: 'ticket_created',
     ticket: newTicket as any,
-    messageText: data.message || data.subject,
+    messageText: cleanMessage,
     recipientRole: 'admin'
   });
 
@@ -142,7 +142,7 @@ export async function PUT(req: Request) {
     subject: `[BROKER REPLY] ${ticket.ticketNumber} from ${ticket.agencyName || user.name}: ${ticket.subject}`,
     template: 'ticket_reply_user',
     ticket: ticket as any,
-    messageText: message,
+    messageText: cleanMessage,
     recipientRole: 'admin'
   });
 

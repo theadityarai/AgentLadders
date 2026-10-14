@@ -3,6 +3,7 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { canManageFinancials } from '@/lib/rbac';
+import { sanitizeString } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -78,6 +79,10 @@ export async function PUT(req: Request) {
   const updatedInvoice = {
     ...db.invoices[index],
     ...data,
+    id: db.invoices[index].id, // IMMUTABLE
+    agencyId: db.invoices[index].agencyId, // IMMUTABLE: tenant isolation
+    clientName: data.clientName !== undefined ? sanitizeString(data.clientName, 100) : db.invoices[index].clientName,
+    notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.invoices[index].notes,
     amount: data.amount !== undefined ? parseFloat(data.amount) || 0 : db.invoices[index].amount,
     updatedAt: new Date().toISOString()
   };

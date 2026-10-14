@@ -294,7 +294,7 @@
   margin-top: 16px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1024px) {
   .settingsLayout {
     flex-direction: column;
     margin: 0 0 20px;

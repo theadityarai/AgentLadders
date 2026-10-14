@@ -39,14 +39,14 @@ export async function POST(req: Request) {
     ...data,
     id: 'task_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    title: data.title || 'New Task',
-    assignedTo: data.assignedTo || user.name || 'Agent',
-    dueDate: data.dueDate || new Date().toISOString().split('T')[0],
-    category: data.category || 'Follow-up Call',
-    priority: data.priority || 'Medium',
-    relatedTo: data.relatedTo || '',
-    description: data.description || '',
-    status: data.status || 'Pending',
+    title: sanitizeString(data.title || 'New Task', 200),
+    assignedTo: sanitizeString(data.assignedTo || user.name || 'Agent', 100),
+    dueDate: sanitizeString(data.dueDate || new Date().toISOString().split('T')[0], 50),
+    category: sanitizeString(data.category || 'Follow-up Call', 50),
+    priority: sanitizeString(data.priority || 'Medium', 50),
+    relatedTo: sanitizeString(data.relatedTo || '', 200),
+    description: sanitizeString(data.description || '', 1000),
+    status: sanitizeString(data.status || 'Pending', 50),
     createdAt: new Date().toISOString()
   };
 

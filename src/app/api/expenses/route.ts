@@ -39,14 +39,14 @@ export async function POST(req: Request) {
     ...data,
     id: 'exp_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    category: data.category || 'Operations',
-    description: data.description || 'Agency Operating Expense',
-    amount: parseFloat(data.amount) || 0,
-    date: data.date || new Date().toISOString().split('T')[0],
-    vendor: data.vendor || '',
-    paymentMethod: data.paymentMethod || 'Company Card',
+    category: sanitizeString(data.category || 'Operations', 50),
+    description: sanitizeString(data.description || 'Agency Operating Expense', 500),
+    amount: Math.max(0, parseFloat(data.amount) || 0),
+    date: sanitizeString(data.date || new Date().toISOString().split('T')[0], 50),
+    vendor: sanitizeString(data.vendor || '', 100),
+    paymentMethod: sanitizeString(data.paymentMethod || 'Company Card', 50),
     taxDeductible: Boolean(data.taxDeductible),
-    receiptRef: data.receiptRef || '',
+    receiptRef: sanitizeString(data.receiptRef || '', 100),
     createdAt: new Date().toISOString()
   };
 

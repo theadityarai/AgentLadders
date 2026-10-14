@@ -3,6 +3,9 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
+import { canMutateCRMRecords } from '@/lib/rbac';
+import { sanitizeString } from '@/lib/sanitize';
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -27,20 +30,24 @@ export async function POST(req: Request) {
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to add property owners.' }, { status: 403 });
+  }
+
   const data = await req.json();
   const newOwner = {
     ...data,
     id: 'owner_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    name: data.name || 'New Owner',
-    email: data.email || '',
-    phone: data.phone || '',
+    name: sanitizeString(data.name || 'New Owner', 100),
+    email: sanitizeString(data.email || '', 100),
+    phone: sanitizeString(data.phone || '', 30),
     propertiesCount: parseInt(data.propertiesCount) || 1,
-    ownerType: data.ownerType || 'Individual Owner',
-    ownershipShare: data.ownershipShare || '100%',
-    primaryProperty: data.primaryProperty || '',
-    taxId: data.taxId || '',
-    notes: data.notes || '',
+    ownerType: sanitizeString(data.ownerType || 'Individual Owner', 50),
+    ownershipShare: sanitizeString(data.ownershipShare || '100%', 20),
+    primaryProperty: sanitizeString(data.primaryProperty || '', 200),
+    taxId: sanitizeString(data.taxId || '', 50),
+    notes: sanitizeString(data.notes || '', 1000),
     createdAt: new Date().toISOString()
   };
 
@@ -59,6 +66,10 @@ export async function PUT(req: Request) {
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to modify property owners.' }, { status: 403 });
+  }
+
   const data = await req.json();
   if (!data.id) return NextResponse.json({ error: 'Missing owner id' }, { status: 400 });
 
@@ -69,6 +80,12 @@ export async function PUT(req: Request) {
   const updatedOwner = {
     ...db.owners[index],
     ...data,
+    id: db.owners[index].id, // IMMUTABLE
+    agencyId: db.owners[index].agencyId, // IMMUTABLE: tenant isolation
+    name: data.name !== undefined ? sanitizeString(data.name, 100) : db.owners[index].name,
+    email: data.email !== undefined ? sanitizeString(data.email, 100) : db.owners[index].email,
+    phone: data.phone !== undefined ? sanitizeString(data.phone, 30) : db.owners[index].phone,
+    notes: data.notes !== undefined ? sanitizeString(data.notes, 1000) : db.owners[index].notes,
     propertiesCount: data.propertiesCount !== undefined ? parseInt(data.propertiesCount) || 1 : db.owners[index].propertiesCount,
     updatedAt: new Date().toISOString()
   };
@@ -86,6 +103,10 @@ export async function DELETE(req: Request) {
   const db = getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to delete property owners.' }, { status: 403 });
+  }
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');

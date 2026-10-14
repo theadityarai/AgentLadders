@@ -6,111 +6,185 @@ import { useRouter, usePathname } from 'next/navigation';
 import {
   XIcon,
   ChevronRightIcon,
-  CheckIcon,
   CompassIcon,
-  PhoneIcon,
-  WhatsAppIcon,
+  HomeIcon,
+  UsersIcon,
   BuildingIcon,
   MapPinIcon,
   BriefcaseIcon,
+  TrendingUpIcon,
+  FileTextIcon,
+  ReceiptIcon,
+  CheckSquareIcon,
+  BarChartIcon,
+  SettingsIcon,
   SparklesIcon,
-  RotateCcwIcon,
-  BookOpenIcon,
-  CheckCircleIcon
+  ArrowRightIcon,
+  BookOpenIcon
 } from '@/components/icons/NavIcons';
 
-export interface TourStep {
+interface QuickGuideItem {
   id: string;
+  name: string;
+  path: string;
+  icon: React.ComponentType<{ size?: number; color?: string; style?: React.CSSProperties }>;
+  accentColor: string;
   badge: string;
-  badgeColor: string;
-  emoji: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  proTip?: string;
-  actionText?: string;
-  actionHref?: string;
-  icon: React.ComponentType<{ size?: number; color?: string }>;
+  tagline: string;
+  threeSteps: string[];
+  keyActionName: string;
 }
 
-const TOUR_STEPS: TourStep[] = [
-  {
-    id: 'welcome',
-    badge: 'Quick Tour • Step 1 of 6',
-    badgeColor: '#059669',
-    emoji: '🚀',
-    title: 'Welcome to AgentLadders CRM',
-    subtitle: 'The Real Estate Operating System for High-Earning Brokers',
-    description: 'AgentLadders is designed specifically for Indian property consultants and agencies. Manage buyer inquiries, instant WhatsApp property brochures, site visits, and commission payouts in one place.',
-    proTip: 'Brokers using AgentLadders close up to 3x more deals by never letting a hot buyer slip through the cracks.',
-    actionText: 'View Full Deal Flowchart 🗺️',
-    actionHref: '/dashboard/tutorial',
-    icon: CompassIcon
-  },
+const PAGE_GUIDES: QuickGuideItem[] = [
   {
     id: 'today',
-    badge: 'Daily Routine • Step 2 of 6',
-    badgeColor: '#2563eb',
-    emoji: '📞',
-    title: 'Your Daily Action Center',
-    subtitle: 'High-Priority Calls & Scheduled Visits',
-    description: 'Start every morning on the Today screen. You will see scheduled site visits, urgent buyer follow-up calls, and quick-action WhatsApp triggers with zero clutter.',
-    proTip: 'Calling fresh leads within 5 minutes increases conversion rates by up to 8x!',
-    actionText: 'Go to Today Dashboard',
-    actionHref: '/dashboard',
-    icon: PhoneIcon
+    name: 'Today Dashboard',
+    path: '/dashboard',
+    icon: HomeIcon,
+    accentColor: '#059669',
+    badge: 'DAILY WORKSTATION',
+    tagline: 'Your morning action center for urgent callbacks & scheduled showings.',
+    threeSteps: [
+      'Check top KPI pulse cards for today\'s scheduled site visits and pipeline value.',
+      'Call or WhatsApp hot buyer callbacks listed in High Priority queue before 11 AM.',
+      'Review your afternoon site visits and tap the Maps pin to check directions.'
+    ],
+    keyActionName: 'Execute Morning Call Queue'
   },
   {
     id: 'leads',
-    badge: 'Inquiry Pipeline • Step 3 of 6',
-    badgeColor: '#7c3aed',
-    emoji: '🎯',
-    title: 'Inquiries & AI Magic Match',
-    subtitle: 'Pair Buyer Budgets with Inventory Instantly',
-    description: 'Store client requirements (Budget, Preferred Locality, BHK type). The Magic Match Engine automatically cross-checks your property inventory to find exact matches in seconds.',
-    proTip: 'Use tags like "Hot Buyer" or "Urgent Investor" to prioritize your follow-up list.',
-    actionText: 'Explore Inquiries',
-    actionHref: '/dashboard/leads',
-    icon: SparklesIcon
+    name: 'Inquiries & Leads',
+    path: '/dashboard/leads',
+    icon: UsersIcon,
+    accentColor: '#2563eb',
+    badge: 'LEAD GENERATION',
+    tagline: 'Capture buyer requirements and run instant AI Magic Match.',
+    threeSteps: [
+      'Click "+ New Inquiry" and record buyer budget (min/max), BHK, and preferred locality.',
+      'Tap "Magic Match 🪄" to scan your inventory and rank matching properties.',
+      'Click "WhatsApp Pitch 💬" to dispatch a formatted brochure to the client in 5 seconds.'
+    ],
+    keyActionName: 'Add Inquiry & Magic Match'
   },
   {
-    id: 'whatsapp',
-    badge: 'Communication • Step 4 of 6',
-    badgeColor: '#16a34a',
-    emoji: '💬',
-    title: '1-Click WhatsApp Property Pitches',
-    subtitle: 'Professional Formatted Brochures in Hindi & English',
-    description: 'No more typing long paragraphs on your phone! Click "WhatsApp Pitch" on any lead or property to generate a customized property presentation and launch WhatsApp immediately.',
-    proTip: 'Includes prices in Lakhs/Crores, carpet area, possession date, and high-res photo links.',
-    actionText: 'Try WhatsApp Pitches',
-    actionHref: '/dashboard/leads',
-    icon: WhatsAppIcon
+    id: 'properties',
+    name: 'Property Inventory',
+    path: '/dashboard/properties',
+    icon: BuildingIcon,
+    accentColor: '#059669',
+    badge: 'INVENTORY VAULT',
+    tagline: 'Catalog builder and resale listings with pricing and digital flyers.',
+    threeSteps: [
+      'Click "+ Add Property" and enter Carpet Area, Asking Price, Floor, and Possession.',
+      'Upload high-resolution photos of living room, kitchen, and society amenities.',
+      'Click "Share on WhatsApp" to create a co-branded flyer with your agency RERA number.'
+    ],
+    keyActionName: 'Add & Share Property Flyer'
   },
   {
-    id: 'site_visits',
-    badge: 'Field Inspections • Step 5 of 6',
-    badgeColor: '#ea580c',
-    emoji: '🚗',
-    title: 'Site Visits & Inspection Tracker',
-    subtitle: 'Convert Property Showings into Signed Deals',
-    description: 'Lock in inspection dates and times with buyers. Share exact Google Maps pins, coordinate with property caretakers, and record buyer feedback right after the showing.',
-    proTip: 'Never show more than 3 properties in one visit—buyers get overwhelmed and delay decisions.',
-    actionText: 'Manage Site Visits',
-    actionHref: '/dashboard/site-visits',
-    icon: MapPinIcon
+    id: 'site-visits',
+    name: 'Site Visits',
+    path: '/dashboard/site-visits',
+    icon: MapPinIcon,
+    accentColor: '#ea580c',
+    badge: 'FIELD SHOWINGS',
+    tagline: 'Coordinate physical property viewings and capture buyer reactions.',
+    threeSteps: [
+      'Click "+ Schedule Visit" with buyer, property, and appointment time.',
+      'Click "Send Location Pin" to WhatsApp the buyer the exact society GPS coordinates.',
+      'Mark status "Completed" and record buyer feedback or counter-offers immediately.'
+    ],
+    keyActionName: 'Schedule Showing & Dispatch GPS'
   },
   {
     id: 'deals',
-    badge: 'Commission & Closing • Step 6 of 6',
-    badgeColor: '#b45309',
-    emoji: '🤝',
-    title: 'Deal Pipeline & Brokerage Invoicing',
-    subtitle: 'Token Advance, Legal Checks & 1-Click GST Invoices',
-    description: 'Track deals through Negotiation, Token Advance, Document Verification, and Registry. Once closed, generate professional GST brokerage invoices in 1 click.',
-    proTip: 'Always issue an official Token Receipt immediately upon receiving earnest money.',
-    actionText: 'View Deals Pipeline',
-    actionHref: '/dashboard/deals',
-    icon: BriefcaseIcon
+    name: 'Deals Pipeline',
+    path: '/dashboard/deals',
+    icon: BriefcaseIcon,
+    accentColor: '#b45309',
+    badge: 'CLOSING KANBAN',
+    tagline: 'Move agreed deals through Token Advance, Legal Check, and Registry.',
+    threeSteps: [
+      'Create a deal card when buyer and seller agree on commercial terms.',
+      'Click "Issue Token Receipt" immediately upon receiving earnest money.',
+      'Drag through Legal Check -> Sale Agreement -> Closed Won, then generate GST invoice.'
+    ],
+    keyActionName: 'Issue Token Receipt & Advance Stage'
+  },
+  {
+    id: 'insights',
+    name: 'Insights & Analytics',
+    path: '/dashboard/insights',
+    icon: TrendingUpIcon,
+    accentColor: '#7c3aed',
+    badge: 'ANALYTICS',
+    tagline: 'Track conversion funnel drop-offs and high-margin micro-markets.',
+    threeSteps: [
+      'Review your Lead-to-Showing conversion rate to spot follow-up bottlenecks.',
+      'Inspect the Micro-Market Revenue breakdown to see top closing localities.',
+      'Export PDF performance summaries for partner and agency briefings.'
+    ],
+    keyActionName: 'Inspect Sales Conversion Funnel'
+  },
+  {
+    id: 'documents',
+    name: 'Documents Vault',
+    path: '/dashboard/documents',
+    icon: FileTextIcon,
+    accentColor: '#059669',
+    badge: 'LEGAL VAULT',
+    tagline: 'Securely store and share title deeds, ECs, and KYC packages.',
+    threeSteps: [
+      'Upload Parent Deeds, 15-year Encumbrance Certificates, and Khata extracts.',
+      'Tag documents by Deal so all papers for a property stay neatly grouped.',
+      'Generate an instant, secure WhatsApp bundle link for bank home loan officers.'
+    ],
+    keyActionName: 'Generate Bank Document Bundle'
+  },
+  {
+    id: 'invoices',
+    name: 'Invoices & Billing',
+    path: '/dashboard/invoices',
+    icon: ReceiptIcon,
+    accentColor: '#059669',
+    badge: 'COMMISSION BILLING',
+    tagline: 'Professional 1-click GST brokerage invoices that get paid on time.',
+    threeSteps: [
+      'Click "+ New Invoice" or generate directly from a closed deal card.',
+      'Confirm 1% or 2% brokerage rate; system automatically calculates 18% GST.',
+      'Send formatted invoice PDF with RTGS/UPI bank details directly over WhatsApp.'
+    ],
+    keyActionName: 'Generate GST Brokerage Invoice'
+  },
+  {
+    id: 'tasks',
+    name: 'Tasks & Reminders',
+    path: '/dashboard/tasks',
+    icon: CheckSquareIcon,
+    accentColor: '#2563eb',
+    badge: 'TASK EXECUTION',
+    tagline: 'Stay on top of key collections, advocate follow-ups, and registry prep.',
+    threeSteps: [
+      'Create time-bound action tasks linked directly to a client deal.',
+      'Apply standard templates like "Registry Day Checklist" 48 hours prior.',
+      'Check off items as completed to keep your deal progress on track.'
+    ],
+    keyActionName: 'Check Off Priority Deal Tasks'
+  },
+  {
+    id: 'settings',
+    name: 'Agency Settings',
+    path: '/dashboard/settings',
+    icon: SettingsIcon,
+    accentColor: '#7c3aed',
+    badge: 'BRANDING & RERA',
+    tagline: 'Configure company logo, RERA credentials, and payout bank accounts.',
+    threeSteps: [
+      'Upload your agency logo to display on all client flyers and invoices.',
+      'Enter your State RERA registration number and GSTIN for compliance.',
+      'Enter your bank current account coordinates for invoice wire transfers.'
+    ],
+    keyActionName: 'Save Agency Branding & RERA'
   }
 ];
 
@@ -118,472 +192,271 @@ export function OnScreenTutorial() {
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [selectedGuideId, setSelectedGuideId] = useState<string>('today');
 
-  // Check initial state from localStorage or listen to event
+  // Detect current page and set initial guide
+  useEffect(() => {
+    const currentGuide = PAGE_GUIDES.find(g => pathname === g.path || (g.path !== '/dashboard' && pathname.startsWith(g.path)));
+    if (currentGuide) {
+      setSelectedGuideId(currentGuide.id);
+    }
+  }, [pathname]);
+
+  // Listen to open-on-screen-tutorial event from anywhere in the app
   useEffect(() => {
     const handleOpenEvent = (e?: any) => {
-      const step = e?.detail?.step !== undefined ? e.detail.step : 0;
-      setCurrentStepIndex(step);
-      setIsCompleted(false);
+      if (e?.detail?.moduleId) {
+        setSelectedGuideId(e.detail.moduleId);
+      }
       setIsOpen(true);
     };
 
     window.addEventListener('open-on-screen-tutorial', handleOpenEvent);
-
-    // Auto-prompt on first visit to /dashboard if not seen before
-    const hasSeenTour = localStorage.getItem('agentladders_tour_dismissed_v1');
-    if (!hasSeenTour && pathname === '/dashboard') {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 1400);
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener('open-on-screen-tutorial', handleOpenEvent);
-      };
-    }
-
-    return () => {
-      window.removeEventListener('open-on-screen-tutorial', handleOpenEvent);
-    };
-  }, [pathname]);
+    return () => window.removeEventListener('open-on-screen-tutorial', handleOpenEvent);
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        handleDismiss();
-      } else if (e.key === 'ArrowRight') {
-        handleNext();
-      } else if (e.key === 'ArrowLeft') {
-        handlePrev();
-      }
+      if (e.key === 'Escape') setIsOpen(false);
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, currentStepIndex]);
+  }, [isOpen]);
 
-  const handleNext = () => {
-    if (currentStepIndex < TOUR_STEPS.length - 1) {
-      setCurrentStepIndex(prev => prev + 1);
-    } else {
-      setIsCompleted(true);
-      localStorage.setItem('agentladders_tour_dismissed_v1', 'true');
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex(prev => prev - 1);
-      setIsCompleted(false);
-    }
-  };
-
-  const handleDismiss = () => {
-    setIsOpen(false);
-    localStorage.setItem('agentladders_tour_dismissed_v1', 'true');
-  };
-
-  const handleRestart = () => {
-    setCurrentStepIndex(0);
-    setIsCompleted(false);
-    setIsOpen(true);
-  };
+  const activeGuide = PAGE_GUIDES.find(g => g.id === selectedGuideId) || PAGE_GUIDES[0];
+  const GuideIcon = activeGuide.icon;
 
   if (!isOpen) return null;
 
-  const currentStep = TOUR_STEPS[currentStepIndex];
-  const StepIcon = currentStep.icon;
-  const progressPercent = ((currentStepIndex + 1) / TOUR_STEPS.length) * 100;
-
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 9999,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-      backgroundColor: 'rgba(15, 23, 42, 0.72)',
-      backdropFilter: 'blur(6px)',
-      animation: 'fadeIn 0.2s ease-out'
-    }}>
-      {/* Tutorial Container Card */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderRadius: 24,
-        width: '100%',
-        maxWidth: '560px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.8)',
-        position: 'relative',
-        overflow: 'hidden',
-        animation: 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
-      }}>
-
-        {/* Top Progress Bar */}
-        <div style={{ height: 5, backgroundColor: '#f1f5f9', width: '100%', position: 'relative' }}>
-          <div style={{
-            height: '100%',
-            backgroundColor: isCompleted ? '#10b981' : currentStep.badgeColor,
-            width: isCompleted ? '100%' : `${progressPercent}%`,
-            transition: 'width 0.35s ease, background-color 0.35s ease'
-          }} />
-        </div>
-
-        {/* Header Bar */}
-        <div style={{
+    <div
+      onClick={() => setIsOpen(false)}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        backgroundColor: 'rgba(15, 23, 42, 0.65)',
+        backdropFilter: 'blur(5px)',
+        animation: 'fadeIn 0.2s ease-out'
+      }}
+    >
+      {/* Interactive Screen Guide Modal */}
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 500,
+          backgroundColor: '#ffffff',
+          borderRadius: 22,
+          boxShadow: '0 25px 60px -10px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(226, 232, 240, 0.9)',
+          overflow: 'hidden',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '18px 24px 12px',
-          borderBottom: '1px solid #f1f5f9'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              backgroundColor: `${currentStep.badgeColor}15`,
-              color: currentStep.badgeColor,
-              padding: '4px 12px',
-              borderRadius: 20,
-              fontSize: 12,
-              fontWeight: 700
-            }}>
-              <span>{currentStep.emoji}</span>
-              {isCompleted ? 'Tour Completed 🎉' : currentStep.badge}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Link
-              href="/dashboard/tutorial"
-              onClick={() => setIsOpen(false)}
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: '#64748b',
-                textDecoration: 'none',
-                padding: '4px 8px',
-                borderRadius: 6,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5
-              }}
-              title="Open full visual flowchart page"
-            >
-              <BookOpenIcon size={14} color="#64748b" />
-              <span>Full Flowchart</span>
-            </Link>
-
-            <button
-              onClick={handleDismiss}
-              aria-label="Close tutorial"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#94a3b8',
-                padding: '6px',
+          flexDirection: 'column',
+          animation: 'slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          border: '1px solid #e2e8f0'
+        }}
+      >
+          {/* Top Header */}
+          <div style={{
+            backgroundColor: '#0f172a',
+            color: '#ffffff',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(255,255,255,0.08)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 32,
+                height: 32,
                 borderRadius: 8,
+                backgroundColor: 'rgba(255,255,255,0.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
-            >
-              <XIcon size={18} color="currentColor" />
-            </button>
-          </div>
-        </div>
-
-        {/* Content Body */}
-        {!isCompleted ? (
-          <div style={{ padding: '24px' }}>
-            {/* Step Icon & Title Header */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 16 }}>
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: 16,
-                backgroundColor: `${currentStep.badgeColor}15`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: `1.5px solid ${currentStep.badgeColor}30`
+                color: '#34d399'
               }}>
-                <StepIcon size={26} color={currentStep.badgeColor} />
+                <GuideIcon size={18} color="#34d399" />
               </div>
-
               <div>
-                <h3 style={{
-                  fontSize: 20,
-                  fontWeight: 800,
-                  color: '#0f172a',
-                  margin: '0 0 4px',
-                  lineHeight: 1.3
-                }}>
-                  {currentStep.title}
-                </h3>
-                <p style={{
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: '#64748b',
-                  margin: 0
-                }}>
-                  {currentStep.subtitle}
-                </p>
-              </div>
-            </div>
-
-            {/* Description Text */}
-            <p style={{
-              fontSize: 14.5,
-              lineHeight: 1.6,
-              color: '#334155',
-              margin: '0 0 16px',
-              backgroundColor: '#f8fafc',
-              padding: '14px 16px',
-              borderRadius: 12,
-              border: '1px solid #e2e8f0'
-            }}>
-              {currentStep.description}
-            </p>
-
-            {/* Pro Tip Box */}
-            {currentStep.proTip && (
-              <div style={{
-                backgroundColor: '#fffbeb',
-                border: '1px solid #fef3c7',
-                borderRadius: 12,
-                padding: '12px 14px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 10,
-                marginBottom: 20
-              }}>
-                <span style={{ fontSize: 18, lineHeight: 1 }}>💡</span>
-                <div style={{ fontSize: 13, color: '#92400e', lineHeight: 1.5, fontWeight: 500 }}>
-                  <strong style={{ color: '#78350f', fontWeight: 700 }}>Broker Pro Tip: </strong>
-                  {currentStep.proTip}
+                <div style={{ fontSize: 14.5, fontWeight: 800, color: '#ffffff' }}>
+                  {activeGuide.name}
+                </div>
+                <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
+                  Active Module Quick Guide
                 </div>
               </div>
-            )}
-
-            {/* Quick Action Link for this specific step */}
-            {currentStep.actionHref && (
-              <div style={{ marginBottom: 12 }}>
-                <Link
-                  href={currentStep.actionHref}
-                  onClick={() => setIsOpen(false)}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: currentStep.badgeColor,
-                    textDecoration: 'none',
-                    padding: '6px 12px',
-                    borderRadius: 8,
-                    backgroundColor: `${currentStep.badgeColor}10`,
-                    border: `1px solid ${currentStep.badgeColor}25`
-                  }}
-                >
-                  <span>{currentStep.actionText}</span>
-                  <ChevronRightIcon size={14} color={currentStep.badgeColor} />
-                </Link>
-              </div>
-            )}
-
-            {/* Step Indicator Dots */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: 8,
-              marginTop: 18,
-              paddingTop: 14,
-              borderTop: '1px solid #f1f5f9'
-            }}>
-              {TOUR_STEPS.map((step, idx) => (
-                <button
-                  key={step.id}
-                  onClick={() => setCurrentStepIndex(idx)}
-                  aria-label={`Jump to step ${idx + 1}: ${step.title}`}
-                  style={{
-                    width: idx === currentStepIndex ? 24 : 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: idx === currentStepIndex ? currentStep.badgeColor : '#cbd5e1',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s ease',
-                    padding: 0
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          /* Tour Completed Screen */
-          <div style={{ padding: '32px 24px', textAlign: 'center' }}>
-            <div style={{
-              width: 72,
-              height: 72,
-              borderRadius: '50%',
-              backgroundColor: '#ecfdf5',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 16,
-              border: '2px solid #a7f3d0'
-            }}>
-              <CheckCircleIcon size={38} color="#059669" />
             </div>
 
-            <h3 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
-              You Are Ready to Close Deals! 🏆
-            </h3>
-            <p style={{ fontSize: 14.5, color: '#475569', lineHeight: 1.6, maxWidth: 440, margin: '0 auto 24px' }}>
-              You have completed the essential AgentLadders CRM tour. For the complete visual step-by-step pipeline blueprint, check out the Deal Flowchart page anytime!
-            </p>
-
-            <div style={{
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: 14,
-              padding: '16px',
-              textAlign: 'left',
-              marginBottom: 24
-            }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span>🎯</span> Recommended Next Actions:
-              </div>
-              <ul style={{ margin: 0, paddingLeft: 20, fontSize: 13, color: '#475569', lineHeight: 1.7 }}>
-                <li>Add your first buyer inquiry in <Link href="/dashboard/leads" onClick={() => setIsOpen(false)} style={{ color: '#059669', fontWeight: 600 }}>Inquiries</Link></li>
-                <li>Match them with properties in <Link href="/dashboard/properties" onClick={() => setIsOpen(false)} style={{ color: '#059669', fontWeight: 600 }}>Properties</Link></li>
-                <li>Study ready WhatsApp closing scripts in <Link href="/dashboard/tutorial" onClick={() => setIsOpen(false)} style={{ color: '#059669', fontWeight: 600 }}>Deal Flowchart</Link></li>
-              </ul>
-            </div>
-
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Link
                 href="/dashboard/tutorial"
                 onClick={() => setIsOpen(false)}
                 style={{
-                  textDecoration: 'none',
-                  backgroundColor: '#059669',
-                  color: '#ffffff',
+                  fontSize: 12,
                   fontWeight: 700,
-                  fontSize: 14,
-                  padding: '12px 24px',
-                  borderRadius: 12,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
+                  color: '#34d399',
+                  textDecoration: 'none',
+                  padding: '4px 8px',
+                  borderRadius: 6,
+                  backgroundColor: 'rgba(52, 211, 153, 0.12)'
                 }}
               >
-                <span>Open Full Deal Flowchart 🗺️</span>
+                Full Playbook 📖
               </Link>
 
               <button
-                onClick={handleDismiss}
+                onClick={() => setIsOpen(false)}
                 style={{
-                  backgroundColor: '#f1f5f9',
-                  color: '#334155',
-                  fontWeight: 600,
-                  fontSize: 14,
-                  padding: '12px 20px',
-                  borderRadius: 12,
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer'
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '4px 6px',
+                  borderRadius: 6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                Go to Workspace
+                <XIcon size={18} color="#94a3b8" />
               </button>
             </div>
           </div>
-        )}
 
-        {/* Footer Navigation Controls */}
-        {!isCompleted && (
+          {/* Module Switcher Strip */}
           <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '16px 24px',
+            gap: 6,
+            padding: '10px 14px',
             backgroundColor: '#f8fafc',
-            borderTop: '1px solid #f1f5f9'
+            borderBottom: '1px solid #e2e8f0',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap'
           }}>
-            <button
-              onClick={handleDismiss}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748b',
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: 'pointer',
-                padding: '6px 10px',
-                borderRadius: 6
-              }}
-            >
-              Skip Tour
-            </button>
-
-            <div style={{ display: 'flex', gap: 10 }}>
-              {currentStepIndex > 0 && (
+            {PAGE_GUIDES.map(g => {
+              const isSel = g.id === activeGuide.id;
+              return (
                 <button
-                  onClick={handlePrev}
+                  key={g.id}
+                  onClick={() => setSelectedGuideId(g.id)}
                   style={{
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: 10,
-                    padding: '8px 16px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer'
+                    padding: '4px 10px',
+                    borderRadius: 14,
+                    fontSize: 11.5,
+                    fontWeight: isSel ? 700 : 500,
+                    cursor: 'pointer',
+                    border: 'none',
+                    backgroundColor: isSel ? '#0f172a' : '#ffffff',
+                    color: isSel ? '#ffffff' : '#64748b',
+                    boxShadow: isSel ? '0 2px 6px rgba(0,0,0,0.15)' : 'none',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  Previous
+                  {g.name}
                 </button>
-              )}
+              );
+            })}
+          </div>
 
-              <button
-                onClick={handleNext}
+          {/* Guide Body */}
+          <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 13.5, color: '#334155', lineHeight: 1.4, fontWeight: 500 }}>
+              {activeGuide.tagline}
+            </div>
+
+            {/* 3 Action Steps */}
+            <div style={{
+              backgroundColor: '#f8fafc',
+              borderRadius: 14,
+              padding: '14px 16px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.04em' }}>
+                ⚡ 3 Key Actions for This Screen:
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {activeGuide.threeSteps.map((step, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <div style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      backgroundColor: '#ecfdf5',
+                      color: '#059669',
+                      fontSize: 11,
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: 1
+                    }}>
+                      {idx + 1}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: '#1e293b', lineHeight: 1.4 }}>
+                      {step}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Direct Jump to In-Depth Tutorial */}
+            <Link
+              href="/dashboard/tutorial"
+              onClick={() => setIsOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 18px',
+                borderRadius: 12,
+                backgroundColor: '#059669',
+                color: '#ffffff',
+                fontSize: 13.5,
+                fontWeight: 700,
+                textDecoration: 'none',
+                boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <BookOpenIcon size={16} color="#ffffff" />
+              <span>Open In-Depth Visual Page Tutorial 📖</span>
+            </Link>
+
+            {/* Navigate directly to page if not already there */}
+            {pathname !== activeGuide.path && (
+              <Link
+                href={activeGuide.path}
+                onClick={() => setIsOpen(false)}
                 style={{
-                  backgroundColor: currentStep.badgeColor,
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: 10,
-                  padding: '8px 20px',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
+                  display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: 6,
-                  boxShadow: `0 4px 12px ${currentStep.badgeColor}35`
+                  padding: '9px 14px',
+                  borderRadius: 10,
+                  backgroundColor: '#f1f5f9',
+                  color: '#334155',
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  textDecoration: 'none'
                 }}
               >
-                <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish Tour 🚀' : 'Next Step'}</span>
-                <ChevronRightIcon size={14} color="#ffffff" />
-              </button>
-            </div>
+                <span>Navigate to {activeGuide.name} Screen ↗</span>
+              </Link>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </div>
   );
 }

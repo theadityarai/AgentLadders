@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   formatINR, 
   DEFAULT_BHK_OPTIONS, 
@@ -60,6 +60,71 @@ interface Lead {
   urgency?: string;
 }
 
+const STATUS_BADGE_MAP: Record<string, { bg: string; color: string; dot: string }> = {
+  'New Inbound': { bg: '#ede9fe', color: '#5b21b6', dot: '#8b5cf6' },
+  'Contacted': { bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
+  'Qualified': { bg: '#d1fae5', color: '#065f46', dot: '#10b981' },
+  'Site Visit Scheduled': { bg: '#ffedd5', color: '#9a3412', dot: '#f97316' },
+  'Negotiation': { bg: '#fef3c7', color: '#92400e', dot: '#f59e0b' },
+  'Won': { bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
+  'Lost': { bg: '#fee2e2', color: '#991b1b', dot: '#ef4444' },
+  'Dead': { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' }
+};
+
+function getStatusBadge(s: string) {
+  const style = STATUS_BADGE_MAP[s] || { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' };
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: style.bg, padding: '4px 10px', borderRadius: 20 }}>
+      <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: style.dot }} />
+      <span style={{ color: style.color, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{s}</span>
+    </div>
+  );
+}
+
+function getSourceBadge(src?: string) {
+  const s = src || 'Direct Inbound';
+  let bg = '#f1f5f9';
+  let color = '#475569';
+  let border = '#e2e8f0';
+  let dot = '#94a3b8';
+
+  const lower = s.toLowerCase();
+  if (lower.includes('self-created') || lower.includes('public listing') || lower.includes('self-interest')) {
+    bg = '#fdf4ff'; color = '#a21caf'; border = '#f0abfc'; dot = '#c026d3';
+  } else if (lower.includes('whatsapp')) {
+    bg = '#dcfce7'; color = '#15803d'; border = '#86efac'; dot = '#16a34a';
+  } else if (lower.includes('website')) {
+    bg = '#eff6ff'; color = '#1d4ed8'; border = '#bfdbfe'; dot = '#2563eb';
+  } else if (lower.includes('99acres') || lower.includes('magicbricks') || lower.includes('housing')) {
+    bg = '#fff7ed'; color = '#c2410c'; border = '#fed7aa'; dot = '#ea580c';
+  } else if (lower.includes('referral') || lower.includes('word of mouth')) {
+    bg = '#faf5ff'; color = '#7e22ce'; border = '#e9d5ff'; dot = '#9333ea';
+  } else if (lower.includes('walk-in')) {
+    bg = '#f0fdf4'; color = '#166534'; border = '#bbf7d0'; dot = '#16a34a';
+  } else if (lower.includes('instagram') || lower.includes('social')) {
+    bg = '#fdf2f8'; color = '#be185d'; border = '#fbcfe8'; dot = '#db2777';
+  }
+
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      padding: '3px 8px',
+      borderRadius: 6,
+      backgroundColor: bg,
+      color: color,
+      border: `1px solid ${border}`,
+      fontSize: 11.5,
+      fontWeight: 600,
+      whiteSpace: 'nowrap'
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: dot }} />
+      <span>{s}</span>
+    </span>
+  );
+}
+
 export default function LeadsPage() {
   const [data, setData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,11 +134,14 @@ export default function LeadsPage() {
   const [clientsList, setClientsList] = useState<{name: string; phone?: string; email?: string; preferredLocation?: string; type?: string}[]>([]);
   const [propertiesList, setPropertiesList] = useState<{title: string; locality?: string; city?: string; bhk?: string; price?: number; purpose?: string}[]>([]);
 
-  const isLeadRent = (l: Lead) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const isLeadRent = useCallback((l: Lead) => {
     const p = ((l as any).leadPurpose || (l as any).purpose || (l as any).leadType || (l as any).dealType || '').toLowerCase();
     const req = ((l as any).requirement || '').toLowerCase();
     return p.includes('rent') || p.includes('tenant') || p.includes('lease') || req.includes('rent') || req.includes('lease');
-  };
+  }, []);
 
   // Dynamic Agency Configurations
   const [bhkOptions, setBhkOptions] = useState<string[]>(DEFAULT_BHK_OPTIONS);
@@ -341,102 +409,46 @@ export default function LeadsPage() {
     }
   };
 
-  const buyCount = data.filter(l => !isLeadRent(l)).length;
-  const rentCount = data.filter(l => isLeadRent(l)).length;
+  const { buyCount, rentCount } = useMemo(() => {
+    let buy = 0;
+    let rent = 0;
+    for (const l of data) {
+      if (isLeadRent(l)) rent++;
+      else buy++;
+    }
+    return { buyCount: buy, rentCount: rent };
+  }, [data, isLeadRent]);
 
-  const filteredData = data.filter(l => {
-    if (purposeFilter !== 'All') {
-      const isRent = isLeadRent(l);
-      if (purposeFilter === 'Rent' && !isRent) return false;
-      if (purposeFilter === 'Buy' && isRent) return false;
-    }
-    if (filter !== 'All') {
-      if (filter === 'Active' && ['Won', 'Lost', 'Dead'].includes(l.status)) return false;
-      if (filter !== 'Active' && l.status !== filter) return false;
-    }
-    if (sourceFilter !== 'All' && (l.source || 'Direct Inbound') !== sourceFilter) {
-      return false;
-    }
-    if (search) {
-      const q = search.toLowerCase();
-      return l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q));
-    }
-    return true;
-  });
-
-  // Leads Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / pageSize));
+  const filteredData = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    return data.filter(l => {
+      if (purposeFilter !== 'All') {
+        const isRent = isLeadRent(l);
+        if (purposeFilter === 'Rent' && !isRent) return false;
+        if (purposeFilter === 'Buy' && isRent) return false;
+      }
+      if (filter !== 'All') {
+        if (filter === 'Active' && ['Won', 'Lost', 'Dead'].includes(l.status)) return false;
+        if (filter !== 'Active' && l.status !== filter) return false;
+      }
+      if (sourceFilter !== 'All' && (l.source || 'Direct Inbound') !== sourceFilter) {
+        return false;
+      }
+      if (q) {
+        return l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q));
+      }
+      return true;
+    });
+  }, [data, purposeFilter, filter, sourceFilter, search, isLeadRent]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [search, filter, purposeFilter, sourceFilter]);
 
-  const paginatedLeads = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredData.length / pageSize)), [filteredData.length, pageSize]);
+  const paginatedLeads = useMemo(() => filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize), [filteredData, currentPage, pageSize]);
 
-  const getStatusBadge = (s: string) => {
-    const map: Record<string, { bg: string; color: string; dot: string }> = {
-      'New Inbound': { bg: '#ede9fe', color: '#5b21b6', dot: '#8b5cf6' },
-      'Contacted': { bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
-      'Qualified': { bg: '#d1fae5', color: '#065f46', dot: '#10b981' },
-      'Site Visit Scheduled': { bg: '#ffedd5', color: '#9a3412', dot: '#f97316' },
-      'Negotiation': { bg: '#fef3c7', color: '#92400e', dot: '#f59e0b' },
-      'Won': { bg: '#dcfce7', color: '#166534', dot: '#22c55e' },
-      'Lost': { bg: '#fee2e2', color: '#991b1b', dot: '#ef4444' },
-      'Dead': { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' }
-    };
-    const style = map[s] || { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' };
-    return (
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: style.bg, padding: '4px 10px', borderRadius: 20 }}>
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: style.dot }} />
-        <span style={{ color: style.color, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{s}</span>
-      </div>
-    );
-  };
 
-  const getSourceBadge = (src?: string) => {
-    const s = src || 'Direct Inbound';
-    let bg = '#f1f5f9';
-    let color = '#475569';
-    let border = '#e2e8f0';
-    let dot = '#94a3b8';
-
-    if (s.toLowerCase().includes('self-created') || s.toLowerCase().includes('public listing') || s.toLowerCase().includes('self-interest')) {
-      bg = '#fdf4ff'; color = '#a21caf'; border = '#f0abfc'; dot = '#c026d3';
-    } else if (s.toLowerCase().includes('whatsapp')) {
-      bg = '#dcfce7'; color = '#15803d'; border = '#86efac'; dot = '#16a34a';
-    } else if (s.toLowerCase().includes('website')) {
-      bg = '#eff6ff'; color = '#1d4ed8'; border = '#bfdbfe'; dot = '#2563eb';
-    } else if (s.toLowerCase().includes('99acres') || s.toLowerCase().includes('magicbricks') || s.toLowerCase().includes('housing')) {
-      bg = '#fff7ed'; color = '#c2410c'; border = '#fed7aa'; dot = '#ea580c';
-    } else if (s.toLowerCase().includes('referral') || s.toLowerCase().includes('word of mouth')) {
-      bg = '#faf5ff'; color = '#7e22ce'; border = '#e9d5ff'; dot = '#9333ea';
-    } else if (s.toLowerCase().includes('walk-in')) {
-      bg = '#f0fdf4'; color = '#166534'; border = '#bbf7d0'; dot = '#16a34a';
-    } else if (s.toLowerCase().includes('instagram') || s.toLowerCase().includes('social')) {
-      bg = '#fdf2f8'; color = '#be185d'; border = '#fbcfe8'; dot = '#db2777';
-    }
-
-    return (
-      <span style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '3px 8px',
-        borderRadius: 6,
-        backgroundColor: bg,
-        color: color,
-        border: `1px solid ${border}`,
-        fontSize: 11.5,
-        fontWeight: 600,
-        whiteSpace: 'nowrap'
-      }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: dot }} />
-        <span>{s}</span>
-      </span>
-    );
-  };
 
   if (loading) {
     return (
@@ -814,32 +826,6 @@ export default function LeadsPage() {
         {/* Dropdowns & Search Toolbar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Status Filter:</span>
-              <select
-                value={filter}
-                onChange={e => setFilter(e.target.value)}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 10,
-                  border: '1.5px solid var(--border)',
-                  backgroundColor: filter === 'All' ? '#fff' : '#ecfdf5',
-                  color: filter === 'All' ? '#334155' : '#047857',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="All">All Statuses ({data.length})</option>
-                <option value="Active">Active Pipeline ({data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length})</option>
-                {leadStatuses.map(s => {
-                  const cnt = data.filter(l => l.status === s).length;
-                  return <option key={s} value={s}>{s} ({cnt})</option>;
-                })}
-              </select>
-            </div>
-
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Channel:</span>
               <select

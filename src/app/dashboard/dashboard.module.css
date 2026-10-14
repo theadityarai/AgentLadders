@@ -109,12 +109,21 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .mainArea {
+    margin-left: 0 !important;
+  }
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .mainArea {
     margin-left: 0 !important;
   }
   .mainContent {
-    padding: 16px !important;
+    padding: 16px 14px 84px !important;
   }
   .statsRow {
     grid-template-columns: 1fr !important;
@@ -123,7 +132,7 @@
 
 @media (max-width: 480px) {
   .mainContent {
-    padding: 12px 10px !important;
+    padding: 12px 10px 84px !important;
   }
 }
 

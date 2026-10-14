@@ -9,9 +9,16 @@ import {
   XIcon,
   SearchIcon,
   SpinnerIcon,
+  HomeIcon,
   UsersIcon,
   BuildingIcon,
+  MapPinIcon,
   BriefcaseIcon,
+  TrendingUpIcon,
+  FileTextIcon,
+  ReceiptIcon,
+  CheckSquareIcon,
+  BarChartIcon,
   BellIcon,
   SettingsIcon,
   MessageCircleIcon,
@@ -21,7 +28,8 @@ import {
   AlertCircleIcon,
   CheckIcon,
   ChevronDownIcon,
-  CompassIcon
+  CompassIcon,
+  SparklesIcon
 } from '@/components/icons/NavIcons';
 
 export function Topbar() {
@@ -49,6 +57,12 @@ export function Topbar() {
     window.addEventListener('profile-updated', loadProfile);
     return () => window.removeEventListener('profile-updated', loadProfile);
   }, [session?.user]);
+
+  useEffect(() => {
+    const handleOpenDrawer = () => setMobileMenuOpen(true);
+    window.addEventListener('open-mobile-drawer', handleOpenDrawer);
+    return () => window.removeEventListener('open-mobile-drawer', handleOpenDrawer);
+  }, []);
 
   // Notification State
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -197,9 +211,9 @@ export function Topbar() {
       
       {/* Left Section: Mobile Hamburger + Breadcrumbs */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        {/* Mobile Hamburger */}
+        {/* Mobile & Tablet Hamburger */}
         <button 
-          className="show-on-mobile" 
+          className="show-on-tablet" 
           onClick={() => setMobileMenuOpen(true)}
           style={{ display: 'none', background: 'none', border: 'none', color: '#0f172a', padding: '6px', cursor: 'pointer', borderRadius: 6 }}
           aria-label="Open navigation menu"
@@ -207,7 +221,7 @@ export function Topbar() {
           <MenuIcon size={22} color="#0f172a" />
         </button>
 
-        <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="hide-on-tablet" style={{ display: 'flex', alignItems: 'center' }}>
           <Breadcrumbs compact />
         </div>
       </div>
@@ -344,30 +358,56 @@ export function Topbar() {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', flexDirection: 'column' }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '340px', backgroundColor: '#fff', height: '100%', display: 'flex', flexDirection: 'column', padding: '24px', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: 16 }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '340px', backgroundColor: '#fff', height: '100%', display: 'flex', flexDirection: 'column', padding: '20px', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: 'var(--primary, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                   <BuildingIcon size={18} color="#fff" />
                 </div>
-                <span style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>AgentLadders</span>
+                <div>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', display: 'block', lineHeight: 1.2 }}>AgentLadders</span>
+                  <span style={{ fontSize: 11, color: '#64748b' }}>Broker Cockpit</span>
+                </div>
               </div>
-              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 4 }}>
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
                 <XIcon size={20} color="#64748b" />
               </button>
             </div>
-            
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '16px 0' }}>
+
+            {/* Mobile Drawer Quick Search */}
+            <div style={{ position: 'relative', marginTop: 14, marginBottom: 6 }}>
+              <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', color: '#94a3b8' }}>
+                <SearchIcon size={15} color="#94a3b8" />
+              </span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search leads, deals, properties..."
+                style={{
+                  width: '100%',
+                  padding: '8px 12px 8px 36px',
+                  borderRadius: 10,
+                  border: '1px solid #e2e8f0',
+                  fontSize: 13,
+                  backgroundColor: '#f8fafc',
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 0' }}>
+              {/* Section 1: Core Dealflow */}
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '8px 8px 4px' }}>
+                Core Dealflow
+              </div>
               {[
-                { href: '/dashboard', label: 'Today Workspace', icon: BuildingIcon },
-                { href: '/dashboard/leads', label: 'Inquiries', icon: UsersIcon },
-                { href: '/dashboard/properties', label: 'Properties', icon: BuildingIcon },
-                { href: '/dashboard/site-visits', label: 'Site Visits', icon: UsersIcon },
+                { href: '/dashboard', label: 'Today Workspace', icon: HomeIcon },
+                { href: '/dashboard/leads', label: 'Inquiries (Leads)', icon: UsersIcon },
+                { href: '/dashboard/properties', label: 'Properties & Inventory', icon: BuildingIcon },
+                { href: '/dashboard/site-visits', label: 'Site Visits', icon: MapPinIcon },
                 { href: '/dashboard/deals', label: 'Deals Pipeline', icon: BriefcaseIcon },
-                { href: '/dashboard/tutorial', label: 'Playbook & Tour (मार्गदर्शिका)', icon: CompassIcon },
-                { href: '/dashboard/insights', label: 'Performance Insights', icon: BuildingIcon },
-                { href: '/dashboard/support', label: 'Help & Support', icon: MessageCircleIcon },
-                { href: '/dashboard/settings', label: 'Settings', icon: SettingsIcon },
+                { href: '/dashboard/insights', label: 'Performance Insights', icon: TrendingUpIcon },
               ].map(item => {
                 const ItemIcon = item.icon;
                 return (
@@ -375,11 +415,66 @@ export function Topbar() {
                     key={item.href} 
                     href={item.href} 
                     onClick={() => setMobileMenuOpen(false)} 
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, color: '#0f172a', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 8, color: '#0f172a', fontSize: 13.5, fontWeight: 500, textDecoration: 'none' }}
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <ItemIcon size={18} color="#64748b" />
+                    <ItemIcon size={17} color="#059669" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+
+              {/* Section 2: Operations & Finance */}
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '12px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: 4 }}>
+                Operations & Financials
+              </div>
+              {[
+                { href: '/dashboard/documents', label: 'Documents & Vault', icon: FileTextIcon },
+                { href: '/dashboard/invoices', label: 'Invoices & Billing', icon: ReceiptIcon },
+                { href: '/dashboard/tasks', label: 'Tasks & Follow-ups', icon: CheckSquareIcon },
+                { href: '/dashboard/reports', label: 'Executive Reports', icon: BarChartIcon },
+                { href: '/dashboard/calendar', label: 'Calendar Schedule', icon: MapPinIcon },
+                { href: '/dashboard/owners', label: 'Property Owners', icon: UsersIcon },
+                { href: '/dashboard/companies', label: 'Corporate Clients', icon: BuildingIcon },
+                { href: '/dashboard/brokerage', label: 'Brokerage Splits', icon: BriefcaseIcon },
+              ].map(item => {
+                const ItemIcon = item.icon;
+                return (
+                  <Link 
+                    key={item.href} 
+                    href={item.href} 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 8, color: '#334155', fontSize: 13.5, fontWeight: 500, textDecoration: 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <ItemIcon size={17} color="#64748b" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+
+              {/* Section 3: Mastery & Support */}
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '12px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: 4 }}>
+                Mastery & Support
+              </div>
+              {[
+                { href: '/dashboard/tutorial', label: 'Playbook & Tutorial 📖', icon: CompassIcon },
+                { href: '/dashboard/support', label: 'Help & Support 💬', icon: MessageCircleIcon },
+                { href: '/dashboard/settings', label: 'Agency Settings ⚙️', icon: SettingsIcon },
+              ].map(item => {
+                const ItemIcon = item.icon;
+                return (
+                  <Link 
+                    key={item.href} 
+                    href={item.href} 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 8, color: '#334155', fontSize: 13.5, fontWeight: 500, textDecoration: 'none' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <ItemIcon size={17} color="#059669" />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -389,15 +484,15 @@ export function Topbar() {
                 <Link 
                   href="/admin" 
                   onClick={() => setMobileMenuOpen(false)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, backgroundColor: 'rgba(99,102,241,0.1)', color: '#4f46e5', fontSize: 14, fontWeight: 600, textDecoration: 'none', marginTop: 8 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 10px', borderRadius: 8, backgroundColor: 'rgba(99,102,241,0.1)', color: '#4f46e5', fontSize: 13.5, fontWeight: 600, textDecoration: 'none', marginTop: 8 }}
                 >
-                  <ShieldIcon size={18} color="#4f46e5" />
+                  <ShieldIcon size={17} color="#4f46e5" />
                   <span>Super Admin HQ</span>
                 </Link>
               )}
             </nav>
 
-            <div style={{ marginTop: 'auto', paddingTop: 16, borderTop: '1px solid #e2e8f0' }}>
+            <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: '1px solid #e2e8f0' }}>
               <button 
                 onClick={() => signOut({ callbackUrl: '/login' })}
                 style={{ width: '100%', padding: '10px', backgroundColor: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 8, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
@@ -434,35 +529,63 @@ export function Topbar() {
           </Link>
         )}
 
-        {/* Deal Playbook & Interactive Tour Quick Link */}
-        <Link href="/dashboard/tutorial" style={{ textDecoration: 'none' }} title="Interactive CRM Guide & Deal Flowchart">
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '6px 12px',
-            borderRadius: '20px',
-            backgroundColor: '#ecfdf5',
-            color: '#065f46',
-            border: '1px solid #a7f3d0',
-            fontSize: '12.5px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = '#d1fae5';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = '#ecfdf5';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
+        {/* Playbook & Tutorial Topbar Control */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: '#ecfdf5',
+          borderRadius: '20px',
+          border: '1px solid #a7f3d0',
+          overflow: 'hidden',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+        }}>
+          <Link
+            href="/dashboard/tutorial"
+            style={{
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              color: '#065f46',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              transition: 'background-color 0.15s ease'
+            }}
+            title="Open Complete Playbook & Tutorial"
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d1fae5'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <CompassIcon size={14} color="#059669" />
-            <span className="hide-on-mobile">Playbook</span>
-          </div>
-        </Link>
+            <span className="hide-on-tablet">Playbook & Tutorial</span>
+          </Link>
+
+          <div style={{ width: 1, height: 16, backgroundColor: '#a7f3d0' }} />
+
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-on-screen-tutorial'))}
+            style={{
+              background: 'none',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '6px 10px',
+              color: '#065f46',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'background-color 0.15s ease'
+            }}
+            title="Open Interactive Screen Tour for this page"
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d1fae5'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <SparklesIcon size={13} color="#059669" />
+            <span className="hide-on-tablet">Tour</span>
+          </button>
+        </div>
 
         {/* Notifications Popover */}
         <div ref={notifRef} style={{ position: 'relative' }}>
@@ -686,7 +809,7 @@ export function Topbar() {
             onClick={() => setShowDropdown(!showDropdown)}
             style={{ display: 'flex', alignItems: 'center', gap: '9px', cursor: 'pointer', padding: '4px', borderRadius: 8 }}
           >
-            <div className="hide-on-mobile" style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
+            <div className="hide-on-tablet" style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a', lineHeight: 1.2 }}>
                 {session?.user?.name || 'Agent'}
               </span>

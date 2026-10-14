@@ -836,7 +836,7 @@ export default function SettingsPage() {
                         <option value="Australia/Sydney">Australia/Sydney (AEST +10:00)</option>
                       </select>
                     </div>
-                    <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                    <div className={`${styles.inputGroup} ${styles.fullSpan}`}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span>Official Broker WhatsApp Number *</span>
                         <InfoTooltip text="This WhatsApp number is used when clients click 'Connect with me on WhatsApp' on public property listings." />

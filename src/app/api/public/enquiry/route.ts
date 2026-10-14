@@ -55,18 +55,18 @@ export async function POST(req: Request) {
     db.leads.unshift(newLead);
 
     // 2. If client specified a tour date, schedule a Site Visit
-    if (preferredDate) {
+    if (cleanPreferredDate) {
       db.siteVisits = db.siteVisits || [];
       db.siteVisits.unshift({
         id: 'vis_' + Math.random().toString(36).substring(2, 9),
         agencyId,
         property: prop ? prop.title : 'Property Showcase',
-        client: name,
-        date: preferredDate,
+        client: cleanName,
+        date: cleanPreferredDate,
         timeSlot: '11:00 AM',
         accompaniedBy: prop?.agentName || 'Aditya Rai',
         status: 'Scheduled',
-        notes: `Online tour booking from public webpage. Phone: ${phone || 'N/A'}. Notes: ${message || 'None'}.`,
+        notes: `Online tour booking from public webpage. Phone: ${cleanPhone || 'N/A'}. Notes: ${cleanMessage || 'None'}.`,
         createdAt: now
       });
     }
@@ -77,11 +77,11 @@ export async function POST(req: Request) {
       id: 'act_' + Math.random().toString(36).substring(2, 9),
       agencyId,
       actor: 'Public Client',
-      type: preferredDate ? 'Site Visit' : 'WhatsApp',
+      type: cleanPreferredDate ? 'Site Visit' : 'WhatsApp',
       relatedEntity: 'Lead',
       relatedId: newLeadId,
-      summary: `Inquiry received from ${name} for ${prop ? prop.title : 'Property'}`,
-      details: `Client email: ${email}, phone: ${phone}. ${preferredDate ? `Requested tour on ${preferredDate}. ` : ''}Message: ${message || 'No additional note.'}`,
+      summary: `Inquiry received from ${cleanName} for ${prop ? prop.title : 'Property'}`,
+      details: `Client email: ${cleanEmail || 'N/A'}, phone: ${cleanPhone || 'N/A'}.${cleanPreferredDate ? ` Requested tour on ${cleanPreferredDate}.` : ''} Message: ${cleanMessage || 'No additional note.'}`,
       createdAt: now
     });
 
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
       agencyId,
       userId: 'all',
       title: '🚨 New Property Inquiry & Lead Captured',
-      message: `${name} just submitted an inquiry for "${prop ? prop.title : 'Luxury Property'}". Lead automatically added to CRM pipeline.`,
+      message: `${cleanName} just submitted an inquiry for "${prop ? prop.title : 'Luxury Property'}". Lead automatically added to CRM pipeline.`,
       type: 'lead',
       read: false,
       createdAt: now

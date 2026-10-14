@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import SessionProvider from '@/components/providers/SessionProvider';
 import ThemeProvider from '@/components/providers/ThemeProvider';
@@ -18,6 +18,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AgentLadders | Real Estate CRM",
   description: "The fastest, cleanest CRM built exclusively for Indian Real Estate Brokers.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
