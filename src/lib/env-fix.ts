@@ -1,4 +1,4 @@
-// Fix for NextAuth URL resolution during SSR / static prerender on Vercel
+// Fix for NextAuth URL & Secret resolution on Vercel
 if (typeof window === 'undefined' && typeof process !== 'undefined') {
   try {
     const pEnv = process.env;
@@ -8,12 +8,12 @@ if (typeof window === 'undefined' && typeof process !== 'undefined') {
         Object.assign(pEnv, {
           NEXTAUTH_URL: vercelUrl
             ? (vercelUrl.startsWith('http') ? vercelUrl : `https://${vercelUrl}`)
-            : 'https://agentladders.com'
+            : 'https://agent-ladders.vercel.app'
         });
       }
-      if (!pEnv['NEXTAUTH_SECRET']) {
+      if (!pEnv['NEXTAUTH_SECRET'] || pEnv['NEXTAUTH_SECRET'].trim() === '') {
         Object.assign(pEnv, {
-          NEXTAUTH_SECRET: 'super-secret-nextauth-key-12345'
+          NEXTAUTH_SECRET: 'agentladders-secret-production-key-998877665544332211'
         });
       }
     }

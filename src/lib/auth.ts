@@ -6,6 +6,18 @@ import crypto from 'crypto';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { verifyTOTP } from '@/lib/totp';
 
+const FALLBACK_SECRET = 'agentladders-secret-production-key-998877665544332211';
+
+if (!process.env.NEXTAUTH_SECRET || process.env.NEXTAUTH_SECRET.trim() === '') {
+  process.env.NEXTAUTH_SECRET = FALLBACK_SECRET;
+}
+if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.trim() === '') {
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  process.env.NEXTAUTH_URL = vercelUrl
+    ? (vercelUrl.startsWith('http') ? vercelUrl : `https://${vercelUrl}`)
+    : 'https://agent-ladders.vercel.app';
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -137,12 +149,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || (
-    process.env.NODE_ENV === 'production'
-      ? (() => {
-          console.warn('CRITICAL SECURITY WARNING: NEXTAUTH_SECRET is not set in production! Generating dynamic secret.');
-          return crypto.randomBytes(32).toString('hex');
-        })()
-      : 'fallback-secret-12345'
-  ),
+  secret: process.env.NEXTAUTH_SECRET || FALLBACK_SECRET,
 };

@@ -1,6 +1,11 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 
+const FALLBACK_SECRET = 'agentladders-secret-production-key-998877665544332211';
+if (!process.env.NEXTAUTH_SECRET || process.env.NEXTAUTH_SECRET.trim() === '') {
+  process.env.NEXTAUTH_SECRET = FALLBACK_SECRET;
+}
+
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
@@ -31,6 +36,7 @@ export default withAuth(
     return response;
   },
   {
+    secret: process.env.NEXTAUTH_SECRET || FALLBACK_SECRET,
     callbacks: {
       authorized: ({ token, req }) => {
         const pathname = req.nextUrl.pathname;

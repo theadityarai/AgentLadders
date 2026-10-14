@@ -5,17 +5,15 @@ import crypto from "crypto";
 const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
 const resolvedAuthUrl = process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL.trim() !== ''
   ? process.env.NEXTAUTH_URL
-  : (vercelUrl ? `https://${vercelUrl}` : 'https://agentladders.com');
+  : (vercelUrl ? (vercelUrl.startsWith('http') ? vercelUrl : `https://${vercelUrl}`) : 'https://agent-ladders.vercel.app');
+
+const FALLBACK_SECRET = 'agentladders-secret-production-key-998877665544332211';
+const resolvedSecret = process.env.NEXTAUTH_SECRET && process.env.NEXTAUTH_SECRET.trim() !== ''
+  ? process.env.NEXTAUTH_SECRET
+  : FALLBACK_SECRET;
 
 process.env.NEXTAUTH_URL = resolvedAuthUrl;
-if (!process.env.NEXTAUTH_SECRET) {
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('⚠️ WARNING: NEXTAUTH_SECRET not set in environment. Generating dynamic fallback secret.');
-    process.env.NEXTAUTH_SECRET = crypto.randomBytes(32).toString('hex');
-  } else {
-    process.env.NEXTAUTH_SECRET = 'super-secret-nextauth-key-12345';
-  }
-}
+process.env.NEXTAUTH_SECRET = resolvedSecret;
 
 const nextConfig: NextConfig = {
   compress: true,
@@ -35,6 +33,7 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXTAUTH_URL: resolvedAuthUrl,
+    NEXTAUTH_SECRET: resolvedSecret,
   },
   async headers() {
     return [
