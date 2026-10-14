@@ -34,7 +34,11 @@ import {
   CompassIcon, 
   SparklesIcon, 
   BuildingIcon,
-  FileTextIcon 
+  FileTextIcon,
+  ChevronDownIcon,
+  CalendarIcon,
+  MapPinIcon,
+  UserIcon 
 } from '@/components/icons/NavIcons';
 
 interface Lead {
@@ -60,6 +64,10 @@ interface Lead {
   preferredLocalities?: string;
   urgency?: string;
   notes?: string;
+  createdAt?: string;
+  inquiredProperty?: string;
+  properties?: string[];
+  requirement?: string;
 }
 
 const STATUS_BADGE_MAP: Record<string, { bg: string; color: string; dot: string }> = {
@@ -138,6 +146,14 @@ export default function LeadsPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
+
+  const toggleExpandLead = (leadId: string) => {
+    setExpandedLeadIds(prev => ({
+      ...prev,
+      [leadId]: !prev[leadId]
+    }));
+  };
 
   const isLeadRent = useCallback((l: Lead) => {
     const p = ((l as any).leadPurpose || (l as any).purpose || (l as any).leadType || (l as any).dealType || '').toLowerCase();
@@ -453,6 +469,305 @@ export default function LeadsPage() {
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredData.length / pageSize)), [filteredData.length, pageSize]);
   const paginatedLeads = useMemo(() => filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize), [filteredData, currentPage, pageSize]);
+
+  const renderInquiryDetails = (lead: Lead) => {
+    const isRent = isLeadRent(lead);
+    const associatedProps = Array.from(new Set([
+      ...(lead.properties || []),
+      ...(lead.inquiredProperty ? [lead.inquiredProperty] : [])
+    ]));
+
+    return (
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        border: '1.5px solid #e2e8f0',
+        boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
+        overflow: 'hidden'
+      }}>
+        {/* Header bar of expanded view */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 18px',
+          backgroundColor: '#f8fafc',
+          borderBottom: '1px solid #e2e8f0',
+          flexWrap: 'wrap',
+          gap: 10
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              backgroundColor: isRent ? '#f3e8ff' : '#eff6ff',
+              color: isRent ? '#7e22ce' : '#1d4ed8',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontSize: 13
+            }}>
+              {lead.name ? lead.name.charAt(0).toUpperCase() : 'I'}
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span>{lead.name}</span>
+                {getStatusBadge(lead.status)}
+                {getSourceBadge(lead.source)}
+              </div>
+              <div style={{ fontSize: 11.5, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
+                <span>Inquiry ID: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{lead.id.substring(0, 16)}</span></span>
+                {lead.createdAt && (
+                  <span>• Received: {new Date(lead.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button
+              type="button"
+              onClick={() => handleOpenEdit(lead)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '6px 12px',
+                backgroundColor: '#ffffff',
+                color: 'var(--primary)',
+                border: '1px solid #cbd5e1',
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = '#cbd5e1'}
+            >
+              <EditIcon size={13} color="currentColor" />
+              <span>Edit Inquiry</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => toggleExpandLead(lead.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '6px 12px',
+                backgroundColor: '#e2e8f0',
+                color: '#334155',
+                border: 'none',
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <span>Collapse</span>
+              <ChevronDownIcon size={14} color="#334155" style={{ transform: 'rotate(180deg)' }} />
+            </button>
+          </div>
+        </div>
+
+        {/* Body Grid of Expanded Details */}
+        <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Top Grid: Contact, Requirements & Location */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
+            
+            {/* Card 1: Contact Information */}
+            <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <UserIcon size={14} color="var(--primary)" />
+                <span>Contact Details</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Phone Number</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{lead.phone}</span>
+                    <a 
+                      href={`tel:${lead.phone}`}
+                      style={{ fontSize: 11.5, color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      Call
+                    </a>
+                    <span style={{ color: '#cbd5e1' }}>•</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const phone = lead.phone.replace(/\D/g, '');
+                        window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
+                      }}
+                      style={{ background: 'none', border: 'none', padding: 0, fontSize: 11.5, color: '#16a34a', fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      WhatsApp
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Email Address</div>
+                  <div style={{ fontWeight: 600, color: lead.email ? '#0f172a' : '#94a3b8', marginTop: 2 }}>
+                    {lead.email ? (
+                      <a href={`mailto:${lead.email}`} style={{ color: '#0f172a', textDecoration: 'none' }}>
+                        {lead.email}
+                      </a>
+                    ) : 'Not provided'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Source & Channel</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 600, color: '#334155' }}>{lead.source || 'Direct Inbound'}</span>
+                    {lead.isSelfCreated && (
+                      <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, backgroundColor: '#fdf4ff', color: '#c026d3', border: '1px solid #f0abfc' }}>
+                        Self-Interest
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 2: Property Requirements */}
+            <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <BuildingIcon size={14} color="var(--primary)" />
+                <span>Property Requirements</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Transaction Purpose</div>
+                  <div style={{ fontWeight: 700, color: isRent ? '#7e22ce' : '#1d4ed8', marginTop: 2 }}>
+                    {isRent ? 'Rent / Lease' : 'Outright Buy'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Property Type & BHK</div>
+                  <div style={{ fontWeight: 600, color: '#0f172a', marginTop: 2 }}>
+                    {lead.propertyTypeNeeded || 'Apartment'} • {Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any BHK')}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Budget Range</div>
+                  <div style={{ fontWeight: 700, color: 'var(--primary)', marginTop: 2, fontSize: 14 }}>
+                    {lead.budgetMax ? `Up to ${formatINR(lead.budgetMax)}` : (lead.budget || 'Flexible')}
+                    {lead.budgetMin ? ` (Min: ${formatINR(lead.budgetMin)})` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Card 3: Location & Urgency */}
+            <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <MapPinIcon size={14} color="var(--primary)" />
+                <span>Location & Timeline</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>City & Preferred Localities</div>
+                  <div style={{ fontWeight: 600, color: '#0f172a', marginTop: 2 }}>
+                    {lead.city || 'Any City'}
+                    {lead.preferredLocalities ? ` • ${lead.preferredLocalities}` : ''}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Move-in Timeline / Urgency</div>
+                  <div style={{ fontWeight: 600, color: '#334155', marginTop: 2 }}>
+                    {lead.urgency || 'Normal Timeline'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Next Follow-Up Date</div>
+                  <div style={{ fontWeight: 600, color: lead.nextFollowUp ? '#d97706' : '#94a3b8', marginTop: 2 }}>
+                    {lead.nextFollowUp || 'No follow-up scheduled'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Specific Preferences Badges */}
+          <div style={{ padding: '12px 14px', backgroundColor: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <CompassIcon size={14} color="var(--primary)" />
+              <span>Client Specifications & Criteria</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 12.5 }}>
+              <div style={{ padding: '4px 10px', backgroundColor: '#ffffff', borderRadius: 6, border: '1px solid #cbd5e1' }}>
+                <span style={{ color: '#64748b' }}>Furnishing: </span>
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{lead.furnishingPreference || 'Any'}</span>
+              </div>
+              <div style={{ padding: '4px 10px', backgroundColor: '#ffffff', borderRadius: 6, border: '1px solid #cbd5e1' }}>
+                <span style={{ color: '#64748b' }}>Construction Stage: </span>
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{lead.constructionStagePreference || 'Any'}</span>
+              </div>
+              <div style={{ padding: '4px 10px', backgroundColor: '#ffffff', borderRadius: 6, border: '1px solid #cbd5e1' }}>
+                <span style={{ color: '#64748b' }}>Vastu Direction: </span>
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{lead.vastuPreference || 'Any'}</span>
+              </div>
+              <div style={{ padding: '4px 10px', backgroundColor: '#ffffff', borderRadius: 6, border: '1px solid #cbd5e1' }}>
+                <span style={{ color: '#64748b' }}>Car Parking: </span>
+                <span style={{ fontWeight: 600, color: '#0f172a' }}>{lead.parkingPreference || 'Any'}</span>
+              </div>
+              {lead.requirement && (
+                <div style={{ padding: '4px 10px', backgroundColor: '#ffffff', borderRadius: 6, border: '1px solid #cbd5e1', width: '100%' }}>
+                  <span style={{ color: '#64748b' }}>Original Notes / Remarks: </span>
+                  <span style={{ fontWeight: 500, color: '#0f172a' }}>{lead.requirement}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Associated Shortlisted Properties */}
+          {associatedProps.length > 0 && (
+            <div style={{ padding: '12px 14px', backgroundColor: '#eff6ff', borderRadius: 8, border: '1px solid #bfdbfe' }}>
+              <div style={{ fontSize: 11.5, fontWeight: 700, textTransform: 'uppercase', color: '#1e40af', letterSpacing: '0.05em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <HomeIcon size={14} color="#1d4ed8" />
+                <span>Shortlisted / Inquired Properties ({associatedProps.length})</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {associatedProps.map((propId: string) => {
+                  const propObj = propertiesList.find(p => (p as any).id === propId || p.title === propId);
+                  return (
+                    <span key={propId} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, backgroundColor: '#ffffff', color: '#1e3a8a', border: '1px solid #93c5fd', fontWeight: 600 }}>
+                      {propObj ? `${propObj.title}${propObj.locality ? ` • ${propObj.locality}` : ''}` : propId}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Private Broker Notes Section */}
+          <div style={{ padding: '14px 16px', backgroundColor: '#fefce8', borderRadius: 8, border: '1px solid #fef08a' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#854d0e', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <FileTextIcon size={14} color="#a16207" />
+                <span>Private Broker Notes & Remarks</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenEdit(lead)}
+                style={{ fontSize: 11.5, color: '#854d0e', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+              >
+                {lead.notes ? 'Edit Notes' : '+ Add Notes'}
+              </button>
+            </div>
+            <div style={{ fontSize: 13, color: '#713f12', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>
+              {lead.notes || <span style={{ fontStyle: 'italic', color: '#a16207' }}>No private notes recorded for this inquiry yet. Click &apos;+ Add Notes&apos; to record negotiation details, client preferences, or loan remarks.</span>}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    );
+  };
 
 
 
@@ -932,13 +1247,22 @@ export default function LeadsPage() {
               </tr>
             ) : (
               paginatedLeads.map((lead, i) => (
-                <tr 
-                  key={lead.id} 
-                  onClick={() => handleOpenEdit(lead)}
-                  style={{ cursor: 'pointer', borderBottom: i === paginatedLeads.length - 1 ? 'none' : '1px solid var(--border)', transition: 'background-color 0.15s ease' }} 
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'} 
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
+                <React.Fragment key={lead.id}>
+                  <tr 
+                    onClick={() => handleOpenEdit(lead)}
+                    style={{ 
+                      cursor: 'pointer', 
+                      borderBottom: expandedLeadIds[lead.id] ? 'none' : (i === paginatedLeads.length - 1 ? 'none' : '1px solid var(--border)'), 
+                      backgroundColor: expandedLeadIds[lead.id] ? '#f8fafc' : 'transparent',
+                      transition: 'background-color 0.15s ease' 
+                    }} 
+                    onMouseEnter={e => {
+                      if (!expandedLeadIds[lead.id]) e.currentTarget.style.backgroundColor = '#f8fafc';
+                    }} 
+                    onMouseLeave={e => {
+                      if (!expandedLeadIds[lead.id]) e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
                   
                   <td style={{ padding: '16px 20px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -1069,6 +1393,46 @@ export default function LeadsPage() {
 
                   <td style={{ padding: '16px 20px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                      {/* Collapsible Dropdown Details Toggle */}
+                      <button 
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleExpandLead(lead.id);
+                        }}
+                        title={expandedLeadIds[lead.id] ? "Collapse Details" : "View All Inquiry Details"}
+                        aria-expanded={!!expandedLeadIds[lead.id]}
+                        style={{
+                          width: 32,
+                          height: 32,
+                          padding: 0,
+                          backgroundColor: expandedLeadIds[lead.id] ? 'var(--primary)' : '#eff6ff',
+                          color: expandedLeadIds[lead.id] ? '#ffffff' : 'var(--primary)',
+                          border: `1px solid ${expandedLeadIds[lead.id] ? 'var(--primary)' : '#bfdbfe'}`,
+                          borderRadius: 7,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => {
+                          if (!expandedLeadIds[lead.id]) e.currentTarget.style.backgroundColor = '#dbeafe';
+                        }}
+                        onMouseLeave={e => {
+                          if (!expandedLeadIds[lead.id]) e.currentTarget.style.backgroundColor = '#eff6ff';
+                        }}
+                      >
+                        <ChevronDownIcon 
+                          size={15} 
+                          color={expandedLeadIds[lead.id] ? '#ffffff' : 'var(--primary)'}
+                          style={{
+                            transform: expandedLeadIds[lead.id] ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        />
+                      </button>
+
                       <button 
                         type="button"
                         onClick={(e) => {
@@ -1177,7 +1541,23 @@ export default function LeadsPage() {
                     </div>
                   </td>
                 </tr>
-              ))
+
+                {/* Collapsible Inquiry Details View */}
+                {expandedLeadIds[lead.id] && (
+                  <tr 
+                    style={{ 
+                      backgroundColor: '#f8fafc',
+                      borderBottom: i === paginatedLeads.length - 1 ? 'none' : '1px solid var(--border)'
+                    }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <td colSpan={6} style={{ padding: '0 20px 20px 20px' }}>
+                      {renderInquiryDetails(lead)}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))
             )}
           </tbody>
             </table>
@@ -1240,8 +1620,36 @@ export default function LeadsPage() {
                   </div>
                 </div>
 
-                {/* 4 Icon Action Buttons */}
+                {/* 5 Icon Action Buttons */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => toggleExpandLead(lead.id)}
+                    title={expandedLeadIds[lead.id] ? "Collapse Details" : "View All Details"}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      padding: 0,
+                      backgroundColor: expandedLeadIds[lead.id] ? 'var(--primary)' : '#eff6ff',
+                      color: expandedLeadIds[lead.id] ? '#ffffff' : 'var(--primary)',
+                      border: `1px solid ${expandedLeadIds[lead.id] ? 'var(--primary)' : '#bfdbfe'}`,
+                      borderRadius: 7,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <ChevronDownIcon
+                      size={15}
+                      color={expandedLeadIds[lead.id] ? '#ffffff' : 'var(--primary)'}
+                      style={{
+                        transform: expandedLeadIds[lead.id] ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}
+                    />
+                  </button>
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(lead)}
@@ -1420,6 +1828,13 @@ export default function LeadsPage() {
                   }}>
                     {lead.notes}
                   </span>
+                </div>
+              )}
+
+              {/* Collapsible Full Details (Mobile View) */}
+              {expandedLeadIds[lead.id] && (
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #e2e8f0' }} onClick={e => e.stopPropagation()}>
+                  {renderInquiryDetails(lead)}
                 </div>
               )}
             </div>
