@@ -33,7 +33,8 @@ import {
   ListIcon, 
   CompassIcon, 
   SparklesIcon, 
-  BuildingIcon 
+  BuildingIcon,
+  FileTextIcon 
 } from '@/components/icons/NavIcons';
 
 interface Lead {
@@ -58,6 +59,7 @@ interface Lead {
   nextFollowUp?: string;
   preferredLocalities?: string;
   urgency?: string;
+  notes?: string;
 }
 
 const STATUS_BADGE_MAP: Record<string, { bg: string; color: string; dot: string }> = {
@@ -187,7 +189,8 @@ export default function LeadsPage() {
     vastuPreference: 'Any',
     parkingPreference: 'Any',
     inquiredProperty: '',
-    properties: [] as string[]
+    properties: [] as string[],
+    notes: ''
   });
 
   const loadData = () => {
@@ -300,7 +303,8 @@ export default function LeadsPage() {
       vastuPreference: 'Any',
       parkingPreference: 'Any',
       inquiredProperty: '',
-      properties: []
+      properties: [],
+      notes: ''
     });
     setShowModal(true);
   };
@@ -328,7 +332,8 @@ export default function LeadsPage() {
       inquiredProperty: (lead as any).inquiredProperty || '',
       properties: Array.isArray((lead as any).properties) && (lead as any).properties.length > 0
         ? (lead as any).properties
-        : ((lead as any).inquiredProperty ? [(lead as any).inquiredProperty] : [])
+        : ((lead as any).inquiredProperty ? [(lead as any).inquiredProperty] : []),
+      notes: lead.notes || ''
     });
     setShowModal(true);
   };
@@ -395,7 +400,8 @@ export default function LeadsPage() {
           vastuPreference: 'Any',
           parkingPreference: 'Any',
           inquiredProperty: '',
-          properties: []
+          properties: [],
+          notes: ''
         });
       } else {
         const err = await res.json().catch(() => ({}));
@@ -435,7 +441,7 @@ export default function LeadsPage() {
         return false;
       }
       if (q) {
-        return l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q));
+        return l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q)) || (l.notes && l.notes.toLowerCase().includes(q));
       }
       return true;
     });
@@ -730,6 +736,45 @@ export default function LeadsPage() {
                 </div>
               </div>
 
+              {/* Internal Notes & Follow-up Remarks */}
+              <div style={{ padding: '16px', backgroundColor: '#f8fafc', borderRadius: 10, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label htmlFor="lead-notes-input" style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 6, margin: 0 }}>
+                    <FileTextIcon size={16} color="var(--primary)" />
+                    <span>Broker Notes & Remarks</span>
+                    <InfoTooltip text="Private broker notes regarding client preferences, negotiation points, loan pre-approval status, or specific conversation remarks. Only visible to your team." />
+                  </label>
+                  <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                    {formData.notes ? `${formData.notes.length}/1000` : 'Optional • Private'}
+                  </span>
+                </div>
+                <textarea
+                  id="lead-notes-input"
+                  rows={3}
+                  value={formData.notes}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="e.g. Client needs loan pre-approval assistance from HDFC. Prefers higher floors with morning sunlight. Ready for token cheque if seller agrees to 5% negotiation..."
+                  maxLength={1000}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    border: '1px solid var(--border)',
+                    fontSize: 13.5,
+                    fontFamily: 'inherit',
+                    color: '#0f172a',
+                    backgroundColor: '#fff',
+                    outline: 'none',
+                    resize: 'vertical',
+                    minHeight: '80px',
+                    lineHeight: 1.5,
+                    transition: 'border-color 0.15s ease'
+                  }}
+                  onFocus={e => (e.currentTarget.style.borderColor = 'var(--primary)')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+                />
+              </div>
+
               <div style={{ display: 'flex', gap: 12, marginTop: 'auto', position: 'sticky', bottom: '-24px', backgroundColor: '#fff', padding: '16px 0', borderTop: '1px solid var(--border)', zIndex: 10 }}>
                 {editingLead && (
                   <button
@@ -959,6 +1004,36 @@ export default function LeadsPage() {
                             <span>{lead.constructionStagePreference}</span>
                           </span>
                         )}
+                      </div>
+                    )}
+                    {lead.notes && (
+                      <div 
+                        title={`Internal Note: ${lead.notes}`}
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'flex-start', 
+                          gap: 5, 
+                          marginTop: 6,
+                          padding: '4px 8px',
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 6,
+                          maxWidth: 280
+                        }}
+                      >
+                        <FileTextIcon size={12} color="#64748b" style={{ flexShrink: 0, marginTop: 2 }} />
+                        <span style={{ 
+                          fontSize: 11, 
+                          color: '#475569', 
+                          lineHeight: 1.35,
+                          overflow: 'hidden',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          wordBreak: 'break-word'
+                        }}>
+                          {lead.notes}
+                        </span>
                       </div>
                     )}
                   </td>
@@ -1317,6 +1392,36 @@ export default function LeadsPage() {
                   {lead.budgetMax ? formatINR(lead.budgetMax) : (lead.budget || 'Unspecified')}
                 </div>
               </div>
+
+              {/* Private Notes in Mobile Card */}
+              {lead.notes && (
+                <div 
+                  title={`Internal Note: ${lead.notes}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 6,
+                    padding: '8px 10px',
+                    backgroundColor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 6,
+                    fontSize: 11.5,
+                    color: '#475569',
+                    lineHeight: 1.4
+                  }}
+                >
+                  <FileTextIcon size={13} color="#64748b" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span style={{
+                    overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    wordBreak: 'break-word'
+                  }}>
+                    {lead.notes}
+                  </span>
+                </div>
+              )}
             </div>
           ))
         )}
