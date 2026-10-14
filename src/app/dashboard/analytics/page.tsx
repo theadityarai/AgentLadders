@@ -122,7 +122,7 @@ export default function AnalyticsPage() {
       ) : (
         <>
           {/* REACTIVE KPI METRICS */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', padding: '0 24px 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
             <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, fontWeight: 600 }}>
@@ -163,7 +163,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* CHARTS SECTION */}
-          <div className="analytics-grid-2" style={{ padding: '0 24px 24px' }}>
+          <div className="analytics-grid-2" style={{ marginBottom: '24px' }}>
             {/* Revenue Velocity Chart */}
             <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -230,7 +230,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* BROKER LEADERBOARD TABLE */}
-          <div style={{ padding: '0 24px 24px' }}>
+          <div style={{ marginBottom: '24px' }}>
             <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div>
@@ -246,8 +246,8 @@ export default function AnalyticsPage() {
                 </span>
               </div>
 
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <div className="responsive-table-scroll touch-scroll-container">
+                <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '12px', textTransform: 'uppercase' }}>
                       <th style={{ padding: '12px 16px' }}>Broker Agent</th>

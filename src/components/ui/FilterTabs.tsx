@@ -230,7 +230,7 @@ export function FilterTabs<T extends string = string>({
         </span>
       )}
 
-      <div style={getContainerStyle()}>
+      <div style={{ ...getContainerStyle(), minWidth: 0, flex: '1 1 auto' }}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
 

@@ -439,7 +439,7 @@ export default function PublicPropertyPage() {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ padding: '24px 20px', maxWidth: 800, margin: '0 auto', width: '100%', flex: 1 }}>
+      <div style={{ padding: '24px 20px 96px', maxWidth: 800, margin: '0 auto', width: '100%', flex: 1, boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 24 }}>
           <div style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', letterSpacing: '-1px' }}>
             {property.price ? formatINR(property.price) : 'Price on Request'}
@@ -545,7 +545,7 @@ export default function PublicPropertyPage() {
       </div>
 
       {/* Sticky Bottom Action Bar (Crucial for Mobile) */}
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', padding: '12px 16px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: 8, zIndex: 40, boxShadow: '0 -4px 15px rgba(0,0,0,0.05)', flexWrap: 'wrap' }}>
+      <div className="public-property-bottom-bar" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: '#fff', borderTop: '1px solid #e2e8f0', display: 'flex', gap: 8, zIndex: 40, boxShadow: '0 -4px 15px rgba(0,0,0,0.05)', flexWrap: 'wrap', boxSizing: 'border-box' }}>
         <button 
           type="button"
           onClick={handleConnectWhatsApp}

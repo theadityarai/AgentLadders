@@ -1223,7 +1223,7 @@ export default function LeadsPage() {
       <div className="desktop-only-table">
         <div style={{ backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
           <div className="responsive-table-scroll">
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 640 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 880 }}>
           <thead>
             <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
               <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client Details</th>
@@ -1592,147 +1592,47 @@ export default function LeadsPage() {
                 cursor: 'pointer'
               }}
             >
-              {/* Card Header: Client Info + Fast Action Buttons */}
+              {/* Card Header: Client Info & Budget */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
                   <div style={{
                     width: 38,
                     height: 38,
                     borderRadius: '50%',
-                    backgroundColor: '#e2e8f0',
+                    backgroundColor: 'var(--primary-light, #d1fae5)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 14,
                     fontWeight: 700,
-                    color: '#475569',
+                    color: 'var(--primary-text, #065f46)',
                     flexShrink: 0
                   }}>
                     {lead.name.charAt(0).toUpperCase()}
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {lead.name}
                     </div>
-                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 1 }}>
+                    <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 1, fontWeight: 500 }}>
                       {lead.phone}
                     </div>
                   </div>
                 </div>
 
-                {/* 5 Icon Action Buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                  <button
-                    type="button"
-                    onClick={() => toggleExpandLead(lead.id)}
-                    title={expandedLeadIds[lead.id] ? "Collapse Details" : "View All Details"}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      padding: 0,
-                      backgroundColor: expandedLeadIds[lead.id] ? 'var(--primary)' : '#eff6ff',
-                      color: expandedLeadIds[lead.id] ? '#ffffff' : 'var(--primary)',
-                      border: `1px solid ${expandedLeadIds[lead.id] ? 'var(--primary)' : '#bfdbfe'}`,
-                      borderRadius: 7,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <ChevronDownIcon
-                      size={15}
-                      color={expandedLeadIds[lead.id] ? '#ffffff' : 'var(--primary)'}
-                      style={{
-                        transform: expandedLeadIds[lead.id] ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                      }}
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(lead)}
-                    title="Edit Inquiry"
-                    style={{
-                      width: 32,
-                      height: 32,
-                      padding: 0,
-                      backgroundColor: '#eff6ff',
-                      color: '#1d4ed8',
-                      border: '1px solid #bfdbfe',
-                      borderRadius: 7,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <EditIcon size={14} color="#1d4ed8" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDeletingLead(lead)}
-                    title="Delete Inquiry"
-                    style={{
-                      width: 32,
-                      height: 32,
-                      padding: 0,
-                      backgroundColor: '#fee2e2',
-                      color: '#dc2626',
-                      border: '1px solid #fecaca',
-                      borderRadius: 7,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <TrashIcon size={14} color="#dc2626" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const phone = lead.phone.replace(/\D/g, '');
-                      window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
-                    }}
-                    title="Chat on WhatsApp"
-                    style={{
-                      width: 32,
-                      height: 32,
-                      padding: 0,
-                      backgroundColor: '#dcfce7',
-                      color: '#166534',
-                      border: '1px solid #bbf7d0',
-                      borderRadius: 7,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <WhatsAppIcon size={14} color="#166534" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => window.location.href = `tel:${lead.phone}`}
-                    title="Call Client"
-                    style={{
-                      width: 32,
-                      height: 32,
-                      padding: 0,
-                      backgroundColor: '#f1f5f9',
-                      color: '#475569',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 7,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <PhoneIcon size={14} color="#475569" />
-                  </button>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <span style={{
+                    display: 'inline-block',
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    color: 'var(--primary, #059669)',
+                    backgroundColor: '#ecfdf5',
+                    padding: '3px 8px',
+                    borderRadius: 6,
+                    border: '1px solid #a7f3d0'
+                  }}>
+                    {lead.budgetMax ? formatINR(lead.budgetMax) : (lead.budget || 'Budget TBA')}
+                  </span>
                 </div>
               </div>
 
@@ -1830,6 +1730,139 @@ export default function LeadsPage() {
                   </span>
                 </div>
               )}
+
+              {/* Mobile Quick Action Buttons Bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 4 }} onClick={e => e.stopPropagation()}>
+                {/* 1-Tap Call */}
+                <button
+                  type="button"
+                  onClick={() => window.location.href = `tel:${lead.phone}`}
+                  title="Call Client"
+                  style={{
+                    flex: 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    backgroundColor: '#eff6ff',
+                    color: '#1d4ed8',
+                    border: '1px solid #bfdbfe',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <PhoneIcon size={14} color="#1d4ed8" />
+                  <span>Call</span>
+                </button>
+
+                {/* 1-Tap WhatsApp */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const phone = lead.phone.replace(/\D/g, '');
+                    window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
+                  }}
+                  title="Chat on WhatsApp"
+                  style={{
+                    flex: 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    backgroundColor: '#dcfce7',
+                    color: '#15803d',
+                    border: '1px solid #bbf7d0',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <WhatsAppIcon size={14} color="#15803d" />
+                  <span>WhatsApp</span>
+                </button>
+
+                {/* Edit */}
+                <button
+                  type="button"
+                  onClick={() => handleOpenEdit(lead)}
+                  title="Edit Inquiry"
+                  style={{
+                    width: 34,
+                    height: 34,
+                    padding: 0,
+                    borderRadius: 8,
+                    backgroundColor: '#f8fafc',
+                    color: '#334155',
+                    border: '1px solid #cbd5e1',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                >
+                  <EditIcon size={14} color="#334155" />
+                </button>
+
+                {/* Delete */}
+                <button
+                  type="button"
+                  onClick={() => setDeletingLead(lead)}
+                  title="Delete Inquiry"
+                  style={{
+                    width: 34,
+                    height: 34,
+                    padding: 0,
+                    borderRadius: 8,
+                    backgroundColor: '#fee2e2',
+                    color: '#dc2626',
+                    border: '1px solid #fecaca',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                >
+                  <TrashIcon size={14} color="#dc2626" />
+                </button>
+
+                {/* Toggle Details Expand */}
+                <button
+                  type="button"
+                  onClick={() => toggleExpandLead(lead.id)}
+                  title={expandedLeadIds[lead.id] ? "Collapse Details" : "View All Details"}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    padding: 0,
+                    borderRadius: 8,
+                    backgroundColor: expandedLeadIds[lead.id] ? 'var(--primary)' : '#f1f5f9',
+                    color: expandedLeadIds[lead.id] ? '#ffffff' : '#475569',
+                    border: `1px solid ${expandedLeadIds[lead.id] ? 'var(--primary)' : '#e2e8f0'}`,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <ChevronDownIcon
+                    size={15}
+                    color={expandedLeadIds[lead.id] ? '#ffffff' : '#475569'}
+                    style={{
+                      transform: expandedLeadIds[lead.id] ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                  />
+                </button>
+              </div>
 
               {/* Collapsible Full Details (Mobile View) */}
               {expandedLeadIds[lead.id] && (

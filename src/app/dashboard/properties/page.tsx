@@ -1306,7 +1306,7 @@ export default function PropertiesPage() {
       </div>
 
       {/* Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
+      <div className="properties-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
         {paginatedProperties.map(prop => (
           <PropertyCardItem 
             key={prop.id} 

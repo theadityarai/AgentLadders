@@ -375,7 +375,7 @@ export default function DashboardPage() {
           SECTION 1: EXECUTIVE WELCOME HEADER
           High-contrast, professional, friendly, with zero muddy text colors.
       ───────────────────────────────────────────────────────────────────────── */}
-      <div style={{
+      <div className="dashboard-welcome-banner" style={{
         background: 'linear-gradient(135deg, #065f46 0%, #047857 55%, #059669 100%)',
         borderRadius: 20,
         padding: '28px 32px',
@@ -425,7 +425,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Direct Action Triggers - Big, Bold, Easy to Tap */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div className="dashboard-banner-actions" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Link
               href="/dashboard/site-visits?new=true"
               style={{
@@ -477,7 +477,7 @@ export default function DashboardPage() {
           SECTION 2: ESSENTIAL BUSINESS METRIC CARDS (4 Real Numbers, No Donut Counters)
           Large text, high clarity, direct links to corresponding sections.
       ───────────────────────────────────────────────────────────────────────── */}
-      <div style={{
+      <div className="dashboard-metric-grid" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
         gap: 16,
@@ -696,8 +696,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Filter Pills */}
-                <div style={{ display: 'flex', gap: 6, backgroundColor: '#f1f5f9', padding: 4, borderRadius: 12, flexWrap: 'wrap' }}>
+                {/* Filter Pills with Touch Momentum Scroll */}
+                <div className="touch-scroll-container" style={{ display: 'flex', gap: 6, backgroundColor: '#f1f5f9', padding: 4, borderRadius: 12, flexWrap: 'nowrap', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                   <button
                     onClick={() => setLeadFilter('all')}
                     style={{
@@ -913,7 +913,7 @@ export default function DashboardPage() {
                         </div>
 
                         {/* BIG ACTION BUTTONS */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <div className="dashboard-lead-action-row" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                           {/* 1-Tap Call */}
                           <button
                             onClick={() => handleCallClient(lead.phone)}

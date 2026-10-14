@@ -28,7 +28,7 @@ export function PageHeader({
         {subtitle && <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{subtitle}</p>}
       </div>
       {actions && (
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div className="responsive-header-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           {actions}
         </div>
       )}

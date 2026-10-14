@@ -293,14 +293,11 @@ export default function CalendarPage() {
         >
           <div 
             onClick={e => e.stopPropagation()}
+            className="responsive-modal"
             style={{
               backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '24px',
-              width: '540px',
-              maxWidth: '90%',
-              maxHeight: '90vh',
-              overflowY: 'auto'
+              borderRadius: '16px',
+              padding: '24px'
             }}
           >
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Schedule Calendar Event</h3>
@@ -316,7 +313,7 @@ export default function CalendarPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
                   <input
@@ -339,7 +336,7 @@ export default function CalendarPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Type</label>
                   <select
@@ -410,14 +407,11 @@ export default function CalendarPage() {
         >
           <div 
             onClick={e => e.stopPropagation()}
+            className="responsive-modal"
             style={{
               backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '24px',
-              width: '540px',
-              maxWidth: '90%',
-              maxHeight: '90vh',
-              overflowY: 'auto'
+              borderRadius: '16px',
+              padding: '24px'
             }}
           >
             <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Event: {editingEvent.title}</h3>
@@ -432,7 +426,7 @@ export default function CalendarPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
                   <input
@@ -454,7 +448,7 @@ export default function CalendarPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Type</label>
                   <select

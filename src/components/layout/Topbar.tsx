@@ -36,6 +36,7 @@ export function Topbar() {
   const { data: session } = useSession();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [userAvatar, setUserAvatar] = useState<string>((session?.user as any)?.image || '');
 
@@ -209,17 +210,48 @@ export function Topbar() {
       zIndex: 40,
     }} className="mobile-px-4">
       
-      {/* Left Section: Mobile Hamburger + Breadcrumbs */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      {/* Left Section: Mobile Hamburger + Brand Mark + Breadcrumbs */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         {/* Mobile & Tablet Hamburger */}
         <button 
           className="show-on-tablet" 
           onClick={() => setMobileMenuOpen(true)}
-          style={{ display: 'none', background: 'none', border: 'none', color: '#0f172a', padding: '6px', cursor: 'pointer', borderRadius: 6 }}
+          style={{
+            display: 'none',
+            background: 'none',
+            border: 'none',
+            color: '#0f172a',
+            padding: '6px',
+            cursor: 'pointer',
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
           aria-label="Open navigation menu"
         >
           <MenuIcon size={22} color="#0f172a" />
         </button>
+
+        {/* Mobile & Tablet Brand Mark */}
+        <div className="show-flex-on-tablet" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 30,
+            height: 30,
+            borderRadius: 7,
+            background: 'var(--primary-gradient, linear-gradient(135deg, #059669 0%, #10b981 100%))',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#ffffff',
+            flexShrink: 0,
+            boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
+          }}>
+            <BuildingIcon size={16} color="#ffffff" strokeWidth={2.2} />
+          </div>
+          <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px', lineHeight: 1 }}>
+            AgentLadders
+          </span>
+        </div>
 
         <div className="hide-on-tablet" style={{ display: 'flex', alignItems: 'center' }}>
           <Breadcrumbs compact />
@@ -355,10 +387,99 @@ export function Topbar() {
         )}
       </div>
 
+      {/* Mobile Full-Screen/Top Search Overlay */}
+      {mobileSearchOpen && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '66px',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 14px',
+          gap: 10,
+          zIndex: 60,
+          borderBottom: '1px solid #e2e8f0',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.06)'
+        }}>
+          <button
+            type="button"
+            onClick={() => {
+              setMobileSearchOpen(false);
+              setSearchOpen(false);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: '6px',
+              cursor: 'pointer',
+              color: '#334155',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%'
+            }}
+            aria-label="Close search"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+
+          <div style={{ flex: 1, position: 'relative' }}>
+            <input
+              autoFocus
+              type="text"
+              value={searchQuery}
+              onChange={e => {
+                setSearchQuery(e.target.value);
+                if (e.target.value.trim().length >= 2) setSearchOpen(true);
+              }}
+              placeholder="Search inquiries, properties, deals..."
+              style={{
+                width: '100%',
+                backgroundColor: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                borderRadius: '20px',
+                padding: '9px 34px 9px 14px',
+                fontSize: '14px',
+                outline: 'none',
+                color: '#0f172a'
+              }}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSearchResults(null);
+                  setSearchOpen(false);
+                }}
+                style={{
+                  position: 'absolute',
+                  right: 10,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 2,
+                  cursor: 'pointer',
+                  color: '#64748b'
+                }}
+              >
+                <XIcon size={16} color="#64748b" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', flexDirection: 'column' }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '340px', backgroundColor: '#fff', height: '100%', display: 'flex', flexDirection: 'column', padding: '20px', overflowY: 'auto' }}>
+        <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 100, display: 'flex' }}>
+          <div onClick={e => e.stopPropagation()} className="animate-slide-left" style={{ width: '100%', maxWidth: '320px', backgroundColor: '#fff', height: '100%', display: 'flex', flexDirection: 'column', padding: '18px 16px', overflowY: 'auto', boxShadow: '4px 0 24px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: 'var(--primary, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
@@ -506,8 +627,30 @@ export function Topbar() {
       )} 
 
       {/* Right Side Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         
+        {/* Mobile Search Button Trigger */}
+        <button
+          type="button"
+          className="show-on-tablet"
+          onClick={() => setMobileSearchOpen(true)}
+          style={{
+            display: 'none',
+            background: 'none',
+            border: 'none',
+            padding: '7px',
+            cursor: 'pointer',
+            borderRadius: '50%',
+            color: '#334155',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          aria-label="Search"
+          title="Search CRM"
+        >
+          <SearchIcon size={20} color="#334155" />
+        </button>
+
         {isSuperAdmin && (
           <Link href="/admin" style={{ textDecoration: 'none' }}>
             <div style={{
@@ -529,8 +672,8 @@ export function Topbar() {
           </Link>
         )}
 
-        {/* Playbook & Tutorial Topbar Control */}
-        <div style={{
+        {/* Playbook & Tutorial Topbar Control (Desktop & Tablet) */}
+        <div className="hide-on-mobile" style={{
           display: 'flex',
           alignItems: 'center',
           backgroundColor: '#ecfdf5',

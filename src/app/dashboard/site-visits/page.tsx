@@ -662,7 +662,7 @@ export default function SiteVisitsPage() {
                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.02)'; }}
                   >
                     {/* Node Dot */}
-                    <div style={{ position: 'absolute', left: -31, top: 24, width: 14, height: 14, borderRadius: '50%', backgroundColor: '#fff', border: '3px solid var(--primary)' }} />
+                    <div className="timeline-node-dot" style={{ position: 'absolute', left: -31, top: 24, width: 14, height: 14, borderRadius: '50%', backgroundColor: '#fff', border: '3px solid var(--primary)' }} />
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>

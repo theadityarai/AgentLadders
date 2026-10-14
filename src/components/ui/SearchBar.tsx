@@ -53,8 +53,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         alignItems: 'center',
         flex: width ? undefined : '1 1 auto',
         width: width || undefined,
-        maxWidth: maxWidth,
-        minWidth: minWidth,
+        maxWidth: typeof maxWidth === 'number' ? `min(${maxWidth}px, 100%)` : maxWidth,
+        minWidth: typeof minWidth === 'number' ? `min(${minWidth}px, 100%)` : minWidth,
+        boxSizing: 'border-box',
         ...style
       }}
     >

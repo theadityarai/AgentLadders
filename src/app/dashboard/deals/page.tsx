@@ -582,7 +582,7 @@ export default function DealsPage() {
       </div>
 
       {/* Kanban Board */}
-      <div style={{ display: 'flex', gap: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24, minHeight: 'calc(100vh - 180px)' }}>
+      <div className="touch-scroll-container" style={{ display: 'flex', gap: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24, minHeight: 'calc(100vh - 180px)' }}>
         {columnsToDisplay.map(stage => {
           const stageDeals = filteredDeals.filter(d => d.stage === stage);
           const colors = getStageColor(stage);
