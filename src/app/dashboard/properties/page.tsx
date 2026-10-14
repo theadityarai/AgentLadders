@@ -355,6 +355,7 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
             title="Share on WhatsApp with Photo Card & details"
             style={{
               flex: 1,
+              minWidth: 0,
               backgroundColor: '#25D366',
               color: '#ffffff',
               border: 'none',
@@ -368,7 +369,6 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 6,
-              whiteSpace: 'nowrap',
               boxShadow: '0 2px 6px rgba(37, 211, 102, 0.2)'
             }}
             onMouseEnter={e => {
@@ -378,33 +378,32 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
               e.currentTarget.style.backgroundColor = '#25D366';
             }}
           >
-            <WhatsAppIcon size={15} color="#ffffff" />
-            <span>WhatsApp Pitch</span>
+            <WhatsAppIcon size={15} color="#ffffff" style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WhatsApp Pitch</span>
           </button>
           
-          {/* Share Modal Trigger */}
+          {/* Share Modal Trigger (Icon-only with hover tooltip) */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onShare && onShare(prop);
             }}
-            title="Share Property"
+            title="Share Property Brochure & Photos"
             aria-label="Share Property"
             style={{
-              padding: '8px 10px',
+              width: 32,
+              height: 32,
+              padding: 0,
+              flexShrink: 0,
               backgroundColor: '#f8fafc',
               border: '1px solid #cbd5e1',
               borderRadius: 8,
               color: '#334155',
               cursor: 'pointer',
-              fontSize: 12,
-              fontWeight: 600,
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 4,
-              flexShrink: 0,
               transition: 'all 0.15s ease'
             }}
             onMouseEnter={e => {
@@ -417,7 +416,6 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
             }}
           >
             <ShareIcon size={14} color="#475569" />
-            <span>Share</span>
           </button>
           
           {/* Edit Button (Icon-only with hover tooltip) */}
@@ -1337,7 +1335,7 @@ export default function PropertiesPage() {
             setCurrentPage(1);
           }}
           itemLabel="properties"
-          style={{ marginTop: 24, borderRadius: 12, border: '1px solid #e2e8f0' }}
+          style={{ marginTop: 24 }}
         />
       )}
       

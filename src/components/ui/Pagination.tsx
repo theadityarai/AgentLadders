@@ -17,7 +17,7 @@ export interface PaginationProps {
 }
 
 /**
- * Computes an array of page numbers with ellipses (-1 represents '...')
+ * Computes an array of page numbers with ellipses
  */
 function getPageNumbers(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
   if (totalPages <= 7) {
@@ -64,194 +64,290 @@ export function Pagination({
   style,
   showPageSizeSelector = true
 }: PaginationProps) {
-  if (totalPages <= 1 && (!totalItems || totalItems <= (pageSize || 10))) {
-    // If only 1 page and no items or total items fit on 1 page, we can still show a minimal footer if totalItems is passed
-    if (!totalItems) return null;
-  }
-
-  const pageNumbers = getPageNumbers(currentPage, Math.max(1, totalPages));
+  const safeTotalPages = Math.max(1, totalPages || 1);
+  const pageNumbers = getPageNumbers(currentPage, safeTotalPages);
 
   // Calculate item range
-  const startItem = totalItems && pageSize ? Math.min((currentPage - 1) * pageSize + 1, totalItems) : null;
-  const endItem = totalItems && pageSize ? Math.min(currentPage * pageSize, totalItems) : null;
+  const startItem = totalItems !== undefined && pageSize ? Math.min((currentPage - 1) * pageSize + 1, totalItems) : null;
+  const endItem = totalItems !== undefined && pageSize ? Math.min(currentPage * pageSize, totalItems) : null;
 
   return (
     <div
-      className={`pagination-container ${className}`}
+      className={`modern-pagination-wrapper ${className}`}
       style={{
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '12px',
-        padding: '14px 18px',
+        gap: '14px',
+        padding: '12px 18px',
         backgroundColor: '#ffffff',
-        borderTop: '1px solid #e2e8f0',
-        borderRadius: '0 0 12px 12px',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
         fontSize: '13px',
         color: '#475569',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
         userSelect: 'none',
         ...style
       }}
     >
-      {/* Left side: Item count summary & optional page size selector */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+      {/* Left side: Item count summary & Rows-per-page selector */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         {totalItems !== undefined && (
-          <span style={{ color: '#64748b', fontWeight: 500 }}>
-            {startItem && endItem ? (
-              <>
-                Showing <strong style={{ color: '#0f172a' }}>{startItem}–{endItem}</strong> of{' '}
-                <strong style={{ color: '#0f172a' }}>{totalItems}</strong> {itemLabel}
-              </>
-            ) : (
-              <>
-                Total <strong style={{ color: '#0f172a' }}>{totalItems}</strong> {itemLabel}
-              </>
-            )}
-          </span>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            padding: '5px 12px',
+            borderRadius: '20px',
+            fontSize: '12.5px'
+          }}>
+            <span style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              backgroundColor: 'var(--primary, #059669)',
+              boxShadow: '0 0 6px rgba(5, 150, 105, 0.45)'
+            }} />
+            <span style={{ color: '#475569', fontWeight: 500 }}>
+              {startItem && endItem ? (
+                <>
+                  Showing <strong style={{ color: '#0f172a', fontWeight: 700 }}>{startItem}–{endItem}</strong> of{' '}
+                  <strong style={{ color: '#0f172a', fontWeight: 700 }}>{totalItems}</strong> {itemLabel}
+                </>
+              ) : (
+                <>
+                  Total <strong style={{ color: '#0f172a', fontWeight: 700 }}>{totalItems}</strong> {itemLabel}
+                </>
+              )}
+            </span>
+          </div>
         )}
 
         {showPageSizeSelector && pageSize && onPageSizeChange && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ fontSize: '12px', color: '#64748b' }}>Per page:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              style={{
-                padding: '4px 8px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#f8fafc',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: '#334155',
-                outline: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              {pageSizeOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
+            <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>Rows:</span>
+            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+              <select
+                value={pageSize}
+                onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                aria-label="Rows per page"
+                style={{
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  padding: '5px 24px 5px 10px',
+                  borderRadius: '7px',
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#0f172a',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--primary, #059669)')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#cbd5e1')}
+              >
+                {pageSizeOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+              <svg 
+                width="12" 
+                height="12" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#64748b" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                style={{ position: 'absolute', right: 7, pointerEvents: 'none' }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
           </div>
         )}
       </div>
 
       {/* Right side: Page navigation buttons */}
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          {/* Previous Button */}
-          <button
-            type="button"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage <= 1}
-            aria-label="Previous page"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: currentPage <= 1 ? '#f8fafc' : '#ffffff',
-              color: currentPage <= 1 ? '#cbd5e1' : '#334155',
-              cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              fontWeight: 600,
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-            <span className="pagination-text">Prev</span>
-          </button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+        {/* Previous Button */}
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+          aria-label="Previous page"
+          title="Previous page"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            height: '34px',
+            padding: '0 12px',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            backgroundColor: currentPage <= 1 ? '#f8fafc' : '#ffffff',
+            color: currentPage <= 1 ? '#cbd5e1' : '#334155',
+            cursor: currentPage <= 1 ? 'not-allowed' : 'pointer',
+            fontSize: '12.5px',
+            fontWeight: 600,
+            transition: 'all 0.15s ease',
+            boxShadow: currentPage <= 1 ? 'none' : '0 1px 2px rgba(0,0,0,0.04)'
+          }}
+          onMouseEnter={(e) => {
+            if (currentPage > 1) {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentPage > 1) {
+              e.currentTarget.style.backgroundColor = '#ffffff';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+            }
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <span className="pagination-text">Prev</span>
+        </button>
 
-          {/* Page numbers */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            {pageNumbers.map((page, index) => {
-              if (page === 'ellipsis') {
-                return (
-                  <span
-                    key={`ellipsis-${index}`}
-                    style={{
-                      padding: '0 6px',
-                      color: '#94a3b8',
-                      fontSize: '14px',
-                      fontWeight: 600
-                    }}
-                  >
-                    …
-                  </span>
-                );
-              }
-
-              const isActive = page === currentPage;
+        {/* Desktop Page Numbers */}
+        <div className="pagination-pages-desktop" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {pageNumbers.map((page, index) => {
+            if (page === 'ellipsis') {
               return (
-                <button
-                  key={page}
-                  type="button"
-                  onClick={() => onPageChange(page)}
-                  aria-current={isActive ? 'page' : undefined}
+                <span
+                  key={`ellipsis-${index}`}
                   style={{
-                    minWidth: '34px',
-                    height: '34px',
-                    padding: '0 8px',
-                    borderRadius: '8px',
-                    border: isActive ? '1px solid #0f172a' : '1px solid transparent',
-                    backgroundColor: isActive ? '#0f172a' : '#ffffff',
-                    color: isActive ? '#ffffff' : '#475569',
-                    fontSize: '13px',
-                    fontWeight: isActive ? 700 : 500,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = '#f1f5f9';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = '#ffffff';
+                    padding: '0 6px',
+                    color: '#94a3b8',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    letterSpacing: '1px'
                   }}
                 >
-                  {page}
-                </button>
+                  …
+                </span>
               );
-            })}
-          </div>
+            }
 
-          {/* Next Button */}
-          <button
-            type="button"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages}
-            aria-label="Next page"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: currentPage >= totalPages ? '#f8fafc' : '#ffffff',
-              color: currentPage >= totalPages ? '#cbd5e1' : '#334155',
-              cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              fontWeight: 600,
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span className="pagination-text">Next</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
+            const isActive = page === currentPage;
+            return (
+              <button
+                key={page}
+                type="button"
+                onClick={() => onPageChange(page)}
+                aria-current={isActive ? 'page' : undefined}
+                aria-label={`Page ${page}`}
+                style={{
+                  minWidth: '34px',
+                  height: '34px',
+                  padding: '0 8px',
+                  borderRadius: '8px',
+                  border: isActive ? 'none' : '1px solid #e2e8f0',
+                  background: isActive ? 'var(--primary, #059669)' : '#ffffff',
+                  color: isActive ? '#ffffff' : '#334155',
+                  fontSize: '13px',
+                  fontWeight: isActive ? 700 : 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: isActive ? '0 2px 8px rgba(5, 150, 105, 0.35)' : 'none',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9';
+                    e.currentTarget.style.borderColor = '#cbd5e1';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = '#ffffff';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                  }
+                }}
+              >
+                {page}
+              </button>
+            );
+          })}
         </div>
-      )}
+
+        {/* Mobile Page Indicator */}
+        <div className="pagination-pages-mobile" style={{ display: 'none', padding: '0 8px', fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
+          {currentPage} / {safeTotalPages}
+        </div>
+
+        {/* Next Button */}
+        <button
+          type="button"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage >= safeTotalPages}
+          aria-label="Next page"
+          title="Next page"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            height: '34px',
+            padding: '0 12px',
+            borderRadius: '8px',
+            border: '1px solid #e2e8f0',
+            backgroundColor: currentPage >= safeTotalPages ? '#f8fafc' : '#ffffff',
+            color: currentPage >= safeTotalPages ? '#cbd5e1' : '#334155',
+            cursor: currentPage >= safeTotalPages ? 'not-allowed' : 'pointer',
+            fontSize: '12.5px',
+            fontWeight: 600,
+            transition: 'all 0.15s ease',
+            boxShadow: currentPage >= safeTotalPages ? 'none' : '0 1px 2px rgba(0,0,0,0.04)'
+          }}
+          onMouseEnter={(e) => {
+            if (currentPage < safeTotalPages) {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (currentPage < safeTotalPages) {
+              e.currentTarget.style.backgroundColor = '#ffffff';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+            }
+          }}
+        >
+          <span className="pagination-text">Next</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Responsive mobile handling */}
+      <style>{`
+        @media (max-width: 640px) {
+          .modern-pagination-wrapper {
+            justify-content: center !important;
+          }
+          .pagination-pages-desktop {
+            display: none !important;
+          }
+          .pagination-pages-mobile {
+            display: block !important;
+          }
+          .pagination-text {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

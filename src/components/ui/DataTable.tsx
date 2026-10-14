@@ -187,6 +187,7 @@ export function DataTable<T extends Record<string, unknown>>({
             setCurrentPage(1);
           }}
           showPageSizeSelector={paginationConfig.showPageSizeSelector ?? true}
+          style={{ border: 'none', borderTop: '1px solid #e2e8f0', borderRadius: '0 0 12px 12px', boxShadow: 'none' }}
         />
       )}
     </div>
