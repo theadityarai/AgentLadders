@@ -46,6 +46,8 @@ export async function POST(req: Request) {
     size: sanitizeString(data.size || '1.2 MB', 30),
     fileData: rawFileData,
     uploadedBy: sanitizeString(user.name || 'Agent', 100),
+    relatedTo: data.relatedTo ? sanitizeString(data.relatedTo, 500) : undefined,
+    description: data.description ? sanitizeString(data.description, 1000) : undefined,
     createdAt: new Date().toISOString()
   };
 
@@ -69,7 +71,13 @@ export async function DELETE(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
+  let id = searchParams.get('id');
+  if (!id) {
+    try {
+      const body = await req.json();
+      id = body.id;
+    } catch {}
+  }
   if (!id) return NextResponse.json({ error: 'Missing document id' }, { status: 400 });
 
   if (db.documents) {
@@ -78,5 +86,41 @@ export async function DELETE(req: Request) {
   }
 
   return NextResponse.json({ success: true });
+}
+
+export async function PUT(req: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const db = getDb();
+  const user = db.users.find(u => u.id === (session.user as any).id);
+  if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  if (!canMutateCRMRecords(user.role)) {
+    return NextResponse.json({ error: 'Forbidden: Read-Only users do not have permission to edit documents.' }, { status: 403 });
+  }
+
+  const data = await req.json();
+  if (!data.id) return NextResponse.json({ error: 'Missing document id' }, { status: 400 });
+
+  if (!db.documents) db.documents = [];
+  const index = db.documents.findIndex(d => d.id === data.id && d.agencyId === user.agencyId);
+  if (index === -1) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+
+  const existingDoc = db.documents[index];
+
+  const updatedDoc = {
+    ...existingDoc,
+    name: data.name ? sanitizeString(data.name, 150) : existingDoc.name,
+    category: data.category ? sanitizeString(data.category, 50) : existingDoc.category,
+    description: data.description !== undefined ? sanitizeString(data.description || '', 1000) : existingDoc.description,
+    relatedTo: data.relatedTo !== undefined ? sanitizeString(data.relatedTo || '', 500) : existingDoc.relatedTo,
+    updatedAt: new Date().toISOString()
+  };
+
+  db.documents[index] = updatedDoc;
+  saveDb(db);
+
+  return NextResponse.json({ success: true, document: updatedDoc });
 }
 

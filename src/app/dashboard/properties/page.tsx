@@ -31,7 +31,8 @@ import {
   TrashIcon,
   CopyIcon,
   ExternalLinkIcon,
-  PlusIcon
+  PlusIcon,
+  KeyIcon
 } from '@/components/icons/NavIcons';
 
 export interface PropertyMedia {
@@ -65,6 +66,8 @@ interface Property {
   image?: string;
   listingType?: string;
   publicToken?: string;
+  createdAt?: string;
+  areaSqFt?: number | string;
 }
 
 const getStatusStyle = (s: string) => {
@@ -501,6 +504,7 @@ export default function PropertiesPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
+  const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
   const [sharingProperty, setSharingProperty] = useState<Property | null>(null);
@@ -514,7 +518,7 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filter, purposeFilter]);
+  }, [search, filter, purposeFilter, sortBy]);
 
   const isPropertyRent = useCallback((p: Property) => {
     return p.purpose === 'For Rent' || p.listingType === 'For Rent';
@@ -850,7 +854,7 @@ export default function PropertiesPage() {
   // Memoized Filtered Properties
   const filteredData = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return data.filter(p => {
+    const matches = data.filter(p => {
       if (purposeFilter !== 'All') {
         const isRent = isPropertyRent(p);
         if (purposeFilter === 'Rent' && !isRent) return false;
@@ -873,7 +877,25 @@ export default function PropertiesPage() {
       }
       return true;
     });
-  }, [data, purposeFilter, filter, search, isPropertyRent]);
+
+    return [...matches].sort((a, b) => {
+      if (sortBy === 'oldest') {
+        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      } else if (sortBy === 'price_desc') {
+        return (Number(b.price) || 0) - (Number(a.price) || 0);
+      } else if (sortBy === 'price_asc') {
+        return (Number(a.price) || 0) - (Number(b.price) || 0);
+      } else if (sortBy === 'title_asc') {
+        return (a.title || '').localeCompare(b.title || '');
+      } else if (sortBy === 'area_desc') {
+        const areaA = Number(a.carpetAreaSqFt) || Number(a.areaSqFt) || 0;
+        const areaB = Number(b.carpetAreaSqFt) || Number(b.areaSqFt) || 0;
+        return areaB - areaA;
+      } else {
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      }
+    });
+  }, [data, purposeFilter, filter, search, isPropertyRent, sortBy]);
 
   // Memoized Pagination calculations
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredData.length / pageSize)), [filteredData.length, pageSize]);
@@ -1264,43 +1286,61 @@ export default function PropertiesPage() {
         </button>
       </div>
 
-      {/* Main Filter Toolbar */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 24 }}>
-        {/* Main Type / Purpose Filter Pills (Buy vs Rent) */}
-        <FilterTabs
-          label="Listing Type:"
-          tabs={[
-            { id: 'All', label: 'All Inventory', count: data.length },
-            { id: 'Buy', label: 'For Sale', count: buyCount },
-            { id: 'Rent', label: 'For Rent', count: rentCount }
-          ]}
-          activeTab={purposeFilter}
-          onChange={(tabId) => setPurposeFilter(tabId as any)}
-        />
+      {/* Unified Compact Filter Bar Card */}
+      <div className="unified-filter-card">
+        {/* Row 1: Segmented Listing Type Switch + Search + Sort */}
+        <div className="unified-filter-row-top">
+          <FilterTabs
+            variant="segmented"
+            size="sm"
+            tabs={[
+              { id: 'All', label: 'All Inventory', count: data.length, icon: <BuildingIcon size={13} /> },
+              { id: 'Buy', label: 'For Sale', count: buyCount, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'For Rent', count: rentCount, icon: <KeyIcon size={13} /> }
+            ]}
+            activeTab={purposeFilter}
+            onChange={(tabId) => setPurposeFilter(tabId as any)}
+          />
 
-        {/* Status Filter Pills */}
-        <FilterTabs
-          label="Property Status:"
-          tabs={[
-            { id: 'All', label: 'All Statuses', count: data.length },
-            { id: 'Available', label: 'Available', count: data.filter(p => p.status === 'Available').length },
-            { id: 'Under Offer', label: 'Under Offer', count: data.filter(p => p.status === 'Under Offer').length },
-            { id: 'Under Contract', label: 'Under Contract', count: data.filter(p => p.status === 'Under Contract').length },
-            { id: 'Sold', label: 'Sold', count: data.filter(p => p.status === 'Sold').length },
-            { id: 'Rented', label: 'Rented', count: data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length },
-            { id: 'Off Market', label: 'Off Market', count: data.filter(p => p.status === 'Off Market').length },
-          ]}
-          activeTab={filter}
-          onChange={(tabId) => setFilter(tabId)}
-        />
+          <div className="unified-filter-controls">
+            <SearchBar 
+              value={search}
+              onChange={setSearch}
+              placeholder="Search title, location, BHK..."
+              maxWidth={240}
+            />
 
-        {/* Search Toolbar */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-          <SearchBar 
-            value={search}
-            onChange={setSearch}
-            placeholder="Search by title, location, BHK..."
-            maxWidth={320}
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="unified-filter-select"
+            >
+              <option value="newest">Sort: Newest Added</option>
+              <option value="oldest">Sort: Oldest Added</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="title_asc">Title (A → Z)</option>
+              <option value="area_desc">Area: Largest First</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Row 2: Status Filter Pills in a Compact Horizontal Strip */}
+        <div className="unified-filter-row-bottom">
+          <FilterTabs
+            label="Status:"
+            size="sm"
+            tabs={[
+              { id: 'All', label: 'All Statuses', count: data.length },
+              { id: 'Available', label: 'Available', count: data.filter(p => p.status === 'Available').length },
+              { id: 'Under Offer', label: 'Under Offer', count: data.filter(p => p.status === 'Under Offer').length },
+              { id: 'Under Contract', label: 'Under Contract', count: data.filter(p => p.status === 'Under Contract').length },
+              { id: 'Sold', label: 'Sold', count: data.filter(p => p.status === 'Sold').length },
+              { id: 'Rented', label: 'Rented', count: data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length },
+              { id: 'Off Market', label: 'Off Market', count: data.filter(p => p.status === 'Off Market').length },
+            ]}
+            activeTab={filter}
+            onChange={(tabId) => setFilter(tabId)}
           />
         </div>
       </div>

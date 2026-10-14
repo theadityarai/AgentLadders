@@ -76,16 +76,17 @@ export function ConfirmModal({
           backgroundColor: '#ffffff',
           borderRadius: '16px',
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: '480px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           overflow: 'hidden',
           border: '1px solid #e2e8f0',
-          position: 'relative'
+          position: 'relative',
+          boxSizing: 'border-box'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+        <div style={{ padding: '24px', boxSizing: 'border-box' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', minWidth: 0 }}>
             <div
               style={{
                 width: '44px',
@@ -103,14 +104,16 @@ export function ConfirmModal({
               {iconSymbol}
             </div>
 
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
               <h3
                 style={{
                   fontSize: '18px',
                   fontWeight: 700,
                   color: '#0f172a',
                   margin: '0 0 8px 0',
-                  lineHeight: '1.3'
+                  lineHeight: '1.3',
+                  wordBreak: 'break-word',
+                  overflowWrap: 'anywhere'
                 }}
               >
                 {title}
@@ -120,7 +123,9 @@ export function ConfirmModal({
                   fontSize: '14px',
                   color: '#64748b',
                   lineHeight: '1.5',
-                  margin: 0
+                  margin: 0,
+                  wordBreak: 'break-word',
+                  overflowWrap: 'anywhere'
                 }}
               >
                 {message}

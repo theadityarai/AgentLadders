@@ -1,20 +1,80 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { FilterTabs } from '@/components/ui/FilterTabs';
+import {
+  FileTextIcon,
+  DownloadIcon,
+  ShareIcon,
+  TrashIcon,
+  CheckIcon,
+  XIcon,
+  BuildingIcon,
+  UsersIcon,
+  BriefcaseIcon,
+  WhatsAppIcon
+} from '@/components/icons/NavIcons';
 
-interface DocumentItem {
+export interface DocumentItem {
   id: string;
   name: string;
   type: string;
+  category?: string;
   size: string;
   fileData?: string;
   uploadedBy: string;
+  relatedTo?: string;
+  description?: string;
   createdAt: string;
 }
+
+const DOCUMENT_CATEGORIES = [
+  'All',
+  'Contracts & MOUs',
+  'Client KYC & Identity',
+  'Brochures & Floor Plans',
+  'Title Deeds & OC',
+  'Payment Receipts',
+  'Others'
+] as const;
+
+type DocCategory = typeof DOCUMENT_CATEGORIES[number];
+
+// Standard legal & operational real estate starter templates
+const REAL_ESTATE_TEMPLATES = [
+  {
+    title: 'Sole Selling Brokerage Agreement',
+    category: 'Contracts & MOUs',
+    format: 'PDF / DOC',
+    desc: 'Standard RERA compliant agency mandate granting exclusive or semi-exclusive marketing rights.',
+    sampleFileName: 'Agency_Sole_Selling_Rights_Mandate.pdf'
+  },
+  {
+    title: 'Client Tenant Verification Form',
+    category: 'Client KYC & Identity',
+    format: 'PDF Form',
+    desc: 'Police intimation and identity declaration form for residential rental agreements.',
+    sampleFileName: 'Tenant_Police_Verification_KYC.pdf'
+  },
+  {
+    title: 'Token Advance Acknowledgment Receipt',
+    category: 'Payment Receipts',
+    format: 'PDF Document',
+    desc: 'Official earnest money receipt with non-refundable clauses and title escrow timeline.',
+    sampleFileName: 'Token_Advance_Escrow_Receipt.pdf'
+  },
+  {
+    title: 'Property Handover Inspection Checklist',
+    category: 'Brochures & Floor Plans',
+    format: 'Audit Sheet',
+    desc: 'Room-by-room inventory, fittings, keys, electricity meter reading, and possession signoff.',
+    sampleFileName: 'Possession_Handover_Inspection_Checklist.pdf'
+  }
+];
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
@@ -22,12 +82,14 @@ function formatFileSize(bytes: number): string {
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
-function getFileIcon(type: string): string {
-  const t = type.toLowerCase();
+function getFileIcon(type: string, name: string = ''): string {
+  const t = (type + ' ' + name).toLowerCase();
   if (t.includes('pdf')) return '📕';
-  if (t.includes('image') || t.includes('jpg') || t.includes('png')) return '🖼️';
-  if (t.includes('spreadsheet') || t.includes('excel') || t.includes('csv')) return '📊';
+  if (t.includes('image') || t.includes('jpg') || t.includes('png') || t.includes('webp')) return '🖼️';
+  if (t.includes('sheet') || t.includes('excel') || t.includes('csv') || t.includes('xls')) return '📊';
   if (t.includes('word') || t.includes('doc')) return '📘';
+  if (t.includes('contract') || t.includes('mou') || t.includes('agreement')) return '📜';
+  if (t.includes('receipt') || t.includes('token') || t.includes('invoice')) return '🧾';
   return '📄';
 }
 
@@ -35,10 +97,13 @@ export default function DocumentsPage() {
   const [data, setData] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState<DocCategory>('All');
+  const [sortBy, setSortBy] = useState('newest');
   
-  // Custom dialog & feedback states
+  // Modals & Feedback
   const [docToDelete, setDocToDelete] = useState<DocumentItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
   // Upload State
@@ -46,20 +111,31 @@ export default function DocumentsPage() {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileDataUrl, setFileDataUrl] = useState('');
+  const [uploadCategory, setUploadCategory] = useState<string>('');
+  const [uploadDescription, setUploadDescription] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
+
+  // Multi-select Link to Entity State (Upload)
+  const [linkEntityType, setLinkEntityType] = useState<'Property' | 'Client' | 'Deal'>('Property');
+  const [selectedLinks, setSelectedLinks] = useState<string[]>([]);
+  const [entityFilterQuery, setEntityFilterQuery] = useState('');
+
+  // Edit Document State
+  const [editingDoc, setEditingDoc] = useState<DocumentItem | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editSelectedLinks, setEditSelectedLinks] = useState<string[]>([]);
+  const [editEntityType, setEditEntityType] = useState<'Property' | 'Client' | 'Deal'>('Property');
+  const [editEntityFilterQuery, setEditEntityFilterQuery] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  // CRM entity lists
+  const [propertiesList, setPropertiesList] = useState<{ id: string; title: string; locality?: string }[]>([]);
+  const [clientsList, setClientsList] = useState<{ id: string; name: string; phone?: string }[]>([]);
+  const [dealsList, setDealsList] = useState<{ id: string; title: string; stage?: string }[]>([]);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showUpload) {
-        setShowUpload(false);
-        setSelectedFile(null);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showUpload]);
 
   const loadDocuments = () => {
     fetch('/api/documents')
@@ -67,12 +143,41 @@ export default function DocumentsPage() {
       .then(json => {
         if (json.documents) setData(json.documents);
       })
+      .catch(() => {})
       .finally(() => setLoading(false));
+  };
+
+  const loadCRMEntities = () => {
+    Promise.all([
+      fetch('/api/properties').then(r => r.json()).catch(() => ({})),
+      fetch('/api/leads').then(r => r.json()).catch(() => ({})),
+      fetch('/api/deals').then(r => r.json()).catch(() => ({}))
+    ]).then(([propsRes, leadsRes, dealsRes]) => {
+      setPropertiesList(propsRes.properties || []);
+      setClientsList(leadsRes.leads || []);
+      setDealsList(dealsRes.deals || []);
+    }).catch(() => {});
   };
 
   useEffect(() => {
     loadDocuments();
+    loadCRMEntities();
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showUpload) {
+          setShowUpload(false);
+          setSelectedFile(null);
+        }
+        if (editingDoc) setEditingDoc(null);
+        if (previewDoc) setPreviewDoc(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showUpload, editingDoc, previewDoc]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -100,19 +205,108 @@ export default function DocumentsPage() {
     reader.readAsDataURL(file);
   };
 
+  // Toggle multi-select link (Upload)
+  const toggleLink = (formattedValue: string) => {
+    setSelectedLinks(prev => {
+      if (prev.includes(formattedValue)) {
+        return prev.filter(v => v !== formattedValue);
+      } else {
+        return [...prev, formattedValue];
+      }
+    });
+  };
+
+  // Toggle multi-select link (Edit)
+  const toggleEditLink = (formattedValue: string) => {
+    setEditSelectedLinks(prev => {
+      if (prev.includes(formattedValue)) {
+        return prev.filter(v => v !== formattedValue);
+      } else {
+        return [...prev, formattedValue];
+      }
+    });
+  };
+
+  // Open Edit Modal
+  const handleOpenEdit = (doc: DocumentItem) => {
+    setEditingDoc(doc);
+    setEditName(doc.name);
+    setEditCategory(doc.category || 'Contracts & MOUs');
+    setEditDescription(doc.description || '');
+    setEditSelectedLinks(doc.relatedTo ? doc.relatedTo.split(', ').filter(Boolean) : []);
+    setEditEntityType('Property');
+    setEditEntityFilterQuery('');
+  };
+
+  // Save Edit Changes (Metadata only, media preserved)
+  const handleSaveEdit = async () => {
+    if (!editingDoc) return;
+    if (!editName.trim()) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Name Required', message: 'Document title cannot be blank.' });
+      return;
+    }
+    if (!editCategory.trim()) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Category Required', message: 'Please select a document category.' });
+      return;
+    }
+
+    setIsSavingEdit(true);
+    try {
+      const res = await fetch('/api/documents', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingDoc.id,
+          name: editName.trim(),
+          category: editCategory,
+          description: editDescription.trim(),
+          relatedTo: editSelectedLinks.join(', ')
+        })
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        setData(prev => prev.map(d => d.id === editingDoc.id ? { ...d, ...json.document } : d));
+        if (previewDoc && previewDoc.id === editingDoc.id) {
+          setPreviewDoc(json.document);
+        }
+        setEditingDoc(null);
+        setToast({ id: Date.now().toString(), type: 'success', title: 'Document Updated', message: `"${editName.trim()}" details updated successfully!` });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        setToast({ id: Date.now().toString(), type: 'error', title: 'Update Failed', message: err.error || 'Failed to update document.' });
+      }
+    } catch {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Network Error', message: 'Could not communicate with vault server.' });
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   const handleUploadSubmit = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'File Required', message: 'Please select a document file to upload.' });
+      return;
+    }
+    if (!uploadCategory.trim()) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Category Required', message: 'Please select a document category.' });
+      return;
+    }
     setIsUploading(true);
     
     let docType = 'General Document';
     if (selectedFile.type.includes('pdf')) docType = 'PDF';
-    if (selectedFile.type.includes('image')) docType = 'Image';
-    if (selectedFile.type.includes('sheet') || selectedFile.type.includes('csv')) docType = 'Spreadsheet';
+    else if (selectedFile.type.includes('image')) docType = 'Image';
+    else if (selectedFile.type.includes('sheet') || selectedFile.type.includes('csv')) docType = 'Spreadsheet';
+    else if (selectedFile.type.includes('word') || selectedFile.name.endsWith('.doc') || selectedFile.name.endsWith('.docx')) docType = 'Word Document';
 
     const payload = {
       name: selectedFile.name,
       type: docType,
+      category: uploadCategory,
       size: formatFileSize(selectedFile.size),
+      relatedTo: selectedLinks.length > 0 ? selectedLinks.join(', ') : undefined,
+      description: uploadDescription.trim() || undefined,
       fileData: fileDataUrl,
     };
 
@@ -126,14 +320,17 @@ export default function DocumentsPage() {
         setShowUpload(false);
         setSelectedFile(null);
         setFileDataUrl('');
-        setToast({ id: Date.now().toString(), type: 'success', title: 'Uploaded', message: 'Document uploaded successfully!' });
+        setUploadDescription('');
+        setSelectedLinks([]);
+        setEntityFilterQuery('');
+        setToast({ id: Date.now().toString(), type: 'success', title: 'Document Saved', message: `"${selectedFile.name}" stored securely in agency vault!` });
         loadDocuments();
       } else {
-        setToast({ id: Date.now().toString(), type: 'error', title: 'Upload Failed', message: 'Failed to upload document.' });
+        const err = await res.json().catch(() => ({}));
+        setToast({ id: Date.now().toString(), type: 'error', title: 'Upload Failed', message: err.error || 'Failed to upload document.' });
       }
-    } catch (err) {
-      console.error(err);
-      setToast({ id: Date.now().toString(), type: 'error', title: 'Network Error', message: 'Network error while uploading.' });
+    } catch {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Network Error', message: 'Failed to communicate with vault server.' });
     } finally {
       setIsUploading(false);
     }
@@ -143,36 +340,214 @@ export default function DocumentsPage() {
     if (!docToDelete) return;
     setIsDeleting(true);
     try {
-      const res = await fetch('/api/documents', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: docToDelete.id })
+      const res = await fetch(`/api/documents?id=${encodeURIComponent(docToDelete.id)}`, {
+        method: 'DELETE'
       });
       if (res.ok) {
-        setToast({ id: Date.now().toString(), type: 'success', title: 'Deleted', message: `"${docToDelete.name}" deleted successfully.` });
+        setToast({ id: Date.now().toString(), type: 'success', title: 'Document Removed', message: `"${docToDelete.name}" deleted from vault.` });
         setDocToDelete(null);
         loadDocuments();
       } else {
-        setToast({ id: Date.now().toString(), type: 'error', title: 'Delete Failed', message: 'Failed to delete document.' });
+        setToast({ id: Date.now().toString(), type: 'error', title: 'Delete Failed', message: 'Could not remove document.' });
       }
-    } catch (err) {
-      console.error(err);
-      setToast({ id: Date.now().toString(), type: 'error', title: 'Delete Error', message: 'An error occurred while deleting document.' });
+    } catch {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Network Error', message: 'Network error while deleting document.' });
     } finally {
       setIsDeleting(false);
     }
   };
 
-  const filteredData = data.filter(d => 
-    d.name.toLowerCase().includes(search.toLowerCase()) || 
-    d.type.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleDownloadSample = (template: typeof REAL_ESTATE_TEMPLATES[0]) => {
+    const textContent =
+      `=================================================================\n` +
+      `       AGENTLADDERS OFFICIAL REAL ESTATE LEGAL TEMPLATE          \n` +
+      `=================================================================\n` +
+      `Document Title:    ${template.title}\n` +
+      `Category:          ${template.category}\n` +
+      `Format Compliance: RERA & Indian Real Estate Law Standard\n` +
+      `Generated On:      ${new Date().toLocaleDateString('en-IN')}\n` +
+      `-----------------------------------------------------------------\n` +
+      `PURPOSE & SCOPE:\n` +
+      `${template.desc}\n` +
+      `-----------------------------------------------------------------\n` +
+      `TERMS & MANDATE PROVISIONS:\n` +
+      `1. PARTIES: Entered into between Owner / Landlord and Real Estate Broker.\n` +
+      `2. COMMISSION SPLIT: Standard 1% to 2% brokerage due upon registration.\n` +
+      `3. VALIDITY & ESCROW: Token advance strictly acknowledged in written receipt.\n` +
+      `4. JURISDICTION: Governed by the local civil court and RERA Appellate.\n` +
+      `=================================================================\n` +
+      `Ready for execution. AgentLadders Agency Operations Vault\n`;
+
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = template.sampleFileName.replace('.pdf', '.txt');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    setToast({ id: Date.now().toString(), type: 'info', title: 'Template Saved', message: `"${template.title}" downloaded to your device!` });
+  };
+
+  const handleWhatsAppShare = async (doc: DocumentItem) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const directUrl = `${origin}/d/${doc.id}`;
+    let msg = `Hello! Sharing document from AgentLadders Vault:\n\n📄 *${doc.name}*\n📁 Category: ${doc.category || 'General'}\n📦 Size: ${doc.size}\n`;
+    if (doc.description) {
+      msg += `📝 Notes: ${doc.description}\n`;
+    }
+    msg += `\n⬇️ *Direct Access & Download Link:*\n${directUrl}\n\n(No login required to view or download)`;
+
+    // Try sharing the actual document file directly if device supports file sharing (e.g. mobile WhatsApp)
+    if (typeof navigator !== 'undefined' && navigator.share && doc.fileData && doc.fileData.startsWith('data:')) {
+      try {
+        const [header, base64] = doc.fileData.split(',');
+        const mimeMatch = header.match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mime });
+        const file = new File([blob], doc.name, { type: mime });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: doc.name,
+            text: msg
+          });
+          return;
+        }
+      } catch {
+        // Fall back to opening WhatsApp URL
+      }
+    }
+
+    // Direct WhatsApp share URL with direct access and download link
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleCopyDirectLink = (doc: DocumentItem) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareUrl = `${origin}/d/${doc.id}`;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl);
+      setToast({
+        id: Date.now().toString(),
+        type: 'success',
+        title: 'Direct Link Copied',
+        message: 'Direct document download link copied to clipboard!'
+      });
+    }
+  };
+
+  // Filtered Documents
+  const filteredData = useMemo(() => {
+    return data.filter(doc => {
+      const q = search.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        doc.name.toLowerCase().includes(q) ||
+        doc.type.toLowerCase().includes(q) ||
+        (doc.category && doc.category.toLowerCase().includes(q)) ||
+        (doc.relatedTo && doc.relatedTo.toLowerCase().includes(q)) ||
+        (doc.description && doc.description.toLowerCase().includes(q));
+
+      const matchesCat =
+        activeCategory === 'All' ||
+        (doc.category && doc.category.toLowerCase() === activeCategory.toLowerCase());
+
+      return matchesSearch && matchesCat;
+    }).sort((a, b) => {
+      if (sortBy === 'oldest') {
+        return (a.id || '').localeCompare(b.id || '');
+      } else if (sortBy === 'name_asc') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'name_desc') {
+        return b.name.localeCompare(a.name);
+      } else if (sortBy === 'category') {
+        return (a.category || '').localeCompare(b.category || '');
+      }
+      // default: newest
+      return (b.id || '').localeCompare(a.id || '');
+    });
+  }, [data, search, activeCategory, sortBy]);
+
+  // Filter items for the active entity type picker in Upload modal
+  const filteredEntityItems = useMemo(() => {
+    const q = entityFilterQuery.trim().toLowerCase();
+    if (linkEntityType === 'Property') {
+      return propertiesList
+        .filter(p => !q || p.title.toLowerCase().includes(q) || (p.locality && p.locality.toLowerCase().includes(q)))
+        .map(p => ({
+          id: p.id,
+          label: p.title,
+          subtext: p.locality || 'Prime Locality',
+          value: `Property: ${p.title}`
+        }));
+    } else if (linkEntityType === 'Client') {
+      return clientsList
+        .filter(c => !q || c.name.toLowerCase().includes(q) || (c.phone && c.phone.toLowerCase().includes(q)))
+        .map(c => ({
+          id: c.id,
+          label: c.name,
+          subtext: c.phone || 'Client Lead',
+          value: `Client: ${c.name}`
+        }));
+    } else {
+      return dealsList
+        .filter(d => !q || d.title.toLowerCase().includes(q) || (d.stage && d.stage.toLowerCase().includes(q)))
+        .map(d => ({
+          id: d.id,
+          label: d.title,
+          subtext: `Stage: ${d.stage || 'Negotiation'}`,
+          value: `Deal: ${d.title}`
+        }));
+    }
+  }, [linkEntityType, propertiesList, clientsList, dealsList, entityFilterQuery]);
+
+  // Filter items for the active entity type picker in Edit modal
+  const filteredEditEntityItems = useMemo(() => {
+    const q = editEntityFilterQuery.trim().toLowerCase();
+    if (editEntityType === 'Property') {
+      return propertiesList
+        .filter(p => !q || p.title.toLowerCase().includes(q) || (p.locality && p.locality.toLowerCase().includes(q)))
+        .map(p => ({
+          id: p.id,
+          label: p.title,
+          subtext: p.locality || 'Prime Locality',
+          value: `Property: ${p.title}`
+        }));
+    } else if (editEntityType === 'Client') {
+      return clientsList
+        .filter(c => !q || c.name.toLowerCase().includes(q) || (c.phone && c.phone.toLowerCase().includes(q)))
+        .map(c => ({
+          id: c.id,
+          label: c.name,
+          subtext: c.phone || 'Client Lead',
+          value: `Client: ${c.name}`
+        }));
+    } else {
+      return dealsList
+        .filter(d => !q || d.title.toLowerCase().includes(q) || (d.stage && d.stage.toLowerCase().includes(q)))
+        .map(d => ({
+          id: d.id,
+          label: d.title,
+          subtext: `Stage: ${d.stage || 'Negotiation'}`,
+          value: `Deal: ${d.title}`
+        }));
+    }
+  }, [editEntityType, propertiesList, clientsList, dealsList, editEntityFilterQuery]);
 
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12 }}>
-        <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: '#059669', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-        <span style={{ color: '#64748b', fontSize: 14 }}>Loading documents...</span>
+        <div style={{ width: 36, height: 36, border: '3px solid #e2e8f0', borderTopColor: 'var(--primary, #059669)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <span style={{ color: '#64748b', fontSize: 14 }}>Opening agency documents vault...</span>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -180,167 +555,1414 @@ export default function DocumentsPage() {
 
   return (
     <>
-      {/* Upload Modal */}
-      {showUpload && (
-        <div onClick={() => { setShowUpload(false); setSelectedFile(null); }} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
-          <div onClick={e => e.stopPropagation()} className="responsive-modal animate-enter" style={{ backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center' }}>
-                Upload Document <InfoTooltip text="Upload client KYC, brochures, or property agreements securely." />
-              </h2>
-              <button onClick={() => { setShowUpload(false); setSelectedFile(null); }} style={{ background: 'none', border: 'none', fontSize: 24, color: '#94a3b8', cursor: 'pointer' }}>&times;</button>
+      <div className="dashboard-page-container animate-enter" style={{ maxWidth: '100%', boxSizing: 'border-box' }}>
+        
+        {/* Header */}
+        <div className="responsive-header" style={{ marginBottom: 20 }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              Documents &amp; Legal Vault <InfoTooltip text="Secure cloud vault for sale agreements, tenant KYC, floor plans, and RERA property documents." />
+            </h1>
+            <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
+              Centralized file storage linked directly to deals, properties, and client profiles
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowUpload(true);
+                setSelectedLinks([]);
+                setUploadDescription('');
+                setUploadCategory('');
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 7,
+                backgroundColor: 'var(--primary, #059669)',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: 9,
+                padding: '10px 18px',
+                fontSize: 13.5,
+                fontWeight: 600,
+                cursor: 'pointer',
+                boxShadow: '0 3px 12px rgba(5,150,105,0.25)',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#047857')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#059669')}
+            >
+              <span>+ Upload Document</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Tabs & Search Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
+          <FilterTabs
+            tabs={DOCUMENT_CATEGORIES.map(cat => ({
+              id: cat,
+              label: cat,
+              count: cat === 'All' ? data.length : data.filter(d => (d.category || '').toLowerCase() === cat.toLowerCase()).length
+            }))}
+            activeTab={activeCategory}
+            onChange={(tabId) => setActiveCategory(tabId as DocCategory)}
+          />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search by file name, client, property, note..."
+              maxWidth={300}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}>
+                Sort:
+              </label>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid #cbd5e1',
+                  backgroundColor: '#ffffff',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: '#0f172a',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="name_asc">Document Name (A - Z)</option>
+                <option value="name_desc">Document Name (Z - A)</option>
+                <option value="category">Category</option>
+              </select>
             </div>
-            
-            <div style={{ padding: 24 }}>
-              {!selectedFile ? (
-                <div 
-                  onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{ 
-                    border: `2px dashed ${dragActive ? '#059669' : '#cbd5e1'}`, 
-                    backgroundColor: dragActive ? '#f0fdf4' : '#f8fafc',
-                    borderRadius: 12, padding: '40px 20px', textAlign: 'center', cursor: 'pointer',
-                    transition: 'all 0.2s ease'
+          </div>
+        </div>
+
+        {/* Documents Grid */}
+        {filteredData.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#ffffff', borderRadius: 14, border: '1px dashed #cbd5e1', marginBottom: 30 }}>
+            <div style={{ fontSize: 38, marginBottom: 12 }}>📂</div>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>No documents found</h3>
+            <p style={{ fontSize: 13, color: '#64748b', margin: 0, maxWidth: 360, marginInline: 'auto' }}>
+              {search || activeCategory !== 'All' ? 'Try adjusting your search query or switching to another category.' : 'Upload client KYC, floor plans, or tenancy agreements to start building your vault.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowUpload(true);
+                setSelectedLinks([]);
+                setUploadDescription('');
+              }}
+              style={{ marginTop: 16, padding: '8px 16px', backgroundColor: 'var(--primary, #059669)', color: '#ffffff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+            >
+              + Upload Document Now
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: 16, marginBottom: 32 }}>
+            {filteredData.map(doc => {
+              const fileIcon = getFileIcon(doc.type, doc.name);
+              // Split relatedTo into separate entity tags if multi-selected
+              const relatedList = doc.relatedTo ? doc.relatedTo.split(', ').filter(Boolean) : [];
+
+              return (
+                <div
+                  key={doc.id}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 14,
+                    padding: '18px 20px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = '#cbd5e1';
+                    e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.05)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
                   }}
                 >
-                  <input type="file" ref={fileInputRef} onChange={(e) => e.target.files && handleFile(e.target.files[0])} style={{ display: 'none' }} />
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>📤</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>Click or drag file to this area to upload</div>
-                  <div style={{ fontSize: 13, color: '#64748b', marginTop: 8 }}>Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files.</div>
+                  {/* Top Bar: Icon + Category Badge + Action Buttons (Edit + Delete) */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 32 }}>{fileIcon}</span>
+                      <div>
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: doc.category === 'Others' ? '#64748b' : '#059669',
+                          backgroundColor: doc.category === 'Others' ? '#f1f5f9' : '#ecfdf5',
+                          padding: '3px 8px',
+                          borderRadius: 6,
+                          display: 'inline-block'
+                        }}>
+                          {doc.category || 'General'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {/* Edit Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(doc)}
+                        title="Edit Document Details"
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#64748b',
+                          cursor: 'pointer',
+                          padding: '5px 7px',
+                          borderRadius: 6,
+                          fontSize: 13,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.15s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#0284c7'; e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      >
+                        ✏️
+                      </button>
+
+                      {/* Delete Button */}
+                      <button
+                        type="button"
+                        onClick={() => setDocToDelete(doc)}
+                        title="Delete Document"
+                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 5, borderRadius: 6 }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#fee2e2'; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+                      >
+                        <TrashIcon size={16} color="currentColor" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Body: Title + Details */}
+                  <div style={{ flex: 1, marginBottom: 14 }}>
+                    <h3
+                      onClick={() => setPreviewDoc(doc)}
+                      style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', margin: '0 0 6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer' }}
+                      title={doc.name}
+                    >
+                      {doc.name}
+                    </h3>
+
+                    <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                      <span>{doc.type}</span>
+                      <span>•</span>
+                      <span>{doc.size}</span>
+                      <span>•</span>
+                      <span>{doc.uploadedBy || 'Agent'}</span>
+                    </div>
+
+                    {/* Note / Description Snippet */}
+                    {doc.description && (
+                      <div
+                        onClick={() => setPreviewDoc(doc)}
+                        style={{
+                          fontSize: 12,
+                          color: '#475569',
+                          backgroundColor: '#f8fafc',
+                          padding: '6px 10px',
+                          borderRadius: 6,
+                          border: '1px solid #e2e8f0',
+                          marginBottom: 8,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 6
+                        }}
+                        title={doc.description}
+                      >
+                        <span style={{ fontSize: 12 }}>📝</span>
+                        <span style={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          fontStyle: 'italic',
+                          maxWidth: '240px'
+                        }}>
+                          {doc.description}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Multi-selected Linked Entity Badges */}
+                    {relatedList.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                        {relatedList.map((rel, i) => {
+                          const icon = rel.startsWith('Property') ? '🏢' : rel.startsWith('Client') ? '👤' : '💼';
+                          return (
+                            <span
+                              key={i}
+                              style={{
+                                fontSize: 11,
+                                color: '#334155',
+                                backgroundColor: '#f1f5f9',
+                                border: '1px solid #e2e8f0',
+                                padding: '2px 8px',
+                                borderRadius: 12,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                fontWeight: 600,
+                                maxWidth: '100%',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                              title={rel}
+                            >
+                              <span>{icon}</span>
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{rel}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer Action Row: Preview, Edit, WhatsApp Share, Download */}
+                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ fontSize: 11.5, color: '#94a3b8' }}>
+                      {new Date(doc.createdAt).toLocaleDateString('en-IN')}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {/* View / Preview */}
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDoc(doc)}
+                        title="Quick View Document Details"
+                        style={{ padding: '6px 10px', backgroundColor: '#f1f5f9', color: '#0f172a', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Preview
+                      </button>
+
+                      {/* Edit Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(doc)}
+                        title="Edit Details"
+                        style={{ padding: '6px 9px', backgroundColor: '#f0f9ff', color: '#0284c7', border: '1px solid #bae6fd', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        Edit
+                      </button>
+
+                      {/* WhatsApp Share */}
+                      <button
+                        type="button"
+                        onClick={() => handleWhatsAppShare(doc)}
+                        title="Share Document with Client on WhatsApp"
+                        style={{ padding: '6px 9px', backgroundColor: '#ecfdf5', color: '#059669', border: '1px solid #bbf7d0', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <WhatsAppIcon size={14} color="#059669" />
+                      </button>
+
+                      {/* Download */}
+                      {doc.fileData ? (
+                        <a
+                          href={doc.fileData}
+                          download={doc.name}
+                          title="Download File to Computer"
+                          style={{ padding: '6px 10px', backgroundColor: '#0f172a', color: '#ffffff', textDecoration: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}
+                        >
+                          <DownloadIcon size={12} color="#ffffff" />
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const blob = new Blob([`Document: ${doc.name}\nType: ${doc.type}\nNotes: ${doc.description || 'N/A'}\nStored in AgentLadders Vault`], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = doc.name;
+                            link.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          title="Download Stored Copy"
+                          style={{ padding: '6px 10px', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                        >
+                          <DownloadIcon size={12} color="#ffffff" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Real Estate Standard Legal & Deal Starter Templates */}
+        <div style={{ backgroundColor: '#ffffff', borderRadius: 14, border: '1px solid #e2e8f0', padding: 22, marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+            <div>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                📜 Standard Real Estate Legal &amp; Deal Templates
+              </h3>
+              <p style={{ fontSize: 12.5, color: '#64748b', margin: '3px 0 0' }}>
+                Pre-formatted, RERA-aligned agreements and checklists ready for client execution
+              </p>
+            </div>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: '#059669', backgroundColor: '#ecfdf5', padding: '4px 10px', borderRadius: 20 }}>
+              Free Agency Assets
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+            {REAL_ESTATE_TEMPLATES.map(tpl => (
+              <div
+                key={tpl.title}
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 12,
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#2563eb', backgroundColor: '#eff6ff', padding: '2px 7px', borderRadius: 4 }}>
+                      {tpl.category}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{tpl.format}</span>
+                  </div>
+                  <h4 style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>{tpl.title}</h4>
+                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5, margin: '0 0 14px' }}>{tpl.desc}</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleDownloadSample(tpl)}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: '#0f172a',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                >
+                  <DownloadIcon size={13} color="#475569" />
+                  <span>Download Template</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      {/* Upload Document Modal */}
+      {showUpload && (
+        <div
+          onClick={() => { setShowUpload(false); setSelectedFile(null); }}
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal animate-enter"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 16,
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              maxHeight: '92vh',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 24 }}>📤</span>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Upload to Agency Vault
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setShowUpload(false); setSelectedFile(null); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}
+              >
+                <XIcon size={20} color="#64748b" />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div style={{ padding: '22px', overflowY: 'auto' }}>
+              {/* File Dropzone */}
+              {!selectedFile ? (
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: `2px dashed ${dragActive ? 'var(--primary, #059669)' : '#cbd5e1'}`,
+                    backgroundColor: dragActive ? '#f0fdf4' : '#f8fafc',
+                    borderRadius: 14,
+                    padding: '28px 16px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    marginBottom: 18
+                  }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={(e) => e.target.files && handleFile(e.target.files[0])}
+                    style={{ display: 'none' }}
+                  />
+                  <div style={{ fontSize: 36, marginBottom: 8 }}>📤</div>
+                  <div style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a' }}>
+                    Click or drag document to this area
+                  </div>
+                  <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 4 }}>
+                    Supports PDF, DOC, PNG, JPG, Excel / CSV up to 10MB
+                  </div>
                 </div>
               ) : (
-                <div style={{ padding: 20, backgroundColor: '#f8fafc', border: '1px solid var(--border)', borderRadius: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                    <div style={{ fontSize: 24 }}>{getFileIcon(selectedFile.type || selectedFile.name)}</div>
-                    <div style={{ flex: 1, overflow: 'hidden' }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selectedFile.name}</div>
-                      <div style={{ fontSize: 12, color: '#64748b' }}>{formatFileSize(selectedFile.size)}</div>
+                <div style={{ padding: '14px 16px', backgroundColor: '#f0fdf4', border: '1.5px solid #bbf7d0', borderRadius: 12, marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 24 }}>{getFileIcon(selectedFile.type, selectedFile.name)}</span>
+                    <div>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#166534', wordBreak: 'break-all' }}>{selectedFile.name}</div>
+                      <div style={{ fontSize: 11.5, color: '#15803d' }}>{formatFileSize(selectedFile.size)}</div>
                     </div>
-                    <button onClick={() => setSelectedFile(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 600 }}>Remove</button>
                   </div>
-                  
-                  <button 
-                    onClick={handleUploadSubmit} 
-                    disabled={isUploading}
-                    style={{ width: '100%', padding: '12px', backgroundColor: '#059669', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFile(null)}
+                    style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
                   >
-                    {isUploading ? 'Uploading...' : 'Confirm Upload'}
+                    Change File
                   </button>
                 </div>
               )}
+
+              {/* 1. Document Category Selection (with Others option) */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                  Document Category *
+                </label>
+                <select
+                  required
+                  value={uploadCategory}
+                  onChange={e => setUploadCategory(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 8,
+                    fontSize: 13.5,
+                    outline: 'none',
+                    backgroundColor: '#ffffff',
+                    color: uploadCategory ? '#0f172a' : '#64748b'
+                  }}
+                >
+                  <option value="" disabled>-- Select Document Category --</option>
+                  <option value="Contracts & MOUs">Contracts &amp; MOUs (Sale Agreement, Rental Lease)</option>
+                  <option value="Client KYC & Identity">Client KYC &amp; Identity (PAN, Aadhaar, Passport)</option>
+                  <option value="Brochures & Floor Plans">Brochures &amp; Floor Plans</option>
+                  <option value="Title Deeds & OC">Title Deeds &amp; OC (7/12 extract, Index II, OC)</option>
+                  <option value="Payment Receipts">Payment Receipts (Token Advance, Cheques)</option>
+                  <option value="Others">Others / Miscellaneous Documents</option>
+                </select>
+              </div>
+
+              {/* 2. Text Box Field for Description / Note */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                  Description / Note (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={uploadDescription}
+                  onChange={e => setUploadDescription(e.target.value)}
+                  placeholder="Add notes, summary, remarks or key points regarding this document..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 8,
+                    fontSize: 13.5,
+                    outline: 'none',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit'
+                  }}
+                />
+              </div>
+
+              {/* 3. Link to Option (Property, Client, Deal - Multi-Select) */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ fontSize: 12.5, fontWeight: 700, color: '#334155' }}>
+                    Link to (Multi-Select, Optional)
+                  </label>
+                  {selectedLinks.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedLinks([])}
+                      style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                    >
+                      Clear All ({selectedLinks.length})
+                    </button>
+                  )}
+                </div>
+
+                {/* Selected Entity Chips */}
+                {selectedLinks.length > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 6,
+                    padding: '8px 10px',
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: 8,
+                    marginBottom: 10
+                  }}>
+                    {selectedLinks.map(link => {
+                      const icon = link.startsWith('Property') ? '🏢' : link.startsWith('Client') ? '👤' : '💼';
+                      return (
+                        <span
+                          key={link}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            padding: '3px 8px',
+                            borderRadius: 14,
+                            backgroundColor: '#ffffff',
+                            color: '#166534',
+                            fontSize: 12,
+                            fontWeight: 600,
+                            border: '1px solid #86efac',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                          }}
+                        >
+                          <span>{icon}</span>
+                          <span>{link}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedLinks(prev => prev.filter(l => l !== link))}
+                            style={{ background: 'none', border: 'none', color: '#16a34a', cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 700, lineHeight: 1 }}
+                            title="Remove"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Entity Type Selector Tabs */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 8 }}>
+                  {(['Property', 'Client', 'Deal'] as const).map(type => {
+                    const icon = type === 'Property' ? '🏢' : type === 'Client' ? '👤' : '💼';
+                    const count = type === 'Property' ? propertiesList.length : type === 'Client' ? clientsList.length : dealsList.length;
+                    const isSelected = linkEntityType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          setLinkEntityType(type);
+                          setEntityFilterQuery('');
+                        }}
+                        style={{
+                          padding: '7px 8px',
+                          borderRadius: 8,
+                          border: isSelected ? '1.5px solid var(--primary, #059669)' : '1px solid #cbd5e1',
+                          backgroundColor: isSelected ? '#ecfdf5' : '#f8fafc',
+                          color: isSelected ? '#065f46' : '#475569',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 5,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>{icon}</span>
+                        <span>{type}</span>
+                        <span style={{ fontSize: 10, opacity: 0.7 }}>({count})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Filter input for the current active entity list */}
+                <input
+                  type="text"
+                  value={entityFilterQuery}
+                  onChange={e => setEntityFilterQuery(e.target.value)}
+                  placeholder={`Search ${linkEntityType.toLowerCase()}s...`}
+                  style={{
+                    width: '100%',
+                    padding: '7px 10px',
+                    borderRadius: '6px 6px 0 0',
+                    border: '1px solid #cbd5e1',
+                    borderBottom: 'none',
+                    fontSize: 12.5,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+
+                {/* Multi-Select Scrollable Checklist */}
+                <div style={{
+                  maxHeight: 140,
+                  overflowY: 'auto',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0 0 8px 8px',
+                  backgroundColor: '#ffffff'
+                }}>
+                  {filteredEntityItems.length === 0 ? (
+                    <div style={{ padding: '14px', textAlign: 'center', color: '#94a3b8', fontSize: 12 }}>
+                      No {linkEntityType.toLowerCase()}s found matching search.
+                    </div>
+                  ) : (
+                    filteredEntityItems.map(item => {
+                      const isChecked = selectedLinks.includes(item.value);
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => toggleLink(item.value)}
+                          style={{
+                            padding: '8px 12px',
+                            borderBottom: '1px solid #f1f5f9',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            cursor: 'pointer',
+                            backgroundColor: isChecked ? '#f0fdf4' : 'transparent',
+                            transition: 'background 0.1s'
+                          }}
+                          onMouseEnter={e => {
+                            if (!isChecked) e.currentTarget.style.backgroundColor = '#f8fafc';
+                          }}
+                          onMouseLeave={e => {
+                            if (!isChecked) e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}} // handled by parent div
+                              style={{ cursor: 'pointer', accentColor: 'var(--primary, #059669)' }}
+                            />
+                            <div style={{ overflow: 'hidden' }}>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.label}
+                              </div>
+                              <div style={{ fontSize: 11, color: '#64748b' }}>
+                                {item.subtext}
+                              </div>
+                            </div>
+                          </div>
+                          {isChecked && (
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
+                              ✓ Selected
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Upload Actions */}
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowUpload(false); setSelectedFile(null); }}
+                  style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#334155', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleUploadSubmit}
+                  disabled={!selectedFile || isUploading}
+                  style={{
+                    padding: '9px 20px',
+                    borderRadius: 8,
+                    border: 'none',
+                    backgroundColor: 'var(--primary, #059669)',
+                    color: '#ffffff',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: !selectedFile || isUploading ? 'not-allowed' : 'pointer',
+                    opacity: !selectedFile || isUploading ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                >
+                  {isUploading ? 'Uploading...' : 'Save Document to Vault'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="dashboard-page-container animate-enter">
-      {/* Header */}
-      <div className="responsive-header">
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center' }}>
-            Documents <InfoTooltip text="Your centralized file storage. Attachments here can be linked directly to deals or client profiles." />
-          </h1>
-          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
-            Securely manage brochures, contracts, and KYC forms.
-          </p>
-        </div>
-        <button 
-          onClick={() => setShowUpload(true)}
-          style={{
-            backgroundColor: '#059669', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
-            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-            boxShadow: '0 4px 12px rgba(5,150,105,0.25)', transition: 'all 0.15s ease',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#047857')}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#059669')}
+      {/* Edit Document Modal (All details editable except uploaded media) */}
+      {editingDoc && (
+        <div
+          onClick={() => setEditingDoc(null)}
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
         >
-          + Upload File
-        </button>
-      </div>
-
-      {/* Search */}
-      <div style={{ marginBottom: 20 }}>
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search documents by name or type..."
-          maxWidth={320}
-        />
-      </div>
-
-      {/* Documents Grid */}
-      {filteredData.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 20px', backgroundColor: '#fff', borderRadius: 16, border: '1px dashed var(--border)' }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>📂</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>No documents found</div>
-          <div style={{ fontSize: 14, color: '#64748b', marginTop: 4 }}>Upload your first brochure or agreement.</div>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-          {filteredData.map(doc => (
-            <div key={doc.id} style={{ 
-              backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 12, padding: 20,
-              boxShadow: '0 4px 15px rgba(0,0,0,0.02)', transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              display: 'flex', flexDirection: 'column'
+          <div
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal animate-enter"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 16,
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              maxHeight: '92vh',
+              display: 'flex',
+              flexDirection: 'column'
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.05)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.02)'; }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div style={{ fontSize: 32 }}>{getFileIcon(doc.type)}</div>
-                <button 
-                  onClick={() => setDocToDelete(doc)} 
-                  title="Delete Document"
-                  style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 4, borderRadius: 4 }} 
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fee2e2'} 
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 24 }}>✏️</span>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  Edit Document Details
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingDoc(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}
+              >
+                <XIcon size={20} color="#64748b" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '22px', overflowY: 'auto' }}>
+              {/* Read-Only Attached Media Badge */}
+              <div style={{
+                padding: '12px 14px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: 10,
+                marginBottom: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 8
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 24 }}>{getFileIcon(editingDoc.type, editingDoc.name)}</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', wordBreak: 'break-all' }}>{editingDoc.name}</div>
+                    <div style={{ fontSize: 11.5, color: '#64748b' }}>
+                      {editingDoc.type} • {editingDoc.size} • Uploaded by {editingDoc.uploadedBy || 'Agent'}
+                    </div>
+                  </div>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#475569', backgroundColor: '#e2e8f0', padding: '3px 8px', borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                  <span>🔒</span> File Media Locked
+                </span>
+              </div>
+
+              {/* 1. Document Title / Name */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                  Document Name / Title *
+                </label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  required
+                  placeholder="e.g. Sale_Agreement_Lodha_Park.pdf"
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13.5, outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              {/* 2. Document Category */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                  Document Category *
+                </label>
+                <select
+                  required
+                  value={editCategory}
+                  onChange={e => setEditCategory(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '9px 12px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 8,
+                    fontSize: 13.5,
+                    outline: 'none',
+                    backgroundColor: '#ffffff',
+                    color: editCategory ? '#0f172a' : '#64748b'
+                  }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  <option value="" disabled>-- Select Document Category --</option>
+                  <option value="Contracts & MOUs">Contracts &amp; MOUs (Sale Agreement, Rental Lease)</option>
+                  <option value="Client KYC & Identity">Client KYC &amp; Identity (PAN, Aadhaar, Passport)</option>
+                  <option value="Brochures & Floor Plans">Brochures &amp; Floor Plans</option>
+                  <option value="Title Deeds & OC">Title Deeds &amp; OC (7/12 extract, Index II, OC)</option>
+                  <option value="Payment Receipts">Payment Receipts (Token Advance, Cheques)</option>
+                  <option value="Others">Others / Miscellaneous Documents</option>
+                </select>
+              </div>
+
+              {/* 3. Description / Notes */}
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                  Description / Note (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={editDescription}
+                  onChange={e => setEditDescription(e.target.value)}
+                  placeholder="Add notes, remarks or context regarding this document..."
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 8,
+                    fontSize: 13.5,
+                    outline: 'none',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit'
+                  }}
+                />
+              </div>
+
+              {/* 4. Link to CRM Entities (Multi-Select) */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ fontSize: 12.5, fontWeight: 700, color: '#334155' }}>
+                    Link to (Multi-Select, Optional)
+                  </label>
+                  {editSelectedLinks.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setEditSelectedLinks([])}
+                      style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                    >
+                      Clear All ({editSelectedLinks.length})
+                    </button>
+                  )}
+                </div>
+
+                {/* Selected Entity Chips */}
+                {editSelectedLinks.length > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 6,
+                    padding: '8px 10px',
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: 8,
+                    marginBottom: 10
+                  }}>
+                    {editSelectedLinks.map(link => {
+                      const icon = link.startsWith('Property') ? '🏢' : link.startsWith('Client') ? '👤' : '💼';
+                      return (
+                        <span
+                          key={link}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            padding: '3px 8px',
+                            borderRadius: 14,
+                            backgroundColor: '#ffffff',
+                            color: '#166534',
+                            fontSize: 12,
+                            fontWeight: 600,
+                            border: '1px solid #86efac',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                          }}
+                        >
+                          <span>{icon}</span>
+                          <span>{link}</span>
+                          <button
+                            type="button"
+                            onClick={() => setEditSelectedLinks(prev => prev.filter(l => l !== link))}
+                            style={{ background: 'none', border: 'none', color: '#16a34a', cursor: 'pointer', padding: 0, fontSize: 13, fontWeight: 700, lineHeight: 1 }}
+                            title="Remove"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Entity Type Selector Tabs */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 8 }}>
+                  {(['Property', 'Client', 'Deal'] as const).map(type => {
+                    const icon = type === 'Property' ? '🏢' : type === 'Client' ? '👤' : '💼';
+                    const count = type === 'Property' ? propertiesList.length : type === 'Client' ? clientsList.length : dealsList.length;
+                    const isSelected = editEntityType === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          setEditEntityType(type);
+                          setEditEntityFilterQuery('');
+                        }}
+                        style={{
+                          padding: '7px 8px',
+                          borderRadius: 8,
+                          border: isSelected ? '1.5px solid var(--primary, #059669)' : '1px solid #cbd5e1',
+                          backgroundColor: isSelected ? '#ecfdf5' : '#f8fafc',
+                          color: isSelected ? '#065f46' : '#475569',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 5,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        <span>{icon}</span>
+                        <span>{type}</span>
+                        <span style={{ fontSize: 10, opacity: 0.7 }}>({count})</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Search input for the current active edit entity list */}
+                <input
+                  type="text"
+                  value={editEntityFilterQuery}
+                  onChange={e => setEditEntityFilterQuery(e.target.value)}
+                  placeholder={`Search ${editEntityType.toLowerCase()}s...`}
+                  style={{
+                    width: '100%',
+                    padding: '7px 10px',
+                    borderRadius: '6px 6px 0 0',
+                    border: '1px solid #cbd5e1',
+                    borderBottom: 'none',
+                    fontSize: 12.5,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+
+                {/* Multi-Select Scrollable Checklist */}
+                <div style={{
+                  maxHeight: 140,
+                  overflowY: 'auto',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '0 0 8px 8px',
+                  backgroundColor: '#ffffff'
+                }}>
+                  {filteredEditEntityItems.length === 0 ? (
+                    <div style={{ padding: '14px', textAlign: 'center', color: '#94a3b8', fontSize: 12 }}>
+                      No {editEntityType.toLowerCase()}s found matching search.
+                    </div>
+                  ) : (
+                    filteredEditEntityItems.map(item => {
+                      const isChecked = editSelectedLinks.includes(item.value);
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => toggleEditLink(item.value)}
+                          style={{
+                            padding: '8px 12px',
+                            borderBottom: '1px solid #f1f5f9',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            cursor: 'pointer',
+                            backgroundColor: isChecked ? '#f0fdf4' : 'transparent',
+                            transition: 'background 0.1s'
+                          }}
+                          onMouseEnter={e => {
+                            if (!isChecked) e.currentTarget.style.backgroundColor = '#f8fafc';
+                          }}
+                          onMouseLeave={e => {
+                            if (!isChecked) e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}}
+                              style={{ cursor: 'pointer', accentColor: 'var(--primary, #059669)' }}
+                            />
+                            <div style={{ overflow: 'hidden' }}>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.label}
+                              </div>
+                              <div style={{ fontSize: 11, color: '#64748b' }}>
+                                {item.subtext}
+                              </div>
+                            </div>
+                          </div>
+                          {isChecked && (
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#16a34a', flexShrink: 0 }}>
+                              ✓ Selected
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Edit Actions */}
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingDoc(null)}
+                  style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#334155', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveEdit}
+                  disabled={isSavingEdit || !editName.trim()}
+                  style={{
+                    padding: '9px 20px',
+                    borderRadius: 8,
+                    border: 'none',
+                    backgroundColor: 'var(--primary, #059669)',
+                    color: '#ffffff',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: isSavingEdit || !editName.trim() ? 'not-allowed' : 'pointer',
+                    opacity: isSavingEdit || !editName.trim() ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                >
+                  {isSavingEdit ? 'Saving Changes...' : 'Save Changes'}
                 </button>
               </div>
-              
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: '0 0 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={doc.name}>
-                  {doc.name}
-                </h3>
-                <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span>{doc.type}</span>
-                  <span>•</span>
-                  <span>{doc.size}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* In-App Document Preview Modal */}
+      {previewDoc && (
+        <div
+          onClick={() => setPreviewDoc(null)}
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal animate-enter"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 16,
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              maxHeight: '92vh',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* Header */}
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 26 }}>{getFileIcon(previewDoc.type, previewDoc.name)}</span>
+                <div>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                    {previewDoc.name}
+                  </h3>
+                  <div style={{ fontSize: 12, color: '#64748b' }}>
+                    {previewDoc.type} • {previewDoc.size}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewDoc(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}
+              >
+                <XIcon size={20} color="#64748b" />
+              </button>
+            </div>
+
+            {/* Preview Body */}
+            <div style={{ padding: '24px', overflowY: 'auto' }}>
+              {previewDoc.fileData && previewDoc.fileData.startsWith('data:image') ? (
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                  <img
+                    src={previewDoc.fileData}
+                    alt={previewDoc.name}
+                    style={{ maxWidth: '100%', maxHeight: 320, borderRadius: 10, border: '1px solid #e2e8f0', objectFit: 'contain' }}
+                  />
+                </div>
+              ) : (
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '20px', textAlign: 'center', marginBottom: 20 }}>
+                  <div style={{ fontSize: 44, marginBottom: 10 }}>{getFileIcon(previewDoc.type, previewDoc.name)}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>{previewDoc.name}</div>
+                  <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
+                    Category: <strong>{previewDoc.category || 'General'}</strong>
+                  </div>
+                </div>
+              )}
+
+              {/* Note / Description Section */}
+              {previewDoc.description && (
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '14px 16px', marginBottom: 18 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span>📝</span> Notes &amp; Description
+                  </div>
+                  <div style={{ fontSize: 13.5, color: '#1e293b', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                    {previewDoc.description}
+                  </div>
+                </div>
+              )}
+
+              {/* Multi-selected Associated CRM Records */}
+              {previewDoc.relatedTo && (
+                <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '14px 16px', marginBottom: 18 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <span>🔗</span> Associated CRM Records
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {previewDoc.relatedTo.split(', ').filter(Boolean).map((rel, idx) => {
+                      const icon = rel.startsWith('Property') ? '🏢' : rel.startsWith('Client') ? '👤' : '💼';
+                      return (
+                        <span
+                          key={idx}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            padding: '4px 10px',
+                            borderRadius: 14,
+                            backgroundColor: '#ffffff',
+                            color: '#0f172a',
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            border: '1px solid #cbd5e1'
+                          }}
+                        >
+                          <span>{icon}</span>
+                          <span>{rel}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Metadata Details */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 20, fontSize: 13 }}>
+                <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                  <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>Uploaded By</span>
+                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{previewDoc.uploadedBy || 'Agent'}</span>
+                </div>
+                <div style={{ backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                  <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', display: 'block' }}>Upload Date</span>
+                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{new Date(previewDoc.createdAt).toLocaleDateString('en-IN')}</span>
                 </div>
               </div>
 
-              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
-                  {new Date(doc.createdAt).toLocaleDateString()}
-                </div>
-                {doc.fileData ? (
-                  <a 
-                    href={doc.fileData} 
-                    download={doc.name}
-                    style={{ textDecoration: 'none', padding: '6px 12px', backgroundColor: '#f1f5f9', color: '#0f172a', borderRadius: 6, fontSize: 12, fontWeight: 600, transition: 'background-color 0.15s ease' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#e2e8f0'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+              {/* Action Buttons: WhatsApp, Edit Details, Download */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
+                {/* Edit Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const doc = previewDoc;
+                    setPreviewDoc(null);
+                    handleOpenEdit(doc);
+                  }}
+                  style={{
+                    padding: '11px',
+                    borderRadius: 9,
+                    backgroundColor: '#eff6ff',
+                    color: '#2563eb',
+                    border: '1px solid #bfdbfe',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 7
+                  }}
+                >
+                  <span>✏️</span>
+                  <span>Edit Details</span>
+                </button>
+
+                {/* Copy Direct Link */}
+                <button
+                  type="button"
+                  onClick={() => handleCopyDirectLink(previewDoc)}
+                  style={{
+                    padding: '11px',
+                    borderRadius: 9,
+                    backgroundColor: '#f8fafc',
+                    color: '#334155',
+                    border: '1px solid #cbd5e1',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 7
+                  }}
+                >
+                  <span>🔗</span>
+                  <span>Copy Direct Link</span>
+                </button>
+
+                {/* WhatsApp Share */}
+                <button
+                  type="button"
+                  onClick={() => handleWhatsAppShare(previewDoc)}
+                  style={{
+                    padding: '11px',
+                    borderRadius: 9,
+                    backgroundColor: '#25D366',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 7
+                  }}
+                >
+                  <WhatsAppIcon size={16} color="#ffffff" />
+                  <span>Share on WhatsApp</span>
+                </button>
+
+                {/* Download */}
+                {previewDoc.fileData ? (
+                  <a
+                    href={previewDoc.fileData}
+                    download={previewDoc.name}
+                    style={{
+                      padding: '11px',
+                      borderRadius: 9,
+                      backgroundColor: '#0f172a',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      fontWeight: 700,
+                      fontSize: 13,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 7
+                    }}
                   >
-                    Download
+                    <DownloadIcon size={14} color="#ffffff" />
+                    <span>Download File</span>
                   </a>
                 ) : (
-                  <span style={{ fontSize: 12, color: '#94a3b8' }}>No File</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const blob = new Blob([`Document: ${previewDoc.name}\nType: ${previewDoc.type}\nNotes: ${previewDoc.description || 'N/A'}\nStored in AgentLadders Vault`], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = previewDoc.name;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    style={{
+                      padding: '11px',
+                      borderRadius: 9,
+                      backgroundColor: '#0f172a',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 7
+                    }}
+                  >
+                    <DownloadIcon size={14} color="#ffffff" />
+                    <span>Download File</span>
+                  </button>
                 )}
               </div>
             </div>
-          ))}
+          </div>
         </div>
       )}
-      </div>
 
-      {/* Custom Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal */}
       <ConfirmModal
         isOpen={!!docToDelete}
         title="Delete Document"
         message={
-          <span>
-            Are you sure you want to permanently delete <strong>{docToDelete?.name}</strong>? This action cannot be undone.
+          <span style={{ display: 'inline-block', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+            Are you sure you want to permanently delete <strong style={{ color: '#0f172a', wordBreak: 'break-all' }}>&ldquo;{docToDelete?.name}&rdquo;</strong> from your agency vault? This action cannot be reversed.
           </span>
         }
         confirmText="Delete Document"
@@ -351,7 +1973,7 @@ export default function DocumentsPage() {
         onCancel={() => setDocToDelete(null)}
       />
 
-      {/* Custom Toast Notification */}
+      {/* Toast Feedback */}
       {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
     </>
   );

@@ -53,6 +53,7 @@ export default function SiteVisitsPage() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('date_asc');
   const [showModal, setShowModal] = useState(false);
   const [editingVisit, setEditingVisit] = useState<SiteVisit | null>(null);
   const [deletingVisit, setDeletingVisit] = useState<SiteVisit | null>(null);
@@ -187,6 +188,23 @@ export default function SiteVisitsPage() {
     }
     return true;
   }).sort((a, b) => {
+    if (sortBy === 'date_desc') {
+      if (a.date !== b.date) return b.date.localeCompare(a.date);
+      return (b.timeSlot || '').localeCompare(a.timeSlot || '');
+    } else if (sortBy === 'client_asc') {
+      return (a.client || '').localeCompare(b.client || '');
+    } else if (sortBy === 'client_desc') {
+      return (b.client || '').localeCompare(a.client || '');
+    } else if (sortBy === 'priority_desc') {
+      const pOrder: Record<string, number> = { 'High Priority': 3, 'Medium Priority': 2, 'Standard': 1, 'Low Priority': 0 };
+      const pa = pOrder[a.priority || ''] ?? 1;
+      const pb = pOrder[b.priority || ''] ?? 1;
+      if (pa !== pb) return pb - pa;
+      return a.date.localeCompare(b.date);
+    } else if (sortBy === 'status') {
+      return (a.status || '').localeCompare(b.status || '');
+    }
+    // Default: date_asc
     if (a.date !== b.date) return a.date.localeCompare(b.date);
     return (a.timeSlot || '').localeCompare(b.timeSlot || '');
   });
@@ -568,58 +586,78 @@ export default function SiteVisitsPage() {
         </button>
       </div>
 
-      {/* Main Type / Purpose Filter (Buy vs Rent) */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-        <FilterTabs
-          label="Showing Type:"
-          tabs={[
-            { id: 'All', label: 'All Showings', count: data.length, icon: <ListIcon size={14} /> },
-            { id: 'Buy', label: 'Buy Visits', count: buyCount, icon: <HomeIcon size={14} /> },
-            { id: 'Rent', label: 'Rent Visits', count: rentCount, icon: <KeyIcon size={14} /> }
-          ]}
-          activeTab={purposeFilter}
-          onChange={(tabId) => setPurposeFilter(tabId as any)}
-        />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search client, property..."
-            maxWidth={280}
+      {/* Unified Compact Filter Bar Card */}
+      <div className="unified-filter-card">
+        {/* Row 1: Segmented Showing Type Switch + Search + Sort */}
+        <div className="unified-filter-row-top">
+          <FilterTabs
+            variant="segmented"
+            size="sm"
+            tabs={[
+              { id: 'All', label: 'All Showings', count: data.length, icon: <ListIcon size={13} /> },
+              { id: 'Buy', label: 'Buy Visits', count: buyCount, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'Rent Visits', count: rentCount, icon: <KeyIcon size={13} /> }
+            ]}
+            activeTab={purposeFilter}
+            onChange={(tabId) => setPurposeFilter(tabId as any)}
           />
+
+          <div className="unified-filter-controls">
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search client, property..."
+              maxWidth={240}
+            />
+
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="unified-filter-select"
+            >
+              <option value="date_asc">Date: Earliest First</option>
+              <option value="date_desc">Date: Latest First</option>
+              <option value="client_asc">Client Name (A → Z)</option>
+              <option value="client_desc">Client Name (Z → A)</option>
+              <option value="priority_desc">Priority (High → Low)</option>
+              <option value="status">Visit Status</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      {/* Visit Status Filter Pills Row */}
-      <div style={{ marginBottom: 14 }}>
-        <FilterTabs
-          label="Visit Status:"
-          tabs={[
-            { id: 'All', label: 'All Statuses', count: data.length },
-            ...siteVisitStatuses.map(s => ({
-              id: s,
-              label: s,
-              count: data.filter(v => v.status === s).length
-            }))
-          ]}
-          activeTab={statusFilter}
-          onChange={(tabId) => setStatusFilter(tabId)}
-        />
-      </div>
+        {/* Row 2: Schedule & Status in Compact Horizontal Strips */}
+        <div className="unified-filter-row-bottom" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <FilterTabs
+              label="Schedule:"
+              size="sm"
+              tabs={['Upcoming', 'Past', 'Cancelled', 'All Dates'].map(f => ({
+                id: f,
+                label: f,
+                count: f === 'All Dates' ? data.length : (f === 'Upcoming' ? data.filter(v => v.date >= today && v.status !== 'Cancelled').length : (f === 'Past' ? data.filter(v => v.date < today).length : data.filter(v => v.status === 'Cancelled').length))
+              }))}
+              activeTab={filter}
+              onChange={(tabId) => setFilter(tabId as any)}
+            />
+          </div>
 
-      {/* Date Range Tabs */}
-      <div style={{ marginBottom: 28 }}>
-        <FilterTabs
-          label="Schedule:"
-          tabs={['All Dates', 'Upcoming', 'Past', 'Cancelled'].map(f => ({
-            id: f,
-            label: f,
-            count: f === 'All Dates' ? data.length : undefined
-          }))}
-          activeTab={filter}
-          onChange={(tabId) => setFilter(tabId)}
-        />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', borderTop: '1px solid #f8fafc', paddingTop: 6 }}>
+            <FilterTabs
+              label="Status:"
+              size="sm"
+              tabs={[
+                { id: 'All', label: 'All Statuses', count: data.length },
+                ...siteVisitStatuses.map(s => ({
+                  id: s,
+                  label: s,
+                  count: data.filter(v => v.status === s).length
+                }))
+              ]}
+              activeTab={statusFilter}
+              onChange={(tabId) => setStatusFilter(tabId)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Timeline View */}

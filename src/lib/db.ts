@@ -374,6 +374,7 @@ export interface DocumentItem {
   fileData?: string;
   uploadedBy: string;
   relatedTo?: string;
+  description?: string;
   version?: string;
   createdAt: string;
 }

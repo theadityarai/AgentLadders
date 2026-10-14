@@ -171,6 +171,7 @@ export default function LeadsPage() {
   const [leadSources, setLeadSources] = useState<string[]>(DEFAULT_LEAD_SOURCES);
   const [leadStatuses, setLeadStatuses] = useState<string[]>(DEFAULT_LEAD_STATUSES);
   const [sourceFilter, setSourceFilter] = useState('All');
+  const [sortBy, setSortBy] = useState('newest');
 
   // Modal State
   const [showModal, setShowModal] = useState(false);
@@ -443,7 +444,7 @@ export default function LeadsPage() {
 
   const filteredData = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return data.filter(l => {
+    const matches = data.filter(l => {
       if (purposeFilter !== 'All') {
         const isRent = isLeadRent(l);
         if (purposeFilter === 'Rent' && !isRent) return false;
@@ -461,11 +462,27 @@ export default function LeadsPage() {
       }
       return true;
     });
-  }, [data, purposeFilter, filter, sourceFilter, search, isLeadRent]);
+
+    return [...matches].sort((a, b) => {
+      if (sortBy === 'oldest') {
+        return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+      } else if (sortBy === 'name_asc') {
+        return (a.name || '').localeCompare(b.name || '');
+      } else if (sortBy === 'name_desc') {
+        return (b.name || '').localeCompare(a.name || '');
+      } else if (sortBy === 'budget_desc') {
+        return (Number(b.budgetMax) || 0) - (Number(a.budgetMax) || 0);
+      } else if (sortBy === 'budget_asc') {
+        return (Number(a.budgetMax) || 0) - (Number(b.budgetMax) || 0);
+      } else {
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      }
+    });
+  }, [data, purposeFilter, filter, sourceFilter, search, isLeadRent, sortBy]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filter, purposeFilter, sourceFilter]);
+  }, [search, filter, purposeFilter, sourceFilter, sortBy]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(filteredData.length / pageSize)), [filteredData.length, pageSize]);
   const paginatedLeads = useMemo(() => filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize), [filteredData, currentPage, pageSize]);
@@ -1151,73 +1168,79 @@ export default function LeadsPage() {
         </button>
       </div>
 
-      {/* Primary Type / Purpose Filter (Buy vs Rent) */}
-      <div style={{ marginBottom: 14 }}>
-        <FilterTabs
-          label="Inquiry Type:"
-          tabs={[
-            { id: 'All', label: 'All Inquiries', count: data.length, icon: <ListIcon size={14} /> },
-            { id: 'Buy', label: 'Buy / Purchase', count: buyCount, icon: <HomeIcon size={14} /> },
-            { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: <KeyIcon size={14} /> }
-          ]}
-          activeTab={purposeFilter}
-          onChange={(tabId) => setPurposeFilter(tabId as any)}
-        />
-      </div>
+      {/* Unified Compact Filter Bar Card */}
+      <div className="unified-filter-card">
+        {/* Row 1: Segmented Type Switch + Search + Channel + Sort */}
+        <div className="unified-filter-row-top">
+          <FilterTabs
+            variant="segmented"
+            size="sm"
+            tabs={[
+              { id: 'All', label: 'All Inquiries', count: data.length, icon: <ListIcon size={13} /> },
+              { id: 'Buy', label: 'Buy / Sale', count: buyCount, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: <KeyIcon size={13} /> }
+            ]}
+            activeTab={purposeFilter}
+            onChange={(tabId) => setPurposeFilter(tabId as any)}
+          />
 
-      {/* Filters & Search */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
-        {/* Status Filter Pills Row */}
-        <FilterTabs
-          label="Status:"
-          tabs={[
-            { id: 'All', label: 'All', count: data.length },
-            { id: 'Active', label: 'Active Pipeline', count: data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length },
-            ...leadStatuses.map(s => ({
-              id: s,
-              label: s,
-              count: data.filter(l => l.status === s).length
-            }))
-          ]}
-          activeTab={filter}
-          onChange={(tabId) => setFilter(tabId)}
-        />
+          <div className="unified-filter-controls">
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search name, phone, notes..."
+              maxWidth={220}
+            />
 
-        {/* Dropdowns & Search Toolbar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Channel:</span>
-              <select
-                value={sourceFilter}
-                onChange={e => setSourceFilter(e.target.value)}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 10,
-                  border: '1.5px solid var(--border)',
-                  backgroundColor: sourceFilter === 'All' ? '#fff' : '#eff6ff',
-                  color: sourceFilter === 'All' ? '#334155' : '#1d4ed8',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="All">All Inbound Sources</option>
-                {leadSources.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={sourceFilter}
+              onChange={e => setSourceFilter(e.target.value)}
+              className="unified-filter-select"
+              style={{
+                backgroundColor: sourceFilter === 'All' ? '#ffffff' : '#eff6ff',
+                color: sourceFilter === 'All' ? '#334155' : '#1d4ed8'
+              }}
+            >
+              <option value="All">All Sources</option>
+              {leadSources.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="unified-filter-select"
+            >
+              <option value="newest">Sort: Newest</option>
+              <option value="oldest">Sort: Oldest</option>
+              <option value="name_asc">Name (A → Z)</option>
+              <option value="name_desc">Name (Z → A)</option>
+              <option value="budget_desc">Budget: High → Low</option>
+              <option value="budget_asc">Budget: Low → High</option>
+            </select>
           </div>
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Search name, phone, source..."
-          maxWidth={280}
-        />
+        </div>
+
+        {/* Row 2: Status Filter Pills in a Compact Horizontal Strip */}
+        <div className="unified-filter-row-bottom">
+          <FilterTabs
+            label="Status:"
+            size="sm"
+            tabs={[
+              { id: 'All', label: 'All', count: data.length },
+              { id: 'Active', label: 'Active Pipeline', count: data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length },
+              ...leadStatuses.map(s => ({
+                id: s,
+                label: s,
+                count: data.filter(l => l.status === s).length
+              }))
+            ]}
+            activeTab={filter}
+            onChange={(tabId) => setFilter(tabId)}
+          />
+        </div>
       </div>
-    </div>
 
       {/* Desktop Table View */}
       <div className="desktop-only-table">

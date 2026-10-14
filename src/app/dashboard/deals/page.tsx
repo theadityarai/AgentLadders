@@ -61,6 +61,7 @@ export default function DealsPage() {
   const [dealTypeFilter, setDealTypeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
   const [stageFilter, setStageFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
 
   const [clientsList, setClientsList] = useState<{name: string; phone?: string; email?: string; type?: string}[]>([]);
   const [propertiesList, setPropertiesList] = useState<{title: string; locality?: string; city?: string; bhk?: string; price?: number; purpose?: string; listingType?: string}[]>([]);
@@ -215,8 +216,24 @@ export default function DealsPage() {
         );
       }
       return true;
+    }).sort((a, b) => {
+      if (sortBy === 'oldest') {
+        return (a.id || '').localeCompare(b.id || '');
+      } else if (sortBy === 'amount_desc') {
+        return (b.amount || 0) - (a.amount || 0);
+      } else if (sortBy === 'amount_asc') {
+        return (a.amount || 0) - (b.amount || 0);
+      } else if (sortBy === 'title_asc') {
+        return (a.title || '').localeCompare(b.title || '');
+      } else if (sortBy === 'client_asc') {
+        return (a.clientName || '').localeCompare(b.clientName || '');
+      } else if (sortBy === 'close_date') {
+        return (a.expectedCloseDate || '').localeCompare(b.expectedCloseDate || '');
+      }
+      // default: newest
+      return (b.id || '').localeCompare(a.id || '');
     });
-  }, [data, dealTypeFilter, stageFilter, searchQuery, isDealRent]);
+  }, [data, dealTypeFilter, stageFilter, searchQuery, isDealRent, sortBy]);
 
   const columnsToDisplay = useMemo(() => {
     if (stageFilter === 'All') return stages;
@@ -540,45 +557,64 @@ export default function DealsPage() {
         </button>
       </div>
 
-      {/* Deals Filter Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-        <FilterTabs
-          label="Deal Type:"
-          tabs={[
-            { id: 'All', label: 'All Deals', count: data.length, icon: <ListIcon size={14} /> },
-            { id: 'Buy', label: 'Sale / Buy Deals', count: saleCount, icon: <HomeIcon size={14} /> },
-            { id: 'Rent', label: 'Rental / Lease Deals', count: rentCount, icon: <KeyIcon size={14} /> }
-          ]}
-          activeTab={dealTypeFilter}
-          onChange={(tabId) => setDealTypeFilter(tabId as any)}
-        />
+      {/* Unified Compact Filter Bar Card */}
+      <div className="unified-filter-card">
+        {/* Row 1: Segmented Deal Type Switch + Search + Sort */}
+        <div className="unified-filter-row-top">
+          <FilterTabs
+            variant="segmented"
+            size="sm"
+            tabs={[
+              { id: 'All', label: 'All Deals', count: data.length, icon: <ListIcon size={13} /> },
+              { id: 'Buy', label: 'Sale / Buy Deals', count: saleCount, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'Rental / Lease Deals', count: rentCount, icon: <KeyIcon size={13} /> }
+            ]}
+            activeTab={dealTypeFilter}
+            onChange={(tabId) => setDealTypeFilter(tabId as any)}
+          />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search deals, clients, properties..."
-            maxWidth={280}
+          <div className="unified-filter-controls">
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search deals, clients, properties..."
+              maxWidth={240}
+            />
+
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="unified-filter-select"
+            >
+              <option value="newest">Sort: Newest First</option>
+              <option value="oldest">Sort: Oldest First</option>
+              <option value="amount_desc">Deal Value: High → Low</option>
+              <option value="amount_asc">Deal Value: Low → High</option>
+              <option value="title_asc">Deal Name (A → Z)</option>
+              <option value="client_asc">Client Name (A → Z)</option>
+              <option value="close_date">Expected Close Date</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Row 2: Deal Stage Filter Pills in a Compact Horizontal Strip */}
+        <div className="unified-filter-row-bottom">
+          <FilterTabs
+            label="Stage:"
+            size="sm"
+            tabs={[
+              { id: 'All', label: 'All Stages', count: data.length },
+              { id: 'Active', label: 'Active Pipeline', count: activeDealsCount },
+              ...allStagesList.map(s => ({
+                id: s,
+                label: s,
+                count: data.filter(d => d.stage === s).length
+              }))
+            ]}
+            activeTab={stageFilter}
+            onChange={(tabId) => setStageFilter(tabId)}
           />
         </div>
-      </div>
-
-      {/* Deal Status / Pipeline Stage Filter Pills Row */}
-      <div style={{ marginBottom: 20 }}>
-        <FilterTabs
-          label="Deal Stage:"
-          tabs={[
-            { id: 'All', label: 'All Stages', count: data.length },
-            { id: 'Active', label: 'Active Pipeline', count: activeDealsCount },
-            ...allStagesList.map(s => ({
-              id: s,
-              label: s,
-              count: data.filter(d => d.stage === s).length
-            }))
-          ]}
-          activeTab={stageFilter}
-          onChange={(tabId) => setStageFilter(tabId)}
-        />
       </div>
 
       {/* Kanban Board */}
