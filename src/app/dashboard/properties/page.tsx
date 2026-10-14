@@ -389,7 +389,8 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
               e.stopPropagation();
               onShare && onShare(prop);
             }}
-            title="Open multi-channel sharing options"
+            title="Share Property"
+            aria-label="Share Property"
             style={{
               padding: '8px 10px',
               backgroundColor: '#f8fafc',
@@ -403,6 +404,7 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
               alignItems: 'center',
               justifyContent: 'center',
               gap: 4,
+              flexShrink: 0,
               transition: 'all 0.15s ease'
             }}
             onMouseEnter={e => {
@@ -418,7 +420,7 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
             <span>Share</span>
           </button>
           
-          {/* Edit Button */}
+          {/* Edit Button (Icon-only with hover tooltip) */}
           <button
             type="button"
             onClick={(e) => {
@@ -426,27 +428,35 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
               onEdit && onEdit(prop);
             }}
             title="Edit Property"
+            aria-label="Edit Property"
             style={{
-              padding: '8px 10px',
-              backgroundColor: '#f1f5f9',
-              border: '1px solid #e2e8f0',
+              width: 32,
+              height: 32,
+              padding: 0,
+              flexShrink: 0,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
               borderRadius: 8,
-              color: '#0f172a',
+              color: '#1d4ed8',
               cursor: 'pointer',
-              fontSize: 12,
-              fontWeight: 600,
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: 4
+              justifyContent: 'center',
+              transition: 'all 0.15s ease'
             }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#e2e8f0')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#dbeafe';
+              e.currentTarget.style.borderColor = '#93c5fd';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = '#eff6ff';
+              e.currentTarget.style.borderColor = '#bfdbfe';
+            }}
           >
-            <EditIcon size={14} color="#0f172a" />
-            <span>Edit</span>
+            <EditIcon size={14} color="#1d4ed8" />
           </button>
 
-          {/* Delete Button */}
+          {/* Delete Button (Icon-only with hover tooltip) */}
           <button
             type="button"
             onClick={(e) => {
@@ -454,19 +464,30 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
               onDelete && onDelete(prop);
             }}
             title="Delete Property"
+            aria-label="Delete Property"
             style={{
-              padding: '8px 9px',
-              backgroundColor: '#fef2f2',
+              width: 32,
+              height: 32,
+              padding: 0,
+              flexShrink: 0,
+              backgroundColor: '#fee2e2',
               border: '1px solid #fecaca',
               borderRadius: 8,
               color: '#dc2626',
               cursor: 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              transition: 'all 0.15s ease'
             }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fee2e2')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fef2f2')}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#fecaca';
+              e.currentTarget.style.borderColor = '#f87171';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = '#fee2e2';
+              e.currentTarget.style.borderColor = '#fecaca';
+            }}
           >
             <TrashIcon size={14} color="#dc2626" />
           </button>
