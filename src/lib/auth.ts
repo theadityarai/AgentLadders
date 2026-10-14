@@ -8,16 +8,6 @@ import { verifyTOTP } from '@/lib/totp';
 
 const FALLBACK_SECRET = 'agentladders-secret-production-key-998877665544332211';
 
-if (!process.env.NEXTAUTH_SECRET || process.env.NEXTAUTH_SECRET.trim() === '') {
-  process.env.NEXTAUTH_SECRET = FALLBACK_SECRET;
-}
-if (!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.trim() === '') {
-  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
-  process.env.NEXTAUTH_URL = vercelUrl
-    ? (vercelUrl.startsWith('http') ? vercelUrl : `https://${vercelUrl}`)
-    : 'https://agent-ladders.vercel.app';
-}
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
