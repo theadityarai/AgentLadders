@@ -373,8 +373,8 @@ export function OnScreenTutorial() {
                       width: 20,
                       height: 20,
                       borderRadius: '50%',
-                      backgroundColor: '#ecfdf5',
-                      color: '#059669',
+                      backgroundColor: 'var(--primary-light, #ecfdf5)',
+                      color: 'var(--primary, #059669)',
                       fontSize: 11,
                       fontWeight: 800,
                       display: 'flex',
@@ -404,12 +404,12 @@ export function OnScreenTutorial() {
                 gap: 8,
                 padding: '12px 18px',
                 borderRadius: 12,
-                backgroundColor: '#059669',
+                backgroundColor: 'var(--primary, #059669)',
                 color: '#ffffff',
                 fontSize: 13.5,
                 fontWeight: 700,
                 textDecoration: 'none',
-                boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)',
+                boxShadow: '0 4px 14px rgba(var(--primary-rgb, 5, 150, 105), 0.3)',
                 transition: 'all 0.15s ease'
               }}
             >

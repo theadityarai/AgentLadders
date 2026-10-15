@@ -82,7 +82,7 @@ function renderCrumbIcon(
 ) {
   if (!icon) return null;
   const iconSize = compact ? 13 : 14;
-  const iconColor = isLast ? '#059669' : '#64748b';
+  const iconColor = isLast ? 'var(--primary, #059669)' : '#64748b';
 
   if (React.isValidElement(icon)) {
     return (

@@ -6,6 +6,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
+import { Pagination } from '@/components/ui/Pagination';
 import {
   FileTextIcon,
   DownloadIcon,
@@ -19,7 +20,9 @@ import {
   WhatsAppIcon,
   EditIcon,
   ExternalLinkIcon,
-  PrinterIcon
+  PrinterIcon,
+  ListIcon,
+  ChevronDownIcon
 } from '@/components/icons/NavIcons';
 import { ShareModal } from '@/components/ui/ShareModal';
 
@@ -97,12 +100,314 @@ function getFileIcon(type: string, name: string = ''): string {
   return '📄';
 }
 
+function getCategoryBadgeStyle(cat?: string) {
+  switch (cat) {
+    case 'Contracts & MOUs':
+      return { bg: '#f3e8ff', color: '#7e22ce', border: '#d8b4fe' };
+    case 'Client KYC & Identity':
+      return { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
+    case 'Brochures & Floor Plans':
+      return { bg: '#fef3c7', color: '#92400e', border: '#fde68a' };
+    case 'Title Deeds & OC':
+      return { bg: '#ccfbf1', color: '#0f766e', border: '#99f6e4' };
+    case 'Payment Receipts':
+      return { bg: '#ecfdf5', color: '#065f46', border: '#a7f3d0' };
+    case 'Others':
+    default:
+      return { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' };
+  }
+}
+
+const DocumentCardItem = React.memo(function DocumentCardItem({
+  doc,
+  onOpenPreview,
+  onOpenEdit,
+  onDelete,
+  onWhatsAppShare
+}: {
+  doc: DocumentItem;
+  onOpenPreview: (doc: DocumentItem) => void;
+  onOpenEdit: (doc: DocumentItem) => void;
+  onDelete: (doc: DocumentItem) => void;
+  onWhatsAppShare: (doc: DocumentItem) => void;
+}) {
+  const fileIcon = getFileIcon(doc.type, doc.name);
+  const relatedList = doc.relatedTo ? doc.relatedTo.split(', ').filter(Boolean) : [];
+  const catStyle = getCategoryBadgeStyle(doc.category);
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: 14,
+        padding: '18px 20px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.15s ease'
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = '#cbd5e1';
+        e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.05)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = '#e2e8f0';
+        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+      }}
+    >
+      {/* Top Bar: Icon + Category Badge + Action Buttons (Edit + Delete) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 32 }}>{fileIcon}</span>
+          <div>
+            <span style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: catStyle.color,
+              backgroundColor: catStyle.bg,
+              border: `1px solid ${catStyle.border}`,
+              padding: '3px 8px',
+              borderRadius: 6,
+              display: 'inline-block'
+            }}>
+              {doc.category || 'General'}
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {/* Edit Button */}
+          <button
+            type="button"
+            onClick={() => onOpenEdit(doc)}
+            title="Edit Document Details"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#64748b',
+              cursor: 'pointer',
+              padding: '5px 7px',
+              borderRadius: 6,
+              fontSize: 13,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.15s'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#0284c7'; e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+          >
+            ✏️
+          </button>
+
+          {/* Delete Button */}
+          <button
+            type="button"
+            onClick={() => onDelete(doc)}
+            title="Delete Document"
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 5, borderRadius: 6 }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#fee2e2'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+          >
+            <TrashIcon size={16} color="currentColor" />
+          </button>
+        </div>
+      </div>
+
+      {/* Body: Title + Details */}
+      <div style={{ flex: 1, marginBottom: 14 }}>
+        <h3
+          onClick={() => onOpenPreview(doc)}
+          style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', margin: '0 0 6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer' }}
+          title={doc.name}
+        >
+          {doc.name}
+        </h3>
+
+        <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+          <span>{doc.type}</span>
+          <span>•</span>
+          <span>{doc.size}</span>
+          <span>•</span>
+          <span>{doc.uploadedBy || 'Agent'}</span>
+          <span>•</span>
+          <span>📅 {new Date(doc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+        </div>
+
+        {/* Note / Description Snippet */}
+        {doc.description && (
+          <div
+            onClick={() => onOpenPreview(doc)}
+            style={{
+              fontSize: 12,
+              color: '#475569',
+              backgroundColor: '#f8fafc',
+              padding: '6px 10px',
+              borderRadius: 6,
+              border: '1px solid #e2e8f0',
+              marginBottom: 8,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 6
+            }}
+            title={doc.description}
+          >
+            <span style={{ fontSize: 12 }}>📝</span>
+            <span style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontStyle: 'italic',
+              maxWidth: '240px'
+            }}>
+              {doc.description}
+            </span>
+          </div>
+        )}
+
+        {/* Multi-selected Linked Entity Badges */}
+        {relatedList.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {relatedList.map((rel, i) => {
+              const icon = rel.startsWith('Property') ? '🏢' : rel.startsWith('Client') ? '👤' : '💼';
+              return (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: 11,
+                    color: '#334155',
+                    backgroundColor: '#f1f5f9',
+                    border: '1px solid #e2e8f0',
+                    padding: '2px 8px',
+                    borderRadius: 12,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    fontWeight: 600,
+                    maxWidth: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title={rel}
+                >
+                  <span>{icon}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{rel}</span>
+                </span>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Footer Action Row: Preview, Edit Icon, WhatsApp Share, Download */}
+      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+        {/* View / Preview */}
+        <button
+          type="button"
+          onClick={() => onOpenPreview(doc)}
+          title="Preview Document in Google Docs / Native Viewer"
+          style={{
+            padding: '6px 11px',
+            backgroundColor: '#f1f5f9',
+            color: '#0f172a',
+            border: '1px solid #e2e8f0',
+            borderRadius: 6,
+            fontSize: 12,
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            transition: 'all 0.15s ease'
+          }}
+        >
+          <span>👁️</span>
+          <span>Preview</span>
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* Edit Button */}
+          <button
+            type="button"
+            onClick={() => onOpenEdit(doc)}
+            title="Edit Details"
+            style={{
+              width: 30,
+              height: 30,
+              backgroundColor: '#f0f9ff',
+              color: '#0284c7',
+              border: '1px solid #bae6fd',
+              borderRadius: 6,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <EditIcon size={14} color="#0284c7" />
+          </button>
+
+          {/* WhatsApp Share */}
+          <button
+            type="button"
+            onClick={() => onWhatsAppShare(doc)}
+            title="Share Document on WhatsApp"
+            style={{
+              width: 30,
+              height: 30,
+              backgroundColor: '#ecfdf5',
+              color: '#059669',
+              border: '1px solid #bbf7d0',
+              borderRadius: 6,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <WhatsAppIcon size={14} color="#059669" />
+          </button>
+
+          {/* Download */}
+          <a
+            href={doc.fileData || `/api/public/document/${doc.id}/raw`}
+            download={doc.name}
+            title="Download File"
+            style={{
+              width: 30,
+              height: 30,
+              backgroundColor: '#0f172a',
+              color: '#ffffff',
+              textDecoration: 'none',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <DownloadIcon size={13} color="#ffffff" />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 export default function DocumentsPage() {
   const [data, setData] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<DocCategory>('All');
   const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [expandedDocIds, setExpandedDocIds] = useState<Record<string, boolean>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
   
   // Modals & Feedback
   const [docToDelete, setDocToDelete] = useState<DocumentItem | null>(null);
@@ -604,6 +909,22 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
     return counts;
   }, [data, search]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeCategory, sortBy]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setViewMode('grid');
+    }
+  }, []);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredData.slice(start, start + pageSize);
+  }, [filteredData, currentPage, pageSize]);
+
   // Filter items for the active entity type picker in Upload modal
   const filteredEntityItems = useMemo(() => {
     const q = entityFilterQuery.trim().toLowerCase();
@@ -696,7 +1017,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
               <span style={{ fontWeight: 700, color: '#0f172a' }}>{filteredData.length} shown</span>
               {(activeCategory !== 'All' || search) && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                  <span style={{ fontSize: 12, color: 'var(--primary-text, var(--primary, #059669))', backgroundColor: 'var(--primary-light, #ecfdf5)', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
                     Filtered: {[
                       activeCategory !== 'All' ? activeCategory : null,
                       search ? `"${search}"` : null
@@ -715,6 +1036,52 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
           </div>
 
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* View Mode Switcher: List View vs Cards View (Default: List View) */}
+            <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '10px', gap: '3px' }}>
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  fontSize: '12.5px',
+                  fontWeight: viewMode === 'list' ? 700 : 500,
+                  backgroundColor: viewMode === 'list' ? 'var(--primary, #059669)' : 'transparent',
+                  color: viewMode === 'list' ? '#ffffff' : '#64748b',
+                  boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5
+                }}
+              >
+                <ListIcon size={14} color="currentColor" />
+                <span>List View</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '7px',
+                  border: 'none',
+                  fontSize: '12.5px',
+                  fontWeight: viewMode === 'grid' ? 700 : 500,
+                  backgroundColor: viewMode === 'grid' ? 'var(--primary, #059669)' : 'transparent',
+                  color: viewMode === 'grid' ? '#ffffff' : '#64748b',
+                  boxShadow: viewMode === 'grid' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5
+                }}
+              >
+                <FileTextIcon size={14} color="currentColor" />
+                <span>Cards View</span>
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={() => {
@@ -735,11 +1102,11 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 fontSize: 13.5,
                 fontWeight: 600,
                 cursor: 'pointer',
-                boxShadow: '0 3px 12px rgba(5,150,105,0.25)',
+                boxShadow: '0 3px 12px rgba(var(--primary-rgb, 5, 150, 105), 0.25)',
                 transition: 'all 0.15s ease'
               }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#047857')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#059669')}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark, #047857)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary, #059669)')}
             >
               <span>+ Upload Document</span>
             </button>
@@ -814,296 +1181,455 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
               + Upload Document Now
             </button>
           </div>
+        ) : viewMode === 'list' ? (
+          <>
+            <div className="desktop-only-table" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20 }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border, #e2e8f0)' }}>
+                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Document</th>
+                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Category</th>
+                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Linked Record</th>
+                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Date &amp; Size</th>
+                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Uploaded By</th>
+                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedData.map((doc, idx) => {
+                      const isExpanded = !!expandedDocIds[doc.id];
+                      const fileIcon = getFileIcon(doc.type, doc.name);
+                      const catStyle = getCategoryBadgeStyle(doc.category);
+                      const relatedList = doc.relatedTo ? doc.relatedTo.split(', ').filter(Boolean) : [];
+
+                      return (
+                        <React.Fragment key={doc.id}>
+                          <tr
+                            onClick={() => setExpandedDocIds(prev => ({ ...prev, [doc.id]: !prev[doc.id] }))}
+                            style={{
+                              borderBottom: isExpanded ? 'none' : '1px solid var(--border, #e2e8f0)',
+                              backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa',
+                              cursor: 'pointer',
+                              transition: 'background-color 0.15s ease'
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#ffffff' : '#fafafa')}
+                          >
+                            {/* Document Title & Icon */}
+                            <td style={{ padding: '14px 18px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{
+                                  width: 42,
+                                  height: 42,
+                                  borderRadius: 8,
+                                  backgroundColor: '#f1f5f9',
+                                  border: '1px solid #e2e8f0',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: 22,
+                                  flexShrink: 0
+                                }}>
+                                  {fileIcon}
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                  <div
+                                    style={{ fontWeight: 700, color: '#090d16', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}
+                                    title={doc.name}
+                                  >
+                                    {doc.name}
+                                  </div>
+                                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3 }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 4, backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
+                                      {doc.type}
+                                    </span>
+                                    <span style={{ fontSize: 11.5, color: '#64748b' }}>{doc.size}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Category Badge */}
+                            <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
+                              <span style={{
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                padding: '3px 10px',
+                                borderRadius: 14,
+                                backgroundColor: catStyle.bg,
+                                color: catStyle.color,
+                                border: `1px solid ${catStyle.border}`
+                              }}>
+                                {doc.category || 'General'}
+                              </span>
+                            </td>
+
+                            {/* Linked Record */}
+                            <td style={{ padding: '14px 18px' }}>
+                              {relatedList.length > 0 ? (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 240 }}>
+                                  {relatedList.slice(0, 2).map((rel, i) => {
+                                    const icon = rel.startsWith('Property') ? '🏢' : rel.startsWith('Client') ? '👤' : '💼';
+                                    return (
+                                      <span
+                                        key={i}
+                                        style={{
+                                          fontSize: 11,
+                                          color: '#334155',
+                                          backgroundColor: '#f1f5f9',
+                                          border: '1px solid #e2e8f0',
+                                          padding: '2px 8px',
+                                          borderRadius: 12,
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: 4,
+                                          fontWeight: 600,
+                                          maxWidth: '100%',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap'
+                                        }}
+                                        title={rel}
+                                      >
+                                        <span>{icon}</span>
+                                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{rel}</span>
+                                      </span>
+                                    );
+                                  })}
+                                  {relatedList.length > 2 && (
+                                    <span style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', padding: '2px 6px', borderRadius: 10, backgroundColor: '#e2e8f0' }}>
+                                      +{relatedList.length - 2} more
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span style={{ color: '#94a3b8', fontSize: 12 }}>Unlinked</span>
+                              )}
+                            </td>
+
+                            {/* Date & Size */}
+                            <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
+                              <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 13 }}>
+                                {new Date(doc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </div>
+                              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
+                                {doc.size}
+                              </div>
+                            </td>
+
+                            {/* Uploaded By */}
+                            <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
+                              <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 13 }}>
+                                {doc.uploadedBy || 'Agent'}
+                              </div>
+                              <div style={{ fontSize: 11, color: '#059669', fontWeight: 600 }}>
+                                Verified
+                              </div>
+                            </td>
+
+                            {/* Actions Column */}
+                            <td style={{ padding: '14px 18px', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                                {/* Expand / Collapse */}
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedDocIds(prev => ({ ...prev, [doc.id]: !prev[doc.id] }))}
+                                  title={isExpanded ? 'Collapse Details' : 'Expand Details'}
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 7,
+                                    border: '1px solid #bfdbfe',
+                                    backgroundColor: isExpanded ? 'var(--primary, #059669)' : '#eff6ff',
+                                    color: isExpanded ? '#fff' : 'var(--primary, #059669)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                >
+                                  <ChevronDownIcon size={14} color={isExpanded ? '#fff' : 'var(--primary, #059669)'} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+                                </button>
+
+                                {/* Preview Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenPreview(doc)}
+                                  title="Preview Document"
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 7,
+                                    border: '1px solid #e2e8f0',
+                                    backgroundColor: '#ffffff',
+                                    color: '#0f172a',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    fontSize: 13,
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                                >
+                                  👁️
+                                </button>
+
+                                {/* WhatsApp Share */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleWhatsAppShare(doc)}
+                                  title="Share Document on WhatsApp"
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 7,
+                                    border: '1px solid #bbf7d0',
+                                    backgroundColor: '#dcfce7',
+                                    color: '#166534',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#bbf7d0')}
+                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#dcfce7')}
+                                >
+                                  <WhatsAppIcon size={14} color="#166534" />
+                                </button>
+
+                                {/* Download */}
+                                <a
+                                  href={doc.fileData || `/api/public/document/${doc.id}/raw`}
+                                  download={doc.name}
+                                  title="Download File"
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 7,
+                                    border: '1px solid #0f172a',
+                                    backgroundColor: '#0f172a',
+                                    color: '#ffffff',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    textDecoration: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#334155')}
+                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#0f172a')}
+                                >
+                                  <DownloadIcon size={13} color="#ffffff" />
+                                </a>
+
+                                {/* Edit */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEdit(doc)}
+                                  title="Edit Document"
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 7,
+                                    border: '1px solid #bfdbfe',
+                                    backgroundColor: '#eff6ff',
+                                    color: '#1d4ed8',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#dbeafe')}
+                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#eff6ff')}
+                                >
+                                  <EditIcon size={14} color="#1d4ed8" />
+                                </button>
+
+                                {/* Delete */}
+                                <button
+                                  type="button"
+                                  onClick={() => setDocToDelete(doc)}
+                                  title="Delete Document"
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 7,
+                                    border: '1px solid #fecaca',
+                                    backgroundColor: '#fee2e2',
+                                    color: '#dc2626',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s ease'
+                                  }}
+                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fecaca')}
+                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fee2e2')}
+                                >
+                                  <TrashIcon size={14} color="#dc2626" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* Expandable collapse row with document details & notes */}
+                          {isExpanded && (
+                            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border, #e2e8f0)' }} onClick={e => e.stopPropagation()}>
+                              <td colSpan={6} style={{ padding: '0 20px 20px 20px' }}>
+                                <div style={{ backgroundColor: '#ffffff', borderRadius: 10, border: '1px solid #e2e8f0', padding: '16px 20px', marginTop: 6, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                                  <div>
+                                    <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6 }}>
+                                      📝 Document Notes &amp; Summary
+                                    </div>
+                                    <div style={{ fontSize: 13.5, color: '#1e293b', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                      {doc.description || 'No additional notes or description provided for this vault asset.'}
+                                    </div>
+                                  </div>
+
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10, fontSize: 12.5 }}>
+                                    <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                      <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>Category</span>
+                                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{doc.category || 'General'}</span>
+                                    </div>
+                                    <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                      <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>File Format</span>
+                                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{doc.type}</span>
+                                    </div>
+                                    <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                      <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>File Size</span>
+                                      <span style={{ fontWeight: 600, color: '#0f172a' }}>{doc.size}</span>
+                                    </div>
+                                    <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                      <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>Vault Security</span>
+                                      <span style={{ fontWeight: 600, color: '#059669' }}>🔒 Certified Real Estate Record</span>
+                                    </div>
+                                  </div>
+
+                                  {relatedList.length > 0 && (
+                                    <div>
+                                      <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6 }}>
+                                        🔗 Linked CRM Records
+                                      </div>
+                                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                        {relatedList.map((rel, i) => {
+                                          const icon = rel.startsWith('Property') ? '🏢' : rel.startsWith('Client') ? '👤' : '💼';
+                                          return (
+                                            <span
+                                              key={i}
+                                              style={{
+                                                fontSize: 12,
+                                                color: '#334155',
+                                                backgroundColor: '#f1f5f9',
+                                                border: '1px solid #cbd5e1',
+                                                padding: '3px 10px',
+                                                borderRadius: 14,
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: 5,
+                                                fontWeight: 600
+                                              }}
+                                            >
+                                              <span>{icon}</span>
+                                              <span>{rel}</span>
+                                            </span>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f1f5f9', padding: '8px 14px', borderRadius: 8, border: '1px solid #cbd5e1', flexWrap: 'wrap', gap: 8 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                                      <span style={{ fontWeight: 700, color: '#0f172a' }}>File Name:</span>
+                                      <span style={{ color: '#0284c7', fontWeight: 600, fontFamily: 'monospace' }}>{doc.name}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCopyDirectLink(doc)}
+                                        style={{ padding: '5px 12px', fontSize: 12, fontWeight: 700, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                      >
+                                        <span>📋</span> Copy Link
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleOpenPreview(doc)}
+                                        style={{ padding: '5px 12px', fontSize: 12, fontWeight: 700, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                      >
+                                        <span>👁️</span> Preview
+                                      </button>
+                                      <a
+                                        href={doc.fileData || `/api/public/document/${doc.id}/raw`}
+                                        download={doc.name}
+                                        style={{ padding: '5px 12px', fontSize: 12, fontWeight: 700, backgroundColor: '#0f172a', color: '#fff', border: '1px solid #0f172a', borderRadius: 6, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
+                                      >
+                                        <DownloadIcon size={12} color="#fff" /> Download
+                                      </a>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile fallback for list view */}
+            <div className="mobile-only-cards" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14, marginBottom: 20 }}>
+              {paginatedData.map(doc => (
+                <DocumentCardItem
+                  key={`m-${doc.id}`}
+                  doc={doc}
+                  onOpenPreview={handleOpenPreview}
+                  onOpenEdit={handleOpenEdit}
+                  onDelete={setDocToDelete}
+                  onWhatsAppShare={handleWhatsAppShare}
+                />
+              ))}
+            </div>
+          </>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 16, marginBottom: 32 }}>
-            {filteredData.map(doc => {
-              const fileIcon = getFileIcon(doc.type, doc.name);
-              // Split relatedTo into separate entity tags if multi-selected
-              const relatedList = doc.relatedTo ? doc.relatedTo.split(', ').filter(Boolean) : [];
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 16, marginBottom: 20 }}>
+            {paginatedData.map(doc => (
+              <DocumentCardItem
+                key={doc.id}
+                doc={doc}
+                onOpenPreview={handleOpenPreview}
+                onOpenEdit={handleOpenEdit}
+                onDelete={setDocToDelete}
+                onWhatsAppShare={handleWhatsAppShare}
+              />
+            ))}
+          </div>
+        )}
 
-              return (
-                <div
-                  key={doc.id}
-                  style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 14,
-                    padding: '18px 20px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = '#cbd5e1';
-                    e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.05)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = '#e2e8f0';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
-                  }}
-                >
-                  {/* Top Bar: Icon + Category Badge + Action Buttons (Edit + Delete) */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: 32 }}>{fileIcon}</span>
-                      <div>
-                        <span style={{
-                          fontSize: 11,
-                          fontWeight: 700,
-                          color: doc.category === 'Others' ? '#64748b' : '#059669',
-                          backgroundColor: doc.category === 'Others' ? '#f1f5f9' : '#ecfdf5',
-                          padding: '3px 8px',
-                          borderRadius: 6,
-                          display: 'inline-block'
-                        }}>
-                          {doc.category || 'General'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      {/* Edit Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(doc)}
-                        title="Edit Document Details"
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#64748b',
-                          cursor: 'pointer',
-                          padding: '5px 7px',
-                          borderRadius: 6,
-                          fontSize: 13,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.15s'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#0284c7'; e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.backgroundColor = 'transparent'; }}
-                      >
-                        ✏️
-                      </button>
-
-                      {/* Delete Button */}
-                      <button
-                        type="button"
-                        onClick={() => setDocToDelete(doc)}
-                        title="Delete Document"
-                        style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 5, borderRadius: 6 }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#fee2e2'; }}
-                        onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
-                      >
-                        <TrashIcon size={16} color="currentColor" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Body: Title + Details */}
-                  <div style={{ flex: 1, marginBottom: 14 }}>
-                    <h3
-                      onClick={() => handleOpenPreview(doc)}
-                      style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', margin: '0 0 6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer' }}
-                      title={doc.name}
-                    >
-                      {doc.name}
-                    </h3>
-
-                    <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
-                      <span>{doc.type}</span>
-                      <span>•</span>
-                      <span>{doc.size}</span>
-                      <span>•</span>
-                      <span>{doc.uploadedBy || 'Agent'}</span>
-                      <span>•</span>
-                      <span>📅 {new Date(doc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                    </div>
-
-                    {/* Note / Description Snippet */}
-                    {doc.description && (
-                      <div
-                        onClick={() => handleOpenPreview(doc)}
-                        style={{
-                          fontSize: 12,
-                          color: '#475569',
-                          backgroundColor: '#f8fafc',
-                          padding: '6px 10px',
-                          borderRadius: 6,
-                          border: '1px solid #e2e8f0',
-                          marginBottom: 8,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'flex-start',
-                          gap: 6
-                        }}
-                        title={doc.description}
-                      >
-                        <span style={{ fontSize: 12 }}>📝</span>
-                        <span style={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          fontStyle: 'italic',
-                          maxWidth: '240px'
-                        }}>
-                          {doc.description}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Multi-selected Linked Entity Badges */}
-                    {relatedList.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                        {relatedList.map((rel, i) => {
-                          const icon = rel.startsWith('Property') ? '🏢' : rel.startsWith('Client') ? '👤' : '💼';
-                          return (
-                            <span
-                              key={i}
-                              style={{
-                                fontSize: 11,
-                                color: '#334155',
-                                backgroundColor: '#f1f5f9',
-                                border: '1px solid #e2e8f0',
-                                padding: '2px 8px',
-                                borderRadius: 12,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 4,
-                                fontWeight: 600,
-                                maxWidth: '100%',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                              }}
-                              title={rel}
-                            >
-                              <span>{icon}</span>
-                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{rel}</span>
-                            </span>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer Action Row: Preview, Edit Icon, WhatsApp Share, Download (Compact & Overflow-Free) */}
-                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                    {/* View / Preview */}
-                    <button
-                      type="button"
-                      onClick={() => handleOpenPreview(doc)}
-                      title="Preview Document in Google Docs / Native Viewer"
-                      style={{
-                        padding: '6px 11px',
-                        backgroundColor: '#f1f5f9',
-                        color: '#0f172a',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: 6,
-                        fontSize: 12,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 5,
-                        transition: 'all 0.15s ease'
-                      }}
-                    >
-                      <span>👁️</span>
-                      <span>Preview</span>
-                    </button>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      {/* Edit Button (Icon button with hover tooltip matching platform standards) */}
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(doc)}
-                        title="Edit Details"
-                        style={{
-                          width: 30,
-                          height: 30,
-                          backgroundColor: '#f0f9ff',
-                          color: '#0284c7',
-                          border: '1px solid #bae6fd',
-                          borderRadius: 6,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        <EditIcon size={14} color="#0284c7" />
-                      </button>
-
-                      {/* WhatsApp Share */}
-                      <button
-                        type="button"
-                        onClick={() => handleWhatsAppShare(doc)}
-                        title="Share Document on WhatsApp"
-                        style={{
-                          width: 30,
-                          height: 30,
-                          backgroundColor: '#ecfdf5',
-                          color: '#059669',
-                          border: '1px solid #bbf7d0',
-                          borderRadius: 6,
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        <WhatsAppIcon size={14} color="#059669" />
-                      </button>
-
-                      {/* Download */}
-                      {doc.fileData ? (
-                        <a
-                          href={doc.fileData}
-                          download={doc.name}
-                          title="Download File to Computer"
-                          style={{
-                            width: 30,
-                            height: 30,
-                            backgroundColor: '#0f172a',
-                            color: '#ffffff',
-                            textDecoration: 'none',
-                            borderRadius: 6,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <DownloadIcon size={13} color="#ffffff" />
-                        </a>
-                      ) : (
-                        <a
-                          href={`/api/public/document/${doc.id}/raw`}
-                          download={doc.name}
-                          title="Download File"
-                          style={{
-                            width: 30,
-                            height: 30,
-                            backgroundColor: '#0f172a',
-                            color: '#ffffff',
-                            textDecoration: 'none',
-                            borderRadius: 6,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <DownloadIcon size={13} color="#ffffff" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+        {/* Pagination Bar */}
+        {filteredData.length > 0 && (
+          <div style={{ marginBottom: 28 }}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={filteredData.length}
+              pageSize={pageSize}
+              pageSizeOptions={[8, 12, 16, 24, 48]}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              itemLabel="documents"
+            />
           </div>
         )}
 
@@ -1118,7 +1644,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 Pre-formatted, RERA-aligned agreements and checklists ready for client execution
               </p>
             </div>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: '#059669', backgroundColor: '#ecfdf5', padding: '4px 10px', borderRadius: 20 }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--primary-text, var(--primary, #059669))', backgroundColor: 'var(--primary-light, #ecfdf5)', padding: '4px 10px', borderRadius: 20 }}>
               Free Agency Assets
             </span>
           </div>
@@ -1439,8 +1965,8 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                           padding: '7px 8px',
                           borderRadius: 8,
                           border: isSelected ? '1.5px solid var(--primary, #059669)' : '1px solid #cbd5e1',
-                          backgroundColor: isSelected ? '#ecfdf5' : '#f8fafc',
-                          color: isSelected ? '#065f46' : '#475569',
+                          backgroundColor: isSelected ? 'var(--primary-light, #ecfdf5)' : '#f8fafc',
+                          color: isSelected ? 'var(--primary-text, var(--primary, #065f46))' : '#475569',
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: 'pointer',
@@ -1793,8 +2319,8 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                           padding: '7px 8px',
                           borderRadius: 8,
                           border: isSelected ? '1.5px solid var(--primary, #059669)' : '1px solid #cbd5e1',
-                          backgroundColor: isSelected ? '#ecfdf5' : '#f8fafc',
-                          color: isSelected ? '#065f46' : '#475569',
+                          backgroundColor: isSelected ? 'var(--primary-light, #ecfdf5)' : '#f8fafc',
+                          color: isSelected ? 'var(--primary-text, var(--primary, #065f46))' : '#475569',
                           fontSize: 12,
                           fontWeight: 700,
                           cursor: 'pointer',

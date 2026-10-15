@@ -1394,7 +1394,7 @@ export default function LandingPage() {
               },
               {
                 q: 'Can we customize the CRM with our agency logo and corporate theme?',
-                a: 'Yes. In Settings, you can upload your agency logo, select from 6 luxury real estate font pairings, and choose from 6 curated color palettes (Emerald, Sapphire, Obsidian, Rose Gold, Amber, Indigo). Your branding propagates across all dashboards, client links, and downloadable contracts in real time.'
+                a: 'Yes. In Settings, you can upload your agency logo, select from 6 luxury real estate font pairings, and choose from 5 curated color palettes (Emerald, Sapphire, Rose Gold, Amber, Indigo). Your branding propagates across all dashboards, client links, and downloadable contracts in real time.'
               },
               {
                 q: 'What happens after the 14-day free trial?',

@@ -344,13 +344,13 @@ export default function PlaybookAndTutorialPage() {
                   borderRadius: 20,
                   fontSize: 13,
                   fontWeight: isSel ? 700 : 500,
-                  backgroundColor: isSel ? '#059669' : '#ffffff',
+                  backgroundColor: isSel ? 'var(--primary, #059669)' : '#ffffff',
                   color: isSel ? '#ffffff' : '#334155',
-                  border: isSel ? '1px solid #059669' : '1px solid #e2e8f0',
+                  border: isSel ? '1px solid var(--primary, #059669)' : '1px solid #e2e8f0',
                   whiteSpace: 'nowrap',
                   cursor: 'pointer',
                   flexShrink: 0,
-                  boxShadow: isSel ? '0 2px 8px rgba(5,150,105,0.25)' : 'none'
+                  boxShadow: isSel ? '0 2px 8px rgba(var(--primary-rgb, 5, 150, 105), 0.25)' : 'none'
                 }}
               >
                 <span>{mod.shortName}</span>
@@ -460,7 +460,7 @@ export default function PlaybookAndTutorialPage() {
                             width: 32,
                             height: 32,
                             borderRadius: 8,
-                            backgroundColor: isSel ? '#059669' : '#f1f5f9',
+                            backgroundColor: isSel ? 'var(--primary, #059669)' : '#f1f5f9',
                             color: isSel ? '#ffffff' : '#64748b',
                             display: 'flex',
                             alignItems: 'center',
@@ -474,13 +474,13 @@ export default function PlaybookAndTutorialPage() {
                             <div style={{ fontSize: 13, fontWeight: isSel ? 700 : 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {mod.shortName}
                             </div>
-                            <div style={{ fontSize: 11, color: isSel ? '#059669' : '#94a3b8', marginTop: 1 }}>
+                            <div style={{ fontSize: 11, color: isSel ? 'var(--primary, #059669)' : '#94a3b8', marginTop: 1 }}>
                               {mod.url}
                             </div>
                           </div>
 
                           {isSel && (
-                            <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#059669', flexShrink: 0 }} />
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--primary, #059669)', flexShrink: 0 }} />
                           )}
                         </button>
                       );
@@ -631,7 +631,7 @@ export default function PlaybookAndTutorialPage() {
                   fontWeight: 700,
                   cursor: 'pointer',
                   border: 'none',
-                  backgroundColor: activeTab === tab.id ? '#059669' : 'transparent',
+                  backgroundColor: activeTab === tab.id ? 'var(--primary, #059669)' : 'transparent',
                   color: activeTab === tab.id ? '#ffffff' : '#64748b',
                   transition: 'all 0.15s ease'
                 }}
@@ -692,9 +692,9 @@ export default function PlaybookAndTutorialPage() {
                             gap: 6,
                             padding: '6px 12px',
                             borderRadius: 8,
-                            backgroundColor: isActiveStep ? '#059669' : 'rgba(255,255,255,0.08)',
+                            backgroundColor: isActiveStep ? 'var(--primary, #059669)' : 'rgba(255,255,255,0.08)',
                             color: '#ffffff',
-                            border: isActiveStep ? '1px solid #34d399' : '1px solid rgba(255,255,255,0.15)',
+                            border: isActiveStep ? '1px solid var(--accent, #34d399)' : '1px solid rgba(255,255,255,0.15)',
                             fontSize: 12,
                             fontWeight: 700,
                             cursor: 'pointer',
@@ -836,7 +836,7 @@ export default function PlaybookAndTutorialPage() {
                           width: 44,
                           height: 44,
                           borderRadius: 12,
-                          backgroundColor: isSelected ? '#059669' : '#0f172a',
+                          backgroundColor: isSelected ? 'var(--primary, #059669)' : '#0f172a',
                           color: '#ffffff',
                           display: 'flex',
                           flexDirection: 'column',
@@ -845,7 +845,7 @@ export default function PlaybookAndTutorialPage() {
                           fontWeight: 800,
                           fontSize: 16,
                           flexShrink: 0,
-                          boxShadow: isSelected ? '0 4px 12px rgba(5, 150, 105, 0.35)' : 'none'
+                          boxShadow: isSelected ? '0 4px 12px rgba(var(--primary-rgb, 5, 150, 105), 0.35)' : 'none'
                         }}>
                           <span style={{ fontSize: 10, textTransform: 'uppercase', opacity: 0.8 }}>Step</span>
                           <span>{st.number}</span>
@@ -1142,7 +1142,7 @@ export default function PlaybookAndTutorialPage() {
                       style={{
                         padding: '4px 10px',
                         borderRadius: 6,
-                        backgroundColor: activeHotspotId === h.id ? '#059669' : '#0f172a',
+                        backgroundColor: activeHotspotId === h.id ? 'var(--primary, #059669)' : '#0f172a',
                         color: '#ffffff',
                         border: '1px solid #334155',
                         fontSize: 11.5,

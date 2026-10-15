@@ -1327,7 +1327,7 @@ export default function PropertiesPage() {
             <span style={{ fontWeight: 700, color: '#0f172a' }}>{filteredData.length} shown</span>
             {(purposeFilter !== 'All' || filter !== 'All' || search) && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                <span style={{ fontSize: 12, color: 'var(--primary-text, var(--primary, #059669))', backgroundColor: 'var(--primary-light, #ecfdf5)', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
                   Filtered: {[
                     purposeFilter !== 'All' ? (purposeFilter === 'Buy' ? 'For Sale' : 'For Rent') : null,
                     filter !== 'All' ? filter : null,

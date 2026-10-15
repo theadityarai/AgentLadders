@@ -2681,6 +2681,39 @@
   ],
   "auditLogs": [
     {
+      "id": "aud_zmb16r4",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "DELETE",
+      "entity": "ActiveSession",
+      "entityId": "sess_xmldq8r_mv9sjppk",
+      "details": "User signed out from Google Chrome (103.21.124.58 (Localhost • Vance Realty Gateway)).",
+      "createdAt": "2026-10-15T19:06:01.606Z"
+    },
+    {
+      "id": "aud_9mzkef4",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "DELETE",
+      "entity": "ActiveSession",
+      "entityId": "sess_208d7zp_mv9vvvco",
+      "details": "User signed out from Google Chrome (103.21.124.58 (Localhost • Vance Realty Gateway)).",
+      "createdAt": "2026-10-15T18:40:36.579Z"
+    },
+    {
+      "id": "aud_3yat6wa",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "DELETE",
+      "entity": "ActiveSessions",
+      "entityId": "usr_ag_vance_01",
+      "details": "Terminated 8 active session(s) from other browsers and devices.",
+      "createdAt": "2026-10-15T18:34:42.436Z"
+    },
+    {
       "id": "aud_amhsxj5",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
@@ -2905,167 +2938,92 @@
   "sharedLinks": [],
   "activeSessions": [
     {
-      "id": "sess_zv1pi7l_mv9nzcrw",
+      "id": "sess_io30ex2_mv9wt2ck",
       "userId": "usr_ag_vance_01",
       "userName": "Marcus Vance",
       "userEmail": "marcus@vancerealty.com",
-      "browser": "Mozilla Firefox",
-      "browserVersion": "158.0",
+      "browser": "Google Chrome",
+      "browserVersion": "155.0.0.0",
       "os": "Windows 11 PC",
       "deviceType": "desktop",
       "deviceModel": "Windows PC",
-      "ipAddress": "::ffff:127.0.0.1",
+      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
       "location": "Mumbai, Maharashtra, India",
       "screen": "1536 × 864",
-      "timezone": "Asia/Kolkata",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:158.0) Gecko/20100101 Firefox/158.0",
-      "createdAt": "2026-10-15T14:58:58.933Z",
-      "lastActive": "2026-10-15T15:01:16.558Z"
+      "timezone": "Asia/Calcutta",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "createdAt": "2026-10-15T19:06:01.958Z",
+      "lastActive": "2026-10-15T19:06:01.958Z"
+    },
+    {
+      "id": "sess_duvxlmy_mv9wtbr9",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "userEmail": "marcus@vancerealty.com",
+      "browser": "Google Chrome",
+      "browserVersion": "155.0.0.0",
+      "os": "Windows 11 PC",
+      "deviceType": "desktop",
+      "deviceModel": "Windows PC",
+      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
+      "location": "Mumbai, Maharashtra, India",
+      "screen": "1536 × 864",
+      "timezone": "Asia/Calcutta",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "createdAt": "2026-10-15T19:06:14.268Z",
+      "lastActive": "2026-10-15T19:32:29.245Z"
+    }
+  ],
+  "revokedSessions": [
+    {
+      "id": "sess_zv1pi7l_mv9nzcrw",
+      "userId": "usr_ag_vance_01",
+      "revokedAt": "2026-10-15T18:34:42.436Z"
     },
     {
       "id": "sess_lrg86uo_mv94c1of",
       "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-15T14:59:26.199Z",
-      "lastActive": "2026-10-15T15:17:46.908Z"
+      "revokedAt": "2026-10-15T18:34:42.436Z"
     },
     {
       "id": "sess_idwe6xy_mv9oshpj",
       "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-15T15:21:47.439Z",
-      "lastActive": "2026-10-15T16:49:31.642Z"
+      "revokedAt": "2026-10-15T18:34:42.436Z"
     },
     {
       "id": "sess_995wmlw_mv9qmen6",
       "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-15T16:12:54.811Z",
-      "lastActive": "2026-10-15T16:12:59.921Z"
+      "revokedAt": "2026-10-15T18:34:42.436Z"
     },
     {
       "id": "sess_mbmumsc_mv9s43jn",
       "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-15T16:54:51.016Z",
-      "lastActive": "2026-10-15T17:06:06.301Z"
+      "revokedAt": "2026-10-15T18:34:42.436Z"
     },
     {
       "id": "test_agent_suite_device",
       "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows Desktop",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1920 × 1080",
-      "timezone": "Asia/Kolkata",
-      "userAgent": "node",
-      "createdAt": "2026-10-15T17:00:21.409Z",
-      "lastActive": "2026-10-15T17:05:33.692Z"
+      "revokedAt": "2026-10-15T18:34:42.436Z"
     },
     {
       "id": "sess_7r81lig_mv9sje2k",
       "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-15T17:06:32.382Z",
-      "lastActive": "2026-10-15T17:06:46.834Z"
-    },
-    {
-      "id": "sess_xmldq8r_mv9sjppk",
-      "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-15T17:06:47.191Z",
-      "lastActive": "2026-10-15T18:25:09.242Z"
+      "revokedAt": "2026-10-15T18:34:42.436Z"
     },
     {
       "id": "sess_5wlnjmg_mv9te8ry",
       "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-15T17:30:37.066Z",
-      "lastActive": "2026-10-15T18:24:29.685Z"
+      "revokedAt": "2026-10-15T18:34:42.436Z"
+    },
+    {
+      "id": "sess_208d7zp_mv9vvvco",
+      "userId": "usr_ag_vance_01",
+      "revokedAt": "2026-10-15T18:40:36.579Z"
+    },
+    {
+      "id": "sess_xmldq8r_mv9sjppk",
+      "userId": "usr_ag_vance_01",
+      "revokedAt": "2026-10-15T19:06:01.606Z"
     }
-  ],
-  "revokedSessions": []
+  ]
 }

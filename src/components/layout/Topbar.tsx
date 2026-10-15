@@ -290,7 +290,7 @@ export function Topbar() {
       {/* Search Bar - Interactive Live Command Bar */}
       <div ref={searchRef} className="hide-on-mobile" style={{ flex: 1, maxWidth: '440px', position: 'relative' }}>
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', color: '#94a3b8' }}>
-          {isSearching ? <SpinnerIcon size={16} color="#059669" /> : <SearchIcon size={16} color="#94a3b8" />}
+          {isSearching ? <SpinnerIcon size={16} color="var(--primary, #059669)" /> : <SearchIcon size={16} color="#94a3b8" />}
         </span>
         <input 
           type="text" 
@@ -568,7 +568,7 @@ export function Topbar() {
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <ItemIcon size={17} color="#059669" />
+                    <ItemIcon size={17} color="var(--primary, #059669)" />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -622,7 +622,7 @@ export function Topbar() {
                     onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
                     onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    <ItemIcon size={17} color="#059669" />
+                    <ItemIcon size={17} color="var(--primary, #059669)" />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -699,13 +699,13 @@ export function Topbar() {
           </Link>
         )}
 
-        {/* Playbook & Tutorial Topbar Control (Desktop & Tablet) */}
+        {/* Playbook & Tutorial Topbar Control (Desktop & Tablet) - Theme Dynamic */}
         <div className="hide-on-mobile" style={{
           display: 'flex',
           alignItems: 'center',
-          backgroundColor: '#ecfdf5',
+          backgroundColor: 'var(--primary-light, #ecfdf5)',
           borderRadius: '20px',
-          border: '1px solid #a7f3d0',
+          border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)',
           overflow: 'hidden',
           boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
         }}>
@@ -717,20 +717,20 @@ export function Topbar() {
               alignItems: 'center',
               gap: '6px',
               padding: '6px 12px',
-              color: '#065f46',
+              color: 'var(--primary-text, var(--primary, #065f46))',
               fontSize: '12.5px',
               fontWeight: 700,
               transition: 'background-color 0.15s ease'
             }}
             title="Open Complete Playbook & Tutorial"
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d1fae5'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(var(--primary-rgb, 5, 150, 105), 0.14)'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
-            <CompassIcon size={14} color="#059669" />
+            <CompassIcon size={14} color="var(--primary, #059669)" />
             <span className="hide-on-tablet">Playbook & Tutorial</span>
           </Link>
 
-          <div style={{ width: 1, height: 16, backgroundColor: '#a7f3d0' }} />
+          <div style={{ width: 1, height: 16, backgroundColor: 'rgba(var(--primary-rgb, 5, 150, 105), 0.2)' }} />
 
           <button
             type="button"
@@ -742,17 +742,17 @@ export function Topbar() {
               alignItems: 'center',
               gap: '4px',
               padding: '6px 10px',
-              color: '#065f46',
+              color: 'var(--primary-text, var(--primary, #065f46))',
               fontSize: '12px',
               fontWeight: 700,
               cursor: 'pointer',
               transition: 'background-color 0.15s ease'
             }}
             title="Open Interactive Screen Tour for this page"
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d1fae5'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(var(--primary-rgb, 5, 150, 105), 0.14)'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
-            <SparklesIcon size={13} color="#059669" />
+            <SparklesIcon size={13} color="var(--primary, #059669)" />
             <span className="hide-on-tablet">Tour</span>
           </button>
         </div>
@@ -867,8 +867,8 @@ export function Topbar() {
               <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
                   <div style={{ padding: '36px 20px', textAlign: 'center', color: '#94a3b8' }}>
-                    <div style={{ display: 'inline-flex', padding: 10, borderRadius: '50%', backgroundColor: '#f1f5f9', marginBottom: 8, color: '#059669' }}>
-                      <CheckIcon size={22} color="#059669" />
+                    <div style={{ display: 'inline-flex', padding: 10, borderRadius: '50%', backgroundColor: 'var(--primary-light, #f1f5f9)', marginBottom: 8, color: 'var(--primary, #059669)' }}>
+                      <CheckIcon size={22} color="var(--primary, #059669)" />
                     </div>
                     <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>All caught up!</div>
                     <div style={{ fontSize: '12px', marginTop: '2px' }}>No unread updates.</div>

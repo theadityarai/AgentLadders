@@ -1549,15 +1549,15 @@ export default function InvoicesPage() {
             {/* Modal Header */}
             <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FileTextIcon size={20} color="#059669" />
+                <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: 'var(--primary-light, #ecfdf5)', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileTextIcon size={20} color="var(--primary, #059669)" />
                 </div>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, whiteSpace: 'nowrap' }}>
                       {editingInvoice ? `Edit Tax Invoice #${form.number}` : 'Create Tax Invoice'}
                     </h3>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, backgroundColor: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, backgroundColor: 'var(--primary-light, #ecfdf5)', color: 'var(--primary-text, var(--primary, #059669))', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', whiteSpace: 'nowrap' }}>
                       RERA &amp; GST Compliant
                     </span>
                   </div>
@@ -1877,15 +1877,15 @@ export default function InvoicesPage() {
               <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <BriefcaseIcon size={15} color="#059669" />
+                    <BriefcaseIcon size={15} color="var(--primary, #059669)" />
                     <span>Advisory Services &amp; Line Items</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddItem}
-                    style={{ fontSize: 12.5, fontWeight: 700, color: '#059669', background: 'none', border: '1px solid #a7f3d0', padding: '5px 12px', borderRadius: 6, backgroundColor: '#ecfdf5', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                    style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--primary-text, var(--primary, #059669))', background: 'none', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', padding: '5px 12px', borderRadius: 6, backgroundColor: 'var(--primary-light, #ecfdf5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                   >
-                    <PlusIcon size={14} color="#059669" />
+                    <PlusIcon size={14} color="var(--primary, #059669)" />
                     <span>Add Line Item</span>
                   </button>
                 </div>
@@ -2159,7 +2159,7 @@ export default function InvoicesPage() {
                         href="/dashboard/settings"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ fontSize: 12, fontWeight: 700, color: '#059669', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 6 }}
+                        style={{ fontSize: 12, fontWeight: 700, color: 'var(--primary-text, var(--primary, #059669))', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', backgroundColor: 'var(--primary-light, #ecfdf5)', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', borderRadius: 6 }}
                       >
                         Enable in Invoice Settings →
                       </a>

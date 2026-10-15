@@ -77,15 +77,6 @@ export const FONT_OPTIONS: FontOption[] = [
     fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     previewHeading: 'Prestige Boulevard Smart Homes',
     previewBody: 'Designed for young high-net-worth families with integrated home automation and clubhouse.'
-  },
-  {
-    id: 'playfair',
-    name: 'Playfair Display',
-    category: 'Heritage Editorial Serif',
-    tagline: 'Classic editorial serif expressing timeless prestige, heritage villas, and private estates',
-    fontFamily: "'Playfair Display', Georgia, serif",
-    previewHeading: 'The Royal Sovereign Mansions',
-    previewBody: 'A legacy address crafted for discerning connoisseurs of architecture, privacy, and heirloom luxury.'
   }
 ];
 
@@ -117,20 +108,6 @@ export const COLOR_SCHEMES: ColorSchemeOption[] = [
     previewGradient: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
     badgeBg: '#dbeafe',
     badgeText: '#1e40af'
-  },
-  {
-    id: 'obsidian',
-    name: 'Midnight Obsidian',
-    tagline: 'Ultra-minimalist, sleek monochrome architectural luxury',
-    primary: '#0f172a',
-    primaryDark: '#020617',
-    primaryLight: '#f1f5f9',
-    primaryText: '#0f172a',
-    primaryRgb: '15, 23, 42',
-    accent: '#334155',
-    previewGradient: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
-    badgeBg: '#e2e8f0',
-    badgeText: '#0f172a'
   },
   {
     id: 'rose',
@@ -253,8 +230,10 @@ export function getStoredTheme(): { fontId: string; colorId: string } {
   }
 
   try {
-    const fontId = localStorage.getItem('agentladders_font') || 'roboto';
-    const colorId = localStorage.getItem('agentladders_color') || 'emerald';
+    let fontId = localStorage.getItem('agentladders_font') || 'roboto';
+    if (fontId === 'playfair') fontId = 'roboto';
+    let colorId = localStorage.getItem('agentladders_color') || 'emerald';
+    if (colorId === 'obsidian') colorId = 'emerald';
     return { fontId, colorId };
   } catch {
     return { fontId: 'roboto', colorId: 'emerald' };

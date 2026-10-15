@@ -550,7 +550,7 @@ export default function DashboardPage() {
           <div style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px', margin: '4px 0 10px' }}>
             {newInquiriesCount}
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, width: 'fit-content', backgroundColor: '#ecfdf5', color: '#059669', fontSize: 12, fontWeight: 700, padding: '3px 8px', borderRadius: 12 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, width: 'fit-content', backgroundColor: 'var(--primary-light, #ecfdf5)', color: 'var(--primary, #059669)', fontSize: 12, fontWeight: 700, padding: '3px 8px', borderRadius: 12 }}>
             <span>↑ 20% from last week</span>
           </div>
         </Link>
@@ -652,7 +652,7 @@ export default function DashboardPage() {
           <div style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px', margin: '4px 0 10px' }}>
             {dealsInProgressCount}
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, width: 'fit-content', backgroundColor: '#ecfdf5', color: '#059669', fontSize: 12, fontWeight: 700, padding: '3px 8px', borderRadius: 12 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, width: 'fit-content', backgroundColor: 'var(--primary-light, #ecfdf5)', color: 'var(--primary, #059669)', fontSize: 12, fontWeight: 700, padding: '3px 8px', borderRadius: 12 }}>
             <span>↑ 3 closing this month</span>
           </div>
         </Link>
@@ -739,8 +739,8 @@ export default function DashboardPage() {
                   onClick={() => setPriorityFilter('inquiries')}
                   style={{
                     border: 'none',
-                    backgroundColor: priorityFilter === 'inquiries' ? 'var(--primary)' : '#ecfdf5',
-                    color: priorityFilter === 'inquiries' ? '#ffffff' : 'var(--primary)',
+                    backgroundColor: priorityFilter === 'inquiries' ? 'var(--primary)' : 'var(--primary-light, #ecfdf5)',
+                    color: priorityFilter === 'inquiries' ? '#ffffff' : 'var(--primary-text, var(--primary))',
                     fontSize: 12,
                     fontWeight: 700,
                     padding: '5px 12px',
@@ -780,7 +780,7 @@ export default function DashboardPage() {
                   'Overdue': { bg: '#fef2f2', text: '#dc2626', border: '#fecaca' },
                   'Due Soon': { bg: '#fef3c7', text: '#d97706', border: '#fde68a' },
                   'Site Visit': { bg: '#eff6ff', text: '#2563eb', border: '#bfdbfe' },
-                  'New Inquiry': { bg: '#ecfdf5', text: '#059669', border: '#a7f3d0' }
+                  'New Inquiry': { bg: 'var(--primary-light, #ecfdf5)', text: 'var(--primary-text, var(--primary, #059669))', border: 'rgba(var(--primary-rgb, 5, 150, 105), 0.25)' }
                 }[item.category] || { bg: '#f1f5f9', text: '#475569', border: '#e2e8f0' };
 
                 return (
@@ -894,7 +894,7 @@ export default function DashboardPage() {
                             minWidth: 78,
                             justifyContent: 'center'
                           }}
-                          onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#ecfdf5')}
+                          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-light, #ecfdf5)')}
                           onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
                         >
                           <WhatsAppIcon size={12} color="var(--primary)" />

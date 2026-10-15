@@ -450,11 +450,29 @@ export default function SettingsPage() {
   const handleFontChange = (fontId: string) => {
     setSelectedFont(fontId);
     applyTheme(fontId, selectedColor);
+    fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateBranding',
+        fontFamily: fontId,
+        colorScheme: selectedColor
+      })
+    }).catch(() => {});
   };
 
   const handleColorChange = (colorId: string) => {
     setSelectedColor(colorId);
     applyTheme(selectedFont, colorId);
+    fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateBranding',
+        fontFamily: selectedFont,
+        colorScheme: colorId
+      })
+    }).catch(() => {});
   };
 
   const handleSaveTheme = async () => {
@@ -486,6 +504,15 @@ export default function SettingsPage() {
     setSelectedFont('roboto');
     setSelectedColor('emerald');
     applyTheme('roboto', 'emerald');
+    fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateBranding',
+        fontFamily: 'roboto',
+        colorScheme: 'emerald'
+      })
+    }).catch(() => {});
     showToast('info', 'Reset to Roboto & Emerald Prosperity default theme.', 'Default Restored');
   };
 
@@ -1273,7 +1300,7 @@ export default function SettingsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                   <span style={{ fontSize: 18 }}>🔤</span>
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                    Select Typography (7 Font Options • Default: Roboto)
+                    Select Typography (6 Font Options • Default: Roboto)
                   </h3>
                 </div>
 
@@ -1396,7 +1423,7 @@ export default function SettingsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                   <span style={{ fontSize: 18 }}>🎨</span>
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                    Select Color Scheme (6 Real Estate Palettes • Default: Emerald Prosperity)
+                    Select Color Scheme (5 Real Estate Palettes • Default: Emerald Prosperity)
                   </h3>
                 </div>
 
@@ -1834,7 +1861,7 @@ export default function SettingsPage() {
                     />
                   </div>
 
-                  <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                  <div className={styles.inputGroup}>
                     <label>
                       UPI / QR Remittance ID
                       <InfoTooltip text="Virtual payment address (VPA) for instant UPI payments (e.g. agency.realty@hdfcbank)" />

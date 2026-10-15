@@ -596,7 +596,7 @@ export default function DealsPage() {
             <span>Pipeline Value: <strong style={{ color: 'var(--primary)', fontSize: 14 }}>{formatINR(activePipelineValue)}</strong></span>
             {(dealTypeFilter !== 'All' || stageFilter !== 'All' || searchQuery) && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                <span style={{ fontSize: 12, color: 'var(--primary-text, var(--primary, #059669))', backgroundColor: 'var(--primary-light, #ecfdf5)', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
                   Filtered: {[
                     dealTypeFilter !== 'All' ? (dealTypeFilter === 'Buy' ? 'Sale / Buy' : 'Rental / Lease') : null,
                     stageFilter !== 'All' ? stageFilter : null,
