@@ -1880,6 +1880,53 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
+                {/* GST Taxation & Place of Supply Toggle */}
+                <div style={{
+                  padding: '14px 18px',
+                  backgroundColor: invoiceSettings.enableGstTaxation ? '#ecfdf5' : '#f8fafc',
+                  border: `1.5px solid ${invoiceSettings.enableGstTaxation ? '#a7f3d0' : '#e2e8f0'}`,
+                  borderRadius: 12,
+                  marginBottom: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                  flexWrap: 'wrap'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a' }}>
+                        GST Taxation &amp; Place of Supply Module
+                      </span>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 12,
+                        backgroundColor: invoiceSettings.enableGstTaxation ? '#d1fae5' : '#f1f5f9',
+                        color: invoiceSettings.enableGstTaxation ? '#059669' : '#64748b'
+                      }}>
+                        {invoiceSettings.enableGstTaxation ? 'Enabled' : 'Disabled (Default)'}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 12, color: '#64748b', margin: '3px 0 0' }}>
+                      When enabled, the GST Taxation &amp; Place of Supply section will appear in the invoice creator to calculate CGST, SGST, or IGST.
+                    </p>
+                  </div>
+
+                  <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', gap: 8 }}>
+                    <input
+                      type="checkbox"
+                      checked={!!invoiceSettings.enableGstTaxation}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, enableGstTaxation: e.target.checked })}
+                      style={{ width: 18, height: 18, accentColor: '#059669', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: invoiceSettings.enableGstTaxation ? '#059669' : '#475569' }}>
+                      {invoiceSettings.enableGstTaxation ? 'Enabled' : 'Enable GST'}
+                    </span>
+                  </label>
+                </div>
+
                 <div className={styles.formGrid}>
                   <div className={styles.inputGroup}>
                     <label>

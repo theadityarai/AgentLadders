@@ -362,15 +362,41 @@ label {
 .confirm-modal-box h1,
 .confirm-modal-box h2,
 .confirm-modal-box h3,
-.responsive-modal p,
-.responsive-modal span,
-.responsive-modal div,
-.responsive-modal strong,
-.responsive-modal h1,
-.responsive-modal h2,
-.responsive-modal h3 {
+.break-words {
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+/* Wide Editor Modal (for Invoices, Agreements, Rich Documents) */
+.invoice-editor-modal {
+  width: 100% !important;
+  max-width: min(880px, calc(100vw - 32px)) !important;
+  max-height: 92vh !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  margin: 16px !important;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+.invoice-editor-modal,
+.invoice-editor-modal * {
+  box-sizing: border-box;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+@media (max-width: 640px) {
+  .invoice-editor-modal {
+    margin: auto 0 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 94vh !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -893,6 +919,13 @@ label {
   }
   .unified-filter-controls > *:first-child {
     grid-column: 1 / -1;
+  }
+}
+
+/* Responsive Invoice Modal Grid */
+@media (max-width: 860px) {
+  .invoice-modal-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 

@@ -288,7 +288,8 @@ export async function PUT(req: Request) {
       upiId: sanitizeString(inv.upiId ?? ''),
       placeOfSupply: sanitizeString(inv.placeOfSupply ?? ''),
       sacCode: sanitizeString(inv.sacCode ?? ''),
-      defaultNotes: sanitizeString(inv.defaultNotes ?? '')
+      defaultNotes: sanitizeString(inv.defaultNotes ?? ''),
+      enableGstTaxation: Boolean(inv.enableGstTaxation)
     };
     saveDb(db);
     return NextResponse.json({ success: true, invoiceSettings: db.agencies[agencyIndex].invoiceSettings });

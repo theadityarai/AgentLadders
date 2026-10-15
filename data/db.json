@@ -232,13 +232,19 @@
         "tagline": "Licensed Real Estate Advisory & Brokerage Firm",
         "gstin": "27AABCA1234F1Z5",
         "reraReg": "A51800029384",
+        "address": "",
+        "phone": "",
+        "email": "",
+        "pan": "",
         "accountName": "Vance Luxury Realty Escrow Advisory",
         "bankName": "HDFC Bank Ltd",
+        "accountType": "Savings",
         "accountNumber": "50200088921102",
         "ifscCode": "HDFC0000128",
         "upiId": "agency.realty@hdfcbank",
         "placeOfSupply": "Maharashtra (27)",
-        "sacCode": "997221"
+        "sacCode": "997221",
+        "defaultNotes": ""
       }
     }
   ],
@@ -1889,14 +1895,19 @@
       "taxRate": 18,
       "issueDate": "2026-10-14",
       "dueDate": "2026-10-28",
-      "status": "Overdue",
+      "status": "Paid",
       "notes": "50% advance upon title agreement, 50% on deed execution. Bank transfer only.",
       "id": "inv_ja8kb4q3",
       "agencyId": "ag_vance_01",
       "createdAt": "2026-10-14T18:14:44.400Z",
-      "updatedAt": "2026-10-15T04:58:20.694Z",
+      "updatedAt": "2026-10-15T12:23:05.614Z",
       "totalAmount": 1463200,
-      "taxType": "intra"
+      "taxType": "intra",
+      "paymentDetails": {
+        "paidAt": "2026-10-15",
+        "paymentMode": "NEFT / RTGS",
+        "transactionRef": "DIRECT-PORTAL-CONFIRMATION"
+      }
     }
   ],
   "payments": [
@@ -2829,7 +2840,7 @@
       "timezone": "Asia/Calcutta",
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
       "createdAt": "2026-10-15T05:49:06.757Z",
-      "lastActive": "2026-10-15T07:16:41.998Z"
+      "lastActive": "2026-10-15T13:36:28.218Z"
     },
     {
       "id": "sess_secondary_mac_hsjda",

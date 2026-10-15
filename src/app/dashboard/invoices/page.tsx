@@ -11,7 +11,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { 
-  formatINR, 
+  formatActualINR,
   formatINRFull, 
   numberToIndianWords, 
   DEFAULT_INVOICE_SETTINGS, 
@@ -40,7 +40,8 @@ import {
   ExternalLinkIcon,
   CalendarIcon,
   RotateCcwIcon,
-  PlusIcon
+  PlusIcon,
+  FileTextIcon
 } from '@/components/icons/NavIcons';
 
 export interface InvoiceItem {
@@ -63,7 +64,7 @@ export interface Invoice {
   items?: InvoiceItem[];
   amount: number; // Subtotal (Taxable Value)
   totalAmount?: number; // Total with Tax
-  taxType?: 'intra' | 'inter' | 'exempt';
+  taxType?: 'intra' | 'inter' | 'exempt' | 'not_applicable' | 'none' | string;
   taxRate?: number | string;
   issueDate?: string;
   dueDate: string;
@@ -122,8 +123,8 @@ export default function InvoicesPage() {
     clientGstin: '',
     dealRef: '',
     items: [DEFAULT_LINE_ITEM()],
-    taxType: 'intra' as 'intra' | 'inter' | 'exempt',
-    taxRate: '18',
+    taxType: 'none' as 'intra' | 'inter' | 'exempt' | 'not_applicable' | 'none',
+    taxRate: 'none',
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
     status: 'Pending',
@@ -136,6 +137,8 @@ export default function InvoicesPage() {
   // Commission Calculator Helper within Form
   const [calcBasePrice, setCalcBasePrice] = useState('');
   const [calcPercentage, setCalcPercentage] = useState('2');
+  const [customPercentage, setCustomPercentage] = useState('');
+  const [targetLineItemIndex, setTargetLineItemIndex] = useState(0);
 
   // Agency branding & invoice configuration
   const [agencyInfo, setAgencyInfo] = useState<{ name: string; phone?: string; whatsapp?: string }>({
@@ -232,15 +235,18 @@ export default function InvoicesPage() {
   // Form Live Calculations
   const formCalculations = useMemo(() => {
     const subtotal = form.items.reduce((sum, it) => sum + (parseFloat(it.amount) || 0), 0);
-    const taxRate = parseFloat(form.taxRate) || 0;
-    const isInter = form.taxType === 'inter';
-    const isExempt = form.taxType === 'exempt';
+    const isGstEnabled = Boolean(invoiceSettings.enableGstTaxation);
+    const taxRate = isGstEnabled && form.taxRate !== 'none' ? (parseFloat(form.taxRate) || 0) : 0;
+    const taxType = isGstEnabled ? form.taxType : 'none';
+    const isInter = taxType === 'inter';
+    const isExempt = taxType === 'exempt';
+    const isNoTax = !isGstEnabled || taxType === 'none' || taxType === 'not_applicable' || isExempt || taxRate === 0;
 
     let cgst = 0;
     let sgst = 0;
     let igst = 0;
 
-    if (!isExempt) {
+    if (!isNoTax) {
       if (isInter) {
         igst = subtotal * (taxRate / 100);
       } else {
@@ -250,7 +256,7 @@ export default function InvoicesPage() {
     }
 
     const totalTax = cgst + sgst + igst;
-    const totalAmount = Math.round(subtotal + totalTax);
+    const totalAmount = Math.round((subtotal + totalTax) * 100) / 100;
 
     return {
       subtotal,
@@ -261,7 +267,7 @@ export default function InvoicesPage() {
       totalAmount,
       inWords: numberToIndianWords(totalAmount)
     };
-  }, [form.items, form.taxRate, form.taxType]);
+  }, [form.items, form.taxRate, form.taxType, invoiceSettings.enableGstTaxation]);
 
   const handleOpenAdd = () => {
     setEditingInvoice(null);
@@ -274,12 +280,12 @@ export default function InvoicesPage() {
       clientGstin: '',
       dealRef: '',
       items: [DEFAULT_LINE_ITEM()],
-      taxType: 'intra',
-      taxRate: '18',
+      taxType: 'none',
+      taxRate: 'none',
       issueDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
       status: 'Pending',
-      notes: invoiceSettings.defaultNotes || 'Brokerage advisory fees payable upon formal title verification and registration.',
+      notes: '',
       paymentDate: new Date().toISOString().split('T')[0],
       paymentMode: 'NEFT / RTGS',
       paymentRef: ''
@@ -287,6 +293,8 @@ export default function InvoicesPage() {
     setSelectedProperties([]);
     setCalcBasePrice('');
     setCalcPercentage('2');
+    setCustomPercentage('');
+    setTargetLineItemIndex(0);
     setShowModal(true);
   };
 
@@ -317,12 +325,12 @@ export default function InvoicesPage() {
       clientGstin: inv.clientGstin || '',
       dealRef: inv.dealRef || '',
       items: existingItems,
-      taxType: (inv.taxType as any) || 'intra',
-      taxRate: inv.taxRate?.toString() || '18',
+      taxType: ((inv.taxType as any) || (invoiceSettings.enableGstTaxation ? 'intra' : 'none')),
+      taxRate: inv.taxRate !== undefined && inv.taxRate !== null && inv.taxRate.toString() !== '0' ? inv.taxRate.toString() : (invoiceSettings.enableGstTaxation ? (inv.taxRate === 0 ? '0' : 'none') : 'none'),
       issueDate: inv.issueDate || new Date().toISOString().split('T')[0],
       dueDate: inv.dueDate || new Date().toISOString().split('T')[0],
       status: inv.status || 'Pending',
-      notes: inv.notes || invoiceSettings.defaultNotes || '',
+      notes: inv.notes || '',
       paymentDate: inv.paymentDetails?.paidAt || new Date().toISOString().split('T')[0],
       paymentMode: inv.paymentDetails?.paymentMode || 'NEFT / RTGS',
       paymentRef: inv.paymentDetails?.transactionRef || ''
@@ -334,6 +342,9 @@ export default function InvoicesPage() {
     } else {
       setSelectedProperties([]);
     }
+    setTargetLineItemIndex(0);
+    setCustomPercentage('');
+    setCalcBasePrice('');
     setShowModal(true);
   };
 
@@ -359,6 +370,9 @@ export default function InvoicesPage() {
       ...prev,
       items: prev.items.filter((_, idx) => idx !== index)
     }));
+    if (targetLineItemIndex >= form.items.length - 1) {
+      setTargetLineItemIndex(Math.max(0, form.items.length - 2));
+    }
   };
 
   const handleUpdateItem = (index: number, field: string, val: string) => {
@@ -369,32 +383,67 @@ export default function InvoicesPage() {
     });
   };
 
-  // Quick commission calculator applier
-  const handleApplyCommissionCalc = () => {
+  // Quick commission calculator appliers (target selected line item with actual amounts and actual percentage)
+  const applyCommission = (pct: number) => {
     const base = parseFloat(calcBasePrice) || 0;
-    const pct = parseFloat(calcPercentage) || 0;
-    if (base <= 0 || pct <= 0) return;
+    if (base <= 0) {
+      setToast({ id: Date.now().toString(), type: 'info', title: 'Deal Value Required', message: 'Enter deal value to calculate commission percentage.' });
+      return;
+    }
+    if (pct <= 0) {
+      setToast({ id: Date.now().toString(), type: 'info', title: 'Invalid Percentage', message: 'Enter a valid percentage greater than 0.' });
+      return;
+    }
+    const rawAmt = base * (pct / 100);
+    const amt = Math.round(rawAmt * 100) / 100;
+    const amtStr = amt % 1 === 0 ? amt.toFixed(0) : amt.toFixed(2);
+    const targetIdx = (targetLineItemIndex >= 0 && targetLineItemIndex < form.items.length) ? targetLineItemIndex : 0;
 
-    const commissionAmt = Math.round(base * (pct / 100));
     setForm(prev => {
-      const updatedItems = [...prev.items];
-      if (updatedItems.length > 0) {
-        updatedItems[0] = {
-          ...updatedItems[0],
-          description: prev.dealRef 
-            ? `${pct}% Brokerage Commission on ${prev.dealRef}`
-            : `${pct}% Agency Commission on Property Transaction (${formatINR(base)})`,
-          amount: commissionAmt.toString()
-        };
-      }
-      return { ...prev, items: updatedItems };
+      const items = [...prev.items];
+      if (items.length <= targetIdx) return prev;
+      const dealLabel = prev.dealRef ? `on ${prev.dealRef} ` : '';
+      items[targetIdx] = {
+        ...items[targetIdx],
+        description: `${pct}% Brokerage Commission ${dealLabel}(Transaction Value: ${formatActualINR(base)})`,
+        amount: amtStr
+      };
+      return { ...prev, items };
     });
 
     setToast({
       id: Date.now().toString(),
       type: 'info',
       title: 'Commission Applied',
-      message: `Calculated ${pct}% on ${formatINR(base)} = ${formatINR(commissionAmt)} applied to Item #1.`
+      message: `Calculated ${pct}% on ${formatActualINR(base)} = ${formatActualINR(amt)} applied to Line Item #${targetIdx + 1}.`
+    });
+  };
+
+  const applyRentalCommission = () => {
+    const base = parseFloat(calcBasePrice) || 0;
+    if (base <= 0) {
+      setToast({ id: Date.now().toString(), type: 'info', title: 'Deal Value Required', message: 'Enter monthly rental value to apply rental brokerage.' });
+      return;
+    }
+    const amt = Math.round(base * 100) / 100;
+    const amtStr = amt % 1 === 0 ? amt.toFixed(0) : amt.toFixed(2);
+    const targetIdx = (targetLineItemIndex >= 0 && targetLineItemIndex < form.items.length) ? targetLineItemIndex : 0;
+    setForm(prev => {
+      const items = [...prev.items];
+      if (items.length <= targetIdx) return prev;
+      const dealLabel = prev.dealRef ? `on ${prev.dealRef} ` : '';
+      items[targetIdx] = {
+        ...items[targetIdx],
+        description: `1 Month Rental Tenancy Brokerage ${dealLabel}(Monthly Rent: ${formatActualINR(base)})`,
+        amount: amtStr
+      };
+      return { ...prev, items };
+    });
+    setToast({
+      id: Date.now().toString(),
+      type: 'info',
+      title: 'Rent Brokerage Applied',
+      message: `1 Month Rent (${formatActualINR(base)}) applied to Line Item #${targetIdx + 1}.`
     });
   };
 
@@ -420,6 +469,8 @@ export default function InvoicesPage() {
       amount: parseFloat(it.amount) || 0
     }));
 
+    const isGstEnabled = Boolean(invoiceSettings.enableGstTaxation);
+
     const payload = {
       ...(editingInvoice ? { id: editingInvoice.id } : {}),
       number: form.number,
@@ -432,8 +483,8 @@ export default function InvoicesPage() {
       items: parsedItems,
       amount: formCalculations.subtotal,
       totalAmount: formCalculations.totalAmount,
-      taxType: form.taxType,
-      taxRate: parseFloat(form.taxRate) || 0,
+      taxType: isGstEnabled ? form.taxType : 'none',
+      taxRate: isGstEnabled && form.taxRate !== 'none' ? (parseFloat(form.taxRate) || 0) : 0,
       issueDate: form.issueDate,
       dueDate: form.dueDate,
       status: form.status,
@@ -458,7 +509,7 @@ export default function InvoicesPage() {
           id: Date.now().toString(),
           type: 'success',
           title: editingInvoice ? 'Invoice Updated' : 'Tax Invoice Created',
-          message: `Invoice #${form.number} saved with total ${formatINR(formCalculations.totalAmount)}.`
+          message: `Invoice #${form.number} saved with total ${formatActualINR(formCalculations.totalAmount)}.`
         });
         loadInvoices();
       } else {
@@ -505,16 +556,17 @@ export default function InvoicesPage() {
   // Multi-Channel Share Helpers
   const getInvoiceAmounts = (inv: Invoice) => {
     const subtotal = Number(inv.amount) || 0;
-    const taxRate = Number(inv.taxRate ?? 18);
-    const taxType = inv.taxType || 'intra';
+    const taxRate = Number(inv.taxRate ?? 0);
+    const taxType = inv.taxType || 'none';
     const isInter = taxType === 'inter';
     const isExempt = taxType === 'exempt';
+    const isNoTax = taxType === 'none' || taxType === 'not_applicable' || isExempt || taxRate === 0;
 
     let cgst = 0;
     let sgst = 0;
     let igst = 0;
 
-    if (!isExempt) {
+    if (!isNoTax) {
       if (isInter) {
         igst = subtotal * (taxRate / 100);
       } else {
@@ -524,7 +576,7 @@ export default function InvoicesPage() {
     }
 
     const total = inv.totalAmount !== undefined ? Number(inv.totalAmount) : (subtotal + cgst + sgst + igst);
-    return { subtotal, cgst, sgst, igst, total, isInter, isExempt, taxRate };
+    return { subtotal, cgst, sgst, igst, total, isInter, isExempt, isNoTax, taxRate, taxType };
   };
 
   const handleWhatsAppShare = (inv: Invoice) => {
@@ -534,7 +586,7 @@ export default function InvoicesPage() {
     const firmName = invoiceSettings.agencyName || agencyInfo.name;
     const accType = invoiceSettings.accountType || 'Current';
 
-    const msg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (${accType} A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n• *UPI ID:* ${invoiceSettings.upiId}` : ''}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
+    const msg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatActualINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatActualINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (${accType} A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n• *UPI ID:* ${invoiceSettings.upiId}` : ''}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
 
     const url = phoneTarget ? `https://wa.me/${phoneTarget}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
     try {
@@ -571,7 +623,7 @@ export default function InvoicesPage() {
 
   const handleCopySummary = (inv: Invoice) => {
     const { total } = getInvoiceAmounts(inv);
-    const text = `Tax Invoice #${inv.number} | Client: ${inv.clientName} | Total Payable: ${formatINR(total)} (${formatINRFull(total)}) | Due: ${inv.dueDate} | Bank: ${invoiceSettings.bankName} A/c: ${invoiceSettings.accountNumber} IFSC: ${invoiceSettings.ifscCode}`;
+    const text = `Tax Invoice #${inv.number} | Client: ${inv.clientName} | Total Payable: ${formatActualINR(total)} (${formatINRFull(total)}) | Due: ${inv.dueDate} | Bank: ${invoiceSettings.bankName} A/c: ${invoiceSettings.accountNumber} IFSC: ${invoiceSettings.ifscCode}`;
     navigator.clipboard.writeText(text);
     setToast({ id: Date.now().toString(), type: 'success', title: 'Invoice Summary Copied', message: 'Ready to paste into messages.' });
   };
@@ -905,14 +957,14 @@ export default function InvoicesPage() {
       key: 'amount',
       label: 'Payable Amount (INR)',
       render: (r) => {
-        const { subtotal, total, taxRate } = getInvoiceAmounts(r);
+        const { subtotal, total, taxRate, isNoTax } = getInvoiceAmounts(r);
         return (
           <div>
-            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14.5px' }}>
-              {formatINR(total)}
+            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '14px' }}>
+              {formatActualINR(total)}
             </div>
             <div style={{ fontSize: '11px', color: '#64748b', marginTop: 1 }}>
-              Base: {formatINR(subtotal)} + {taxRate}% GST
+              Base: {formatActualINR(subtotal)}{!isNoTax && taxRate > 0 ? ` + ${taxRate}% GST` : ''}
             </div>
           </div>
         );
@@ -966,28 +1018,6 @@ export default function InvoicesPage() {
       label: 'Actions',
       render: (r) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {/* Toggle Paid / Pending */}
-          <button
-            type="button"
-            onClick={() => handleTogglePaid(r)}
-            style={{
-              padding: '6px 9px',
-              fontSize: '11.5px',
-              fontWeight: 700,
-              backgroundColor: r.status === 'Paid' ? '#eff6ff' : '#f0fdf4',
-              border: `1px solid ${r.status === 'Paid' ? '#bfdbfe' : '#bbf7d0'}`,
-              borderRadius: 6,
-              cursor: 'pointer',
-              color: r.status === 'Paid' ? '#1d4ed8' : '#15803d',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4
-            }}
-            title={r.status === 'Paid' ? 'Mark as Pending' : 'Mark as Paid'}
-          >
-            {r.status === 'Paid' ? 'Pending' : '✓ Paid'}
-          </button>
-
           {/* Quick Share Menu */}
           <button
             type="button"
@@ -1095,19 +1125,19 @@ export default function InvoicesPage() {
         <div className="dashboard-metric-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 22 }}>
           <div style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: '16px 18px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>Total Invoiced (Gross)</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>{formatINR(stats.totalBilled)}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>{formatActualINR(stats.totalBilled)}</div>
             <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 3 }}>Across {data.length} total billings</div>
           </div>
 
           <div style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: '16px 18px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ fontSize: 11.5, fontWeight: 700, color: '#059669', textTransform: 'uppercase', marginBottom: 4 }}>Total Collected (Paid)</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: '#059669' }}>{formatINR(stats.totalCollected)}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#059669' }}>{formatActualINR(stats.totalCollected)}</div>
             <div style={{ fontSize: 11.5, color: '#059669', fontWeight: 600, marginTop: 3 }}>{stats.paidCount} cleared remittances</div>
           </div>
 
           <div style={{ backgroundColor: '#ffffff', borderRadius: 12, padding: '16px 18px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
             <div style={{ fontSize: 11.5, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', marginBottom: 4 }}>Accounts Receivable</div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: '#2563eb' }}>{formatINR(stats.totalPending)}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#2563eb' }}>{formatActualINR(stats.totalPending)}</div>
             <div style={{ fontSize: 11.5, color: '#2563eb', fontWeight: 600, marginTop: 3 }}>{stats.pendingCount} pending payment</div>
           </div>
 
@@ -1171,135 +1201,79 @@ export default function InvoicesPage() {
       {showModal && (
         <div
           onClick={() => setShowModal(false)}
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="responsive-modal animate-enter"
-            style={{ backgroundColor: '#ffffff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.15)', maxWidth: 760, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+            className="invoice-editor-modal animate-enter"
+            style={{ backgroundColor: '#ffffff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', maxWidth: 880, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
           >
             {/* Modal Header */}
-            <div style={{ padding: '16px 22px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', flexShrink: 0 }}>
-              <div>
-                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  {editingInvoice ? 'Edit Commission Tax Invoice' : 'Create Commission Tax Invoice'}
-                </h3>
-                <p style={{ fontSize: 12.5, color: '#64748b', margin: '2px 0 0' }}>
-                  Compliant with Indian RERA &amp; GST guidelines for real estate brokerage firms
-                </p>
+            <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FileTextIcon size={20} color="#059669" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, whiteSpace: 'nowrap' }}>
+                      {editingInvoice ? `Edit Tax Invoice #${form.number}` : 'Create Tax Invoice'}
+                    </h3>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, backgroundColor: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', whiteSpace: 'nowrap' }}>
+                      RERA &amp; GST Compliant
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12, color: '#64748b', margin: '2px 0 0' }}>
+                    Generate real estate brokerage commission invoice with automatic GST calculations
+                  </p>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: 6 }}
-              >
-                <XIcon size={20} color="#64748b" />
-              </button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                {/* Invoice Number Badge with Regenerate */}
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 12, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap' }}>
+                  <span style={{ color: '#475569', whiteSpace: 'nowrap' }}>Invoice #:</span>
+                  <input
+                    value={form.number}
+                    onChange={e => setForm({ ...form, number: e.target.value })}
+                    style={{ width: 120, border: 'none', background: 'transparent', fontWeight: 800, color: '#0f172a', fontSize: 12.5, outline: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, number: generateInvoiceNumber() }))}
+                    title="Generate new invoice sequence"
+                    style={{ background: 'none', border: 'none', color: '#059669', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
+                  >
+                    <RotateCcwIcon size={13} color="#059669" />
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: 6, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  title="Close modal"
+                >
+                  <XIcon size={20} color="#64748b" />
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '22px', overflowY: 'auto' }}>
+            {/* Modal Form Body: Single comfortable, spacious flow */}
+            <form onSubmit={handleSubmit} style={{ overflowY: 'auto', flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
               
-              {/* SECTION 1: INVOICE META */}
-              <div style={{ marginBottom: 16, backgroundColor: '#f8fafc', padding: '14px 16px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.04em' }}>
-                  1. Invoice Identifiers &amp; Schedule
-                </div>
-                
-                <div className="responsive-grid-3" style={{ gap: 12 }}>
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
-                      <span>Invoice Number *</span>
-                      <button
-                        type="button"
-                        onClick={() => setForm(prev => ({ ...prev, number: generateInvoiceNumber() }))}
-                        title="Generate random new invoice sequence"
-                        style={{ background: 'none', border: 'none', color: '#059669', fontSize: 11, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap' }}
-                      >
-                        <RotateCcwIcon size={11} color="#059669" />
-                        <span>Regenerate</span>
-                      </button>
-                    </label>
-                    <input
-                      required
-                      value={form.number}
-                      onChange={e => setForm({ ...form, number: e.target.value })}
-                      placeholder="e.g. INV-2026-0042"
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, outline: 'none', fontWeight: 600 }}
-                    />
+              {/* SECTION 1: BILLED CLIENT DETAILS */}
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <UsersIcon size={15} color="#059669" />
+                    <span>Billed To (Client &amp; Entity Details)</span>
                   </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Issue Date *</label>
-                    <input
-                      required
-                      type="date"
-                      value={form.issueDate}
-                      onChange={e => setForm({ ...form, issueDate: e.target.value })}
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13 }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Due Date *</label>
-                    <input
-                      required
-                      type="date"
-                      value={form.dueDate}
-                      onChange={e => setForm({ ...form, dueDate: e.target.value })}
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13 }}
-                    />
-                    <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-                      <button type="button" onClick={() => setDueDatePreset(0)} style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', color: '#475569', whiteSpace: 'nowrap' }}>Today</button>
-                      <button type="button" onClick={() => setDueDatePreset(7)} style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', color: '#475569', whiteSpace: 'nowrap' }}>+7d</button>
-                      <button type="button" onClick={() => setDueDatePreset(14)} style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', color: '#475569', whiteSpace: 'nowrap' }}>+14d</button>
-                      <button type="button" onClick={() => setDueDatePreset(30)} style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', color: '#475569', whiteSpace: 'nowrap' }}>+30d</button>
-                    </div>
-                  </div>
+                  <span style={{ fontSize: 11.5, color: '#64748b' }}>Search CRM client or enter details manually</span>
                 </div>
 
-                <div style={{ marginTop: 12 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Initial Status</label>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {invoiceStatuses.map(s => {
-                      const isSel = form.status === s;
-                      const col = getStatusColorStyle(s);
-                      return (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => setForm(prev => ({ ...prev, status: s }))}
-                          style={{
-                            padding: '5px 12px',
-                            borderRadius: 20,
-                            fontSize: 12,
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            border: isSel ? `2px solid ${col.text}` : '1px solid #cbd5e1',
-                            backgroundColor: isSel ? col.bg : '#ffffff',
-                            color: isSel ? col.text : '#475569',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: col.dot }} />
-                          {s}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 2: CLIENT DETAILS */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.04em' }}>
-                  2. Client &amp; Billing Entity (Billed To)
-                </div>
-
-                {/* Auto-fill from CRM client */}
-                <div style={{ marginBottom: 12 }}>
+                {/* CRM Client Autocomplete Dropdown */}
+                <div style={{ marginBottom: 14 }}>
                   <SearchableCombobox
                     label="Select Registered CRM Client (Auto-fill)"
                     value={form.clientName}
@@ -1308,7 +1282,7 @@ export default function InvoicesPage() {
                     options={crmClients.map(c => ({
                       value: c.name,
                       label: c.name,
-                      sublabel: c.phone || 'No Phone',
+                      sublabel: c.phone || 'No phone',
                       badge: (c as any).type || (c as any).status || 'Client'
                     }))}
                     onChange={(val, opt) => {
@@ -1317,7 +1291,7 @@ export default function InvoicesPage() {
                         return;
                       }
                       const matched = crmClients.find(c => c.name === val);
-                      const phoneVal = (matched && matched.phone) || (opt?.sublabel && opt.sublabel !== 'No Phone' ? opt.sublabel : form.clientPhone);
+                      const phoneVal = (matched && matched.phone) || (opt?.sublabel && opt.sublabel !== 'No phone' ? opt.sublabel : form.clientPhone);
                       setForm(prev => ({
                         ...prev,
                         clientName: val,
@@ -1327,39 +1301,26 @@ export default function InvoicesPage() {
                         clientGstin: (matched && matched.gstin) || prev.clientGstin
                       }));
                     }}
-                    onAddNew={() => {}}
-                    addNewLabel="+ New Client"
                   />
                 </div>
 
-                <div className="responsive-grid-2" style={{ gap: 12, marginBottom: 10 }}>
+                {/* 2-Column Inputs for Name & Phone */}
+                <div className="responsive-grid-2" style={{ gap: 14, marginBottom: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Client / Entity Legal Name *</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
+                      Client / Entity Legal Name *
+                    </label>
                     <input
                       required
                       value={form.clientName}
                       onChange={e => setForm({ ...form, clientName: e.target.value })}
-                      placeholder="e.g. Vikram Malhotra / Indus Capital PE"
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, outline: 'none' }}
+                      placeholder="e.g. Vikram Malhotra / Indus Ventures Pvt Ltd"
+                      style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13, outline: 'none' }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                      Client GSTIN <span style={{ color: '#64748b', fontWeight: 500 }}>(Optional for B2B Tax Credit)</span>
-                    </label>
-                    <input
-                      value={form.clientGstin}
-                      onChange={e => setForm({ ...form, clientGstin: e.target.value.toUpperCase() })}
-                      placeholder="e.g. 27AAACN1234F1Z1"
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, outline: 'none', letterSpacing: '0.04em' }}
-                    />
-                  </div>
-                </div>
-
-                <div className="responsive-grid-2" style={{ gap: 12, marginBottom: 10 }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                      Client WhatsApp / Phone (10 Digits)
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
+                      Client WhatsApp / Phone
                     </label>
                     <PhoneInput
                       value={form.clientPhone || ''}
@@ -1367,194 +1328,251 @@ export default function InvoicesPage() {
                       placeholder="98200 45678"
                     />
                   </div>
+                </div>
+
+                {/* 2-Column Inputs for Email & GSTIN */}
+                <div className="responsive-grid-2" style={{ gap: 14, marginBottom: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Client Email Address</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
+                      Client Email Address
+                    </label>
                     <input
                       type="email"
                       value={form.clientEmail}
                       onChange={e => setForm({ ...form, clientEmail: e.target.value })}
-                      placeholder="e.g. vikram@example.com"
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, outline: 'none' }}
+                      placeholder="vikram@example.com"
+                      style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13, outline: 'none' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
+                      Client GSTIN <span style={{ color: '#64748b', fontWeight: 500 }}>(Optional for B2B)</span>
+                    </label>
+                    <input
+                      value={form.clientGstin}
+                      onChange={e => setForm({ ...form, clientGstin: e.target.value.toUpperCase() })}
+                      placeholder="e.g. 27AAACN1234F1Z1"
+                      style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13, outline: 'none', letterSpacing: '0.04em' }}
                     />
                   </div>
                 </div>
 
+                {/* Full Width Address */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Client Billing Address</label>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
+                    Billing Address
+                  </label>
                   <input
                     value={form.clientAddress}
                     onChange={e => setForm({ ...form, clientAddress: e.target.value })}
                     placeholder="e.g. Flat 1402, Lodha Park Tower 2, Worli, Mumbai 400018"
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, outline: 'none' }}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13, outline: 'none' }}
                   />
                 </div>
               </div>
 
-              {/* SECTION 3: TRANSACTION & DEAL REFERENCE */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.04em' }}>
-                  3. Deal &amp; Property Reference
+              {/* SECTION 2: LINKED PROPERTY / DEAL & 1-CLICK COMMISSION CALCULATOR */}
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <BuildingIcon size={15} color="#059669" />
+                    <span>Transaction &amp; Deal Reference (Optional)</span>
+                  </div>
+                  <span style={{ fontSize: 11.5, color: '#059669', fontWeight: 600 }}>1-Click calculate brokerage into line items</span>
                 </div>
 
-                <div style={{ marginBottom: 10 }}>
-                  <MultiPropertySelector
-                    label="Referenced Property Assets / Deals"
-                    required={false}
-                    itemPrefix="Property"
-                    itemBadgeLabel="Referenced Properties / Deals"
-                    addFirstLabel="Select Property Asset for Invoice"
-                    addMoreLabel="+ Add Another Property Asset"
-                    selectActionLabel="+ Select"
-                    availableProperties={[
+                {/* Property / Deal Dropdown */}
+                <div style={{ marginBottom: 12 }}>
+                  <SearchableCombobox
+                    label="Link Property Asset or Pipeline Deal"
+                    value={form.dealRef}
+                    placeholder="Select property or closed deal from CRM (optional)..."
+                    searchPlaceholder="Type property title or deal..."
+                    options={[
                       ...crmProperties.map(p => ({
-                        id: p.id,
-                        title: p.title,
-                        locality: p.locality || p.city,
-                        bhk: p.bhk,
-                        price: p.price,
-                        purpose: p.purpose || 'Property'
+                        value: p.title,
+                        label: p.title,
+                        sublabel: `${p.locality || p.city || 'Prime Location'} • ${p.bhk || p.purpose || 'Property'}`,
+                        badge: p.price ? formatActualINR(p.price) : 'Property'
                       })),
                       ...crmDeals.map(d => ({
-                        id: d.id,
-                        title: d.title,
-                        locality: d.clientName ? `Deal for ${d.clientName}` : 'Deals Pipeline',
-                        bhk: 'Deal',
-                        price: d.amount,
-                        purpose: 'Pipeline Deal'
+                        value: d.title,
+                        label: d.title,
+                        sublabel: d.clientName ? `Deal for ${d.clientName}` : 'Pipeline Deal',
+                        badge: d.amount ? formatActualINR(d.amount) : 'Deal'
                       }))
                     ]}
-                    selectedProperties={selectedProperties}
-                    onChange={(newProps) => {
-                      setSelectedProperties(newProps);
-                      const refString = newProps.join(', ');
-                      setForm(prev => ({
-                        ...prev,
-                        dealRef: refString
-                      }));
-
-                      // Auto-fill calculator base price from first selected asset
-                      const matchProp = crmProperties.find(p => p.title === newProps[0]);
-                      const matchDeal = crmDeals.find(d => d.title === newProps[0]);
-                      const val = matchProp?.price || matchDeal?.amount;
-                      if (val) {
-                        setCalcBasePrice(val.toString());
+                    onChange={(val) => {
+                      setForm(prev => ({ ...prev, dealRef: val }));
+                      const matchProp = crmProperties.find(p => p.title === val);
+                      const matchDeal = crmDeals.find(d => d.title === val);
+                      const priceVal = matchProp?.price || matchDeal?.amount;
+                      if (priceVal) {
+                        setCalcBasePrice(priceVal.toString());
                       }
                     }}
                   />
                 </div>
 
-                <div style={{ marginBottom: 10 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 4 }}>
-                    Custom Deal / Property Reference Description
-                  </label>
-                  <input
-                    value={form.dealRef}
-                    onChange={e => setForm({ ...form, dealRef: e.target.value })}
-                    placeholder="e.g. 4 BHK Sea-Facing Ultra Luxury Flat, Lodha Park"
-                    style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, outline: 'none' }}
-                  />
-                </div>
-
-                {/* Quick Commission Calculator Banner */}
-                <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', marginTop: 8 }}>
-                  <div style={{ fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span>⚡ Quick Brokerage Commission Calculator</span>
-                    <InfoTooltip text="Quickly calculate 1% or 2% advisory commission from transaction value and inject into Line Item 1." />
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1 1 180px' }}>
+                {/* Deal Value & Quick Percentage Buttons */}
+                <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  
+                  {/* Top row: Deal Value input + Target Line Item Selector */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, alignItems: 'center' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>
+                        Deal / Transaction Value (₹)
+                      </label>
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="decimal"
                         value={calcBasePrice}
-                        onChange={e => setCalcBasePrice(e.target.value)}
-                        placeholder="Deal Value (e.g. 85000000)"
-                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12.5, backgroundColor: '#ffffff' }}
+                        onKeyDown={(e) => {
+                          if (!/[0-9.]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Home', 'End'].includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                            e.preventDefault();
+                          }
+                          if (e.key === '.' && calcBasePrice.includes('.')) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={e => {
+                          let val = e.target.value.replace(/[^0-9.]/g, '');
+                          const parts = val.split('.');
+                          if (parts.length > 2) {
+                            val = parts[0] + '.' + parts.slice(1).join('');
+                          }
+                          setCalcBasePrice(val);
+                        }}
+                        placeholder="e.g. 999999"
+                        style={{ width: '100%', padding: '7px 10px', border: '1px solid #86efac', borderRadius: 6, fontSize: 13, backgroundColor: '#ffffff', fontWeight: 700, color: '#166534', outline: 'none' }}
                       />
+                      {calcBasePrice && !isNaN(parseFloat(calcBasePrice)) && parseFloat(calcBasePrice) > 0 && (
+                        <div style={{ fontSize: 11, color: '#15803d', fontWeight: 700, marginTop: 4 }}>
+                          Actual Amount: {formatActualINR(calcBasePrice)}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      {['1', '2', '3'].map(pct => (
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>
+                        Apply Brokerage To Line Item
+                      </label>
+                      <select
+                        value={targetLineItemIndex}
+                        onChange={e => setTargetLineItemIndex(parseInt(e.target.value) || 0)}
+                        style={{ width: '100%', padding: '7px 10px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12.5, backgroundColor: '#ffffff', fontWeight: 700, color: '#166534', outline: 'none' }}
+                      >
+                        {form.items.map((it, idx) => (
+                          <option key={it.id || idx} value={idx}>
+                            Line Item #{idx + 1}{it.description ? ` (${it.description.slice(0, 24)}${it.description.length > 24 ? '...' : ''})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Second row: Preset buttons + Custom Percentage Input */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', borderTop: '1px solid #dcfce7', paddingTop: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#166534', marginRight: 4 }}>
+                        Presets:
+                      </span>
+                      {[
+                        { label: '1% Brokerage', pct: 1 },
+                        { label: '2% Brokerage', pct: 2 },
+                        { label: '3% Brokerage', pct: 3 }
+                      ].map(item => (
                         <button
-                          key={pct}
+                          key={item.label}
                           type="button"
-                          onClick={() => setCalcPercentage(pct)}
-                          style={{
-                            padding: '4px 8px',
-                            borderRadius: 4,
-                            fontSize: 11.5,
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            border: calcPercentage === pct ? '1px solid #15803d' : '1px solid #bbf7d0',
-                            backgroundColor: calcPercentage === pct ? '#15803d' : '#ffffff',
-                            color: calcPercentage === pct ? '#ffffff' : '#166534'
-                          }}
+                          onClick={() => applyCommission(item.pct)}
+                          style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: '1px solid #16a34a', backgroundColor: '#ffffff', color: '#166534', whiteSpace: 'nowrap' }}
                         >
-                          {pct}%
+                          {item.label}
                         </button>
                       ))}
                       <button
                         type="button"
-                        onClick={() => {
-                          const val = parseFloat(calcBasePrice) || 0;
-                          if (val > 0) {
-                            // 1 month rent equivalent
-                            const rentAmt = Math.round(val);
-                            setForm(prev => {
-                              const updatedItems = [...prev.items];
-                              if (updatedItems.length > 0) {
-                                updatedItems[0] = {
-                                  ...updatedItems[0],
-                                  description: prev.dealRef ? `1 Month Rental Brokerage - ${prev.dealRef}` : 'Rental Tenancy Facilitation Brokerage (1 Month Rent)',
-                                  amount: rentAmt.toString()
-                                };
-                              }
-                              return { ...prev, items: updatedItems };
-                            });
-                          }
-                        }}
-                        style={{ padding: '4px 8px', borderRadius: 4, fontSize: 11.5, fontWeight: 700, cursor: 'pointer', border: '1px solid #bbf7d0', backgroundColor: '#ffffff', color: '#166534' }}
+                        onClick={applyRentalCommission}
+                        style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: '1px solid #16a34a', backgroundColor: '#ffffff', color: '#166534', whiteSpace: 'nowrap' }}
                       >
-                        1 Mo. Rent
+                        1 Month Rent
                       </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleApplyCommissionCalc}
-                      style={{ padding: '6px 12px', borderRadius: 6, backgroundColor: '#15803d', color: '#ffffff', border: 'none', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
-                    >
-                      Apply to Item #1
-                    </button>
+
+                    {/* Custom Percentage Input & Apply */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#166534' }}>
+                        Custom %:
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={customPercentage}
+                        onChange={e => setCustomPercentage(e.target.value)}
+                        placeholder="e.g. 1.5"
+                        style={{ width: 75, padding: '5px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12, backgroundColor: '#ffffff', fontWeight: 700, color: '#166534', outline: 'none' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const p = parseFloat(customPercentage);
+                          if (isNaN(p) || p <= 0) {
+                            setToast({ id: Date.now().toString(), type: 'info', title: 'Enter Percentage', message: 'Please enter a valid custom percentage (e.g. 1.5 or 2.5).' });
+                            return;
+                          }
+                          applyCommission(p);
+                        }}
+                        style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: 'none', backgroundColor: '#16a34a', color: '#ffffff', whiteSpace: 'nowrap' }}
+                      >
+                        Apply %
+                      </button>
+                    </div>
                   </div>
+
                 </div>
               </div>
 
-              {/* SECTION 4: ITEMIZED SERVICES / LINE ITEMS */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    4. Advisory Services &amp; Line Items
+              {/* SECTION 3: SERVICES & LINE ITEMS TABLE (FULL WIDTH & SPACIOUS) */}
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 6 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <BriefcaseIcon size={15} color="#059669" />
+                    <span>Advisory Services &amp; Line Items</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddItem}
-                    style={{ fontSize: 12, fontWeight: 700, color: '#059669', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                    style={{ fontSize: 12.5, fontWeight: 700, color: '#059669', background: 'none', border: '1px solid #a7f3d0', padding: '5px 12px', borderRadius: 6, backgroundColor: '#ecfdf5', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                   >
-                    <PlusIcon size={13} color="#059669" />
-                    <span>+ Add Line Item</span>
+                    <PlusIcon size={14} color="#059669" />
+                    <span>Add Line Item</span>
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {/* Table Header */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 130px 170px 36px', gap: 10, padding: '6px 10px', fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>
+                  <span>Service Description / Particulars</span>
+                  <span style={{ textAlign: 'center' }}>SAC / HSN Code</span>
+                  <span style={{ textAlign: 'right' }}>Taxable Amount (₹)</span>
+                  <span></span>
+                </div>
+
+                {/* Line Items List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
                   {form.items.map((it, idx) => (
                     <div
                       key={it.id || idx}
                       style={{
-                        padding: '10px 12px',
+                        padding: '8px 10px',
                         backgroundColor: '#f8fafc',
                         border: '1px solid #e2e8f0',
                         borderRadius: 8,
                         display: 'grid',
-                        gridTemplateColumns: '1fr 140px 130px 32px',
-                        gap: 8,
+                        gridTemplateColumns: 'minmax(0, 1fr) 130px 170px 36px',
+                        gap: 10,
                         alignItems: 'center'
                       }}
                     >
@@ -1563,26 +1581,42 @@ export default function InvoicesPage() {
                           required
                           value={it.description}
                           onChange={e => handleUpdateItem(idx, 'description', e.target.value)}
-                          placeholder="e.g. 2% Brokerage Commission on Lodha Park ATS execution"
-                          style={{ width: '100%', padding: '7px 9px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12.5 }}
+                          placeholder="e.g. Real Estate Acquisition & Brokerage Advisory"
+                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 13, outline: 'none' }}
                         />
                       </div>
                       <div>
                         <input
                           value={it.sacCode}
                           onChange={e => handleUpdateItem(idx, 'sacCode', e.target.value)}
-                          placeholder="SAC: 997221"
-                          style={{ width: '100%', padding: '7px 9px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, textAlign: 'center' }}
+                          placeholder="998224"
+                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12.5, textAlign: 'center', outline: 'none' }}
                         />
                       </div>
                       <div>
                         <input
                           required
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           value={it.amount}
-                          onChange={e => handleUpdateItem(idx, 'amount', e.target.value)}
-                          placeholder="Taxable ₹"
-                          style={{ width: '100%', padding: '7px 9px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12.5, fontWeight: 700, textAlign: 'right' }}
+                          onKeyDown={(e) => {
+                            if (!/[0-9.]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Home', 'End'].includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                              e.preventDefault();
+                            }
+                            if (e.key === '.' && it.amount.includes('.')) {
+                              e.preventDefault();
+                            }
+                          }}
+                          onChange={e => {
+                            let val = e.target.value.replace(/[^0-9.]/g, '');
+                            const parts = val.split('.');
+                            if (parts.length > 2) {
+                              val = parts[0] + '.' + parts.slice(1).join('');
+                            }
+                            handleUpdateItem(idx, 'amount', val);
+                          }}
+                          placeholder="0.00"
+                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 13, fontWeight: 700, textAlign: 'right', outline: 'none' }}
                         />
                       </div>
                       <div style={{ textAlign: 'center' }}>
@@ -1595,11 +1629,14 @@ export default function InvoicesPage() {
                             border: 'none',
                             cursor: form.items.length <= 1 ? 'not-allowed' : 'pointer',
                             color: form.items.length <= 1 ? '#cbd5e1' : '#dc2626',
-                            padding: 4
+                            padding: 4,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                           }}
                           title="Remove Line Item"
                         >
-                          <XIcon size={14} color="currentColor" />
+                          <TrashIcon size={16} color="currentColor" />
                         </button>
                       </div>
                     </div>
@@ -1607,156 +1644,315 @@ export default function InvoicesPage() {
                 </div>
               </div>
 
-              {/* SECTION 5: GST TAXATION & SUPPLY TYPE */}
-              <div style={{ marginBottom: 16, backgroundColor: '#f8fafc', padding: '14px 16px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.04em' }}>
-                  5. GST Taxation &amp; Place of Supply
-                </div>
-
-                <div className="responsive-grid-2" style={{ gap: 12 }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                      GST Supply Type
-                    </label>
-                    <select
-                      value={form.taxType}
-                      onChange={e => setForm({ ...form, taxType: e.target.value as any })}
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, backgroundColor: '#ffffff' }}
-                    >
-                      <option value="intra">Intra-State: CGST (9%) + SGST (9%) - Same State</option>
-                      <option value="inter">Inter-State: IGST (18%) - Client from other State</option>
-                      <option value="exempt">Non-Taxable / Exempt (0% GST)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                      GST Tax Rate (%)
-                    </label>
-                    <select
-                      disabled={form.taxType === 'exempt'}
-                      value={form.taxRate}
-                      onChange={e => setForm({ ...form, taxRate: e.target.value })}
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, backgroundColor: '#ffffff' }}
-                    >
-                      <option value="18">18% Standard GST (9% CGST + 9% SGST / 18% IGST)</option>
-                      <option value="5">5% Concessional GST</option>
-                      <option value="12">12% Intermediate GST</option>
-                      <option value="0">0% Non-Taxable / Exempt</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* LIVE CALCULATION SUMMARY CARD */}
-                <div style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 8, padding: '12px 16px', marginTop: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12.5 }}>
-                    <span style={{ color: '#64748b' }}>Taxable Value (Subtotal):</span>
-                    <strong style={{ color: '#0f172a' }}>{formatINRFull(formCalculations.subtotal)}</strong>
-                  </div>
+              {/* SECTION 4: INVOICE TERMS & TOTALS (2-COLUMN BALANCED BOTTOM SECTION) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(320px, 1fr)', gap: 16, alignItems: 'start' }} className="invoice-modal-grid">
+                
+                {/* LEFT BOX: Dates, Tax Regime, Status & Payment Clearance */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   
-                  {form.taxType === 'intra' && (
-                    <>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12 }}>
-                        <span style={{ color: '#64748b' }}>CGST ({parseFloat(form.taxRate) / 2}%):</span>
-                        <span>{formatINRFull(formCalculations.cgst)}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12 }}>
-                        <span style={{ color: '#64748b' }}>SGST ({parseFloat(form.taxRate) / 2}%):</span>
-                        <span>{formatINRFull(formCalculations.sgst)}</span>
-                      </div>
-                    </>
-                  )}
-
-                  {form.taxType === 'inter' && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12 }}>
-                      <span style={{ color: '#64748b' }}>IGST ({parseFloat(form.taxRate)}%):</span>
-                      <span>{formatINRFull(formCalculations.igst)}</span>
+                  {/* DATES & STATUS */}
+                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <CalendarIcon size={14} color="#059669" />
+                      <span>Invoice Schedule &amp; Status</span>
                     </div>
-                  )}
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0 4px', borderTop: '2px solid #0f172a', marginTop: 6 }}>
-                    <span style={{ fontSize: 14, fontWeight: 800 }}>Total Amount Payable:</span>
-                    <span style={{ fontSize: 16, fontWeight: 800, color: '#059669' }}>{formatINRFull(formCalculations.totalAmount)}</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Issue Date *</label>
+                        <input
+                          required
+                          type="date"
+                          value={form.issueDate}
+                          onChange={e => setForm({ ...form, issueDate: e.target.value })}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                        />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Due Date *</label>
+                        <input
+                          required
+                          type="date"
+                          value={form.dueDate}
+                          onChange={e => setForm({ ...form, dueDate: e.target.value })}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Due Date Presets */}
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                      <button type="button" onClick={() => setDueDatePreset(0)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>Today</button>
+                      <button type="button" onClick={() => setDueDatePreset(7)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>+7 Days</button>
+                      <button type="button" onClick={() => setDueDatePreset(14)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>+14 Days</button>
+                      <button type="button" onClick={() => setDueDatePreset(30)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>+30 Days</button>
+                    </div>
+
+                    {/* Status Pill Buttons */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Payment Status</label>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {invoiceStatuses.map(s => {
+                          const isSel = form.status === s;
+                          const col = getStatusColorStyle(s);
+                          return (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setForm(prev => ({ ...prev, status: s }))}
+                              style={{
+                                flex: '1 1 auto',
+                                minWidth: 70,
+                                padding: '6px 10px',
+                                borderRadius: 7,
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                border: isSel ? `2px solid ${col.text}` : '1px solid #cbd5e1',
+                                backgroundColor: isSel ? col.bg : '#ffffff',
+                                color: isSel ? col.text : '#475569',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 5,
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: col.dot }} />
+                              {s}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* If editing and status is not in current list */}
+                      {!invoiceStatuses.includes(form.status) && (
+                        <div style={{ marginTop: 6, fontSize: 11.5, color: '#dc2626', fontWeight: 700 }}>
+                          Current Status: {form.status}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Payment Clearance Details (if Paid) */}
+                    {form.status === 'Paid' && (
+                      <div style={{ marginTop: 12, padding: '10px 12px', backgroundColor: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0' }}>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: 8 }}>
+                          Payment Clearance Details
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#166534', marginBottom: 2 }}>Payment Date</label>
+                            <input
+                              type="date"
+                              value={form.paymentDate}
+                              onChange={e => setForm({ ...form, paymentDate: e.target.value })}
+                              style={{ width: '100%', padding: '5px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 11.5 }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#166534', marginBottom: 2 }}>Payment Mode</label>
+                            <select
+                              value={form.paymentMode}
+                              onChange={e => setForm({ ...form, paymentMode: e.target.value })}
+                              style={{ width: '100%', padding: '5px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 11.5, backgroundColor: '#fff' }}
+                            >
+                              <option value="NEFT / RTGS">NEFT / RTGS Transfer</option>
+                              <option value="UPI">UPI / QR Remittance</option>
+                              <option value="Cheque">Corporate Cheque</option>
+                              <option value="Escrow Transfer">Direct Escrow Transfer</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#166534', marginBottom: 2 }}>UTR / Transaction Ref #</label>
+                          <input
+                            value={form.paymentRef}
+                            onChange={e => setForm({ ...form, paymentRef: e.target.value })}
+                            placeholder="e.g. HDFC984210"
+                            style={{ width: '100%', padding: '5px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 11.5 }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748b', fontStyle: 'italic', textAlign: 'right' }}>
-                    {formCalculations.inWords}
+
+                  {/* BANK INSTRUCTIONS / NOTES */}
+                  <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                      Payment Terms &amp; Bank Remittance Instructions
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={form.notes}
+                      onChange={e => setForm({ ...form, notes: e.target.value })}
+                      placeholder="Bank account, RTGS IFSC, escrow terms..."
+                      style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, resize: 'vertical', outline: 'none' }}
+                    />
                   </div>
+
                 </div>
-              </div>
 
-              {/* SECTION 6: PAYMENT TERMS & REMITTANCE NOTES */}
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
-                  Payment Terms &amp; Remittance Notes
-                </label>
-                <textarea
-                  rows={2}
-                  value={form.notes}
-                  onChange={e => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Remittance details, bank account, RTGS IFSC..."
-                  style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13, resize: 'vertical' }}
-                />
-              </div>
-
-              {/* SECTION 7: PAYMENT DETAILS (IF PAID) */}
-              {form.status === 'Paid' && (
-                <div style={{ marginBottom: 16, backgroundColor: '#f0fdf4', padding: '14px 16px', borderRadius: 10, border: '1px solid #bbf7d0' }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: 10 }}>
-                    Payment Clearance Details
-                  </div>
-                  <div className="responsive-grid-3" style={{ gap: 10 }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>Date of Remittance</label>
-                      <input
-                        type="date"
-                        value={form.paymentDate}
-                        onChange={e => setForm({ ...form, paymentDate: e.target.value })}
-                        style={{ width: '100%', padding: '7px 9px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12 }}
-                      />
+                {/* RIGHT BOX: GST Taxation & Live Breakdown Card */}
+                <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      GST Taxation &amp; Place of Supply
                     </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>Payment Mode</label>
-                      <select
-                        value={form.paymentMode}
-                        onChange={e => setForm({ ...form, paymentMode: e.target.value })}
-                        style={{ width: '100%', padding: '7px 9px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12, backgroundColor: '#fff' }}
+                    {invoiceSettings.enableGstTaxation ? (
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#16a34a', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '2px 8px', borderRadius: 4 }}>
+                        Module Active
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', padding: '2px 8px', borderRadius: 4 }}>
+                        Disabled
+                      </span>
+                    )}
+                  </div>
+
+                  {!invoiceSettings.enableGstTaxation ? (
+                    <div style={{ backgroundColor: '#f8fafc', border: '1.5px dashed #cbd5e1', borderRadius: 10, padding: '16px 14px', textAlign: 'center' }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        GST Taxation &amp; Place of Supply is Disabled
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#64748b', lineHeight: 1.5, marginBottom: 10 }}>
+                        GST tax calculation and place of supply breakdown are currently turned off for this agency. Invoices will be issued with ₹0 tax.
+                      </div>
+                      <a
+                        href="/dashboard/settings"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: 12, fontWeight: 700, color: '#059669', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 6 }}
                       >
-                        <option value="NEFT / RTGS">NEFT / RTGS Transfer</option>
-                        <option value="UPI">UPI / QR Remittance</option>
-                        <option value="Cheque">Corporate Cheque</option>
-                        <option value="Escrow Transfer">Direct Escrow Transfer</option>
-                      </select>
+                        Enable in Invoice Settings →
+                      </a>
                     </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>UTR / Cheque Ref #</label>
-                      <input
-                        value={form.paymentRef}
-                        onChange={e => setForm({ ...form, paymentRef: e.target.value })}
-                        placeholder="e.g. HDFC984210"
-                        style={{ width: '100%', padding: '7px 9px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12 }}
-                      />
+                  ) : (
+                    /* Supply Type & Tax Rate */
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 8 }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Supply Type</label>
+                        <select
+                          value={form.taxType}
+                          onChange={e => {
+                            const val = e.target.value as any;
+                            setForm(prev => ({
+                              ...prev,
+                              taxType: val,
+                              taxRate: val === 'exempt' ? '0' : prev.taxRate
+                            }));
+                          }}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, backgroundColor: '#ffffff', outline: 'none' }}
+                        >
+                          <option value="none">None</option>
+                          <option value="inter">Inter State (IGST)</option>
+                          <option value="intra">Intra State (CGST + SGST)</option>
+                          <option value="exempt">Exempt</option>
+                          <option value="not_applicable">Not Applicable</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Tax Rate</label>
+                        <select
+                          disabled={form.taxType === 'exempt' || form.taxType === 'not_applicable' || form.taxType === 'none'}
+                          value={form.taxRate}
+                          onChange={e => setForm({ ...form, taxRate: e.target.value })}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, backgroundColor: (form.taxType === 'exempt' || form.taxType === 'not_applicable' || form.taxType === 'none') ? '#f1f5f9' : '#ffffff', outline: 'none' }}
+                        >
+                          <option value="none">None</option>
+                          <option value="18">18% Standard GST</option>
+                          <option value="6">6% Composition Scheme</option>
+                          <option value="0">0% Exempt</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LIVE FINANCIAL CALCULATION SUMMARY CARD */}
+                  <div style={{ backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 10, padding: '14px 16px', marginTop: 4 }}>
+                    <div style={{ fontSize: 11.5, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10, borderBottom: '1px solid #e2e8f0', paddingBottom: 6 }}>
+                      Tax Invoice Financial Summary
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12.5 }}>
+                      <span style={{ color: '#64748b' }}>Taxable Subtotal:</span>
+                      <strong style={{ color: '#0f172a' }}>{formatINRFull(formCalculations.subtotal)}</strong>
+                    </div>
+
+                    {invoiceSettings.enableGstTaxation && form.taxType === 'intra' && form.taxRate !== 'none' && form.taxRate !== '0' && (
+                      <>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12 }}>
+                          <span style={{ color: '#64748b' }}>CGST ({parseFloat(form.taxRate) / 2}%):</span>
+                          <span>{formatINRFull(formCalculations.cgst)}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12 }}>
+                          <span style={{ color: '#64748b' }}>SGST ({parseFloat(form.taxRate) / 2}%):</span>
+                          <span>{formatINRFull(formCalculations.sgst)}</span>
+                        </div>
+                      </>
+                    )}
+
+                    {invoiceSettings.enableGstTaxation && form.taxType === 'inter' && form.taxRate !== 'none' && form.taxRate !== '0' && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12 }}>
+                        <span style={{ color: '#64748b' }}>IGST ({parseFloat(form.taxRate)}%):</span>
+                        <span>{formatINRFull(formCalculations.igst)}</span>
+                      </div>
+                    )}
+
+                    {(!invoiceSettings.enableGstTaxation || form.taxType === 'none' || form.taxType === 'not_applicable') && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12, color: '#64748b' }}>
+                        <span>Taxes (GST):</span>
+                        <span>₹0.00 ({!invoiceSettings.enableGstTaxation ? 'GST Disabled' : 'None / NA'})</span>
+                      </div>
+                    )}
+
+                    {invoiceSettings.enableGstTaxation && (form.taxType === 'exempt' || form.taxRate === '0') && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: 12, color: '#059669' }}>
+                        <span>GST Exemption:</span>
+                        <span>₹0.00 (0% Exempt)</span>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0 4px', borderTop: '2px solid #0f172a', marginTop: 8, alignItems: 'baseline' }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a' }}>Total Amount Payable:</span>
+                      <span style={{ fontSize: 18, fontWeight: 900, color: '#059669' }}>{formatINRFull(formCalculations.totalAmount)}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: '#64748b', fontStyle: 'italic', textAlign: 'right', marginTop: 4 }}>
+                      {formCalculations.inWords}
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* Modal Actions */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, borderTop: '1px solid #e2e8f0', paddingTop: 16 }}>
+                </div>
+
+              </div>
+            </form>
+
+            {/* Modal Actions Footer (Fixed at Bottom) */}
+            <div style={{ padding: '14px 24px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#64748b' }}>
+                <span style={{ fontWeight: 700, color: '#0f172a' }}>Total Payable:</span>
+                <span style={{ fontWeight: 800, color: '#059669' }}>{formatINRFull(formCalculations.totalAmount)}</span>
+                <span>•</span>
+                <span>{form.items.length} {form.items.length === 1 ? 'Line Item' : 'Line Items'}</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  style={{ padding: '9px 16px', borderRadius: 8, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#334155', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                  style={{ padding: '9px 18px', borderRadius: 8, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#334155', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  style={{ padding: '9px 20px', borderRadius: 8, border: 'none', backgroundColor: 'var(--primary, #059669)', color: '#ffffff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                  type="button"
+                  onClick={handleSubmit as any}
+                  style={{ padding: '9px 24px', borderRadius: 8, border: 'none', backgroundColor: 'var(--primary, #059669)', color: '#ffffff', fontSize: 13, fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 4px rgba(5,150,105,0.2)' }}
                 >
                   {editingInvoice ? 'Update Invoice' : 'Issue Tax Invoice'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -1764,7 +1960,7 @@ export default function InvoicesPage() {
       {/* PRINTABLE / OFFICIAL TAX INVOICE PREVIEW MODAL */}
       {selectedInvoiceForPrint && (() => {
         const inv = selectedInvoiceForPrint;
-        const { subtotal, cgst, sgst, igst, total, isInter, isExempt, taxRate } = getInvoiceAmounts(inv);
+        const { subtotal, cgst, sgst, igst, total, isInter, isExempt, isNoTax, taxRate } = getInvoiceAmounts(inv);
         const words = numberToIndianWords(total);
         const items = (inv.items && inv.items.length > 0) ? inv.items : [
           {
@@ -1811,17 +2007,6 @@ export default function InvoicesPage() {
                   >
                     <MailIcon size={13} color="#2563eb" />
                     <span>Email</span>
-                  </button>
-
-                  {/* Download HTML */}
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadStandaloneHtml(inv)}
-                    style={{ padding: '6px 10px', backgroundColor: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
-                    title="Download Standalone HTML Document"
-                  >
-                    <DownloadIcon size={13} color="#334155" />
-                    <span>HTML</span>
                   </button>
 
                   {/* Print */}
@@ -1984,7 +2169,7 @@ export default function InvoicesPage() {
                       <strong style={{ color: '#0f172a' }}>{formatINRFull(subtotal)}</strong>
                     </div>
 
-                    {!isInter && !isExempt && (
+                    {!isInter && !isExempt && !isNoTax && (cgst > 0 || sgst > 0) && (
                       <>
                         <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
                           <span style={{ color: '#64748b' }}>CGST ({taxRate / 2}%):</span>
@@ -1997,10 +2182,24 @@ export default function InvoicesPage() {
                       </>
                     )}
 
-                    {isInter && !isExempt && (
+                    {isInter && !isExempt && !isNoTax && igst > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
                         <span style={{ color: '#64748b' }}>IGST ({taxRate}%):</span>
                         <span>{formatINRFull(igst)}</span>
+                      </div>
+                    )}
+
+                    {isExempt && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: '#059669' }}>
+                        <span>GST Exemption:</span>
+                        <span>₹0.00 (Exempt)</span>
+                      </div>
+                    )}
+
+                    {isNoTax && !isExempt && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', color: '#64748b' }}>
+                        <span>Taxes:</span>
+                        <span>₹0.00</span>
                       </div>
                     )}
 
@@ -2033,12 +2232,18 @@ export default function InvoicesPage() {
                     {invoiceSettings.accountName && (
                       <div>Account Name: <strong>{invoiceSettings.accountName}</strong></div>
                     )}
-                    <div>
-                      {[
-                        invoiceSettings.bankName ? `Bank: <strong>${invoiceSettings.bankName}</strong>` : '',
-                        invoiceSettings.accountNumber ? `${invoiceSettings.accountType || 'Current'} A/c No: <strong>${invoiceSettings.accountNumber}</strong>` : '',
-                        invoiceSettings.ifscCode ? `IFSC: <strong>${invoiceSettings.ifscCode}</strong>` : ''
-                      ].filter(Boolean).reduce((prev, curr) => [prev, ' • ', <span key={Math.random()} dangerouslySetInnerHTML={{ __html: curr }} />] as any)}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                      {invoiceSettings.bankName && (
+                        <span>Bank: <strong>{invoiceSettings.bankName}</strong></span>
+                      )}
+                      {invoiceSettings.bankName && invoiceSettings.accountNumber && <span>•</span>}
+                      {invoiceSettings.accountNumber && (
+                        <span>{invoiceSettings.accountType || 'Current'} A/c No: <strong>{invoiceSettings.accountNumber}</strong></span>
+                      )}
+                      {(invoiceSettings.bankName || invoiceSettings.accountNumber) && invoiceSettings.ifscCode && <span>•</span>}
+                      {invoiceSettings.ifscCode && (
+                        <span>IFSC: <strong>{invoiceSettings.ifscCode}</strong></span>
+                      )}
                     </div>
                     {invoiceSettings.upiId && <div style={{ marginTop: 2 }}>UPI / QR Remittance ID: <strong>{invoiceSettings.upiId}</strong></div>}
                   </div>
@@ -2076,7 +2281,7 @@ export default function InvoicesPage() {
         const firmName = invoiceSettings.agencyName || agencyInfo.name;
         const accType = invoiceSettings.accountType || 'Current';
 
-        const defaultMsg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (${accType} A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n• *UPI ID:* ${invoiceSettings.upiId}` : ''}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
+        const defaultMsg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatActualINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatActualINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (${accType} A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n• *UPI ID:* ${invoiceSettings.upiId}` : ''}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
 
         return (
           <ShareModal
@@ -2086,7 +2291,7 @@ export default function InvoicesPage() {
               id: inv.id,
               type: 'invoice',
               title: `Tax Invoice #${inv.number} • ${inv.clientName}`,
-              subtitle: `Total Payable: ${formatINR(total)} • Due: ${inv.dueDate} • Status: ${inv.status}`,
+              subtitle: `Total Payable: ${formatActualINR(total)} • Due: ${inv.dueDate} • Status: ${inv.status}`,
               description: inv.dealRef ? `Transaction Deal: ${inv.dealRef}` : undefined,
               badge: inv.status.toUpperCase(),
               link: typeof window !== 'undefined' ? `${window.location.origin}/dashboard/invoices?id=${inv.id}` : '',

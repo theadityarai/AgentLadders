@@ -25,6 +25,21 @@ export function formatINR(amount: number | string | undefined | null): string {
   }
 }
 
+/** 
+ * Formats number as exact actual Indian currency without abbreviations (no Lakh/Cr).
+ * e.g. 999999 -> ₹9,99,999, 29999.97 -> ₹29,999.97, 10000000 -> ₹1,00,00,000
+ */
+export function formatActualINR(amount: number | string | undefined | null): string {
+  if (amount === undefined || amount === null || amount === '') return '₹0';
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(num)) return '₹0';
+  const hasDecimals = num % 1 !== 0;
+  return '₹' + num.toLocaleString('en-IN', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2
+  });
+}
+
 /** Formats number as full standard Indian currency with 2 decimals, e.g. ₹11,80,000.00 */
 export function formatINRFull(amount: number | string | undefined | null): string {
   if (amount === undefined || amount === null || amount === '') return '₹0.00';
@@ -92,7 +107,14 @@ export function numberToIndianWords(amount: number | string | undefined | null):
     words += `${convertThreeDigits(remaining)} `;
   }
 
-  return `INR ${words.trim()} Only`;
+  const paise = Math.round((num - Math.floor(num)) * 100);
+  let paiseWords = '';
+  if (paise > 0) {
+    paiseWords = ` and ${convertTwoDigits(paise)} Paise`;
+  }
+
+  const mainWords = words.trim() || 'Zero';
+  return `INR ${mainWords}${paiseWords} Only`;
 }
 
 export function formatINRAmountOnly(amount: number | string | undefined | null): string {
@@ -319,6 +341,7 @@ export interface AgencyInvoiceSettings {
   placeOfSupply?: string;
   sacCode?: string;
   defaultNotes?: string;
+  enableGstTaxation?: boolean;
 }
 
 export const DEFAULT_INVOICE_SETTINGS: AgencyInvoiceSettings = {
@@ -338,6 +361,7 @@ export const DEFAULT_INVOICE_SETTINGS: AgencyInvoiceSettings = {
   upiId: 'agency.realty@hdfcbank',
   placeOfSupply: 'Maharashtra (27)',
   sacCode: '997221',
-  defaultNotes: 'Brokerage advisory fees payable upon formal title verification and registration.'
+  defaultNotes: '',
+  enableGstTaxation: false
 };
 
