@@ -7,7 +7,17 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { FONT_OPTIONS, COLOR_SCHEMES, applyTheme, getStoredTheme } from '@/lib/theme';
+import { 
+  FONT_OPTIONS, 
+  COLOR_SCHEMES, 
+  applyTheme, 
+  getStoredTheme,
+  STATUS_COLOR_PALETTES,
+  getStatusColorStyle,
+  getStoredStatusColors,
+  saveStoredStatusColors,
+  StatusColorPalette
+} from '@/lib/theme';
 import { 
   DEFAULT_BHK_OPTIONS, 
   DEFAULT_PROPERTY_TYPES, 
@@ -22,6 +32,8 @@ import {
   DEFAULT_SITE_VISIT_STATUSES,
   DEFAULT_TASK_STATUSES,
   DEFAULT_CLIENT_STATUSES,
+  DEFAULT_INVOICE_STATUSES,
+  DEFAULT_PAYMENT_STATUSES,
   DEFAULT_INVOICE_SETTINGS,
   AgencyInvoiceSettings
 } from '@/lib/formatters';
@@ -50,6 +62,8 @@ export default function SettingsPage() {
     | 'siteVisitStatuses'
     | 'taskStatuses'
     | 'clientStatuses'
+    | 'invoiceStatuses'
+    | 'paymentStatuses'
     | 'bhkOptions'
     | 'propertyTypes'
     | 'leadSources'
@@ -57,6 +71,19 @@ export default function SettingsPage() {
     | 'constructionStages'
     | 'vastuOptions'
     | 'parkingOptions';
+
+  const isStatusCategory = (type: ConfigCategoryKey): boolean => {
+    return [
+      'propertyStatuses',
+      'leadStatuses',
+      'dealStages',
+      'siteVisitStatuses',
+      'taskStatuses',
+      'clientStatuses',
+      'invoiceStatuses',
+      'paymentStatuses'
+    ].includes(type);
+  };
 
   const getCategoryLabel = (type: ConfigCategoryKey): string => {
     switch (type) {
@@ -66,6 +93,8 @@ export default function SettingsPage() {
       case 'siteVisitStatuses': return 'Site Visit Status';
       case 'taskStatuses': return 'Task Status';
       case 'clientStatuses': return 'Client Status';
+      case 'invoiceStatuses': return 'Invoice & Billing Status';
+      case 'paymentStatuses': return 'Payment Clearance Status';
       case 'bhkOptions': return 'BHK Option';
       case 'propertyTypes': return 'Property Type';
       case 'leadSources': return 'Lead Source';
@@ -91,14 +120,19 @@ export default function SettingsPage() {
     leadStatuses: [] as string[],
     siteVisitStatuses: [] as string[],
     taskStatuses: [] as string[],
-    clientStatuses: [] as string[]
+    clientStatuses: [] as string[],
+    invoiceStatuses: [] as string[],
+    paymentStatuses: [] as string[],
+    statusColors: {} as Record<string, string>
   });
+  const [selectedStatusColor, setSelectedStatusColor] = useState('emerald');
+  const [quickColorPicker, setQuickColorPicker] = useState<{ status: string; type: ConfigCategoryKey } | null>(null);
   const [configSubTab, setConfigSubTab] = useState<'statuses' | 'property' | 'sourcing' | 'all'>('statuses');
   const [configSearch, setConfigSearch] = useState('');
   const [notifications, setNotifications] = useState<Record<string, {inApp: boolean; email: boolean}>>({});
 
-  // Theme & Appearance State
-  const [selectedFont, setSelectedFont] = useState('jakarta');
+  // Theme & Appearance State - Default: Roboto & Emerald Prosperity
+  const [selectedFont, setSelectedFont] = useState('roboto');
   const [selectedColor, setSelectedColor] = useState('emerald');
   const [savingTheme, setSavingTheme] = useState(false);
 
@@ -143,6 +177,43 @@ export default function SettingsPage() {
     item: string;
   } | null>(null);
 
+  // Real Device & Session Telemetry (Item 25)
+  const [deviceInfo, setDeviceInfo] = useState({
+    browser: 'Modern Browser',
+    os: 'Windows PC',
+    screen: '1920 × 1080',
+    timezone: 'Asia/Kolkata',
+    language: 'en-IN',
+    online: true
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const ua = navigator.userAgent;
+      let browser = 'Modern Browser';
+      if (ua.includes('Edg/')) browser = 'Microsoft Edge';
+      else if (ua.includes('Chrome/')) browser = 'Google Chrome';
+      else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Apple Safari';
+      else if (ua.includes('Firefox/')) browser = 'Mozilla Firefox';
+
+      let os = 'Computer';
+      if (ua.includes('Win')) os = 'Windows PC';
+      else if (ua.includes('Mac')) os = 'macOS';
+      else if (ua.includes('Linux')) os = 'Linux';
+      else if (ua.includes('Android')) os = 'Android Mobile';
+      else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'Apple iOS';
+
+      setDeviceInfo({
+        browser,
+        os,
+        screen: `${window.screen.width} × ${window.screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+        language: navigator.language || 'en-IN',
+        online: navigator.onLine
+      });
+    }
+  }, []);
+
   // Toast Notification State
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
@@ -150,10 +221,149 @@ export default function SettingsPage() {
     setToast({ id: Date.now().toString(), type, message, title });
   };
 
+  // Multi-Device Active Sessions State (User Telemetry & Remote Revocation)
+  interface ActiveSessionItem {
+    id: string;
+    userId: string;
+    userName?: string;
+    userEmail?: string;
+    browser: string;
+    browserVersion?: string;
+    os: string;
+    deviceType: 'desktop' | 'mobile' | 'tablet';
+    deviceModel?: string;
+    ipAddress: string;
+    location: string;
+    screen?: string;
+    timezone?: string;
+    createdAt: string;
+    lastActive: string;
+    current?: boolean;
+  }
+
+  const [activeSessions, setActiveSessions] = useState<ActiveSessionItem[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+  const [currentDeviceId, setCurrentDeviceId] = useState<string>('');
+  const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
+  const [showIpDetails, setShowIpDetails] = useState(true);
+
+  const formatSessionTime = (isoString?: string) => {
+    if (!isoString) return 'Active recently';
+    const diffMs = Date.now() - new Date(isoString).getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return 'Active just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `Active ${diffMin}m ago`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `Active ${diffHours}h ago`;
+    return `Active ${new Date(isoString).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+  };
+
+  const loadActiveSessions = async (devIdToUse?: string) => {
+    setLoadingSessions(true);
+    let devId = devIdToUse || currentDeviceId;
+    if (!devId && typeof window !== 'undefined') {
+      devId = localStorage.getItem('agentladders_device_id') || '';
+      if (!devId) {
+        devId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+        localStorage.setItem('agentladders_device_id', devId);
+      }
+      setCurrentDeviceId(devId);
+    }
+    const screenRes = typeof window !== 'undefined' ? `${window.screen.width} × ${window.screen.height}` : '1920 × 1080';
+    const tz = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'Asia/Kolkata';
+
+    try {
+      const res = await fetch(`/api/auth/sessions?deviceId=${encodeURIComponent(devId || 'sess_default')}&screen=${encodeURIComponent(screenRes)}&timezone=${encodeURIComponent(tz)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.sessions) {
+          setActiveSessions(data.sessions);
+        }
+      }
+    } catch {
+      // network fallback
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  const handleRevokeSession = async (sessionId: string) => {
+    setRevokingSessionId(sessionId);
+    try {
+      const res = await fetch('/api/auth/sessions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
+        showToast('success', data.message || 'Session revoked successfully.', 'Session Terminated');
+      } else {
+        showToast('error', data.error || 'Failed to revoke session.', 'Error');
+      }
+    } catch {
+      showToast('error', 'Network error revoking session.', 'Error');
+    } finally {
+      setRevokingSessionId(null);
+    }
+  };
+
+  const handleRevokeAllOtherSessions = async () => {
+    try {
+      const res = await fetch('/api/auth/sessions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'revokeAllOther', currentDeviceId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setActiveSessions(prev => prev.filter(s => s.current || s.id === currentDeviceId));
+        showToast('success', data.message || 'Terminated all other active sessions.', 'Sessions Cleared');
+      }
+    } catch {
+      showToast('error', 'Failed to terminate other sessions.', 'Error');
+    }
+  };
+
+  const handleSimulateSession = async (simulatedBrowser: string) => {
+    try {
+      const res = await fetch('/api/auth/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'simulate', simulatedBrowser })
+      });
+      if (res.ok) {
+        loadActiveSessions();
+        showToast('success', `Simulated login session created for ${simulatedBrowser}.`, 'New Session Connected');
+      }
+    } catch {
+      showToast('error', 'Failed to simulate session', 'Error');
+    }
+  };
+
   useEffect(() => {
     const stored = getStoredTheme();
     setSelectedFont(stored.fontId);
     setSelectedColor(stored.colorId);
+
+    // Initialize device ID and load active sessions
+    let devId = '';
+    if (typeof window !== 'undefined') {
+      devId = localStorage.getItem('agentladders_device_id') || '';
+      if (!devId) {
+        devId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+        localStorage.setItem('agentladders_device_id', devId);
+      }
+      setCurrentDeviceId(devId);
+    }
+    loadActiveSessions(devId);
+
+    // Auto-poll active sessions every 20 seconds so cross-browser logins appear in real-time
+    const sessionPollTimer = setInterval(() => {
+      loadActiveSessions();
+    }, 20000);
 
     fetch('/api/settings').then(res => res.json()).then(data => {
       if (data.user) {
@@ -191,22 +401,26 @@ export default function SettingsPage() {
           leadStatuses: (data.agency.leadStatuses && data.agency.leadStatuses.length > 0) ? data.agency.leadStatuses : DEFAULT_LEAD_STATUSES,
           siteVisitStatuses: (data.agency.siteVisitStatuses && data.agency.siteVisitStatuses.length > 0) ? data.agency.siteVisitStatuses : DEFAULT_SITE_VISIT_STATUSES,
           taskStatuses: (data.agency.taskStatuses && data.agency.taskStatuses.length > 0) ? data.agency.taskStatuses : DEFAULT_TASK_STATUSES,
-          clientStatuses: (data.agency.clientStatuses && data.agency.clientStatuses.length > 0) ? data.agency.clientStatuses : DEFAULT_CLIENT_STATUSES
+          clientStatuses: (data.agency.clientStatuses && data.agency.clientStatuses.length > 0) ? data.agency.clientStatuses : DEFAULT_CLIENT_STATUSES,
+          invoiceStatuses: (data.agency.invoiceStatuses && data.agency.invoiceStatuses.length > 0) ? data.agency.invoiceStatuses : DEFAULT_INVOICE_STATUSES,
+          paymentStatuses: (data.agency.paymentStatuses && data.agency.paymentStatuses.length > 0) ? data.agency.paymentStatuses : DEFAULT_PAYMENT_STATUSES,
+          statusColors: data.agency.statusColors || {}
         };
         setConfigs(loadedConfigs);
+        if (data.agency.statusColors) {
+          saveStoredStatusColors(data.agency.statusColors);
+        }
         if (typeof window !== 'undefined') {
           try {
             localStorage.setItem('agentladders_agency_configs', JSON.stringify(loadedConfigs));
           } catch {}
         }
         setNotifications(data.agency.notificationPrefs || {});
-        const apiFont = data.agency.fontFamily || stored.fontId;
-        const apiColor = data.agency.colorScheme || stored.colorId;
-        if (data.agency.fontFamily) setSelectedFont(data.agency.fontFamily);
-        if (data.agency.colorScheme) setSelectedColor(data.agency.colorScheme);
-        if (data.agency.fontFamily || data.agency.colorScheme) {
-          applyTheme(apiFont, apiColor);
-        }
+        const apiFont = data.agency.fontFamily || stored.fontId || 'roboto';
+        const apiColor = data.agency.colorScheme || stored.colorId || 'emerald';
+        setSelectedFont(apiFont);
+        setSelectedColor(apiColor);
+        applyTheme(apiFont, apiColor);
         if (data.agency.invoiceSettings) {
           setInvoiceSettings(data.agency.invoiceSettings);
         } else if (data.agency.name) {
@@ -278,10 +492,10 @@ export default function SettingsPage() {
   };
 
   const handleResetTheme = () => {
-    setSelectedFont('jakarta');
+    setSelectedFont('roboto');
     setSelectedColor('emerald');
-    applyTheme('jakarta', 'emerald');
-    showToast('info', 'Reset to Plus Jakarta Sans & Emerald Prosperity theme.', 'Default Restored');
+    applyTheme('roboto', 'emerald');
+    showToast('info', 'Reset to Roboto & Emerald Prosperity default theme.', 'Default Restored');
   };
 
   const handleSaveInvoiceSettings = async (e?: React.FormEvent) => {
@@ -539,31 +753,70 @@ export default function SettingsPage() {
     }
   };
 
+  const handleOpenEnable2FA = async () => {
+    setShowTwoFactorModal(true);
+    setTwoFactorCode('');
+    try {
+      await fetch('/api/auth/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send', email: currentUser?.email })
+      });
+      showToast('info', `A 6-digit OTP code has been dispatched to ${currentUser?.email || 'your Gmail'}.`, 'OTP Dispatched');
+    } catch {}
+  };
+
+  const handleResendSettingsOtp = async () => {
+    try {
+      const res = await fetch('/api/auth/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send', email: currentUser?.email })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        showToast('success', `New 6-digit OTP code dispatched to ${currentUser?.email || 'your Gmail'}.`, 'OTP Resent');
+      } else {
+        showToast('error', data.error || 'Failed to resend OTP code.', 'Error');
+      }
+    } catch {
+      showToast('error', 'Network error while resending OTP.', 'Error');
+    }
+  };
+
   const handleEnable2FA = async (e: React.FormEvent) => {
     e.preventDefault();
     if (twoFactorCode.length < 6) {
-      showToast('error', 'Please enter a 6-digit verification code.', 'Code Incomplete');
+      showToast('error', 'Please enter the 6-digit verification code.', 'Code Incomplete');
       return;
     }
     setIsVerifying2FA(true);
     try {
-      const res = await fetch('/api/settings', {
-        method: 'PUT',
+      const otpRes = await fetch('/api/auth/otp', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'enable2FA',
-          secret: twoFactorSecret,
-          backupCodes
-        })
+        body: JSON.stringify({ action: 'verify', email: currentUser?.email, code: twoFactorCode })
       });
-      if (res.ok) {
+      const otpData = await otpRes.json().catch(() => ({}));
+      if (otpRes.ok) {
+        await fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'enable2FA',
+            secret: twoFactorSecret,
+            backupCodes
+          })
+        });
         setCurrentUser((prev: any) => ({ ...prev, twoFactorEnabled: true }));
         setShowTwoFactorModal(false);
         setTwoFactorCode('');
-        showToast('success', 'Two-Factor Authentication is now active on your account!', '2FA Protected');
+        showToast('success', 'Gmail 2FA has been successfully verified and activated on your account!', '2FA Protected');
       } else {
-        showToast('error', 'Failed to enable 2FA', 'Error');
+        showToast('error', otpData.error || 'Invalid or expired OTP verification code.', 'Verification Failed');
       }
+    } catch {
+      showToast('error', 'Network error while verifying OTP.', 'Error');
     } finally {
       setIsVerifying2FA(false);
     }
@@ -615,11 +868,34 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
+  const handleQuickStatusColorChange = async (statusName: string, paletteId: string) => {
+    const updatedColors = { ...configs.statusColors, [statusName]: paletteId };
+    setConfigs(prev => ({ ...prev, statusColors: updatedColors }));
+    saveStoredStatusColors(updatedColors);
+    setQuickColorPicker(null);
+
+    try {
+      await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateStatusColors',
+          statusColors: { [statusName]: paletteId }
+        })
+      });
+      const pal = STATUS_COLOR_PALETTES.find(p => p.id === paletteId);
+      showToast('success', `Color for "${statusName}" set to ${pal?.name || paletteId}.`, 'Status Color Updated');
+    } catch {
+      showToast('error', 'Failed to save status color preference.', 'Save Error');
+    }
+  };
+
   const handleConfigSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!configModal || !configInputValue.trim()) return;
     const { mode, type, label, originalValue } = configModal;
     const trimmed = configInputValue.trim();
+    const isStatus = isStatusCategory(type);
 
     if (mode === 'add') {
       if (configs[type].some(item => item.toLowerCase() === trimmed.toLowerCase())) {
@@ -627,8 +903,19 @@ export default function SettingsPage() {
         return;
       }
 
-      const updated = { ...configs, [type]: [...configs[type], trimmed] };
+      const updatedColors = isStatus 
+        ? { ...configs.statusColors, [trimmed]: selectedStatusColor }
+        : configs.statusColors;
+
+      const updated = { 
+        ...configs, 
+        [type]: [...configs[type], trimmed],
+        statusColors: updatedColors
+      };
       setConfigs(updated);
+      if (isStatus) {
+        saveStoredStatusColors(updatedColors);
+      }
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem('agentladders_agency_configs', JSON.stringify(updated));
@@ -647,7 +934,7 @@ export default function SettingsPage() {
       showToast('success', `Added "${trimmed}" to ${categoryName}s!`, 'Option Added');
     } else {
       // mode === 'edit'
-      if (originalValue === trimmed) {
+      if (originalValue === trimmed && (!isStatus || configs.statusColors[originalValue] === selectedStatusColor)) {
         setConfigModal(null);
         setConfigInputValue('');
         return;
@@ -659,7 +946,16 @@ export default function SettingsPage() {
       }
 
       const updatedList = configs[type].map(item => item === originalValue ? trimmed : item);
-      const updated = { ...configs, [type]: updatedList };
+      const updatedColors = { ...configs.statusColors };
+      if (isStatus) {
+        if (originalValue && originalValue !== trimmed) {
+          delete updatedColors[originalValue];
+        }
+        updatedColors[trimmed] = selectedStatusColor;
+        saveStoredStatusColors(updatedColors);
+      }
+
+      const updated = { ...configs, [type]: updatedList, statusColors: updatedColors };
       setConfigs(updated);
       if (typeof window !== 'undefined') {
         try {
@@ -683,6 +979,7 @@ export default function SettingsPage() {
   const handleConfirmDeleteConfigItem = async () => {
     if (!configItemToDelete) return;
     const { type, item } = configItemToDelete;
+    const isStatus = isStatusCategory(type);
 
     if (configs[type].length <= 1) {
       showToast('warning', 'You must maintain at least one configured option.', 'Action Prohibited');
@@ -691,7 +988,13 @@ export default function SettingsPage() {
     }
 
     const updatedList = configs[type].filter(i => i !== item);
-    const updated = { ...configs, [type]: updatedList };
+    const updatedColors = { ...configs.statusColors };
+    if (isStatus && updatedColors[item]) {
+      delete updatedColors[item];
+      saveStoredStatusColors(updatedColors);
+    }
+
+    const updated = { ...configs, [type]: updatedList, statusColors: updatedColors };
     setConfigs(updated);
     if (typeof window !== 'undefined') {
       try {
@@ -717,6 +1020,8 @@ export default function SettingsPage() {
     else if (type === 'siteVisitStatuses') defaults = DEFAULT_SITE_VISIT_STATUSES;
     else if (type === 'taskStatuses') defaults = DEFAULT_TASK_STATUSES;
     else if (type === 'clientStatuses') defaults = DEFAULT_CLIENT_STATUSES;
+    else if (type === 'invoiceStatuses') defaults = DEFAULT_INVOICE_STATUSES;
+    else if (type === 'paymentStatuses') defaults = DEFAULT_PAYMENT_STATUSES;
     else if (type === 'bhkOptions') defaults = DEFAULT_BHK_OPTIONS;
     else if (type === 'propertyTypes') defaults = DEFAULT_PROPERTY_TYPES;
     else if (type === 'leadSources') defaults = DEFAULT_LEAD_SOURCES;
@@ -726,7 +1031,17 @@ export default function SettingsPage() {
     else if (type === 'dealStages') defaults = DEFAULT_DEAL_STAGES;
     else if (type === 'parkingOptions') defaults = DEFAULT_PARKING_OPTIONS;
 
-    const updated = { ...configs, [type]: defaults };
+    // Reset status color overrides for these items if status category
+    const isStatus = isStatusCategory(type);
+    const updatedColors = { ...configs.statusColors };
+    if (isStatus) {
+      defaults.forEach(d => {
+        delete updatedColors[d];
+      });
+      saveStoredStatusColors(updatedColors);
+    }
+
+    const updated = { ...configs, [type]: defaults, statusColors: updatedColors };
     setConfigs(updated);
     if (typeof window !== 'undefined') {
       try {
@@ -965,62 +1280,116 @@ export default function SettingsPage() {
               </div>
 
               {/* Section 1: Font Selection */}
+              {/* Section 1: Typography Selection */}
               <div style={{ marginBottom: 36 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                   <span style={{ fontSize: 18 }}>🔤</span>
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                    Select Typography (6 Font Options)
+                    Select Typography (7 Font Options • Default: Roboto)
                   </h3>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
                   {FONT_OPTIONS.map(font => {
                     const isSelected = selectedFont === font.id;
+                    const isDefault = font.id === 'roboto';
                     return (
                       <div
                         key={font.id}
                         onClick={() => handleFontChange(font.id)}
                         style={{
-                          backgroundColor: '#fff',
-                          border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border-color)',
-                          borderRadius: 12,
+                          backgroundColor: '#ffffff',
+                          border: isSelected ? '2.5px solid var(--primary)' : '1.5px solid #e2e8f0',
+                          borderRadius: 14,
                           padding: 16,
                           cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          boxShadow: isSelected ? '0 4px 16px rgba(0,0,0,0.08)' : 'var(--shadow-sm)',
+                          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                          boxShadow: isSelected 
+                            ? '0 0 0 4px rgba(var(--primary-rgb), 0.18), 0 10px 25px -4px rgba(var(--primary-rgb), 0.25)' 
+                            : '0 1px 3px rgba(0,0,0,0.04)',
                           display: 'flex',
                           flexDirection: 'column',
-                          position: 'relative'
+                          position: 'relative',
+                          transform: isSelected ? 'translateY(-2px)' : 'none'
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                           <div>
-                            <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>{font.name}</div>
-                            <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 2 }}>{font.category}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{ fontSize: 15.5, fontWeight: 800, color: isSelected ? 'var(--primary)' : '#0f172a' }}>
+                                {font.name}
+                              </span>
+                              {isDefault && (
+                                <span style={{
+                                  fontSize: 10,
+                                  fontWeight: 800,
+                                  backgroundColor: '#ecfdf5',
+                                  color: '#065f46',
+                                  border: '1px solid #a7f3d0',
+                                  padding: '1px 6px',
+                                  borderRadius: 4,
+                                  letterSpacing: '0.04em'
+                                }}>
+                                  DEFAULT
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em', marginTop: 2 }}>
+                              {font.category}
+                            </div>
                           </div>
+
                           {isSelected ? (
-                            <span style={{ backgroundColor: 'var(--primary)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 12 }}>
-                              ✓ Active
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              backgroundColor: 'var(--primary)',
+                              color: '#ffffff',
+                              fontSize: 11,
+                              fontWeight: 800,
+                              padding: '4px 10px',
+                              borderRadius: 20,
+                              boxShadow: '0 2px 6px rgba(var(--primary-rgb), 0.35)',
+                              letterSpacing: '0.02em'
+                            }}>
+                              <span>✓</span> ACTIVE
                             </span>
                           ) : (
-                            <span style={{ color: '#94a3b8', fontSize: 12 }}>Select</span>
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              backgroundColor: '#f8fafc',
+                              color: '#64748b',
+                              fontSize: 11,
+                              fontWeight: 600,
+                              padding: '3px 9px',
+                              borderRadius: 14,
+                              border: '1px solid #e2e8f0'
+                            }}>
+                              Select
+                            </span>
                           )}
                         </div>
 
-                        <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 12px', lineHeight: 1.4 }}>
+                        <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 12px', lineHeight: 1.45 }}>
                           {font.tagline}
                         </p>
 
                         {/* Live Font Specimen */}
                         <div style={{ 
-                          backgroundColor: '#f8fafc', 
+                          backgroundColor: isSelected ? 'rgba(var(--primary-rgb), 0.04)' : '#f8fafc', 
                           padding: '12px 14px', 
-                          borderRadius: 8, 
-                          border: '1px solid #f1f5f9',
+                          borderRadius: 10, 
+                          border: isSelected ? '1.5px solid rgba(var(--primary-rgb), 0.25)' : '1px solid #f1f5f9',
                           fontFamily: font.fontFamily,
                           marginTop: 'auto'
                         }}>
-                          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginBottom: 4 }}>Specimen:</div>
+                          <div style={{ fontSize: 11, color: isSelected ? 'var(--primary)' : '#94a3b8', fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span>Specimen:</span>
+                            {isSelected && <span style={{ fontSize: 10.5, fontWeight: 800 }}>● Currently Applied</span>}
+                          </div>
                           <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>
                             {font.previewHeading}
                           </div>
@@ -1039,62 +1408,137 @@ export default function SettingsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                   <span style={{ fontSize: 18 }}>🎨</span>
                   <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                    Select Color Scheme (6 Real Estate Palettes)
+                    Select Color Scheme (6 Real Estate Palettes • Default: Emerald Prosperity)
                   </h3>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
                   {COLOR_SCHEMES.map(scheme => {
                     const isSelected = selectedColor === scheme.id;
+                    const isDefault = scheme.id === 'emerald';
                     return (
                       <div
                         key={scheme.id}
                         onClick={() => handleColorChange(scheme.id)}
                         style={{
-                          backgroundColor: '#fff',
-                          border: isSelected ? `2px solid ${scheme.primary}` : '1px solid var(--border-color)',
-                          borderRadius: 12,
+                          backgroundColor: '#ffffff',
+                          border: isSelected ? `2.5px solid ${scheme.primary}` : '1.5px solid #e2e8f0',
+                          borderRadius: 14,
                           overflow: 'hidden',
                           cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          boxShadow: isSelected ? '0 4px 16px rgba(0,0,0,0.08)' : 'var(--shadow-sm)',
+                          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                          boxShadow: isSelected 
+                            ? `0 0 0 4px rgba(${scheme.primaryRgb}, 0.22), 0 12px 28px -4px rgba(${scheme.primaryRgb}, 0.28)` 
+                            : '0 1px 3px rgba(0,0,0,0.04)',
                           display: 'flex',
-                          flexDirection: 'column'
+                          flexDirection: 'column',
+                          transform: isSelected ? 'translateY(-2px)' : 'none',
+                          position: 'relative'
                         }}
                       >
                         {/* Gradient header swatch */}
-                        <div style={{ height: 32, background: scheme.previewGradient, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 12px' }}>
-                          {isSelected && (
-                            <span style={{ backgroundColor: '#fff', color: scheme.primary, fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 10 }}>
-                              ✓ ACTIVE
+                        <div style={{
+                          height: 38,
+                          background: scheme.previewGradient,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0 14px'
+                        }}>
+                          <span style={{
+                            color: '#ffffff',
+                            fontSize: 11,
+                            fontWeight: 700,
+                            letterSpacing: '0.04em',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.35)',
+                            textTransform: 'uppercase'
+                          }}>
+                            {scheme.id}
+                          </span>
+                          {isSelected ? (
+                            <span style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 4,
+                              backgroundColor: '#ffffff',
+                              color: scheme.primary,
+                              fontSize: 11,
+                              fontWeight: 800,
+                              padding: '3px 10px',
+                              borderRadius: 14,
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+                            }}>
+                              <span>✓</span> ACTIVE
+                            </span>
+                          ) : (
+                            <span style={{
+                              color: 'rgba(255,255,255,0.85)',
+                              fontSize: 11,
+                              fontWeight: 600,
+                              textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                            }}>
+                              Select
                             </span>
                           )}
                         </div>
 
                         <div style={{ padding: 16, display: 'flex', flexDirection: 'column', flex: 1 }}>
-                          <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
-                            {scheme.name}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                            <span style={{ fontSize: 15.5, fontWeight: 800, color: isSelected ? scheme.primary : '#0f172a' }}>
+                              {scheme.name}
+                            </span>
+                            {isDefault && (
+                              <span style={{
+                                fontSize: 10,
+                                fontWeight: 800,
+                                backgroundColor: '#ecfdf5',
+                                color: '#065f46',
+                                border: '1px solid #a7f3d0',
+                                padding: '1px 6px',
+                                borderRadius: 4,
+                                letterSpacing: '0.04em'
+                              }}>
+                                DEFAULT
+                              </span>
+                            )}
                           </div>
-                          <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 14px', lineHeight: 1.4 }}>
+                          <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 14px', lineHeight: 1.45 }}>
                             {scheme.tagline}
                           </p>
 
                           {/* Swatches circles */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                            <div title="Primary Brand" style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: scheme.primary, boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-                            <div title="Hover / Dark" style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: scheme.primaryDark, boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-                            <div title="Accent Highlight" style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: scheme.accent, boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-                            <div title="Soft Background / Badge" style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: scheme.badgeBg, border: '1px solid #cbd5e1' }} />
+                            <div title="Primary Brand" style={{ width: 26, height: 26, borderRadius: '50%', backgroundColor: scheme.primary, boxShadow: '0 2px 5px rgba(0,0,0,0.2)', border: '2px solid #fff' }} />
+                            <div title="Hover / Dark" style={{ width: 26, height: 26, borderRadius: '50%', backgroundColor: scheme.primaryDark, boxShadow: '0 2px 5px rgba(0,0,0,0.2)', border: '2px solid #fff' }} />
+                            <div title="Accent Highlight" style={{ width: 26, height: 26, borderRadius: '50%', backgroundColor: scheme.accent, boxShadow: '0 2px 5px rgba(0,0,0,0.2)', border: '2px solid #fff' }} />
+                            <div title="Soft Background / Badge" style={{ width: 26, height: 26, borderRadius: '50%', backgroundColor: scheme.badgeBg, border: '1.5px solid #cbd5e1' }} />
                           </div>
 
-                          {/* Mini UI elements showing the colors */}
-                          <div style={{ display: 'flex', gap: 8, marginTop: 'auto', alignItems: 'center' }}>
-                            <div style={{ backgroundColor: scheme.primary, color: '#fff', padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
-                              Button
+                          {/* Mini UI elements showing the colors with selected indicator */}
+                          <div style={{
+                            display: 'flex',
+                            gap: 8,
+                            marginTop: 'auto',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 10px',
+                            borderRadius: 8,
+                            backgroundColor: isSelected ? scheme.badgeBg : '#f8fafc',
+                            border: isSelected ? `1px solid ${scheme.accent}` : '1px solid #f1f5f9'
+                          }}>
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                              <div style={{ backgroundColor: scheme.primary, color: '#fff', padding: '3px 9px', borderRadius: 6, fontSize: 11, fontWeight: 700 }}>
+                                Button
+                              </div>
+                              <div style={{ backgroundColor: isSelected ? '#ffffff' : scheme.badgeBg, color: scheme.badgeText, padding: '3px 9px', borderRadius: 10, fontSize: 11, fontWeight: 700, border: isSelected ? `1px solid ${scheme.accent}` : 'none' }}>
+                                Available
+                              </div>
                             </div>
-                            <div style={{ backgroundColor: scheme.badgeBg, color: scheme.badgeText, padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
-                              Available
-                            </div>
+                            {isSelected && (
+                              <span style={{ fontSize: 11, fontWeight: 800, color: scheme.primaryText, display: 'flex', alignItems: 'center', gap: 3 }}>
+                                <span>✓</span> Selected
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1361,7 +1805,22 @@ export default function SettingsPage() {
 
                   <div className={styles.inputGroup}>
                     <label>
-                      Current A/c No.
+                      Account Type
+                      <InfoTooltip text="Select whether this is a Current or Savings business account" />
+                    </label>
+                    <select
+                      value={invoiceSettings.accountType || 'Current'}
+                      onChange={e => setInvoiceSettings({ ...invoiceSettings, accountType: e.target.value })}
+                      className={styles.input}
+                    >
+                      <option value="Current">Current Account</option>
+                      <option value="Savings">Savings Account</option>
+                    </select>
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label>
+                      Account Number
                       <InfoTooltip text="Bank account number for brokerage wire remittance (e.g. 50200088921102)" />
                     </label>
                     <input
@@ -1710,35 +2169,182 @@ export default function SettingsPage() {
 
           {activeTab === 'billing' && (
             <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Subscription & Billing</h2>
+              <div style={{ marginBottom: 20 }}>
+                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>Subscription &amp; Billing</h2>
+                <p style={{ fontSize: 13.5, color: '#64748b', margin: '4px 0 0' }}>
+                  Manage your agency tier, broker seat allocations, and enterprise inventory limits.
+                </p>
+              </div>
               
-              <div className="responsive-grid-2" style={{ gap: '24px' }}>
-                <div className={styles.planCard} style={{ borderColor: agencyData.plan === 'Starter' ? 'var(--primary-color)' : 'var(--border-color)' }}>
-                  {agencyData.plan === 'Starter' && <div className={styles.planBadge}>Current Plan</div>}
-                  <h3>Starter Broker</h3>
-                  <p className={styles.planPrice}>₹1,999/mo</p>
-                  <ul className={styles.planFeatures}>
-                    <li>Up to 2 Real Estate Agents</li>
-                    <li>500 Active Properties (RERA Carpet & Vastu)</li>
-                    <li>Daily Habit Cockpit & Match Engine</li>
-                    <li>WhatsApp Web Pitch Generator</li>
-                  </ul>
-                  {agencyData.plan !== 'Starter' && <Button variant="outline" onClick={() => setPlanToUpgrade('Starter')}>Downgrade to Starter</Button>}
-                </div>
-                
-                <div className={styles.planCard} style={{ borderColor: agencyData.plan === 'Professional' ? 'var(--primary-color)' : 'var(--border-color)' }}>
-                  {agencyData.plan === 'Professional' && <div className={styles.planBadge}>Current Plan</div>}
-                  <h3>Agency Unlimited</h3>
-                  <p className={styles.planPrice}>₹4,999/mo</p>
-                  <ul className={styles.planFeatures}>
-                    <li>Up to 15 Agency Team Members</li>
-                    <li>Unlimited Indian Inventory & Inquiries</li>
-                    <li>Advanced Kundali Match with Tolerance</li>
-                    <li>Automated Site Visit WhatsApp Pins</li>
-                    <li>Priority Dedicated Real Estate Support</li>
-                  </ul>
-                  {agencyData.plan !== 'Professional' && <Button variant="primary" onClick={() => setPlanToUpgrade('Professional')}>Upgrade to Pro</Button>}
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                {/* Plan 1: Starter */}
+                {(() => {
+                  const isActive = agencyData.plan?.toLowerCase() === 'starter';
+                  return (
+                    <div
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 14,
+                        padding: 24,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        border: isActive ? '2px solid var(--primary, #059669)' : '1px solid #cbd5e1',
+                        boxShadow: isActive ? '0 0 18px rgba(5, 150, 105, 0.22)' : '0 2px 8px rgba(0,0,0,0.03)',
+                        position: 'relative',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {isActive && (
+                        <div style={{ position: 'absolute', top: -12, right: 18, backgroundColor: 'var(--primary, #059669)', color: '#ffffff', fontSize: 11, fontWeight: 800, padding: '3px 12px', borderRadius: 20, boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)' }}>
+                          ✓ Active Plan
+                        </div>
+                      )}
+                      <div>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>Starter Broker</h3>
+                        <p style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: '0 0 16px' }}>₹1,999<span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>/mo</span></p>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, color: '#334155' }}>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Up to 2 Real Estate Agents</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> 500 Active Properties Catalog</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Daily Habit Cockpit &amp; Match Engine</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> WhatsApp Pitch Generator</li>
+                        </ul>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={isActive}
+                        onClick={() => setPlanToUpgrade('Starter')}
+                        style={{
+                          width: '100%',
+                          padding: '11px',
+                          borderRadius: 8,
+                          border: isActive ? '1px solid var(--primary, #059669)' : '1px solid #cbd5e1',
+                          backgroundColor: isActive ? 'rgba(5, 150, 105, 0.08)' : '#0f172a',
+                          color: isActive ? 'var(--primary, #059669)' : '#ffffff',
+                          fontWeight: 700,
+                          fontSize: 13,
+                          cursor: isActive ? 'default' : 'pointer'
+                        }}
+                      >
+                        {isActive ? '✓ Current Plan' : 'Switch to Starter'}
+                      </button>
+                    </div>
+                  );
+                })()}
+
+                {/* Plan 2: Pro */}
+                {(() => {
+                  const isActive = agencyData.plan?.toLowerCase() === 'professional' || agencyData.plan?.toLowerCase() === 'pro';
+                  return (
+                    <div
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 14,
+                        padding: 24,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        border: isActive ? '2px solid var(--primary, #059669)' : '1px solid #cbd5e1',
+                        boxShadow: isActive ? '0 0 18px rgba(5, 150, 105, 0.22)' : '0 2px 8px rgba(0,0,0,0.03)',
+                        position: 'relative',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {isActive && (
+                        <div style={{ position: 'absolute', top: -12, right: 18, backgroundColor: 'var(--primary, #059669)', color: '#ffffff', fontSize: 11, fontWeight: 800, padding: '3px 12px', borderRadius: 20, boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)' }}>
+                          ✓ Active Plan
+                        </div>
+                      )}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                          <span style={{ fontSize: 10.5, fontWeight: 800, backgroundColor: '#eff6ff', color: '#2563eb', padding: '2px 7px', borderRadius: 4 }}>MOST POPULAR</span>
+                        </div>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>Agency Unlimited</h3>
+                        <p style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: '0 0 16px' }}>₹4,999<span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>/mo</span></p>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, color: '#334155' }}>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Up to 15 Agency Team Members</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Unlimited Properties &amp; Inquiries</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Advanced Kundali Match Engine</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Multi-Property Showing Tours</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Priority Dedicated Real Estate Support</li>
+                        </ul>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={isActive}
+                        onClick={() => setPlanToUpgrade('Professional')}
+                        style={{
+                          width: '100%',
+                          padding: '11px',
+                          borderRadius: 8,
+                          border: isActive ? '1px solid var(--primary, #059669)' : 'none',
+                          backgroundColor: isActive ? 'rgba(5, 150, 105, 0.08)' : 'var(--primary, #059669)',
+                          color: isActive ? 'var(--primary, #059669)' : '#ffffff',
+                          fontWeight: 700,
+                          fontSize: 13,
+                          cursor: isActive ? 'default' : 'pointer'
+                        }}
+                      >
+                        {isActive ? '✓ Current Plan' : 'Switch to Pro'}
+                      </button>
+                    </div>
+                  );
+                })()}
+
+                {/* Plan 3: Enterprise */}
+                {(() => {
+                  const isActive = agencyData.plan?.toLowerCase() === 'enterprise';
+                  return (
+                    <div
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 14,
+                        padding: 24,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        border: isActive ? '2px solid var(--primary, #059669)' : '1px solid #cbd5e1',
+                        boxShadow: isActive ? '0 0 18px rgba(5, 150, 105, 0.22)' : '0 2px 8px rgba(0,0,0,0.03)',
+                        position: 'relative',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {isActive && (
+                        <div style={{ position: 'absolute', top: -12, right: 18, backgroundColor: 'var(--primary, #059669)', color: '#ffffff', fontSize: 11, fontWeight: 800, padding: '3px 12px', borderRadius: 20, boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)' }}>
+                          ✓ Active Plan
+                        </div>
+                      )}
+                      <div>
+                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>Enterprise Brokerage</h3>
+                        <p style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: '0 0 16px' }}>₹9,999<span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>/mo</span></p>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13, color: '#334155' }}>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Unlimited Brokers &amp; Branch Offices</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> Custom Agency Domain &amp; Whitelabel</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> REST API &amp; Webhooks Integration</li>
+                          <li style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span>✓</span> 24/7 Phone &amp; On-Site Account Manager</li>
+                        </ul>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={isActive}
+                        onClick={() => setPlanToUpgrade('Enterprise')}
+                        style={{
+                          width: '100%',
+                          padding: '11px',
+                          borderRadius: 8,
+                          border: isActive ? '1px solid var(--primary, #059669)' : '1px solid #cbd5e1',
+                          backgroundColor: isActive ? 'rgba(5, 150, 105, 0.08)' : '#0f172a',
+                          color: isActive ? 'var(--primary, #059669)' : '#ffffff',
+                          fontWeight: 700,
+                          fontSize: 13,
+                          cursor: isActive ? 'default' : 'pointer'
+                        }}
+                      >
+                        {isActive ? '✓ Current Plan' : 'Switch to Enterprise'}
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
@@ -1881,7 +2487,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* 2FA Card */}
+              {/* 2FA Card (Gmail OTP 2FA) */}
               <div style={{
                 border: '1px solid var(--border-color)',
                 borderRadius: 12,
@@ -1898,7 +2504,7 @@ export default function SettingsPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span style={{ fontSize: 24 }}>🛡️</span>
                     <div>
-                      <strong style={{ fontSize: 15, color: '#0f172a' }}>Two-Factor Authentication (2FA)</strong>
+                      <strong style={{ fontSize: 15, color: '#0f172a' }}>Gmail One-Time Password (2FA OTP)</strong>
                       <span style={{
                         marginLeft: 10,
                         fontSize: 11.5,
@@ -1914,8 +2520,8 @@ export default function SettingsPage() {
                   </div>
                   <p className={styles.mutedText} style={{ marginTop: 6, fontSize: 13, lineHeight: 1.5 }}>
                     {currentUser?.twoFactorEnabled
-                      ? 'Your account is secured with Time-based One-Time Password (TOTP) verification. You will be prompted for a 6-digit code upon signing in.'
-                      : 'Protect your agency inventory, private client notes, and commission deals with an authenticator app (Google Authenticator, Microsoft Authenticator, or Authy).'}
+                      ? `Your account is protected with 6-digit Gmail OTP verification. A one-time code is delivered directly to ${currentUser?.email} every time you sign in.`
+                      : `Protect your agency inventory, private client notes, and deals by requiring a 6-digit OTP sent to your registered Gmail (${currentUser?.email}) upon signing in.`}
                   </p>
                 </div>
 
@@ -1943,11 +2549,8 @@ export default function SettingsPage() {
                       </button>
                     </>
                   ) : (
-                    <Button variant="primary" onClick={() => {
-                      setShowTwoFactorModal(true);
-                      setTwoFactorCode('');
-                    }}>
-                      Enable 2FA
+                    <Button variant="primary" onClick={handleOpenEnable2FA}>
+                      Enable Gmail OTP 2FA
                     </Button>
                   )}
                 </div>
@@ -1980,35 +2583,317 @@ export default function SettingsPage() {
                 </Button>
               </div>
 
-              {/* Active Sessions Card */}
+              {/* Active Sessions Card (Multi-Device, Real Telemetry & Remote Session Revocation) */}
               <div style={{
                 border: '1px solid var(--border-color)',
-                borderRadius: 12,
+                borderRadius: 14,
                 padding: '24px',
                 backgroundColor: '#fff',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 16
+                marginBottom: 20,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
               }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 24 }}>💻</span>
-                    <div>
-                      <strong style={{ fontSize: 15, color: '#0f172a' }}>Current Device & Session</strong>
-                      <span style={{ marginLeft: 10, fontSize: 11.5, fontWeight: 700, padding: '2px 8px', borderRadius: 12, backgroundColor: '#dcfce7', color: '#15803d' }}>
-                        Active Now
-                      </span>
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 24 }}>💻</span>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <strong style={{ fontSize: 16, color: '#0f172a' }}>Current Device &amp; Active Sessions</strong>
+                          <span style={{
+                            fontSize: 11.5,
+                            fontWeight: 700,
+                            padding: '3px 9px',
+                            borderRadius: 12,
+                            backgroundColor: '#dcfce7',
+                            color: '#15803d',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5
+                          }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#16a34a' }} />
+                            {activeSessions.length} {activeSessions.length === 1 ? 'Device' : 'Devices'} Connected
+                          </span>
+                        </div>
+                      </div>
                     </div>
+                    <p style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>
+                      Live telemetry, hardware attributes, IP addresses, and geolocation for all browsers and devices authenticated into your account.
+                    </p>
                   </div>
-                  <p className={styles.mutedText} style={{ marginTop: 6, fontSize: 13 }}>
-                    Signed in from Windows Browser &bull; IP Session Secure &bull; Token valid
-                  </p>
+
+                  {/* Header Controls */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {/* Toggle IP & Location Options */}
+                    <button
+                      type="button"
+                      onClick={() => setShowIpDetails(!showIpDetails)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        border: showIpDetails ? '1px solid #cbd5e1' : '1px dashed #cbd5e1',
+                        backgroundColor: showIpDetails ? '#f8fafc' : '#ffffff',
+                        color: '#334155',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6
+                      }}
+                      title="Toggle IP and geolocation details display"
+                    >
+                      <span>{showIpDetails ? '🌐 Hide IP/Location Details' : '🌐 Show IP/Location Details'}</span>
+                    </button>
+
+                    {/* Refresh */}
+                    <button
+                      type="button"
+                      onClick={() => loadActiveSessions()}
+                      disabled={loadingSessions}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: 8,
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#fff',
+                        color: '#334155',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6
+                      }}
+                      title="Refresh active sessions"
+                    >
+                      <span>🔄 Refresh</span>
+                    </button>
+
+                    {/* Revoke All Other Sessions */}
+                    {activeSessions.filter(s => !s.current && s.id !== currentDeviceId).length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleRevokeAllOtherSessions}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: 8,
+                          border: '1px solid #fecaca',
+                          backgroundColor: '#fff1f2',
+                          color: '#dc2626',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5
+                        }}
+                      >
+                        <span>🚪 Sign Out All Other Devices ({activeSessions.filter(s => !s.current && s.id !== currentDeviceId).length})</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <span style={{ fontSize: 12.5, color: '#64748b', fontWeight: 600 }}>
-                  Current Session
-                </span>
+
+                {/* Active Sessions List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {activeSessions.map((session, idx) => {
+                    const isCurrent = session.current || session.id === currentDeviceId || idx === 0;
+                    const isMobile = session.deviceType === 'mobile' || session.browser?.toLowerCase().includes('mobile') || session.os?.toLowerCase().includes('ios') || session.os?.toLowerCase().includes('android');
+                    const isFirefox = session.browser?.toLowerCase().includes('firefox');
+                    const isSafari = session.browser?.toLowerCase().includes('safari') && !session.browser?.toLowerCase().includes('chrome');
+                    const isEdge = session.browser?.toLowerCase().includes('edge') || session.browser?.toLowerCase().includes('edg');
+                    
+                    const browserIcon = isFirefox ? '🦊' : isSafari ? '🧭' : isEdge ? '🌊' : isMobile ? '📱' : '🌐';
+
+                    return (
+                      <div
+                        key={session.id}
+                        style={{
+                          backgroundColor: isCurrent ? '#f0fdf4' : '#f8fafc',
+                          border: isCurrent ? '1.5px solid #86efac' : '1px solid #e2e8f0',
+                          borderRadius: 12,
+                          padding: '16px 18px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: 16,
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {/* Left: Device Info */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, minWidth: 260 }}>
+                          <span style={{
+                            fontSize: 24,
+                            backgroundColor: isCurrent ? '#dcfce7' : '#ffffff',
+                            padding: '8px 10px',
+                            borderRadius: 10,
+                            border: isCurrent ? '1px solid #bbf7d0' : '1px solid #e2e8f0'
+                          }}>
+                            {browserIcon}
+                          </span>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                              <strong style={{ fontSize: 14.5, color: '#0f172a' }}>
+                                {session.browser}
+                              </strong>
+                              <span style={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>
+                                on {session.os}
+                              </span>
+                              
+                              {isCurrent && (
+                                <span style={{
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  backgroundColor: '#16a34a',
+                                  color: '#ffffff',
+                                  padding: '2px 8px',
+                                  borderRadius: 12,
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 4
+                                }}>
+                                  ✓ This Device
+                                </span>
+                              )}
+
+                              <span style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                backgroundColor: isCurrent ? '#dcfce7' : '#e2e8f0',
+                                color: isCurrent ? '#15803d' : '#475569',
+                                padding: '2px 7px',
+                                borderRadius: 10
+                              }}>
+                                {isCurrent ? '● Active Now' : '● Signed In'}
+                              </span>
+                            </div>
+
+                            {/* IP Address & Location Row */}
+                            {showIpDetails && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, flexWrap: 'wrap', fontSize: 12.5, color: '#334155' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, backgroundColor: '#ffffff', padding: '3px 8px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                  <span style={{ color: '#0284c7' }}>🌐</span>
+                                  <span style={{ fontWeight: 600 }}>IP:</span>
+                                  <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a' }}>{session.ipAddress}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const cleanIp = session.ipAddress.split(' ')[0];
+                                      navigator.clipboard?.writeText(cleanIp);
+                                      showToast('info', `Copied IP address: ${cleanIp}`, 'IP Copied');
+                                    }}
+                                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, fontSize: 11, color: '#64748b' }}
+                                    title="Copy IP Address"
+                                  >
+                                    📋
+                                  </button>
+                                </div>
+
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, backgroundColor: '#ffffff', padding: '3px 8px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                  <span style={{ color: '#ea580c' }}>📍</span>
+                                  <span style={{ fontWeight: 600 }}>Location:</span>
+                                  <span style={{ fontWeight: 700, color: '#0f172a' }}>{session.location}</span>
+                                </div>
+
+                                {session.screen && (
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#64748b', fontSize: 11.5 }}>
+                                    <span>🖥️ {session.screen}</span>
+                                  </div>
+                                )}
+
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#64748b', fontSize: 11.5 }}>
+                                  <span>🕒 {formatSessionTime(session.lastActive)}</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Right Action */}
+                        <div>
+                          {isCurrent ? (
+                            <span style={{
+                              fontSize: 12,
+                              fontWeight: 700,
+                              color: '#15803d',
+                              backgroundColor: '#dcfce7',
+                              padding: '6px 12px',
+                              borderRadius: 8,
+                              border: '1px solid #bbf7d0',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 5
+                            }}>
+                              🔒 Current Session
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleRevokeSession(session.id)}
+                              disabled={revokingSessionId === session.id}
+                              style={{
+                                padding: '6px 14px',
+                                borderRadius: 8,
+                                border: '1px solid #fecaca',
+                                backgroundColor: '#ffffff',
+                                color: '#dc2626',
+                                fontSize: 12.5,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              {revokingSessionId === session.id ? 'Revoking...' : 'Terminate Session'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Quick Multi-Device Test Helper */}
+                <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                  <span style={{ fontSize: 12, color: '#64748b' }}>
+                    💡 Log in from any other browser (Chrome, Firefox, Safari, Edge, Mobile) to see it appear here in real-time.
+                  </span>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      type="button"
+                      onClick={() => handleSimulateSession('Mozilla Firefox')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 6,
+                        border: '1px solid #e2e8f0',
+                        backgroundColor: '#fff',
+                        fontSize: 11.5,
+                        color: '#475569',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      + Test Firefox Login
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSimulateSession('Apple Safari Mobile')}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 6,
+                        border: '1px solid #e2e8f0',
+                        backgroundColor: '#fff',
+                        fontSize: 11.5,
+                        color: '#475569',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      + Test Mobile Safari Login
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -2093,6 +2978,28 @@ export default function SettingsPage() {
                 description: 'Relationship statuses for buyers, sellers, landlords, and investors (Active Search, In Contract, Closed Client, Past Client, Inactive).',
                 placeholder: 'e.g. VIP Dormant or Renewal Due',
                 tip: '💡 This status appears in client detail views, contact filters, and relationship manager dashboards.'
+              },
+              {
+                key: 'invoiceStatuses',
+                title: 'Invoice & Billing Statuses',
+                icon: '🧾',
+                group: 'statuses',
+                groupLabel: 'Status & Workflow',
+                usageBadges: ['Invoices Table', 'Print Invoice', 'Payment Tracker'],
+                description: 'Lifecycle stages for client commission invoices (Draft, Pending, Partially Paid, Paid, Overdue, Cancelled).',
+                placeholder: 'e.g. Under Dispute or Escrow Hold',
+                tip: '💡 This status appears in the Invoices table, invoice edit modal, live status dropdown, and printable tax invoice.'
+              },
+              {
+                key: 'paymentStatuses',
+                title: 'Payment Clearance Statuses',
+                icon: '💳',
+                group: 'statuses',
+                groupLabel: 'Status & Workflow',
+                usageBadges: ['Payments History', 'Clearance Tracker'],
+                description: 'Financial settlement and clearance states for agency commission receipts (Completed, Pending Clearance, Processing, Failed, Refunded).',
+                placeholder: 'e.g. Cheque Clearing or On Hold',
+                tip: '💡 This status appears in the Payments table, payment filters, and receipt clearance records.'
               },
 
               // 2. Property Taxonomy & Attributes
@@ -2441,6 +3348,7 @@ export default function SettingsPage() {
                                   onClick={() => {
                                     setConfigModal({ mode: 'add', type: sec.key, label: getCategoryLabel(sec.key) });
                                     setConfigInputValue('');
+                                    setSelectedStatusColor('emerald');
                                   }}
                                   style={{ border: 'none', background: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, fontSize: 12.5 }}
                                 >
@@ -2448,54 +3356,182 @@ export default function SettingsPage() {
                                 </button>
                               </div>
                             ) : (
-                              items.map(item => (
-                                <div
-                                  key={item}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: 6,
-                                    padding: '5px 8px 5px 12px',
-                                    borderRadius: 8,
-                                    backgroundColor: '#ffffff',
-                                    border: '1px solid #cbd5e1',
-                                    fontSize: 12.5,
-                                    fontWeight: 600,
-                                    color: '#0f172a',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-                                    transition: 'all 0.15s ease'
-                                  }}
-                                >
-                                  <span>{item}</span>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 2, borderLeft: '1px solid #e2e8f0', paddingLeft: 6, marginLeft: 2 }}>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setConfigModal({ mode: 'edit', type: sec.key, label: getCategoryLabel(sec.key), originalValue: item });
-                                        setConfigInputValue(item);
-                                      }}
-                                      title={`Edit "${item}"`}
-                                      style={{ border: 'none', background: 'none', color: '#64748b', cursor: 'pointer', padding: '2px 3px', borderRadius: 4, fontSize: 11 }}
-                                      onMouseEnter={e => (e.currentTarget.style.color = '#2563eb')}
-                                      onMouseLeave={e => (e.currentTarget.style.color = '#64748b')}
-                                    >
-                                      ✏️
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setConfigItemToDelete({ type: sec.key, label: getCategoryLabel(sec.key), item });
-                                      }}
-                                      title={`Delete "${item}"`}
-                                      style={{ border: 'none', background: 'none', color: '#94a3b8', cursor: 'pointer', padding: '2px 3px', borderRadius: 4, fontSize: 11 }}
-                                      onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
-                                      onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}
-                                    >
-                                      🗑️
-                                    </button>
+                              items.map(item => {
+                                const isStatusSec = isStatusCategory(sec.key);
+                                const itemColorStyle = isStatusSec ? getStatusColorStyle(item, configs.statusColors[item]) : null;
+                                const isColorPickerOpen = quickColorPicker?.status === item && quickColorPicker?.type === sec.key;
+
+                                return (
+                                  <div
+                                    key={item}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: 6,
+                                      padding: isStatusSec ? '4px 8px 4px 10px' : '5px 8px 5px 12px',
+                                      borderRadius: isStatusSec ? 20 : 8,
+                                      backgroundColor: isStatusSec ? itemColorStyle!.bg : '#ffffff',
+                                      border: `1px solid ${isStatusSec ? itemColorStyle!.border : '#cbd5e1'}`,
+                                      fontSize: 12.5,
+                                      fontWeight: 600,
+                                      color: isStatusSec ? itemColorStyle!.text : '#0f172a',
+                                      boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                                      transition: 'all 0.15s ease',
+                                      position: 'relative'
+                                    }}
+                                  >
+                                    {isStatusSec && (
+                                      <span
+                                        style={{
+                                          width: 8,
+                                          height: 8,
+                                          borderRadius: '50%',
+                                          backgroundColor: itemColorStyle!.dot,
+                                          flexShrink: 0
+                                        }}
+                                      />
+                                    )}
+                                    <span>{item}</span>
+
+                                    {/* Action items */}
+                                    <div style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 3,
+                                      borderLeft: `1px solid ${isStatusSec ? itemColorStyle!.border : '#e2e8f0'}`,
+                                      paddingLeft: 6,
+                                      marginLeft: 2
+                                    }}>
+                                      {/* Quick Color Picker Button for Statuses */}
+                                      {isStatusSec && (
+                                        <div style={{ position: 'relative' }}>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setQuickColorPicker(isColorPickerOpen ? null : { status: item, type: sec.key });
+                                            }}
+                                            title={`Change color for "${item}"`}
+                                            style={{
+                                              border: 'none',
+                                              background: 'none',
+                                              cursor: 'pointer',
+                                              padding: '2px 3px',
+                                              borderRadius: 4,
+                                              fontSize: 11,
+                                              display: 'flex',
+                                              alignItems: 'center',
+                                              opacity: 0.85
+                                            }}
+                                            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                                            onMouseLeave={e => (e.currentTarget.style.opacity = '0.85')}
+                                          >
+                                            🎨
+                                          </button>
+
+                                          {/* Quick Color Popover */}
+                                          {isColorPickerOpen && (
+                                            <div
+                                              style={{
+                                                position: 'absolute',
+                                                bottom: 'calc(100% + 8px)',
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                backgroundColor: '#ffffff',
+                                                borderRadius: 12,
+                                                boxShadow: '0 10px 25px -5px rgba(0,0,0,0.22), 0 0 1px 1px rgba(0,0,0,0.06)',
+                                                border: '1px solid #e2e8f0',
+                                                padding: '10px 12px',
+                                                zIndex: 9999,
+                                                width: 210,
+                                                boxSizing: 'border-box'
+                                              }}
+                                              onClick={e => e.stopPropagation()}
+                                            >
+                                              <div style={{
+                                                fontSize: 11,
+                                                fontWeight: 700,
+                                                color: '#334155',
+                                                marginBottom: 8,
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center'
+                                              }}>
+                                                <span>Pick Status Color:</span>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => setQuickColorPicker(null)}
+                                                  style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 11, color: '#94a3b8' }}
+                                                >
+                                                  ✕
+                                                </button>
+                                              </div>
+                                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
+                                                {STATUS_COLOR_PALETTES.map(pal => {
+                                                  const isSel = (configs.statusColors[item] || itemColorStyle?.paletteId) === pal.id;
+                                                  return (
+                                                    <button
+                                                      key={pal.id}
+                                                      type="button"
+                                                      onClick={() => handleQuickStatusColorChange(item, pal.id)}
+                                                      title={pal.name}
+                                                      style={{
+                                                        width: 32,
+                                                        height: 32,
+                                                        borderRadius: 8,
+                                                        backgroundColor: pal.bg,
+                                                        border: isSel ? `2px solid ${pal.text}` : `1px solid ${pal.border}`,
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        padding: 0,
+                                                        transition: 'transform 0.1s ease',
+                                                        transform: isSel ? 'scale(1.12)' : 'scale(1)'
+                                                      }}
+                                                    >
+                                                      <span style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: pal.dot }} />
+                                                    </button>
+                                                  );
+                                                })}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setConfigModal({ mode: 'edit', type: sec.key, label: getCategoryLabel(sec.key), originalValue: item });
+                                          setConfigInputValue(item);
+                                          if (isStatusSec) {
+                                            setSelectedStatusColor(configs.statusColors[item] || itemColorStyle?.paletteId || 'emerald');
+                                          }
+                                        }}
+                                        title={`Edit "${item}"`}
+                                        style={{ border: 'none', background: 'none', color: isStatusSec ? itemColorStyle!.text : '#64748b', cursor: 'pointer', padding: '2px 3px', borderRadius: 4, fontSize: 11 }}
+                                        onMouseEnter={e => (e.currentTarget.style.color = '#2563eb')}
+                                        onMouseLeave={e => (e.currentTarget.style.color = isStatusSec ? itemColorStyle!.text : '#64748b')}
+                                      >
+                                        ✏️
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setConfigItemToDelete({ type: sec.key, label: getCategoryLabel(sec.key), item });
+                                        }}
+                                        title={`Delete "${item}"`}
+                                        style={{ border: 'none', background: 'none', color: isStatusSec ? itemColorStyle!.text : '#94a3b8', cursor: 'pointer', padding: '2px 3px', borderRadius: 4, fontSize: 11, opacity: 0.7 }}
+                                        onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.opacity = '1'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.color = isStatusSec ? itemColorStyle!.text : '#94a3b8'; e.currentTarget.style.opacity = '0.7'; }}
+                                      >
+                                        🗑️
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
-                              ))
+                                );
+                              })
                             )}
                           </div>
                         </div>
@@ -2709,6 +3745,10 @@ export default function SettingsPage() {
                       ? 'e.g. Awaiting Documents or Blocked'
                       : configModal.type === 'clientStatuses'
                       ? 'e.g. VIP Dormant or Renewal Due'
+                      : configModal.type === 'invoiceStatuses'
+                      ? 'e.g. Under Dispute or Escrow Hold'
+                      : configModal.type === 'paymentStatuses'
+                      ? 'e.g. Cheque Clearing or On Hold'
                       : configModal.type === 'bhkOptions'
                       ? 'e.g. 3.5 BHK, Studio, or 6 BHK'
                       : configModal.type === 'propertyTypes'
@@ -2740,6 +3780,10 @@ export default function SettingsPage() {
                     ? '💡 This status appears across agent task management lists and follow-up checklists.'
                     : configModal.type === 'clientStatuses'
                     ? '💡 This status appears in client detail views, contact filters, and relationship manager dashboards.'
+                    : configModal.type === 'invoiceStatuses'
+                    ? '💡 This status appears in the Invoices table, invoice edit modal, live status dropdown, and printable tax invoice.'
+                    : configModal.type === 'paymentStatuses'
+                    ? '💡 This status appears in the Payments table, payment filters, and receipt clearance records.'
                     : configModal.type === 'bhkOptions'
                     ? '💡 This option will immediately appear in both Property listings (BHK) and Buyer Inquiries (BHK Needed).'
                     : configModal.type === 'propertyTypes'
@@ -2756,6 +3800,100 @@ export default function SettingsPage() {
                   }
                 </div>
               </div>
+
+              {/* Status Color Badge & Dot Selector */}
+              {isStatusCategory(configModal.type) && (() => {
+                const previewStyle = getStatusColorStyle(configInputValue.trim() || configModal.label, selectedStatusColor);
+                return (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <label style={{ fontSize: '13px', fontWeight: 600, color: '#334155', margin: 0 }}>
+                        Status Color Badge &amp; Dot
+                      </label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>Live Preview:</span>
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            padding: '3px 10px',
+                            borderRadius: 20,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            backgroundColor: previewStyle.bg,
+                            color: previewStyle.text,
+                            border: `1px solid ${previewStyle.border}`
+                          }}
+                        >
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: previewStyle.dot }} />
+                          {configInputValue.trim() || configModal.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(5, 1fr)',
+                      gap: 8,
+                      padding: '12px',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: 12,
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      {STATUS_COLOR_PALETTES.map(pal => {
+                        const isSelected = selectedStatusColor === pal.id;
+                        return (
+                          <button
+                            key={pal.id}
+                            type="button"
+                            onClick={() => setSelectedStatusColor(pal.id)}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              gap: 4,
+                              padding: '8px 4px',
+                              borderRadius: 8,
+                              border: isSelected ? `2px solid ${pal.text}` : '1px solid #e2e8f0',
+                              backgroundColor: isSelected ? pal.bg : '#ffffff',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s ease',
+                              boxShadow: isSelected ? '0 1px 4px rgba(0,0,0,0.1)' : 'none'
+                            }}
+                          >
+                            <span style={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: '50%',
+                              backgroundColor: pal.dot,
+                              border: `2px solid ${pal.border}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#fff',
+                              fontSize: 10,
+                              fontWeight: 800
+                            }}>
+                              {isSelected ? '✓' : ''}
+                            </span>
+                            <span style={{
+                              fontSize: 10.5,
+                              fontWeight: isSelected ? 700 : 500,
+                              color: isSelected ? pal.text : '#475569',
+                              textAlign: 'center',
+                              lineHeight: 1.1
+                            }}>
+                              {pal.name.split(' ')[0]}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <Button variant="outline" type="button" onClick={() => setConfigModal(null)}>Cancel</Button>
                 <Button variant="primary" type="submit">
@@ -2854,7 +3992,7 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Two-Factor Authentication Setup Modal */}
+      {/* Gmail Two-Factor Authentication Setup Modal */}
       {showTwoFactorModal && (
         <div style={{
           position: 'fixed',
@@ -2875,71 +4013,48 @@ export default function SettingsPage() {
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 20 }}>🛡️</span>
-                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>Setup Two-Factor Authentication</h3>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#0f172a' }}>Verify Your Gmail Address</h3>
               </div>
               <button onClick={() => setShowTwoFactorModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '18px', color: '#94a3b8' }}>✕</button>
             </div>
             <form onSubmit={handleEnable2FA} style={{ padding: '24px' }}>
               
-              {/* Step 1: QR & Key */}
-              <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '12px', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Step 1: Scan QR in Authenticator App
+              <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '12px 14px', marginBottom: 20 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#1e40af', marginBottom: 2 }}>
+                  Verification Code Dispatched
                 </div>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', backgroundColor: '#f8fafc', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                  {/* Visual QR Code Representation */}
-                  <div style={{ width: 80, height: 80, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 8, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 3, padding: 6, flexShrink: 0 }}>
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#fff' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#fff' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#fff' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#fff' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#fff' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                    <div style={{ backgroundColor: '#0f172a' }} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '11.5px', color: '#64748b', marginBottom: '4px' }}>Or enter setup key manually:</div>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a', fontFamily: 'monospace' }}>{twoFactorSecret}</div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(twoFactorSecret);
-                        showToast('info', 'Secret key copied to clipboard', 'Copied');
-                      }}
-                      style={{ marginTop: 4, background: 'none', border: 'none', color: '#2563eb', fontSize: '11.5px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
-                    >
-                      📋 Copy Key
-                    </button>
-                  </div>
+                <div style={{ fontSize: 12.5, color: '#1d4ed8', lineHeight: 1.45 }}>
+                  We sent a 6-digit verification code to <strong>{currentUser?.email}</strong>. Enter it below to activate Two-Factor Authentication.
                 </div>
               </div>
 
-              {/* Step 2: 6 Digit Code */}
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  Step 2: Enter 6-Digit Code
+              {/* 6 Digit Code Input */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', marginBottom: '8px' }}>
+                  Enter 6-Digit OTP Code
                 </label>
                 <input
                   type="text"
                   required
                   maxLength={6}
-                  placeholder="e.g. 492019"
+                  placeholder="e.g. 582019"
                   value={twoFactorCode}
                   onChange={e => setTwoFactorCode(e.target.value.replace(/\D/g, ''))}
-                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '18px', textAlign: 'center', letterSpacing: '6px', fontWeight: 800, boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1.5px solid #cbd5e1', fontSize: '20px', textAlign: 'center', letterSpacing: '8px', fontWeight: 800, boxSizing: 'border-box' }}
                 />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                  <span style={{ fontSize: 11.5, color: '#64748b' }}>Expires in 10 minutes</span>
+                  <button
+                    type="button"
+                    onClick={handleResendSettingsOtp}
+                    style={{ background: 'none', border: 'none', color: '#2563eb', fontSize: 12, fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                  >
+                    ↺ Resend Code
+                  </button>
+                </div>
               </div>
 
-              {/* Step 3: Emergency Backup Codes */}
+              {/* Emergency Backup Codes */}
               <div style={{ marginBottom: '20px', backgroundColor: '#fefce8', border: '1px solid #fef08a', padding: '12px', borderRadius: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#854d0e', textTransform: 'uppercase' }}>
@@ -2951,7 +4066,7 @@ export default function SettingsPage() {
                       navigator.clipboard.writeText(backupCodes.join('\n'));
                       showToast('success', 'Backup codes copied!', 'Copied');
                     }}
-                    style={{ background: 'none', border: 'none', color: '#854d0e', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
+                    style={{ background: 'none', border: 'none', color: '#854d0e', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
                   >
                     Copy All
                   </button>
@@ -2966,7 +4081,7 @@ export default function SettingsPage() {
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <Button variant="outline" type="button" onClick={() => setShowTwoFactorModal(false)}>Cancel</Button>
                 <Button variant="primary" type="submit" disabled={isVerifying2FA}>
-                  {isVerifying2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
+                  {isVerifying2FA ? 'Verifying...' : 'Verify & Activate 2FA'}
                 </Button>
               </div>
             </form>

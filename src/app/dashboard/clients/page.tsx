@@ -7,7 +7,8 @@ import { DataTable, Column } from '@/components/ui/DataTable';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
-import { DEFAULT_LEAD_SOURCES } from '@/lib/formatters';
+import { DEFAULT_LEAD_SOURCES, DEFAULT_CLIENT_STATUSES } from '@/lib/formatters';
+import { getStatusColorStyle } from '@/lib/theme';
 
 interface Client {
   [key: string]: unknown;
@@ -27,7 +28,6 @@ interface Client {
 }
 
 const CLIENT_TYPES = ['Buyer', 'Seller / Landlord', 'Tenant', 'Investor / VIP'];
-const CLIENT_STATUSES = ['Active Search', 'In Contract', 'Closed Client', 'Past Client'];
 
 export default function ClientsPage() {
   const [data, setData] = useState<Client[]>([]);
@@ -35,6 +35,7 @@ export default function ClientsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [leadSources, setLeadSources] = useState<string[]>(DEFAULT_LEAD_SOURCES);
+  const [clientStatuses, setClientStatuses] = useState<string[]>(DEFAULT_CLIENT_STATUSES);
 
   const initialForm = {
     name: '',
@@ -90,6 +91,7 @@ export default function ClientsPage() {
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed.leadSources) && parsed.leadSources.length > 0) setLeadSources(parsed.leadSources);
+          if (Array.isArray(parsed.clientStatuses) && parsed.clientStatuses.length > 0) setClientStatuses(parsed.clientStatuses);
         }
       } catch {}
     }
@@ -98,8 +100,13 @@ export default function ClientsPage() {
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
-        if (data.agency && Array.isArray(data.agency.leadSources) && data.agency.leadSources.length > 0) {
-          setLeadSources(data.agency.leadSources);
+        if (data.agency) {
+          if (Array.isArray(data.agency.leadSources) && data.agency.leadSources.length > 0) {
+            setLeadSources(data.agency.leadSources);
+          }
+          if (Array.isArray(data.agency.clientStatuses) && data.agency.clientStatuses.length > 0) {
+            setClientStatuses(data.agency.clientStatuses);
+          }
         }
       })
       .catch(() => {});
@@ -109,6 +116,7 @@ export default function ClientsPage() {
         try {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed.leadSources) && parsed.leadSources.length > 0) setLeadSources(parsed.leadSources);
+          if (Array.isArray(parsed.clientStatuses) && parsed.clientStatuses.length > 0) setClientStatuses(parsed.clientStatuses);
         } catch {}
       }
     };
@@ -298,9 +306,28 @@ export default function ClientsPage() {
                 </span>
               )}
             </div>
-            <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 600, marginTop: '4px' }}>
-              ● {row.status || 'Active Search'}
-            </div>
+            {(() => {
+              const sc = getStatusColorStyle(row.status || 'Active Search');
+              return (
+                <div style={{ marginTop: '4px' }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '12px',
+                    backgroundColor: sc.bg,
+                    color: sc.text,
+                    border: `1px solid ${sc.border}`
+                  }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.dot }} />
+                    {row.status || 'Active Search'}
+                  </span>
+                </div>
+              );
+            })()}
           </div>
         );
       }
@@ -395,7 +422,7 @@ export default function ClientsPage() {
             value: statusFilter,
             options: [
               { label: 'All Statuses', value: 'All' },
-              ...CLIENT_STATUSES.map(s => ({ label: s, value: s }))
+              ...clientStatuses.map(s => ({ label: s, value: s }))
             ],
             onChange: setStatusFilter
           }
@@ -497,6 +524,17 @@ export default function ClientsPage() {
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
                     {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
+                  <select
+                    value={form.status}
+                    onChange={e => setForm({ ...form, status: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                  >
+                    {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
 
@@ -631,7 +669,7 @@ export default function ClientsPage() {
                     onChange={e => setEditingClient({ ...editingClient, status: e.target.value })}
                     style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
                   >
-                    {CLIENT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                    {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
 

@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" 
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700;900&display=swap" 
           rel="stylesheet" 
         />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -49,9 +49,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var f = localStorage.getItem('agentladders_font') || 'montserrat';
+                var f = localStorage.getItem('agentladders_font') || 'roboto';
                 var c = localStorage.getItem('agentladders_color') || 'emerald';
                 var fonts = {
+                  roboto: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
                   jakarta: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                   inter: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                   montserrat: "'Montserrat', sans-serif",
@@ -67,7 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   amber: { p: '#d97706', pd: '#b45309', pl: '#fef3c7', pt: '#92400e', rgb: '217, 119, 6', grad: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)', acc: '#f59e0b', bb: '#fef3c7', bt: '#92400e' },
                   indigo: { p: '#6366f1', pd: '#4f46e5', pl: '#e0e7ff', pt: '#3730a3', rgb: '99, 102, 241', grad: 'linear-gradient(135deg, #4f46e5 0%, #818cf8 100%)', acc: '#818cf8', bb: '#e0e7ff', bt: '#3730a3' }
                 };
-                var fontVal = fonts[f] || fonts.montserrat;
+                var fontVal = fonts[f] || fonts.roboto;
                 var cur = colors[c] || colors.emerald;
 
                 var s = document.createElement('style');

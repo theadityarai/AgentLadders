@@ -7,6 +7,7 @@ import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { DEFAULT_PAYMENT_STATUSES } from '@/lib/formatters';
 
 interface Payment {
   [key: string]: unknown;
@@ -22,7 +23,6 @@ interface Payment {
 }
 
 const METHODS = ['Bank Transfer', 'Corporate Cheque', 'Escrow Account', 'Card Payment'];
-const PAYMENT_STATUSES = ['Completed', 'Pending Clearance', 'Failed', 'Refunded'];
 
 const initialForm = {
   reference: '',
@@ -38,6 +38,7 @@ const initialForm = {
 export default function PaymentsPage() {
   const [data, setData] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [paymentStatuses, setPaymentStatuses] = useState<string[]>(DEFAULT_PAYMENT_STATUSES);
   const [showModal, setShowModal] = useState(false);
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null);
   const [form, setForm] = useState(initialForm);
@@ -65,6 +66,26 @@ export default function PaymentsPage() {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('agentladders_agency_configs');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed.paymentStatuses) && parsed.paymentStatuses.length > 0) {
+            setPaymentStatuses(parsed.paymentStatuses);
+          }
+        }
+      } catch {}
+    }
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => {
+        if (d?.agency?.paymentStatuses && Array.isArray(d.agency.paymentStatuses) && d.agency.paymentStatuses.length > 0) {
+          setPaymentStatuses(d.agency.paymentStatuses);
+        }
+      })
+      .catch(() => {});
+
     loadPayments();
   }, []);
 
@@ -309,7 +330,7 @@ export default function PaymentsPage() {
             onChange: setStatusFilter,
             options: [
               { label: 'All Statuses', value: 'All' },
-              ...PAYMENT_STATUSES.map(s => ({ label: s, value: s }))
+              ...paymentStatuses.map(s => ({ label: s, value: s }))
             ]
           }
         ]}
@@ -411,7 +432,7 @@ export default function PaymentsPage() {
                     onChange={e => setForm({ ...form, status: e.target.value })}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   >
-                    {PAYMENT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                    {paymentStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
@@ -524,7 +545,7 @@ export default function PaymentsPage() {
                     onChange={e => setEditingPayment({ ...editingPayment, status: e.target.value })}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   >
-                    {PAYMENT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                    {paymentStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>

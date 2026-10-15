@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import { getStatusColorStyle } from '@/lib/theme';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
@@ -14,10 +15,12 @@ import {
   formatINRFull, 
   numberToIndianWords, 
   DEFAULT_INVOICE_SETTINGS, 
+  DEFAULT_INVOICE_STATUSES,
   AgencyInvoiceSettings 
 } from '@/lib/formatters';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
+import { ShareModal } from '@/components/ui/ShareModal';
 import {
   WhatsAppIcon,
   DownloadIcon,
@@ -73,8 +76,6 @@ export interface Invoice {
   updatedAt?: string;
 }
 
-const INVOICE_STATUSES = ['Pending', 'Paid', 'Draft', 'Overdue', 'Cancelled'];
-
 const COMMON_SAC_CODES = [
   { code: '997221', label: '997221 - Real Estate Brokerage / Advisory on a Fee or Contract Basis' },
   { code: '998213', label: '998213 - Legal Documentation, Title Verification & ATS Stamping Facilitation' },
@@ -98,6 +99,7 @@ const generateInvoiceNumber = () => {
 export default function InvoicesPage() {
   const [data, setData] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [invoiceStatuses, setInvoiceStatuses] = useState<string[]>(DEFAULT_INVOICE_STATUSES);
   const [showModal, setShowModal] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   
@@ -179,6 +181,9 @@ export default function InvoicesPage() {
           accountName: `${settingsRes.agency.name} Escrow Advisory`
         }));
       }
+      if (settingsRes.agency?.invoiceStatuses && Array.isArray(settingsRes.agency.invoiceStatuses) && settingsRes.agency.invoiceStatuses.length > 0) {
+        setInvoiceStatuses(settingsRes.agency.invoiceStatuses);
+      }
       if (settingsRes.agency?.name) {
         setAgencyInfo({
           name: settingsRes.agency.name,
@@ -193,6 +198,17 @@ export default function InvoicesPage() {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('agentladders_agency_configs');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed.invoiceStatuses) && parsed.invoiceStatuses.length > 0) {
+            setInvoiceStatuses(parsed.invoiceStatuses);
+          }
+        }
+      } catch {}
+    }
     loadInvoices();
     loadMeta();
   }, []);
@@ -448,9 +464,8 @@ export default function InvoicesPage() {
     }
   };
 
-  const handleTogglePaid = async (inv: Invoice) => {
-    const nextStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
-    setData(prev => prev.map(i => i.id === inv.id ? { ...i, status: nextStatus } : i));
+  const handleStatusChange = async (inv: Invoice, nextStatus: string) => {
+    setData(prev => prev.map(i => i.id === inv.id ? { ...i, status: nextStatus as any } : i));
     try {
       await fetch('/api/invoices', {
         method: 'PUT',
@@ -469,11 +484,16 @@ export default function InvoicesPage() {
         id: Date.now().toString(),
         type: 'success',
         title: 'Status Updated',
-        message: `Invoice #${inv.number} marked as ${nextStatus}.`
+        message: `Invoice #${inv.number} status changed to ${nextStatus}.`
       });
     } catch {
       loadInvoices();
     }
+  };
+
+  const handleTogglePaid = async (inv: Invoice) => {
+    const nextStatus = inv.status === 'Paid' ? 'Pending' : 'Paid';
+    await handleStatusChange(inv, nextStatus);
   };
 
   // Multi-Channel Share Helpers
@@ -506,8 +526,9 @@ export default function InvoicesPage() {
     const phone = inv.clientPhone ? inv.clientPhone.replace(/[^0-9]/g, '') : '';
     const phoneTarget = phone ? (phone.startsWith('91') ? phone : `91${phone}`) : '';
     const firmName = invoiceSettings.agencyName || agencyInfo.name;
+    const accType = invoiceSettings.accountType || 'Current';
 
-    const msg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official RERA & GST Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (Escrow Current A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}\n• *UPI ID:* ${invoiceSettings.upiId}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
+    const msg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (${accType} A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n• *UPI ID:* ${invoiceSettings.upiId}` : ''}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
 
     const url = phoneTarget ? `https://wa.me/${phoneTarget}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
@@ -516,16 +537,18 @@ export default function InvoicesPage() {
   const handleEmailShare = (inv: Invoice) => {
     const { subtotal, total, taxRate } = getInvoiceAmounts(inv);
     const firmName = invoiceSettings.agencyName || agencyInfo.name;
+    const accType = invoiceSettings.accountType || 'Current';
     const subject = `Tax Invoice #${inv.number} - Real Estate Advisory Services [${firmName}]`;
 
-    const body = `Dear ${inv.clientName},\n\nPlease find attached the tax invoice breakdown for real estate advisory services provided by ${firmName}.\n\nINVOICE SUMMARY:\n- Invoice Number: #${inv.number}\n- Issue Date: ${inv.issueDate || 'Current'}\n- Due Date: ${inv.dueDate}\n- Deal Reference: ${inv.dealRef || 'Property Transaction Advisory'}\n\nFINANCIAL BREAKDOWN:\n- Taxable Subtotal: ${formatINRFull(subtotal)}\n- Applicable GST: ${taxRate}%\n- TOTAL PAYABLE: ${formatINRFull(total)}\n- Amount in Words: ${numberToIndianWords(total)}\n\nREMITTANCE BANK DETAILS:\n- Beneficiary Account: ${invoiceSettings.accountName}\n- Bank: ${invoiceSettings.bankName}\n- Current Account No: ${invoiceSettings.accountNumber}\n- IFSC Code: ${invoiceSettings.ifscCode}\n- UPI ID: ${invoiceSettings.upiId}\n\nPlease transfer via NEFT/RTGS or UPI and reply with transaction UTR confirmation.\n\nWarm regards,\nAccounts & Advisory Desk\n${firmName}\nGSTIN: ${invoiceSettings.gstin} | RERA: ${invoiceSettings.reraReg}`;
+    const body = `Dear ${inv.clientName},\n\nPlease find attached the tax invoice breakdown for real estate advisory services provided by ${firmName}.\n\nINVOICE SUMMARY:\n- Invoice Number: #${inv.number}\n- Issue Date: ${inv.issueDate || 'Current'}\n- Due Date: ${inv.dueDate}\n- Deal Reference: ${inv.dealRef || 'Property Transaction Advisory'}\n\nFINANCIAL BREAKDOWN:\n- Taxable Subtotal: ${formatINRFull(subtotal)}\n- Applicable GST: ${taxRate}%\n- TOTAL PAYABLE: ${formatINRFull(total)}\n- Amount in Words: ${numberToIndianWords(total)}\n\nREMITTANCE BANK DETAILS:\n- Beneficiary Account: ${invoiceSettings.accountName}\n- Bank: ${invoiceSettings.bankName}\n- ${accType} Account No: ${invoiceSettings.accountNumber}\n- IFSC Code: ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n- UPI ID: ${invoiceSettings.upiId}` : ''}\n\nPlease transfer via NEFT/RTGS or UPI and reply with transaction UTR confirmation.\n\nWarm regards,\nAccounts & Advisory Desk\n${firmName}${invoiceSettings.gstin ? `\nGSTIN: ${invoiceSettings.gstin}` : ''}${invoiceSettings.reraReg ? ` | RERA: ${invoiceSettings.reraReg}` : ''}`;
 
     const mailtoUrl = `mailto:${inv.clientEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
   };
 
   const handleCopyRemittance = () => {
-    const text = `*Remittance & Bank Account Details:*\nAccount Name: ${invoiceSettings.accountName}\nBank: ${invoiceSettings.bankName}\nCurrent A/c No: ${invoiceSettings.accountNumber}\nIFSC Code: ${invoiceSettings.ifscCode}\nUPI ID: ${invoiceSettings.upiId}`;
+    const accType = invoiceSettings.accountType || 'Current';
+    const text = `*Remittance & Bank Account Details:*\nAccount Name: ${invoiceSettings.accountName}\nBank: ${invoiceSettings.bankName}\n${accType} A/c No: ${invoiceSettings.accountNumber}\nIFSC Code: ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\nUPI ID: ${invoiceSettings.upiId}` : ''}`;
     navigator.clipboard.writeText(text);
     setToast({ id: Date.now().toString(), type: 'success', title: 'Copied to Clipboard', message: 'Bank remittance details copied.' });
   };
@@ -559,32 +582,49 @@ export default function InvoicesPage() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tax Invoice #${inv.number} - ${firmName}</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 24px; color: #0f172a; background: #f8fafc; }
-    .card { max-width: 780px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    .header { display: flex; justify-content: space-between; border-bottom: 2.5px solid #059669; padding-bottom: 18px; margin-bottom: 24px; }
-    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; font-size: 13px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px; }
-    th { background: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 10px 12px; text-align: left; color: #334155; font-weight: 700; }
-    td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
-    .remittance { background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 12px; margin-bottom: 16px; color: #334155; }
-    .notes { background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 12px; margin-bottom: 24px; color: #334155; }
-    @media print { body { background: none; padding: 0; } .card { box-shadow: none; border: none; padding: 0; } }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 24px; color: #0f172a; background: #f8fafc; font-size: 13px; line-height: 1.4; }
+    .card { max-width: 780px; margin: 0 auto; background: #fff; padding: 32px 36px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .header { display: flex; justify-content: space-between; border-bottom: 2.5px solid #059669; padding-bottom: 14px; margin-bottom: 18px; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; font-size: 12.5px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12.5px; }
+    th { background: #f8fafc; border-bottom: 2px solid #cbd5e1; padding: 8px 10px; text-align: left; color: #334155; font-weight: 700; }
+    td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; }
+    .remittance { background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11.5px; margin-bottom: 12px; color: #334155; }
+    .notes { background: #f8fafc; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 11.5px; margin-bottom: 16px; color: #334155; }
+    @media print { 
+      @page { size: A4 portrait; margin: 8mm 10mm; } 
+      html, body { height: 100% !important; margin: 0 !important; padding: 0 !important; background: #fff !important; font-size: 11px !important; } 
+      .card { max-width: 100% !important; padding: 10px 14px !important; border: none !important; box-shadow: none !important; page-break-inside: avoid !important; break-inside: avoid !important; } 
+      table { margin-bottom: 10px !important; }
+      th, td { padding: 5px 8px !important; }
+      .header { margin-bottom: 10px !important; padding-bottom: 8px !important; }
+      .meta-grid { margin-bottom: 10px !important; gap: 10px !important; }
+      .remittance { padding: 8px 10px !important; margin-bottom: 8px !important; font-size: 10.5px !important; }
+      .notes { padding: 8px 10px !important; margin-bottom: 8px !important; font-size: 10.5px !important; }
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="header">
       <div>
-        <h1 style="margin: 0; font-size: 20px; color: #0f172a;">${firmName}</h1>
-        <div style="font-size: 12px; color: #64748b; margin-top: 2px;">${invoiceSettings.tagline}</div>
-        ${invoiceSettings.address ? `<div style="font-size: 11.5px; color: #64748b; margin-top: 3px;">${invoiceSettings.address}</div>` : ''}
-        <div style="font-size: 11.5px; color: #334155; margin-top: 4px;">
-          GSTIN: <strong>${invoiceSettings.gstin}</strong> • RERA Reg: <strong>${invoiceSettings.reraReg}</strong>
-        </div>
+        <h1 style="margin: 0; font-size: 18px; color: #0f172a;">${firmName}</h1>
+        ${invoiceSettings.tagline ? `<div style="font-size: 12px; color: #64748b; margin-top: 2px;">${invoiceSettings.tagline}</div>` : ''}
+        ${invoiceSettings.address ? `<div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">${invoiceSettings.address}</div>` : ''}
+        ${([invoiceSettings.phone ? `Tel: ${invoiceSettings.phone}` : '', invoiceSettings.email ? `Email: ${invoiceSettings.email}` : ''].filter(Boolean).length > 0) ? `
+          <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+            ${[invoiceSettings.phone ? `Tel: ${invoiceSettings.phone}` : '', invoiceSettings.email ? `Email: ${invoiceSettings.email}` : ''].filter(Boolean).join(' • ')}
+          </div>
+        ` : ''}
+        ${([invoiceSettings.gstin ? `GSTIN: <strong>${invoiceSettings.gstin}</strong>` : '', invoiceSettings.reraReg ? `RERA Reg: <strong>${invoiceSettings.reraReg}</strong>` : '', invoiceSettings.pan ? `PAN: <strong>${invoiceSettings.pan}</strong>` : ''].filter(Boolean).length > 0) ? `
+          <div style="font-size: 11.5px; color: #334155; margin-top: 4px;">
+            ${[invoiceSettings.gstin ? `GSTIN: <strong>${invoiceSettings.gstin}</strong>` : '', invoiceSettings.reraReg ? `RERA Reg: <strong>${invoiceSettings.reraReg}</strong>` : '', invoiceSettings.pan ? `PAN: <strong>${invoiceSettings.pan}</strong>` : ''].filter(Boolean).join(' • ')}
+          </div>
+        ` : ''}
       </div>
       <div style="text-align: right;">
-        <div style="font-size: 22px; font-weight: 800; color: #059669; letter-spacing: -0.5px;">TAX INVOICE</div>
-        <div style="font-size: 14px; font-weight: 700; margin-top: 2px;">#${inv.number}</div>
+        <div style="font-size: 20px; font-weight: 800; color: #059669; letter-spacing: -0.5px;">TAX INVOICE</div>
+        <div style="font-size: 13.5px; font-weight: 700; margin-top: 2px;">#${inv.number}</div>
         <div style="font-size: 12px; margin-top: 2px;">Status: <strong style="color: ${inv.status === 'Paid' ? '#059669' : '#d97706'}">${inv.status.toUpperCase()}</strong></div>
       </div>
     </div>
@@ -592,17 +632,17 @@ export default function InvoicesPage() {
     <div class="meta-grid">
       <div>
         <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Billed To Client:</div>
-        <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-top: 2px;">${inv.clientName}</div>
+        <div style="font-size: 15px; font-weight: 800; color: #0f172a; margin-top: 2px;">${inv.clientName}</div>
         ${inv.clientGstin ? `<div style="font-size: 12px; color: #059669; font-weight: 700; margin-top: 2px;">GSTIN: ${inv.clientGstin} (B2B Registered Taxpayer)</div>` : ''}
         ${inv.clientAddress ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">${inv.clientAddress}</div>` : ''}
         ${inv.clientPhone ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Phone: ${inv.clientPhone}</div>` : ''}
         ${inv.clientEmail ? `<div style="font-size: 12px; color: #475569; margin-top: 2px;">Email: ${inv.clientEmail}</div>` : ''}
-        ${inv.dealRef ? `<div style="font-size: 12.5px; color: #059669; font-weight: 600; margin-top: 6px;">Deal: ${inv.dealRef}</div>` : ''}
+        ${inv.dealRef ? `<div style="font-size: 12px; color: #059669; font-weight: 600; margin-top: 4px;">Deal: ${inv.dealRef}</div>` : ''}
       </div>
       <div style="text-align: right;">
         <div><span style="color: #64748b;">Issue Date:</span> <strong>${inv.issueDate || 'Current'}</strong></div>
         <div style="margin-top: 4px;"><span style="color: #64748b;">Due Date:</span> <strong style="color: #dc2626;">${inv.dueDate}</strong></div>
-        <div style="margin-top: 4px;"><span style="color: #64748b;">Place of Supply:</span> <strong>${invoiceSettings.placeOfSupply}</strong></div>
+        ${invoiceSettings.placeOfSupply ? `<div style="margin-top: 4px;"><span style="color: #64748b;">Place of Supply:</span> <strong>${invoiceSettings.placeOfSupply}</strong></div>` : ''}
         <div style="margin-top: 4px;"><span style="color: #64748b;">Reverse Charge:</span> <strong>No</strong></div>
       </div>
     </div>
@@ -622,7 +662,7 @@ export default function InvoicesPage() {
             <td style="text-align: center; color: #64748b;">${idx + 1}</td>
             <td>
               <div style="font-weight: 700; color: #0f172a;">${it.description}</div>
-              <div style="font-size: 11.5px; color: #64748b;">Real Estate Agency Facilitation & Advisory Mandate</div>
+              <div style="font-size: 11px; color: #64748b;">Real Estate Agency Facilitation & Advisory Mandate</div>
             </td>
             <td style="text-align: center; color: #64748b;">${it.sacCode || invoiceSettings.sacCode || '997221'}</td>
             <td style="text-align: right; font-weight: 700;">${formatINRFull(it.amount)}</td>
@@ -631,57 +671,63 @@ export default function InvoicesPage() {
       </tbody>
     </table>
 
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
-      <div style="width: 320px; font-size: 13px;">
-        <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 18px;">
+      <div style="width: 320px; font-size: 12.5px;">
+        <div style="display: flex; justify-content: space-between; padding: 3px 0;">
           <span style="color: #64748b;">Subtotal (Taxable):</span>
           <strong>${formatINRFull(subtotal)}</strong>
         </div>
         ${!isInter && !isExempt ? `
-          <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+          <div style="display: flex; justify-content: space-between; padding: 3px 0;">
             <span style="color: #64748b;">CGST (${taxRate / 2}%):</span>
             <span>${formatINRFull(cgst)}</span>
           </div>
-          <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+          <div style="display: flex; justify-content: space-between; padding: 3px 0;">
             <span style="color: #64748b;">SGST (${taxRate / 2}%):</span>
             <span>${formatINRFull(sgst)}</span>
           </div>
         ` : ''}
         ${isInter && !isExempt ? `
-          <div style="display: flex; justify-content: space-between; padding: 4px 0;">
+          <div style="display: flex; justify-content: space-between; padding: 3px 0;">
             <span style="color: #64748b;">IGST (${taxRate}%):</span>
             <span>${formatINRFull(igst)}</span>
           </div>
         ` : ''}
-        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 2px solid #0f172a; margin-top: 6px;">
-          <span style="font-size: 14px; font-weight: 800;">Total Amount Payable:</span>
-          <span style="font-size: 16px; font-weight: 800; color: #059669;">${formatINRFull(total)}</span>
+        <div style="display: flex; justify-content: space-between; padding: 6px 0; border-top: 2px solid #0f172a; margin-top: 4px;">
+          <span style="font-size: 13.5px; font-weight: 800;">Total Amount Payable:</span>
+          <span style="font-size: 15px; font-weight: 800; color: #059669;">${formatINRFull(total)}</span>
         </div>
-        <div style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 2px; text-align: right;">
+        <div style="font-size: 10.5px; color: #64748b; font-style: italic; margin-top: 2px; text-align: right;">
           ${words}
         </div>
       </div>
     </div>
 
-    <div class="remittance">
-      <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">Remittance & Bank Account Details:</div>
-      <div>Account Name: <strong>${invoiceSettings.accountName}</strong></div>
-      <div>Bank: <strong>${invoiceSettings.bankName} • Current A/c No: ${invoiceSettings.accountNumber}</strong> • IFSC: <strong>${invoiceSettings.ifscCode}</strong></div>
-      ${invoiceSettings.upiId ? `<div>UPI / QR Remittance ID: <strong>${invoiceSettings.upiId}</strong></div>` : ''}
-    </div>
-
-    ${(inv.notes || invoiceSettings.defaultNotes) ? `
-      <div class="notes">
-        <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">Payment Terms & Remittance Notes:</div>
-        <div style="white-space: pre-wrap; line-height: 1.5; color: #334155;">${inv.notes || invoiceSettings.defaultNotes}</div>
+    ${(invoiceSettings.accountNumber || invoiceSettings.bankName || invoiceSettings.accountName) ? `
+      <div class="remittance">
+        <div style="font-weight: 700; color: #0f172a; margin-bottom: 3px;">Remittance & Bank Account Details:</div>
+        ${invoiceSettings.accountName ? `<div>Account Name: <strong>${invoiceSettings.accountName}</strong></div>` : ''}
+        <div>${[
+          invoiceSettings.bankName ? `Bank: <strong>${invoiceSettings.bankName}</strong>` : '',
+          invoiceSettings.accountNumber ? `${invoiceSettings.accountType || 'Current'} A/c No: <strong>${invoiceSettings.accountNumber}</strong>` : '',
+          invoiceSettings.ifscCode ? `IFSC: <strong>${invoiceSettings.ifscCode}</strong>` : ''
+        ].filter(Boolean).join(' • ')}</div>
+        ${invoiceSettings.upiId ? `<div>UPI / QR Remittance ID: <strong>${invoiceSettings.upiId}</strong></div>` : ''}
       </div>
     ` : ''}
 
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #e2e8f0; padding-top: 18px; font-size: 11px; color: #64748b;">
+    ${(inv.notes || invoiceSettings.defaultNotes) ? `
+      <div class="notes">
+        <div style="font-weight: 700; color: #0f172a; margin-bottom: 3px;">Payment Terms & Remittance Notes:</div>
+        <div style="white-space: pre-wrap; line-height: 1.4; color: #334155;">${inv.notes || invoiceSettings.defaultNotes}</div>
+      </div>
+    ` : ''}
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #e2e8f0; padding-top: 12px; font-size: 10.5px; color: #64748b;">
       <div>Computer generated electronic tax invoice under Section 65B of Evidence Act & IT Act 2000.</div>
       <div style="text-align: right;">
         <div style="font-weight: 700; color: #0f172a;">For ${firmName}</div>
-        <div style="margin-top: 32px;">Authorized Broker Signatory</div>
+        <div style="margin-top: 24px;">Authorized Broker Signatory</div>
       </div>
     </div>
   </div>
@@ -872,7 +918,32 @@ export default function InvoicesPage() {
     {
       key: 'status',
       label: 'Status',
-      render: (r) => <StatusBadge status={r.status} />
+      render: (r) => {
+        const style = getStatusColorStyle(r.status);
+        return (
+          <select
+            value={r.status}
+            onChange={(e) => handleStatusChange(r, e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: style.bg,
+              color: style.text,
+              border: `1.5px solid ${style.border}`,
+              padding: '4px 8px',
+              borderRadius: 6,
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              outline: 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {invoiceStatuses.map(st => (
+              <option key={st} value={st}>{st}</option>
+            ))}
+          </select>
+        );
+      }
     },
     {
       key: 'actions',
@@ -1047,7 +1118,7 @@ export default function InvoicesPage() {
               onChange: setStatusFilter,
               options: [
                 { label: 'All Statuses', value: 'All' },
-                ...INVOICE_STATUSES.map(s => ({ label: s, value: s }))
+                ...invoiceStatuses.map(s => ({ label: s, value: s }))
               ]
             },
             {
@@ -1172,26 +1243,35 @@ export default function InvoicesPage() {
 
                 <div style={{ marginTop: 12 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Initial Status</label>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {INVOICE_STATUSES.map(s => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setForm(prev => ({ ...prev, status: s }))}
-                        style={{
-                          padding: '6px 12px',
-                          borderRadius: 6,
-                          fontSize: 12,
-                          fontWeight: 700,
-                          cursor: 'pointer',
-                          border: form.status === s ? '1.5px solid #059669' : '1px solid #cbd5e1',
-                          backgroundColor: form.status === s ? '#ecfdf5' : '#ffffff',
-                          color: form.status === s ? '#059669' : '#475569'
-                        }}
-                      >
-                        {s}
-                      </button>
-                    ))}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {invoiceStatuses.map(s => {
+                      const isSel = form.status === s;
+                      const col = getStatusColorStyle(s);
+                      return (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setForm(prev => ({ ...prev, status: s }))}
+                          style={{
+                            padding: '5px 12px',
+                            borderRadius: 20,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            border: isSel ? `2px solid ${col.text}` : '1px solid #cbd5e1',
+                            backgroundColor: isSel ? col.bg : '#ffffff',
+                            color: isSel ? col.text : '#475569',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: col.dot }} />
+                          {s}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -1694,15 +1774,15 @@ export default function InvoicesPage() {
                   Official RERA Tax Invoice #{inv.number}
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {/* WhatsApp */}
+                  {/* WhatsApp / Share */}
                   <button
                     type="button"
-                    onClick={() => handleWhatsAppShare(inv)}
+                    onClick={() => setSharingInvoice(inv)}
                     style={{ padding: '6px 10px', backgroundColor: '#ecfdf5', color: '#059669', border: '1px solid #bbf7d0', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
-                    title="Send Invoice to Client on WhatsApp"
+                    title="Share Invoice with Client or Anyone"
                   >
                     <WhatsAppIcon size={14} color="#059669" />
-                    <span>WhatsApp</span>
+                    <span>Share / WhatsApp</span>
                   </button>
 
                   {/* Email */}
@@ -1749,27 +1829,42 @@ export default function InvoicesPage() {
               </div>
 
               {/* Printable Tax Invoice Paper Layout */}
-              <div style={{ padding: '36px 40px', backgroundColor: '#ffffff', color: '#0f172a', fontFamily: 'inherit' }}>
+              <div className="print-invoice-paper" style={{ padding: '32px 36px', backgroundColor: '#ffffff', color: '#0f172a', fontFamily: 'inherit' }}>
                 
                 {/* Invoice Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2.5px solid #059669', paddingBottom: 20, marginBottom: 24, flexWrap: 'wrap', gap: 14 }}>
+                <div className="print-invoice-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2.5px solid #059669', paddingBottom: 16, marginBottom: 20, flexWrap: 'wrap', gap: 14 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                       <div style={{ width: 30, height: 30, borderRadius: 6, backgroundColor: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                         <BuildingIcon size={17} color="#fff" />
                       </div>
                       <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.3px' }}>
-                        {invoiceSettings.agencyName || agencyInfo.name}
+                        {invoiceSettings.agencyName || agencyInfo.name || 'Real Estate Advisory'}
                       </h2>
                     </div>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>{invoiceSettings.tagline || 'Licensed Real Estate Advisory & Brokerage Firm'}</div>
+                    {invoiceSettings.tagline && (
+                      <div style={{ fontSize: 12, color: '#64748b' }}>{invoiceSettings.tagline}</div>
+                    )}
                     {invoiceSettings.address && (
                       <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>{invoiceSettings.address}</div>
                     )}
-                    <div style={{ fontSize: 11.5, color: '#475569', marginTop: 3 }}>
-                      GSTIN: <strong>{invoiceSettings.gstin || '27AABCA1234F1Z5'}</strong> • RERA Reg: <strong>{invoiceSettings.reraReg || 'A51800029384'}</strong>
-                      {invoiceSettings.pan && <span> • PAN: <strong>{invoiceSettings.pan}</strong></span>}
-                    </div>
+                    {(invoiceSettings.phone || invoiceSettings.email) && (
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                        {[
+                          invoiceSettings.phone ? `Tel: ${invoiceSettings.phone}` : '',
+                          invoiceSettings.email ? `Email: ${invoiceSettings.email}` : ''
+                        ].filter(Boolean).join(' • ')}
+                      </div>
+                    )}
+                    {([invoiceSettings.gstin, invoiceSettings.reraReg, invoiceSettings.pan].some(Boolean)) && (
+                      <div style={{ fontSize: 11.5, color: '#334155', marginTop: 4 }}>
+                        {[
+                          invoiceSettings.gstin && <span>GSTIN: <strong>{invoiceSettings.gstin}</strong></span>,
+                          invoiceSettings.reraReg && <span>RERA Reg: <strong>{invoiceSettings.reraReg}</strong></span>,
+                          invoiceSettings.pan && <span>PAN: <strong>{invoiceSettings.pan}</strong></span>
+                        ].filter(Boolean).reduce((prev, curr, idx) => [prev, ' • ', curr] as any)}
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ textAlign: 'right' }}>
@@ -1796,10 +1891,10 @@ export default function InvoicesPage() {
                 </div>
 
                 {/* Billed To / Dates Meta Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 24, marginBottom: 24, fontSize: 13 }}>
+                <div className="print-meta-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20, marginBottom: 20, fontSize: 12.5 }}>
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>Billed To Client:</div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{inv.clientName}</div>
+                    <div style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a' }}>{inv.clientName}</div>
                     {inv.clientGstin && (
                       <div style={{ color: '#059669', fontWeight: 700, fontSize: 12, marginTop: 2 }}>
                         GSTIN: {inv.clientGstin} (B2B Registered Taxpayer)
@@ -1824,10 +1919,12 @@ export default function InvoicesPage() {
                       <span style={{ color: '#64748b' }}>Due Date: </span>
                       <strong style={{ color: '#dc2626' }}>{inv.dueDate}</strong>
                     </div>
-                    <div style={{ marginBottom: 4 }}>
-                      <span style={{ color: '#64748b' }}>Place of Supply: </span>
-                      <strong style={{ color: '#0f172a' }}>{invoiceSettings.placeOfSupply || 'Maharashtra (27)'}</strong>
-                    </div>
+                    {invoiceSettings.placeOfSupply && (
+                      <div style={{ marginBottom: 4 }}>
+                        <span style={{ color: '#64748b' }}>Place of Supply: </span>
+                        <strong style={{ color: '#0f172a' }}>{invoiceSettings.placeOfSupply}</strong>
+                      </div>
+                    )}
                     <div>
                       <span style={{ color: '#64748b' }}>Reverse Charge: </span>
                       <strong style={{ color: '#0f172a' }}>No</strong>
@@ -1836,25 +1933,25 @@ export default function InvoicesPage() {
                 </div>
 
                 {/* Itemized Services Table */}
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 24, fontSize: 13 }}>
+                <table className="print-invoice-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 18, fontSize: 12.5 }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
-                      <th style={{ padding: '10px 12px', textAlign: 'center', width: 40, fontWeight: 700, color: '#334155' }}>#</th>
-                      <th style={{ padding: '10px 12px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>Description of Service</th>
-                      <th style={{ padding: '10px 12px', textAlign: 'center', width: 90, fontWeight: 700, color: '#334155' }}>SAC Code</th>
-                      <th style={{ padding: '10px 12px', textAlign: 'right', width: 140, fontWeight: 700, color: '#334155' }}>Taxable Value</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: 40, fontWeight: 700, color: '#334155' }}>#</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 700, color: '#334155' }}>Description of Service</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'center', width: 90, fontWeight: 700, color: '#334155' }}>SAC Code</th>
+                      <th style={{ padding: '8px 10px', textAlign: 'right', width: 140, fontWeight: 700, color: '#334155' }}>Taxable Value</th>
                     </tr>
                   </thead>
                   <tbody>
                     {items.map((it, idx) => (
                       <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '12px', textAlign: 'center', color: '#64748b' }}>{idx + 1}</td>
-                        <td style={{ padding: '12px' }}>
+                        <td style={{ padding: '10px', textAlign: 'center', color: '#64748b' }}>{idx + 1}</td>
+                        <td style={{ padding: '10px' }}>
                           <div style={{ fontWeight: 700, color: '#0f172a' }}>{it.description}</div>
-                          <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>Real estate advisory and mandate facilitation services</div>
+                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 1 }}>Real estate advisory and mandate facilitation services</div>
                         </td>
-                        <td style={{ padding: '12px', textAlign: 'center', color: '#64748b' }}>{it.sacCode || invoiceSettings.sacCode || '997221'}</td>
-                        <td style={{ padding: '12px', textAlign: 'right', fontWeight: 700 }}>
+                        <td style={{ padding: '10px', textAlign: 'center', color: '#64748b' }}>{it.sacCode || invoiceSettings.sacCode || '997221'}</td>
+                        <td style={{ padding: '10px', textAlign: 'right', fontWeight: 700 }}>
                           {formatINRFull(it.amount)}
                         </td>
                       </tr>
@@ -1863,20 +1960,20 @@ export default function InvoicesPage() {
                 </table>
 
                 {/* Invoice Calculations Summary */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 24 }}>
-                  <div style={{ width: 300, fontSize: 13 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                <div className="print-calc-summary" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 18 }}>
+                  <div style={{ width: 300, fontSize: 12.5 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
                       <span style={{ color: '#64748b' }}>Subtotal (Taxable):</span>
                       <strong style={{ color: '#0f172a' }}>{formatINRFull(subtotal)}</strong>
                     </div>
 
                     {!isInter && !isExempt && (
                       <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
                           <span style={{ color: '#64748b' }}>CGST ({taxRate / 2}%):</span>
                           <span>{formatINRFull(cgst)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
                           <span style={{ color: '#64748b' }}>SGST ({taxRate / 2}%):</span>
                           <span>{formatINRFull(sgst)}</span>
                         </div>
@@ -1884,57 +1981,68 @@ export default function InvoicesPage() {
                     )}
 
                     {isInter && !isExempt && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
                         <span style={{ color: '#64748b' }}>IGST ({taxRate}%):</span>
                         <span>{formatINRFull(igst)}</span>
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderTop: '2px solid #0f172a', marginTop: 4 }}>
-                      <span style={{ fontSize: 14, fontWeight: 800 }}>Total Amount Payable:</span>
-                      <span style={{ fontSize: 16, fontWeight: 800, color: '#059669' }}>{formatINRFull(total)}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: '2px solid #0f172a', marginTop: 4 }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 800 }}>Total Amount Payable:</span>
+                      <span style={{ fontSize: 15.5, fontWeight: 800, color: '#059669' }}>{formatINRFull(total)}</span>
                     </div>
 
-                    <div style={{ fontSize: 11, color: '#64748b', fontStyle: 'italic', marginTop: 2, textAlign: 'right' }}>
+                    <div style={{ fontSize: 10.5, color: '#64748b', fontStyle: 'italic', marginTop: 2, textAlign: 'right' }}>
                       {words}
                     </div>
                   </div>
                 </div>
 
                 {/* Payment Remittance Instructions */}
-                <div style={{ backgroundColor: '#f8fafc', padding: '14px 18px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12, color: '#475569', marginBottom: 14 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>Remittance &amp; Bank Account Details:</div>
-                    <button
-                      type="button"
-                      onClick={handleCopyRemittance}
-                      style={{ fontSize: 11, background: 'none', border: 'none', color: '#059669', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}
-                    >
-                      <CopyIcon size={12} color="#059669" />
-                      <span>Copy Details</span>
-                    </button>
+                {(invoiceSettings.accountNumber || invoiceSettings.bankName || invoiceSettings.accountName) && (
+                  <div className="print-remittance-box" style={{ backgroundColor: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 11.5, color: '#475569', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
+                      <div style={{ fontWeight: 700, color: '#0f172a' }}>Remittance &amp; Bank Account Details:</div>
+                      <button
+                        type="button"
+                        className="hide-on-print"
+                        onClick={handleCopyRemittance}
+                        style={{ fontSize: 11, background: 'none', border: 'none', color: '#059669', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}
+                      >
+                        <CopyIcon size={12} color="#059669" />
+                        <span>Copy Details</span>
+                      </button>
+                    </div>
+                    {invoiceSettings.accountName && (
+                      <div>Account Name: <strong>{invoiceSettings.accountName}</strong></div>
+                    )}
+                    <div>
+                      {[
+                        invoiceSettings.bankName ? `Bank: <strong>${invoiceSettings.bankName}</strong>` : '',
+                        invoiceSettings.accountNumber ? `${invoiceSettings.accountType || 'Current'} A/c No: <strong>${invoiceSettings.accountNumber}</strong>` : '',
+                        invoiceSettings.ifscCode ? `IFSC: <strong>${invoiceSettings.ifscCode}</strong>` : ''
+                      ].filter(Boolean).reduce((prev, curr) => [prev, ' • ', <span key={Math.random()} dangerouslySetInnerHTML={{ __html: curr }} />] as any)}
+                    </div>
+                    {invoiceSettings.upiId && <div style={{ marginTop: 2 }}>UPI / QR Remittance ID: <strong>{invoiceSettings.upiId}</strong></div>}
                   </div>
-                  <div>Account Name: <strong>{invoiceSettings.accountName || `${invoiceSettings.agencyName} Escrow Advisory`}</strong></div>
-                  <div>Bank: <strong>{invoiceSettings.bankName || 'HDFC Bank Ltd'} • Current A/c No: {invoiceSettings.accountNumber || '50200088921102'}</strong> • IFSC: <strong>{invoiceSettings.ifscCode || 'HDFC0000128'}</strong></div>
-                  {invoiceSettings.upiId && <div style={{ marginTop: 3 }}>UPI / QR Remittance ID: <strong>{invoiceSettings.upiId}</strong></div>}
-                </div>
+                )}
 
                 {/* Payment Terms & Remittance Notes */}
                 {(inv.notes || invoiceSettings.defaultNotes) && (
-                  <div style={{ backgroundColor: '#f8fafc', padding: '12px 18px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 12, color: '#475569', marginBottom: 20 }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>Payment Terms &amp; Remittance Notes:</div>
-                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6, color: '#334155' }}>
-                      {inv.notes || invoiceSettings.defaultNotes || 'Brokerage advisory fees payable upon formal title verification and registration.'}
+                  <div className="print-notes-box" style={{ backgroundColor: '#f8fafc', padding: '10px 16px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 11.5, color: '#475569', marginBottom: 16 }}>
+                    <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 3 }}>Payment Terms &amp; Remittance Notes:</div>
+                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, color: '#334155' }}>
+                      {inv.notes || invoiceSettings.defaultNotes}
                     </div>
                   </div>
                 )}
 
                 {/* Signoff */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 16, fontSize: 11, color: '#64748b' }}>
+                <div className="print-signoff" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 14, fontSize: 10.5, color: '#64748b' }}>
                   <div>Computer generated official electronic invoice under Section 65B of Evidence Act &amp; IT Act 2000.</div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontWeight: 700, color: '#0f172a' }}>For {invoiceSettings.agencyName || agencyInfo.name}</div>
-                    <div style={{ marginTop: 28 }}>Authorized Broker Signatory</div>
+                    <div style={{ marginTop: 22 }}>Authorized Broker Signatory</div>
                   </div>
                 </div>
 
@@ -1944,171 +2052,33 @@ export default function InvoicesPage() {
         );
       })()}
 
-      {/* SHARE INVOICE MODAL / DIALOG */}
+      {/* UNIVERSAL SHARE INVOICE MODAL */}
       {sharingInvoice && (() => {
         const inv = sharingInvoice;
         const { total, subtotal, taxRate } = getInvoiceAmounts(inv);
+        const firmName = invoiceSettings.agencyName || agencyInfo.name;
+        const accType = invoiceSettings.accountType || 'Current';
+
+        const defaultMsg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (${accType} A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n• *UPI ID:* ${invoiceSettings.upiId}` : ''}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
+
         return (
-          <div
-            onClick={() => setSharingInvoice(null)}
-            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 130, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
-          >
-            <div
-              onClick={e => e.stopPropagation()}
-              className="responsive-modal animate-enter"
-              style={{ backgroundColor: '#ffffff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', maxWidth: 520, width: '100%', padding: '22px' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <div>
-                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                    Share Invoice #{inv.number}
-                  </h3>
-                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                    Client: {inv.clientName} • Payable: <strong>{formatINR(total)}</strong>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSharingInvoice(null)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
-                >
-                  <XIcon size={18} color="#64748b" />
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {/* WhatsApp Action */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    handleWhatsAppShare(inv);
-                    setSharingInvoice(null);
-                  }}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #bbf7d0',
-                    backgroundColor: '#f0fdf4',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <WhatsAppIcon size={18} color="#fff" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#166534' }}>Send via WhatsApp</div>
-                      <div style={{ fontSize: 11.5, color: '#15803d' }}>
-                        {inv.clientPhone ? `Send to ${inv.clientPhone}` : 'Open WhatsApp with formatted invoice slip'}
-                      </div>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#15803d' }}>Open ➔</span>
-                </div>
-
-                {/* Email Action */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    handleEmailShare(inv);
-                    setSharingInvoice(null);
-                  }}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #bfdbfe',
-                    backgroundColor: '#eff6ff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <MailIcon size={18} color="#fff" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#1e40af' }}>Send via Email</div>
-                      <div style={{ fontSize: 11.5, color: '#2563eb' }}>
-                        {inv.clientEmail ? `Send to ${inv.clientEmail}` : 'Open default mail app with tax invoice'}
-                      </div>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>Compose ➔</span>
-                </div>
-
-                {/* Copy Summary */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    handleCopySummary(inv);
-                    setSharingInvoice(null);
-                  }}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 8,
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#f8fafc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <CopyIcon size={16} color="#fff" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0f172a' }}>Copy Invoice Summary</div>
-                      <div style={{ fontSize: 11.5, color: '#64748b' }}>Copy quick payment summary to clipboard</div>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Copy</span>
-                </div>
-
-                {/* Download Standalone Document */}
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    handleDownloadStandaloneHtml(inv);
-                    setSharingInvoice(null);
-                  }}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 8,
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#f8fafc',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <DownloadIcon size={16} color="#fff" />
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0f172a' }}>Download Standalone Invoice File</div>
-                      <div style={{ fontSize: 11.5, color: '#64748b' }}>Saves official Tax_Invoice_{inv.number}.html file</div>
-                    </div>
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>Download</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ShareModal
+            isOpen={!!sharingInvoice}
+            onClose={() => setSharingInvoice(null)}
+            shareItem={{
+              id: inv.id,
+              type: 'invoice',
+              title: `Tax Invoice #${inv.number} • ${inv.clientName}`,
+              subtitle: `Total Payable: ${formatINR(total)} • Due: ${inv.dueDate} • Status: ${inv.status}`,
+              description: inv.dealRef ? `Transaction Deal: ${inv.dealRef}` : undefined,
+              badge: inv.status.toUpperCase(),
+              link: typeof window !== 'undefined' ? `${window.location.origin}/dashboard/invoices?id=${inv.id}` : '',
+              recipientName: inv.clientName,
+              recipientPhone: inv.clientPhone,
+              recipientEmail: inv.clientEmail,
+              defaultMessage: defaultMsg
+            }}
+          />
         );
       })()}
 
@@ -2136,13 +2106,19 @@ export default function InvoicesPage() {
         @media print {
           @page {
             size: A4 portrait;
-            margin: 12mm;
+            margin: 6mm 8mm;
+          }
+          html, body {
+            height: 100% !important;
+            overflow: hidden !important;
+            background: #ffffff !important;
+            font-size: 11px !important;
           }
           body * {
-            visibility: hidden;
+            visibility: hidden !important;
           }
           .print-invoice-container, .print-invoice-container * {
-            visibility: visible;
+            visibility: visible !important;
           }
           .print-invoice-container {
             position: absolute !important;
@@ -2151,11 +2127,47 @@ export default function InvoicesPage() {
             width: 100% !important;
             max-width: 100% !important;
             height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
+            max-height: 100vh !important;
+            overflow: hidden !important;
             box-shadow: none !important;
             border: none !important;
             border-radius: 0 !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+          .print-invoice-paper {
+            padding: 10px 14px !important;
+          }
+          .print-invoice-header {
+            padding-bottom: 8px !important;
+            margin-bottom: 10px !important;
+          }
+          .print-meta-grid {
+            margin-bottom: 10px !important;
+            gap: 10px !important;
+          }
+          .print-invoice-table {
+            margin-bottom: 10px !important;
+          }
+          .print-invoice-table th,
+          .print-invoice-table td {
+            padding: 5px 8px !important;
+          }
+          .print-calc-summary {
+            margin-bottom: 10px !important;
+          }
+          .print-remittance-box {
+            padding: 8px 10px !important;
+            margin-bottom: 8px !important;
+          }
+          .print-notes-box {
+            padding: 8px 10px !important;
+            margin-bottom: 8px !important;
+          }
+          .print-signoff {
+            padding-top: 8px !important;
           }
           .hide-on-print {
             display: none !important;

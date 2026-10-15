@@ -121,6 +121,8 @@ function resolveVariant(status: string): StatusBadgeVariant {
   return 'neutral';
 }
 
+import { getStatusColorStyle } from '@/lib/theme';
+
 export function StatusBadge({
   status,
   variant,
@@ -129,8 +131,10 @@ export function StatusBadge({
   className = '',
   style
 }: StatusBadgeProps) {
-  const activeVariant = variant || resolveVariant(status);
-  const cfg = VARIANT_CONFIGS[activeVariant] || VARIANT_CONFIGS.neutral;
+  const dynamicColor = getStatusColorStyle(status);
+  const cfg = variant ? (VARIANT_CONFIGS[variant] || VARIANT_CONFIGS.neutral) : dynamicColor;
+  const textColor = (cfg as any).text || (cfg as any).color || '#0f172a';
+  const activeVariant = variant || 'dynamic';
 
   const isSmall = size === 'sm';
 
@@ -139,7 +143,7 @@ export function StatusBadge({
       className={`status-badge status-badge-${activeVariant} ${className}`}
       style={{
         backgroundColor: cfg.bg,
-        color: cfg.color,
+        color: textColor,
         border: `1px solid ${cfg.border}`,
         padding: isSmall ? '2px 8px' : '4px 10px',
         borderRadius: '20px',

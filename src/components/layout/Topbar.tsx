@@ -552,7 +552,6 @@ export function Topbar() {
                 { href: '/dashboard/documents', label: 'Documents & Vault', icon: FileTextIcon },
                 { href: '/dashboard/invoices', label: 'Invoices & Billing', icon: ReceiptIcon },
                 { href: '/dashboard/tasks', label: 'Tasks & Follow-ups', icon: CheckSquareIcon },
-                { href: '/dashboard/reports', label: 'Executive Reports', icon: BarChartIcon },
                 { href: '/dashboard/calendar', label: 'Calendar Schedule', icon: MapPinIcon },
                 { href: '/dashboard/owners', label: 'Property Owners', icon: UsersIcon },
                 { href: '/dashboard/companies', label: 'Corporate Clients', icon: BuildingIcon },

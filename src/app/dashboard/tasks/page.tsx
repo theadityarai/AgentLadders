@@ -10,6 +10,8 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { FilterTabs } from '@/components/ui/FilterTabs';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { getStatusColorStyle } from '@/lib/theme';
+import { DEFAULT_TASK_STATUSES } from '@/lib/formatters';
 import {
   CheckIcon,
   XIcon,
@@ -22,6 +24,7 @@ import {
   BriefcaseIcon,
   WhatsAppIcon
 } from '@/components/icons/NavIcons';
+import { ShareModal } from '@/components/ui/ShareModal';
 
 export interface Task {
   [key: string]: unknown;
@@ -39,26 +42,27 @@ export interface Task {
 }
 
 const TASK_CATEGORIES = [
-  'Follow-up Call',
-  'Site Visit Prep',
-  'Agreement & Title Drafting',
-  'Escrow & Token Verification',
-  'Builder CP Meeting',
-  'Client KYC Collection'
+  'Buyer Follow-up & Match Sharing',
+  'Site Visit Coordination & Gate Pass',
+  'Token & Escrow Agreement',
+  'Registry, Title Clearance & NOC',
+  'Commission Brokerage Invoicing',
+  'Client KYC Collection',
+  'Builder CP Meeting'
 ];
 
 const TASK_PRIORITIES = ['Urgent', 'High', 'Medium', 'Low'];
 
 const initialForm = {
   title: '',
-  assignedTo: 'Marcus Vance',
-  dueDate: new Date().toISOString().split('T')[0],
-  category: 'Follow-up Call',
-  priority: 'High',
+  assignedTo: '',
+  dueDate: '',
+  category: '',
+  priority: '',
   relatedTo: '',
   phone: '',
   description: '',
-  status: 'Pending'
+  status: ''
 };
 
 function getCategoryIcon(cat: string = ''): string {
@@ -83,6 +87,7 @@ function getPriorityBadge(priority: string = 'Medium') {
 export default function TasksPage() {
   const [data, setData] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [taskStatuses, setTaskStatuses] = useState<string[]>(DEFAULT_TASK_STATUSES);
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board');
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -91,8 +96,9 @@ export default function TasksPage() {
   // CRM context for linking
   const [crmOptions, setCrmOptions] = useState<{ label: string; value: string; phone?: string }[]>([]);
 
-  // Delete modal state
+  // Delete & Share modal states
   const [taskToDelete, setTaskToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [sharingTask, setSharingTask] = useState<Task | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
@@ -135,6 +141,26 @@ export default function TasksPage() {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('agentladders_agency_configs');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed.taskStatuses) && parsed.taskStatuses.length > 0) {
+            setTaskStatuses(parsed.taskStatuses);
+          }
+        }
+      } catch {}
+    }
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => {
+        if (d?.agency?.taskStatuses && Array.isArray(d.agency.taskStatuses) && d.agency.taskStatuses.length > 0) {
+          setTaskStatuses(d.agency.taskStatuses);
+        }
+      })
+      .catch(() => {});
+
     loadTasks();
     loadCRMContext();
   }, []);
@@ -261,11 +287,7 @@ export default function TasksPage() {
 
   // Quick WhatsApp follow-up action
   const handleWhatsAppAction = (task: Task) => {
-    const phone = task.phone ? task.phone.replace(/[^0-9]/g, '') : '';
-    const phoneTarget = phone ? (phone.startsWith('91') ? phone : `91${phone}`) : '';
-    const msg = `Hello! Following up regarding ${task.title}${task.relatedTo ? ` (${task.relatedTo})` : ''}. Please let me know when you're available for a quick discussion.`;
-    const url = phoneTarget ? `https://wa.me/${phoneTarget}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    setSharingTask(task);
   };
 
   // Task Telemetry
@@ -279,6 +301,28 @@ export default function TasksPage() {
 
     return { total, completed, todayTasks, overdue, completionRate };
   }, [data, todayStr]);
+
+  // Faceted tab counts based on current search query
+  const tabCounts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const dataForTabs = data.filter(task => {
+      if (!q) return true;
+      return (
+        task.title?.toLowerCase().includes(q) ||
+        task.assignedTo?.toLowerCase().includes(q) ||
+        task.relatedTo?.toLowerCase().includes(q) ||
+        task.category?.toLowerCase().includes(q)
+      );
+    });
+
+    return {
+      all: dataForTabs.length,
+      today: dataForTabs.filter(t => t.dueDate === todayStr && t.status !== 'Completed').length,
+      overdue: dataForTabs.filter(t => t.dueDate < todayStr && t.status !== 'Completed').length,
+      high: dataForTabs.filter(t => (t.priority === 'High' || t.priority === 'Urgent') && t.status !== 'Completed').length,
+      completed: dataForTabs.filter(t => t.status === 'Completed').length
+    };
+  }, [data, searchQuery, todayStr]);
 
   // Filtered Tasks
   const filteredData = useMemo(() => {
@@ -375,6 +419,19 @@ export default function TasksPage() {
       )
     },
     {
+      key: 'status',
+      label: 'Status',
+      render: (r) => {
+        const sc = getStatusColorStyle(r.status);
+        return (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: sc.bg, border: `1px solid ${sc.border}`, padding: '3px 10px', borderRadius: 20 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.dot }} />
+            <span style={{ color: sc.text, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{r.status}</span>
+          </div>
+        );
+      }
+    },
+    {
       key: 'category',
       label: 'Category',
       render: (r) => (
@@ -456,12 +513,20 @@ export default function TasksPage() {
     }
   ];
 
-  // Kanban Columns
-  const kanbanColumns = [
-    { id: 'Pending', label: 'To Do & Pending', color: '#64748b', bg: '#f8fafc' },
-    { id: 'In Progress', label: 'In Progress', color: '#2563eb', bg: '#eff6ff' },
-    { id: 'Completed', label: 'Completed', color: '#059669', bg: '#ecfdf5' }
-  ];
+  // Kanban Columns dynamically derived from taskStatuses
+  const kanbanColumns = useMemo(() => {
+    return taskStatuses.map(status => {
+      const sc = getStatusColorStyle(status);
+      return {
+        id: status,
+        label: status,
+        color: sc.text,
+        bg: sc.bg,
+        border: sc.border,
+        dot: sc.dot
+      };
+    });
+  }, [taskStatuses]);
 
   if (loading) {
     return (
@@ -483,8 +548,27 @@ export default function TasksPage() {
             <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: 8 }}>
               Tasks &amp; Action Follow-ups <InfoTooltip text="Track lead follow-ups, site visit preparations, token receipts, and legal verification deadlines." />
             </h1>
-            <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
-              Team action checklists linked to clients, listings, and active deals
+            <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span>{data.length} tasks total</span>
+              <span>•</span>
+              <span style={{ fontWeight: 700, color: '#0f172a' }}>{filteredData.length} shown</span>
+              {(filterTab !== 'all' || searchQuery) && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                    Filtered: {[
+                      filterTab !== 'all' ? ({ today: 'Due Today', overdue: 'Overdue', high: 'High Priority', completed: 'Completed' } as any)[filterTab] : null,
+                      searchQuery ? `"${searchQuery}"` : null
+                    ].filter(Boolean).join(' + ')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setFilterTab('all'); setSearchQuery(''); }}
+                    style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                  >
+                    Clear filters
+                  </button>
+                </span>
+              )}
             </p>
           </div>
 
@@ -560,11 +644,11 @@ export default function TasksPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
           <div className="touch-scroll-container" style={{ display: 'flex', gap: 8, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             {[
-              { id: 'all', label: 'All Tasks', count: data.length },
-              { id: 'today', label: 'Due Today', count: stats.todayTasks },
-              { id: 'overdue', label: 'Overdue', count: stats.overdue },
-              { id: 'high', label: 'High Priority', count: data.filter(t => (t.priority === 'High' || t.priority === 'Urgent') && t.status !== 'Completed').length },
-              { id: 'completed', label: 'Completed', count: stats.completed }
+              { id: 'all', label: 'All Tasks', count: tabCounts.all },
+              { id: 'today', label: 'Due Today', count: tabCounts.today },
+              { id: 'overdue', label: 'Overdue', count: tabCounts.overdue },
+              { id: 'high', label: 'High Priority', count: tabCounts.high },
+              { id: 'completed', label: 'Completed', count: tabCounts.completed }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -644,11 +728,16 @@ export default function TasksPage() {
         {/* View Mode 1: Kanban Board */}
         {viewMode === 'board' ? (
           <div className="touch-scroll-container" style={{ display: 'flex', gap: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24 }}>
-            {kanbanColumns.map(col => {
+            {kanbanColumns.map((col, colIdx) => {
               const colTasks = filteredData.filter(t => {
-                if (col.id === 'Completed') return t.status === 'Completed';
-                if (col.id === 'In Progress') return t.status === 'In Progress';
-                return t.status !== 'Completed' && t.status !== 'In Progress';
+                const tStatus = (t.status || '').trim().toLowerCase();
+                const colId = col.id.trim().toLowerCase();
+                if (tStatus === colId) return true;
+                // If status is empty or not in taskStatuses list, place in first column
+                if (colIdx === 0 && !taskStatuses.some(s => s.trim().toLowerCase() === tStatus)) {
+                  return true;
+                }
+                return false;
               });
 
               return (
@@ -672,17 +761,22 @@ export default function TasksPage() {
                   }}
                 >
                   {/* Column Header */}
-                  <div style={{ padding: '14px 16px', borderBottom: '1px solid #e2e8f0', backgroundColor: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: col.color }} />
-                      <h3 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                        {col.label}
-                      </h3>
-                    </div>
-                    <span style={{ fontSize: 12, fontWeight: 700, backgroundColor: '#f1f5f9', color: '#475569', padding: '2px 8px', borderRadius: 12 }}>
-                      {colTasks.length}
-                    </span>
-                  </div>
+                  {(() => {
+                    const sc = getStatusColorStyle(col.id);
+                    return (
+                      <div style={{ padding: '14px 16px', borderBottom: '1px solid #e2e8f0', backgroundColor: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: sc.dot }} />
+                          <h3 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                            {col.label}
+                          </h3>
+                        </div>
+                        <span style={{ fontSize: 12, fontWeight: 700, backgroundColor: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, padding: '2px 8px', borderRadius: 12 }}>
+                          {colTasks.length}
+                        </span>
+                      </div>
+                    );
+                  })()}
 
                   {/* Tasks List */}
                   <div style={{ padding: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
@@ -864,8 +958,8 @@ export default function TasksPage() {
                 />
               </div>
 
-              {/* Category & Priority */}
-              <div className="responsive-grid-2" style={{ gap: 14, marginBottom: 14 }}>
+              {/* Category, Priority & Status */}
+              <div className="responsive-grid-3" style={{ gap: 14, marginBottom: 14 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Category</label>
                   <select
@@ -873,6 +967,7 @@ export default function TasksPage() {
                     onChange={e => setForm({ ...form, category: e.target.value })}
                     style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13.5, backgroundColor: '#ffffff' }}
                   >
+                    <option value="">Select Category...</option>
                     {TASK_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
@@ -883,7 +978,21 @@ export default function TasksPage() {
                     onChange={e => setForm({ ...form, priority: e.target.value })}
                     style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13.5, backgroundColor: '#ffffff' }}
                   >
+                    <option value="">Select Priority...</option>
                     {TASK_PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Status</label>
+                  <select
+                    value={form.status}
+                    onChange={e => setForm({ ...form, status: e.target.value })}
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13.5, backgroundColor: '#ffffff' }}
+                  >
+                    <option value="">Select Status...</option>
+                    {taskStatuses.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1009,6 +1118,30 @@ export default function TasksPage() {
           </div>
         </div>
       )}
+
+      {/* Universal Share Modal */}
+      {sharingTask && (() => {
+        const t = sharingTask;
+        const defaultMsg = `Hello! Following up regarding: *${t.title}*${t.relatedTo ? ` (${t.relatedTo})` : ''}\nDue Date: ${t.dueDate}\nStatus: ${t.status}\n\nPlease let me know when you're available for a quick discussion!`;
+
+        return (
+          <ShareModal
+            isOpen={!!sharingTask}
+            onClose={() => setSharingTask(null)}
+            shareItem={{
+              id: t.id,
+              type: 'task',
+              title: t.title,
+              subtitle: `Due: ${t.dueDate} • Assigned: ${t.assignedTo} • Status: ${t.status}`,
+              description: t.description || undefined,
+              badge: t.category || t.status,
+              recipientName: t.relatedTo || undefined,
+              recipientPhone: t.phone || undefined,
+              defaultMessage: defaultMsg
+            }}
+          />
+        );
+      })()}
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

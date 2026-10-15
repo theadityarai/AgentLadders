@@ -35,21 +35,17 @@ interface Deal {
   dealType?: string;
 }
 
+import { getStatusColorStyle } from '@/lib/theme';
+
 function getStageColor(s: string) {
-  const lower = s.toLowerCase();
-  if (lower.includes('token') || lower.includes('won') || lower.includes('closed')) {
-    return { border: '#bbf7d0', bg: '#f0fdf4', badge: '#059669', badgeBg: '#d1fae5', bar: '#10b981' };
-  }
-  if (lower.includes('lost') || lower.includes('drop') || lower.includes('cancel')) {
-    return { border: '#fecaca', bg: '#fef2f2', badge: '#b91c1c', badgeBg: '#fee2e2', bar: '#ef4444' };
-  }
-  if (lower.includes('agreement') || lower.includes('draft') || lower.includes('legal')) {
-    return { border: '#bfdbfe', bg: '#eff6ff', badge: '#1d4ed8', badgeBg: '#dbeafe', bar: '#3b82f6' };
-  }
-  if (lower.includes('registration') || lower.includes('pending') || lower.includes('loan')) {
-    return { border: '#fde68a', bg: '#fffbeb', badge: '#b45309', badgeBg: '#fef3c7', bar: '#f59e0b' };
-  }
-  return { border: '#e2e8f0', bg: '#f8fafc', badge: '#475569', badgeBg: '#f1f5f9', bar: '#94a3b8' };
+  const sc = getStatusColorStyle(s);
+  return {
+    border: sc.border,
+    bg: sc.bg,
+    badge: sc.text,
+    badgeBg: sc.bg,
+    bar: sc.dot
+  };
 }
 
 export default function DealsPage() {
@@ -178,43 +174,77 @@ export default function DealsPage() {
     }
   }, [data, showToast]);
 
-  const { saleCount, rentCount } = useMemo(() => {
-    let sale = 0;
-    let rent = 0;
-    for (const d of data) {
-      if (isDealRent(d)) rent++;
-      else sale++;
-    }
-    return { saleCount: sale, rentCount: rent };
-  }, [data, isDealRent]);
-
   const allStagesList = useMemo(() => {
     return Array.from(new Set([...stages, 'Closed Won', 'Lost']));
   }, [stages]);
 
+  const matchesDealStage = useCallback((d: Deal, targetStage: string) => {
+    if (targetStage === 'All') return true;
+    if (targetStage === 'Active') return !['Closed Won', 'Lost'].includes(d.stage);
+    return d.stage === targetStage;
+  }, []);
+
+  const matchesDealType = useCallback((d: Deal, targetType: 'All' | 'Buy' | 'Rent') => {
+    if (targetType === 'All') return true;
+    const isRent = isDealRent(d);
+    if (targetType === 'Rent') return isRent;
+    if (targetType === 'Buy') return !isRent;
+    return true;
+  }, [isDealRent]);
+
+  const matchesDealSearch = useCallback((d: Deal, q: string) => {
+    if (!q) return true;
+    return (
+      d.title?.toLowerCase().includes(q) ||
+      d.clientName?.toLowerCase().includes(q) ||
+      d.propertyName?.toLowerCase().includes(q) ||
+      (Array.isArray(d.properties) && d.properties.some(p => p.toLowerCase().includes(q)))
+    );
+  }, []);
+
+  // Faceted Deal Type Counts (Context-aware based on current Stage filter and Search)
+  const dealTypeCounts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const dataForType = data.filter(d => {
+      if (!matchesDealStage(d, stageFilter)) return false;
+      if (!matchesDealSearch(d, q)) return false;
+      return true;
+    });
+
+    let buy = 0;
+    let rent = 0;
+    for (const d of dataForType) {
+      if (isDealRent(d)) rent++;
+      else buy++;
+    }
+    return { all: dataForType.length, buy, rent };
+  }, [data, stageFilter, searchQuery, matchesDealStage, matchesDealSearch, isDealRent]);
+
+  // Faceted Stage Counts (Context-aware based on current Deal Type filter and Search)
+  const stageCounts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const dataForStage = data.filter(d => {
+      if (!matchesDealType(d, dealTypeFilter)) return false;
+      if (!matchesDealSearch(d, q)) return false;
+      return true;
+    });
+
+    const counts: Record<string, number> = {
+      all: dataForStage.length,
+      active: dataForStage.filter(d => !['Closed Won', 'Lost'].includes(d.stage)).length
+    };
+    allStagesList.forEach(st => {
+      counts[st] = dataForStage.filter(d => d.stage === st).length;
+    });
+    return counts;
+  }, [data, dealTypeFilter, searchQuery, allStagesList, matchesDealType, matchesDealSearch]);
+
   const filteredDeals = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return data.filter(d => {
-      if (dealTypeFilter !== 'All') {
-        const isRent = isDealRent(d);
-        if (dealTypeFilter === 'Rent' && !isRent) return false;
-        if (dealTypeFilter === 'Buy' && isRent) return false;
-      }
-      if (stageFilter !== 'All') {
-        if (stageFilter === 'Active') {
-          if (['Closed Won', 'Lost'].includes(d.stage)) return false;
-        } else if (d.stage !== stageFilter) {
-          return false;
-        }
-      }
-      if (q) {
-        return (
-          d.title?.toLowerCase().includes(q) ||
-          d.clientName?.toLowerCase().includes(q) ||
-          d.propertyName?.toLowerCase().includes(q) ||
-          (Array.isArray(d.properties) && d.properties.some(p => p.toLowerCase().includes(q)))
-        );
-      }
+      if (!matchesDealType(d, dealTypeFilter)) return false;
+      if (!matchesDealStage(d, stageFilter)) return false;
+      if (!matchesDealSearch(d, q)) return false;
       return true;
     }).sort((a, b) => {
       if (sortBy === 'oldest') {
@@ -233,7 +263,7 @@ export default function DealsPage() {
       // default: newest
       return (b.id || '').localeCompare(a.id || '');
     });
-  }, [data, dealTypeFilter, stageFilter, searchQuery, isDealRent, sortBy]);
+  }, [data, dealTypeFilter, stageFilter, searchQuery, matchesDealType, matchesDealStage, matchesDealSearch, sortBy]);
 
   const columnsToDisplay = useMemo(() => {
     if (stageFilter === 'All') return stages;
@@ -539,8 +569,30 @@ export default function DealsPage() {
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center' }}>
             Deals Pipeline <InfoTooltip text="Track and manage active transactions visually across the sales lifecycle." />
           </h1>
-          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
-            Total Pipeline Value: <strong style={{ color: 'var(--primary)', fontSize: 15 }}>{formatINR(activePipelineValue)}</strong>
+          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span>{data.length} deals total</span>
+            <span>•</span>
+            <span style={{ fontWeight: 700, color: '#0f172a' }}>{filteredDeals.length} shown</span>
+            <span>•</span>
+            <span>Pipeline Value: <strong style={{ color: 'var(--primary)', fontSize: 14 }}>{formatINR(activePipelineValue)}</strong></span>
+            {(dealTypeFilter !== 'All' || stageFilter !== 'All' || searchQuery) && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                  Filtered: {[
+                    dealTypeFilter !== 'All' ? (dealTypeFilter === 'Buy' ? 'Sale / Buy' : 'Rental / Lease') : null,
+                    stageFilter !== 'All' ? stageFilter : null,
+                    searchQuery ? `"${searchQuery}"` : null
+                  ].filter(Boolean).join(' + ')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setDealTypeFilter('All'); setStageFilter('All'); setSearchQuery(''); }}
+                  style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                >
+                  Clear filters
+                </button>
+              </span>
+            )}
           </p>
         </div>
         <button 
@@ -566,9 +618,9 @@ export default function DealsPage() {
             variant="segmented"
             size="sm"
             tabs={[
-              { id: 'All', label: 'All Deals', count: data.length, icon: <ListIcon size={13} /> },
-              { id: 'Buy', label: 'Sale / Buy Deals', count: saleCount, icon: <HomeIcon size={13} /> },
-              { id: 'Rent', label: 'Rental / Lease Deals', count: rentCount, icon: <KeyIcon size={13} /> }
+              { id: 'All', label: 'All Deals', count: dealTypeCounts.all, icon: <ListIcon size={13} /> },
+              { id: 'Buy', label: 'Sale / Buy Deals', count: dealTypeCounts.buy, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'Rental / Lease Deals', count: dealTypeCounts.rent, icon: <KeyIcon size={13} /> }
             ]}
             activeTab={dealTypeFilter}
             onChange={(tabId) => setDealTypeFilter(tabId as any)}
@@ -604,12 +656,12 @@ export default function DealsPage() {
             label="Stage:"
             size="sm"
             tabs={[
-              { id: 'All', label: 'All Stages', count: data.length },
-              { id: 'Active', label: 'Active Pipeline', count: activeDealsCount },
+              { id: 'All', label: 'All Stages', count: stageCounts.all },
+              { id: 'Active', label: 'Active Pipeline', count: stageCounts.active },
               ...allStagesList.map(s => ({
                 id: s,
                 label: s,
-                count: data.filter(d => d.stage === s).length
+                count: stageCounts[s] ?? 0
               }))
             ]}
             activeTab={stageFilter}

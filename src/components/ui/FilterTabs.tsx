@@ -130,10 +130,10 @@ export function FilterTabs<T extends string = string>({
       return {
         ...base,
         borderRadius: '7px',
-        backgroundColor: isActive ? '#ffffff' : 'transparent',
-        color: isActive ? '#0f172a' : '#64748b',
-        boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)' : 'none',
-        fontWeight: isActive ? 600 : 500
+        backgroundColor: isActive ? 'var(--primary, #059669)' : 'transparent',
+        color: isActive ? '#ffffff' : '#334155',
+        boxShadow: isActive ? '0 2px 6px rgba(var(--primary-rgb, 5, 150, 105), 0.28)' : 'none',
+        fontWeight: isActive ? 700 : 500
       };
     }
 
@@ -175,8 +175,8 @@ export function FilterTabs<T extends string = string>({
     let text = '#475569';
 
     if (isActive) {
-      if (variant === 'pills') {
-        bg = 'rgba(255, 255, 255, 0.22)';
+      if (variant === 'pills' || variant === 'segmented') {
+        bg = 'rgba(255, 255, 255, 0.25)';
         text = '#ffffff';
       } else {
         bg = '#0f172a';

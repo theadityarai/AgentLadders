@@ -20,6 +20,8 @@ import {
   DEFAULT_SITE_VISIT_STATUSES,
   DEFAULT_TASK_STATUSES,
   DEFAULT_CLIENT_STATUSES,
+  DEFAULT_INVOICE_STATUSES,
+  DEFAULT_PAYMENT_STATUSES,
   DEFAULT_INVOICE_SETTINGS
 } from '@/lib/formatters';
 
@@ -96,12 +98,24 @@ export async function GET() {
       agency.clientStatuses = DEFAULT_CLIENT_STATUSES;
       modified = true;
     }
+    if (!agency.invoiceStatuses || agency.invoiceStatuses.length === 0) {
+      agency.invoiceStatuses = DEFAULT_INVOICE_STATUSES;
+      modified = true;
+    }
+    if (!agency.paymentStatuses || agency.paymentStatuses.length === 0) {
+      agency.paymentStatuses = DEFAULT_PAYMENT_STATUSES;
+      modified = true;
+    }
+    if (!agency.statusColors || typeof agency.statusColors !== 'object') {
+      agency.statusColors = {};
+      modified = true;
+    }
     if (!agency.timezone) {
       agency.timezone = 'Asia/Kolkata';
       modified = true;
     }
     if (!agency.fontFamily) {
-      agency.fontFamily = 'montserrat';
+      agency.fontFamily = 'roboto';
       modified = true;
     }
     if (!agency.colorScheme) {
@@ -233,22 +247,48 @@ export async function PUT(req: Request) {
     if (data.siteVisitStatuses) db.agencies[agencyIndex].siteVisitStatuses = data.siteVisitStatuses;
     if (data.taskStatuses) db.agencies[agencyIndex].taskStatuses = data.taskStatuses;
     if (data.clientStatuses) db.agencies[agencyIndex].clientStatuses = data.clientStatuses;
+    if (data.invoiceStatuses) db.agencies[agencyIndex].invoiceStatuses = data.invoiceStatuses;
+    if (data.paymentStatuses) db.agencies[agencyIndex].paymentStatuses = data.paymentStatuses;
+    if (data.statusColors && typeof data.statusColors === 'object') {
+      db.agencies[agencyIndex].statusColors = {
+        ...(db.agencies[agencyIndex].statusColors || {}),
+        ...data.statusColors
+      };
+    }
+  }
+  else if (action === 'updateStatusColors') {
+    if (data.statusColors && typeof data.statusColors === 'object') {
+      db.agencies[agencyIndex].statusColors = {
+        ...(db.agencies[agencyIndex].statusColors || {}),
+        ...data.statusColors
+      };
+      saveDb(db);
+      return NextResponse.json({
+        success: true,
+        statusColors: db.agencies[agencyIndex].statusColors
+      });
+    }
   }
   else if (action === 'updateInvoiceSettings') {
     const inv = data.invoiceSettings || {};
     db.agencies[agencyIndex].invoiceSettings = {
-      agencyName: sanitizeString(inv.agencyName || db.agencies[agencyIndex].name || DEFAULT_INVOICE_SETTINGS.agencyName),
-      tagline: sanitizeString(inv.tagline || DEFAULT_INVOICE_SETTINGS.tagline),
-      gstin: sanitizeString(inv.gstin || ''),
-      reraReg: sanitizeString(inv.reraReg || ''),
-      accountName: sanitizeString(inv.accountName || ''),
-      bankName: sanitizeString(inv.bankName || ''),
-      accountNumber: sanitizeString(inv.accountNumber || ''),
-      ifscCode: sanitizeString(inv.ifscCode || ''),
-      upiId: sanitizeString(inv.upiId || ''),
-      placeOfSupply: sanitizeString(inv.placeOfSupply || DEFAULT_INVOICE_SETTINGS.placeOfSupply),
-      sacCode: sanitizeString(inv.sacCode || DEFAULT_INVOICE_SETTINGS.sacCode),
-      defaultNotes: sanitizeString(inv.defaultNotes || DEFAULT_INVOICE_SETTINGS.defaultNotes || '')
+      agencyName: sanitizeString(inv.agencyName ?? (db.agencies[agencyIndex].name || '')),
+      tagline: sanitizeString(inv.tagline ?? ''),
+      gstin: sanitizeString(inv.gstin ?? ''),
+      reraReg: sanitizeString(inv.reraReg ?? ''),
+      address: sanitizeString(inv.address ?? ''),
+      phone: sanitizeString(inv.phone ?? ''),
+      email: sanitizeString(inv.email ?? ''),
+      pan: sanitizeString(inv.pan ?? ''),
+      accountName: sanitizeString(inv.accountName ?? ''),
+      bankName: sanitizeString(inv.bankName ?? ''),
+      accountType: sanitizeString(inv.accountType ?? 'Current'),
+      accountNumber: sanitizeString(inv.accountNumber ?? ''),
+      ifscCode: sanitizeString(inv.ifscCode ?? ''),
+      upiId: sanitizeString(inv.upiId ?? ''),
+      placeOfSupply: sanitizeString(inv.placeOfSupply ?? ''),
+      sacCode: sanitizeString(inv.sacCode ?? ''),
+      defaultNotes: sanitizeString(inv.defaultNotes ?? '')
     };
     saveDb(db);
     return NextResponse.json({ success: true, invoiceSettings: db.agencies[agencyIndex].invoiceSettings });

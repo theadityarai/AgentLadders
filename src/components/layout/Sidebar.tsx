@@ -40,7 +40,6 @@ const MORE_ITEMS: NavItemConfig[] = [
   { href: '/dashboard/documents', label: 'Documents', icon: FileTextIcon, exact: false },
   { href: '/dashboard/invoices', label: 'Invoices', icon: ReceiptIcon, exact: false },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquareIcon, exact: false },
-  { href: '/dashboard/reports', label: 'Reports', icon: BarChartIcon, exact: false },
 ];
 
 const BOTTOM_ITEMS: NavItemConfig[] = [

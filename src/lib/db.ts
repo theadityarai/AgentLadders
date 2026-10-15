@@ -30,6 +30,26 @@ export interface User {
   createdAt?: string;
 }
 
+export interface UserSession {
+  id: string;
+  userId: string;
+  userName?: string;
+  userEmail?: string;
+  browser: string;
+  browserVersion?: string;
+  os: string;
+  deviceType: 'desktop' | 'mobile' | 'tablet';
+  deviceModel?: string;
+  ipAddress: string;
+  location: string;
+  screen?: string;
+  timezone?: string;
+  userAgent?: string;
+  createdAt: string;
+  lastActive: string;
+  current?: boolean;
+}
+
 export interface Agency {
   id: string;
   name: string;
@@ -58,6 +78,9 @@ export interface Agency {
   siteVisitStatuses?: string[];
   taskStatuses?: string[];
   clientStatuses?: string[];
+  invoiceStatuses?: string[];
+  paymentStatuses?: string[];
+  statusColors?: Record<string, string>;
   notificationPrefs?: Record<string, { inApp: boolean; email: boolean }>;
   invoiceSettings?: AgencyInvoiceSettings;
   createdAt?: string;
@@ -522,6 +545,7 @@ export interface DB {
   recycleBin: RecycleItem[];
   supportTickets: SupportTicket[];
   sharedLinks: PropertyShareRecord[];
+  activeSessions?: UserSession[];
 }
 
 // Ensure the data directory exists
@@ -624,6 +648,7 @@ export function getDb(): DB {
   db.auditLogs = db.auditLogs || [];
   db.recycleBin = db.recycleBin || [];
   db.supportTickets = db.supportTickets || [];
+  db.activeSessions = db.activeSessions || [];
   if (db.supportTickets.length === 0) {
     const firstAgency = (db.agencies && db.agencies[0]) ? db.agencies[0] : { id: 'agency_1', name: 'Vance Luxury Realty' };
     db.supportTickets = [

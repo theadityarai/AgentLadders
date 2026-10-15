@@ -281,25 +281,43 @@ export const DEFAULT_CLIENT_STATUSES = [
   'Inactive'
 ];
 
+export const DEFAULT_INVOICE_STATUSES = [
+  'Draft',
+  'Pending',
+  'Partially Paid',
+  'Paid',
+  'Overdue',
+  'Cancelled'
+];
+
+export const DEFAULT_PAYMENT_STATUSES = [
+  'Completed',
+  'Pending Clearance',
+  'Processing',
+  'Failed',
+  'Refunded'
+];
+
 export const VASTU_FACINGS = DEFAULT_VASTU_FACINGS;
 export const POSSESSION_STAGES = DEFAULT_CONSTRUCTION_STAGES;
 
 export interface AgencyInvoiceSettings {
   agencyName: string;
-  tagline: string;
-  gstin: string;
-  reraReg: string;
+  tagline?: string;
+  gstin?: string;
+  reraReg?: string;
   address?: string;
   phone?: string;
   email?: string;
   pan?: string;
   accountName: string;
   bankName: string;
+  accountType?: 'Current' | 'Savings' | string;
   accountNumber: string;
   ifscCode: string;
-  upiId: string;
-  placeOfSupply: string;
-  sacCode: string;
+  upiId?: string;
+  placeOfSupply?: string;
+  sacCode?: string;
   defaultNotes?: string;
 }
 
@@ -314,6 +332,7 @@ export const DEFAULT_INVOICE_SETTINGS: AgencyInvoiceSettings = {
   pan: 'AABCA1234F',
   accountName: 'Vance Luxury Realty Escrow Advisory',
   bankName: 'HDFC Bank Ltd',
+  accountType: 'Current',
   accountNumber: '50200088921102',
   ifscCode: 'HDFC0000128',
   upiId: 'agency.realty@hdfcbank',

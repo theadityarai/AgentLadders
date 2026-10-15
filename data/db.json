@@ -12,7 +12,20 @@
       "status": "Active",
       "avatar": "",
       "image": "",
-      "createdAt": "2026-08-10T08:00:00.000Z"
+      "createdAt": "2026-08-10T08:00:00.000Z",
+      "twoFactorEnabled": false,
+      "twoFactorSecret": "AGLD-7734-K821-X992",
+      "twoFactorBackupCodes": [
+        "4829-1029",
+        "7361-9921",
+        "8302-4410",
+        "1928-3392",
+        "5512-8801"
+      ],
+      "emailOtp": {
+        "code": "121051",
+        "expiresAt": 1792041049137
+      }
     },
     {
       "id": "usr_super_admin",
@@ -174,6 +187,24 @@
         "Past Client",
         "Inactive"
       ],
+      "invoiceStatuses": [
+        "Draft",
+        "Pending",
+        "Partially Paid",
+        "Paid",
+        "Overdue",
+        "Cancelled"
+      ],
+      "paymentStatuses": [
+        "Completed",
+        "Pending Clearance",
+        "Processing",
+        "Failed",
+        "Refunded"
+      ],
+      "statusColors": {
+        "Available": "blue"
+      },
       "notificationPrefs": {
         "New lead assigned": {
           "inApp": true,
@@ -194,7 +225,7 @@
       },
       "createdAt": "2026-08-10T08:00:00.000Z",
       "updatedAt": "2026-10-13T08:59:47.311Z",
-      "fontFamily": "montserrat",
+      "fontFamily": "roboto",
       "colorScheme": "emerald",
       "invoiceSettings": {
         "agencyName": "Vance Luxury Realty",
@@ -212,6 +243,26 @@
     }
   ],
   "notifications": [
+    {
+      "id": "notif_hjjgz36o",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "title": "Two-Factor Authentication Disabled ⚠️",
+      "message": "Two-Factor Authentication has been turned off for your account.",
+      "type": "warning",
+      "read": false,
+      "createdAt": "2026-10-14T19:42:09.696Z"
+    },
+    {
+      "id": "notif_mx6gvxz5",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "title": "Two-Factor Authentication Activated 🛡️",
+      "message": "Two-Factor Authentication (TOTP Authenticator) was successfully configured on your account.",
+      "type": "system",
+      "read": false,
+      "createdAt": "2026-10-14T19:41:59.965Z"
+    },
     {
       "id": "notif_q8au5rd",
       "agencyId": "ag_vance_01",
@@ -1061,7 +1112,7 @@
       "name": "Vikram Malhotra",
       "email": "vikram.malhotra@induscap.in",
       "phone": "+91 98200 45678",
-      "status": "Hot Buyer 🔥",
+      "status": "New Inbound",
       "source": "WhatsApp Referral",
       "leadPurpose": "Buy",
       "city": "Mumbai",
@@ -1082,7 +1133,8 @@
       "assignedTo": "Marcus Vance",
       "nextFollowUp": "2026-10-13",
       "notes": "Managing Director at Indus Capital PE. Highly decisive. Token ₹10 Lakhs ready for Lodha Park Worli.",
-      "createdAt": "2026-10-13T08:59:47.311Z"
+      "createdAt": "2026-10-13T08:59:47.311Z",
+      "updatedAt": "2026-10-15T04:53:33.520Z"
     },
     {
       "id": "lead_2",
@@ -1837,12 +1889,14 @@
       "taxRate": 18,
       "issueDate": "2026-10-14",
       "dueDate": "2026-10-28",
-      "status": "Pending",
+      "status": "Overdue",
       "notes": "50% advance upon title agreement, 50% on deed execution. Bank transfer only.",
       "id": "inv_ja8kb4q3",
       "agencyId": "ag_vance_01",
       "createdAt": "2026-10-14T18:14:44.400Z",
-      "updatedAt": "2026-10-14T18:56:03.852Z"
+      "updatedAt": "2026-10-15T04:58:20.694Z",
+      "totalAmount": 1463200,
+      "taxType": "intra"
     }
   ],
   "payments": [
@@ -2316,11 +2370,12 @@
       "id": "doc_1",
       "agencyId": "ag_vance_01",
       "name": "Agreement_To_Sale_Lodha_Park_Worli_Draft.pdf",
-      "type": "Agreement to Sale",
-      "category": "Contracts",
+      "type": "Agreement to Sale (PDF)",
+      "category": "Contracts & MOUs",
       "size": "2.4 MB",
       "uploadedBy": "Marcus Vance",
-      "relatedTo": "Lodha Park Worli 4 BHK",
+      "relatedTo": "Property: Lodha Park Worli 4 BHK, Client: Vikram Malhotra",
+      "description": "Standard MahaRERA registered bi-partite draft agreement for sale. Includes payment schedule, common amenities handover timeline, and escrow terms.",
       "version": "v2.1 Final Draft",
       "createdAt": "2026-10-13T08:59:47.311Z"
     },
@@ -2328,11 +2383,12 @@
       "id": "doc_2",
       "agencyId": "ag_vance_01",
       "name": "MahaRERA_Registration_Certificate_P51900001339.pdf",
-      "type": "RERA Certificate",
-      "category": "Compliance",
+      "type": "RERA Certificate (PDF)",
+      "category": "Title Deeds & OC",
       "size": "1.2 MB",
       "uploadedBy": "Marcus Vance",
-      "relatedTo": "Lodha Park Worli",
+      "relatedTo": "Property: Lodha Park Worli 4 BHK",
+      "description": "Official MahaRERA statutory project registration certificate with QR verification stamp and authorized phase completion certificate.",
       "version": "Official Govt Copy",
       "createdAt": "2026-10-13T08:59:47.311Z"
     },
@@ -2340,11 +2396,12 @@
       "id": "doc_3",
       "agencyId": "ag_vance_01",
       "name": "DLF_Camellias_Maintenance_Society_NOC.pdf",
-      "type": "Society NOC",
-      "category": "Title Deeds",
+      "type": "Society NOC (PDF)",
+      "category": "Title Deeds & OC",
       "size": "850 KB",
       "uploadedBy": "Marcus Vance",
-      "relatedTo": "DLF The Camellias",
+      "relatedTo": "Property: DLF The Camellias Luxury Suite",
+      "description": "Condominium Association dues clearance NOC and allocated basement tandem parking bay certification.",
       "version": "Executed Copy",
       "createdAt": "2026-10-13T08:59:47.311Z"
     },
@@ -2352,11 +2409,12 @@
       "id": "doc_4",
       "agencyId": "ag_vance_01",
       "name": "Client_PAN_Aadhaar_KYC_Vikram_Malhotra.pdf",
-      "type": "KYC / PAN / Aadhaar",
-      "category": "KYC Documents",
+      "type": "KYC / PAN / Aadhaar (PDF)",
+      "category": "Client KYC & Identity",
       "size": "1.1 MB",
       "uploadedBy": "Marcus Vance",
-      "relatedTo": "Vikram Malhotra",
+      "relatedTo": "Client: Vikram Malhotra",
+      "description": "Verified Government KYC dossier containing masked Aadhaar copy, PAN verification, and passport address endorsement.",
       "version": "Verified KYC",
       "createdAt": "2026-10-13T08:59:47.311Z"
     },
@@ -2364,13 +2422,40 @@
       "id": "doc_5",
       "agencyId": "ag_vance_01",
       "name": "Prestige_Indiranagar_30Year_Search_Report.pdf",
-      "type": "Legal Opinion Report",
-      "category": "Title Deeds",
+      "type": "Legal Opinion Report (PDF)",
+      "category": "Title Deeds & OC",
       "size": "3.8 MB",
       "uploadedBy": "Marcus Vance",
-      "relatedTo": "Prestige Kingfisher",
+      "relatedTo": "Property: Prestige Kingfisher Indiranagar",
+      "description": "Senior High Court advocate 30-year non-encumbrance title search report with revenue khata chain certificate.",
       "version": "Advocate Certified",
       "createdAt": "2026-10-13T08:59:47.311Z"
+    },
+    {
+      "id": "doc_6",
+      "agencyId": "ag_vance_01",
+      "name": "Master_Sole_Selling_Brokerage_Agreement.docx",
+      "type": "Word Document (.docx)",
+      "category": "Contracts & MOUs",
+      "size": "48.5 KB",
+      "uploadedBy": "Marcus Vance",
+      "relatedTo": "Property: Lodha Park Worli 4 BHK, Client: Vikram Malhotra",
+      "description": "MahaRERA compliant exclusive sole selling brokerage mandate agreement. Outlines 2.0% broker commission, quarterly promotional budget, and 180-day buyer registration protection.",
+      "version": "v1.0 Executable Word Draft",
+      "createdAt": "2026-10-14T11:20:00.000Z"
+    },
+    {
+      "id": "doc_7",
+      "agencyId": "ag_vance_01",
+      "name": "Lodha_Park_4BHK_Architectural_Floor_Plan.png",
+      "type": "Blueprint Image (.png)",
+      "category": "Brochures & Floor Plans",
+      "size": "2.8 MB",
+      "uploadedBy": "Marcus Vance",
+      "relatedTo": "Property: Lodha Park Worli 4 BHK",
+      "description": "Official CAD architectural floor plan blueprint with carpet dimensions, room legends, sky-deck orientation, and structural column grid markings.",
+      "version": "Architect Approved",
+      "createdAt": "2026-10-14T14:45:00.000Z"
     }
   ],
   "reports": [
@@ -2515,6 +2600,50 @@
   ],
   "auditLogs": [
     {
+      "id": "aud_o1wol3j",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "DELETE",
+      "entity": "ActiveSession",
+      "entityId": "sess_mozilla_firefox_lpeaw",
+      "details": "Revoked active session on Mozilla Firefox (103.21.124.62 (Fibre Gateway)).",
+      "createdAt": "2026-10-15T05:53:59.831Z"
+    },
+    {
+      "id": "aud_mczmrd2",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "UPDATE",
+      "entity": "UserSecurity",
+      "entityId": "usr_ag_vance_01",
+      "details": "Gmail One-Time Password 2FA was verified and enabled for marcus@vancerealty.com.",
+      "createdAt": "2026-10-14T20:33:45.169Z"
+    },
+    {
+      "id": "aud_xhtlz4z",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "UPDATE",
+      "entity": "UserSecurity",
+      "entityId": "usr_ag_vance_01",
+      "details": "Two-Factor Authentication was disabled",
+      "createdAt": "2026-10-14T19:42:09.696Z"
+    },
+    {
+      "id": "aud_70pi72y",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "UPDATE",
+      "entity": "UserSecurity",
+      "entityId": "usr_ag_vance_01",
+      "details": "Two-Factor Authentication was enabled",
+      "createdAt": "2026-10-14T19:41:59.965Z"
+    },
+    {
       "id": "aud_1",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
@@ -2648,5 +2777,59 @@
       "createdAt": "2026-10-11T08:59:47.320Z"
     }
   ],
-  "sharedLinks": []
+  "sharedLinks": [],
+  "activeSessions": [
+    {
+      "id": "sess_lrg86uo_mv94c1of",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "userEmail": "marcus@vancerealty.com",
+      "browser": "Google Chrome",
+      "browserVersion": "155.0.0.0",
+      "os": "Windows 11 PC",
+      "deviceType": "desktop",
+      "deviceModel": "Windows PC",
+      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
+      "location": "Mumbai, Maharashtra, India",
+      "screen": "1536 × 864",
+      "timezone": "Asia/Calcutta",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "createdAt": "2026-10-15T05:49:06.757Z",
+      "lastActive": "2026-10-15T07:16:41.998Z"
+    },
+    {
+      "id": "sess_secondary_mac_hsjda",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "userEmail": "marcus@vancerealty.com",
+      "browser": "Mozilla Firefox",
+      "browserVersion": "133.0",
+      "os": "macOS Sequoia (MacBook Pro)",
+      "deviceType": "desktop",
+      "deviceModel": "Apple MacBook Pro 16\"",
+      "ipAddress": "103.21.124.62 (Bandra West HQ WiFi)",
+      "location": "Mumbai, Maharashtra, India",
+      "screen": "2560 × 1600",
+      "timezone": "Asia/Kolkata",
+      "createdAt": "2026-10-15T02:49:06.757Z",
+      "lastActive": "2026-10-15T05:35:06.757Z"
+    },
+    {
+      "id": "sess_mobile_ios_648so",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "userEmail": "marcus@vancerealty.com",
+      "browser": "Apple Safari Mobile",
+      "browserVersion": "18.0",
+      "os": "iOS 18 (iPhone 15 Pro)",
+      "deviceType": "mobile",
+      "deviceModel": "Apple iPhone 15 Pro",
+      "ipAddress": "49.37.152.12 (Airtel 5G Network)",
+      "location": "Pune, Maharashtra, India",
+      "screen": "393 × 852",
+      "timezone": "Asia/Kolkata",
+      "createdAt": "2026-10-14T03:49:06.757Z",
+      "lastActive": "2026-10-15T05:01:06.757Z"
+    }
+  ]
 }

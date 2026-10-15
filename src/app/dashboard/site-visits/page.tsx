@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { DEFAULT_SITE_VISIT_STATUSES } from '@/lib/formatters';
+import { getStatusColorStyle } from '@/lib/theme';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
@@ -26,6 +27,7 @@ import {
   FlameIcon,
   SparklesIcon
 } from '@/components/icons/NavIcons';
+import { ShareModal } from '@/components/ui/ShareModal';
 
 interface SiteVisit {
   id: string;
@@ -56,6 +58,7 @@ export default function SiteVisitsPage() {
   const [sortBy, setSortBy] = useState('date_asc');
   const [showModal, setShowModal] = useState(false);
   const [editingVisit, setEditingVisit] = useState<SiteVisit | null>(null);
+  const [sharingVisit, setSharingVisit] = useState<SiteVisit | null>(null);
   const [deletingVisit, setDeletingVisit] = useState<SiteVisit | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,6 +73,9 @@ export default function SiteVisitsPage() {
   const [propertiesList, setPropertiesList] = useState<{title: string; purpose?: string; listingType?: string; locality?: string; bhk?: string; price?: number}[]>([]);
   const [siteVisitStatuses, setSiteVisitStatuses] = useState<string[]>(DEFAULT_SITE_VISIT_STATUSES);
 
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [calendarDate, setCalendarDate] = useState(() => new Date());
+
   const [formData, setFormData] = useState({ 
     client: '', 
     clientPhone: '', 
@@ -77,10 +83,10 @@ export default function SiteVisitsPage() {
     properties: [] as string[], 
     date: '', 
     timeSlot: '', 
-    purpose: 'Buy' as 'Buy' | 'Rent', 
+    purpose: '' as 'Buy' | 'Rent' | '', 
     notes: '', 
-    status: 'Scheduled', 
-    priority: 'High Priority' 
+    status: '', 
+    priority: '' 
   });
 
   const getVisitPurpose = (visit: SiteVisit): 'Buy' | 'Rent' => {
@@ -106,11 +112,14 @@ export default function SiteVisitsPage() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showModal) setShowModal(false);
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (sharingVisit) setSharingVisit(null);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showModal]);
+  }, [showModal, sharingVisit]);
 
   useEffect(() => {
     // Check localStorage agency configs for instant sync
@@ -163,68 +172,167 @@ export default function SiteVisitsPage() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const buyCount = data.filter(v => getVisitPurpose(v) === 'Buy').length;
-  const rentCount = data.filter(v => getVisitPurpose(v) === 'Rent').length;
+  const matchesVisitPurpose = useCallback((v: SiteVisit, targetPurpose: 'All' | 'Buy' | 'Rent') => {
+    if (targetPurpose === 'All') return true;
+    return getVisitPurpose(v) === targetPurpose;
+  }, [getVisitPurpose]);
 
-  const filteredData = data.filter(v => {
-    if (purposeFilter !== 'All' && getVisitPurpose(v) !== purposeFilter) return false;
-    if (filter === 'Upcoming') {
-      if (v.date < today || v.status === 'Cancelled') return false;
-    } else if (filter === 'Past') {
-      if (v.date >= today) return false;
-    } else if (filter === 'Cancelled') {
-      if (v.status !== 'Cancelled') return false;
-    }
-    if (statusFilter !== 'All' && v.status !== statusFilter) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return (
-        v.client?.toLowerCase().includes(q) ||
-        v.clientPhone?.toLowerCase().includes(q) ||
-        v.property?.toLowerCase().includes(q) ||
-        (Array.isArray(v.properties) && v.properties.some(p => p.toLowerCase().includes(q))) ||
-        v.notes?.toLowerCase().includes(q)
-      );
-    }
+  const matchesVisitSchedule = useCallback((v: SiteVisit, targetSchedule: string, todayDate: string) => {
+    if (targetSchedule === 'All Dates' || targetSchedule === 'All') return true;
+    if (targetSchedule === 'Upcoming') return v.date >= todayDate && v.status !== 'Cancelled';
+    if (targetSchedule === 'Past') return v.date < todayDate;
+    if (targetSchedule === 'Cancelled') return v.status === 'Cancelled';
     return true;
-  }).sort((a, b) => {
-    if (sortBy === 'date_desc') {
-      if (a.date !== b.date) return b.date.localeCompare(a.date);
-      return (b.timeSlot || '').localeCompare(a.timeSlot || '');
-    } else if (sortBy === 'client_asc') {
-      return (a.client || '').localeCompare(b.client || '');
-    } else if (sortBy === 'client_desc') {
-      return (b.client || '').localeCompare(a.client || '');
-    } else if (sortBy === 'priority_desc') {
-      const pOrder: Record<string, number> = { 'High Priority': 3, 'Medium Priority': 2, 'Standard': 1, 'Low Priority': 0 };
-      const pa = pOrder[a.priority || ''] ?? 1;
-      const pb = pOrder[b.priority || ''] ?? 1;
-      if (pa !== pb) return pb - pa;
-      return a.date.localeCompare(b.date);
-    } else if (sortBy === 'status') {
-      return (a.status || '').localeCompare(b.status || '');
+  }, []);
+
+  const matchesVisitStatus = useCallback((v: SiteVisit, targetStatus: string) => {
+    if (targetStatus === 'All') return true;
+    return v.status === targetStatus;
+  }, []);
+
+  const matchesVisitSearch = useCallback((v: SiteVisit, q: string) => {
+    if (!q) return true;
+    return (
+      v.client?.toLowerCase().includes(q) ||
+      v.clientPhone?.toLowerCase().includes(q) ||
+      v.property?.toLowerCase().includes(q) ||
+      (Array.isArray(v.properties) && v.properties.some(p => p.toLowerCase().includes(q))) ||
+      v.notes?.toLowerCase().includes(q)
+    );
+  }, []);
+
+  // Faceted Purpose Counts (Context-aware based on current Schedule, Status, and Search)
+  const purposeCounts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const dataForPurpose = data.filter(v => {
+      if (!matchesVisitSchedule(v, filter, today)) return false;
+      if (!matchesVisitStatus(v, statusFilter)) return false;
+      if (!matchesVisitSearch(v, q)) return false;
+      return true;
+    });
+
+    let buy = 0;
+    let rent = 0;
+    for (const v of dataForPurpose) {
+      if (getVisitPurpose(v) === 'Rent') rent++;
+      else buy++;
     }
-    // Default: date_asc
-    if (a.date !== b.date) return a.date.localeCompare(b.date);
-    return (a.timeSlot || '').localeCompare(b.timeSlot || '');
-  });
+    return { all: dataForPurpose.length, buy, rent };
+  }, [data, filter, statusFilter, searchQuery, today, matchesVisitSchedule, matchesVisitStatus, matchesVisitSearch, getVisitPurpose]);
+
+  // Faceted Schedule Counts (Context-aware based on current Purpose, Status, and Search)
+  const scheduleCounts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const dataForSchedule = data.filter(v => {
+      if (!matchesVisitPurpose(v, purposeFilter)) return false;
+      if (!matchesVisitStatus(v, statusFilter)) return false;
+      if (!matchesVisitSearch(v, q)) return false;
+      return true;
+    });
+
+    return {
+      all: dataForSchedule.length,
+      upcoming: dataForSchedule.filter(v => v.date >= today && v.status !== 'Cancelled').length,
+      past: dataForSchedule.filter(v => v.date < today).length,
+      cancelled: dataForSchedule.filter(v => v.status === 'Cancelled').length
+    };
+  }, [data, purposeFilter, statusFilter, searchQuery, today, matchesVisitPurpose, matchesVisitStatus, matchesVisitSearch]);
+
+  // Faceted Status Counts (Context-aware based on current Purpose, Schedule, and Search)
+  const statusCounts = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const dataForStatus = data.filter(v => {
+      if (!matchesVisitPurpose(v, purposeFilter)) return false;
+      if (!matchesVisitSchedule(v, filter, today)) return false;
+      if (!matchesVisitSearch(v, q)) return false;
+      return true;
+    });
+
+    const counts: Record<string, number> = {
+      all: dataForStatus.length
+    };
+    siteVisitStatuses.forEach(s => {
+      counts[s] = dataForStatus.filter(v => v.status === s).length;
+    });
+    return counts;
+  }, [data, purposeFilter, filter, searchQuery, today, siteVisitStatuses, matchesVisitPurpose, matchesVisitSchedule, matchesVisitSearch]);
+
+  const filteredData = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return data.filter(v => {
+      if (!matchesVisitPurpose(v, purposeFilter)) return false;
+      if (!matchesVisitSchedule(v, filter, today)) return false;
+      if (!matchesVisitStatus(v, statusFilter)) return false;
+      if (!matchesVisitSearch(v, q)) return false;
+      return true;
+    }).sort((a, b) => {
+      if (sortBy === 'date_desc') {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return (b.timeSlot || '').localeCompare(a.timeSlot || '');
+      } else if (sortBy === 'client_asc') {
+        return (a.client || '').localeCompare(b.client || '');
+      } else if (sortBy === 'client_desc') {
+        return (b.client || '').localeCompare(a.client || '');
+      } else if (sortBy === 'priority_desc') {
+        const pOrder: Record<string, number> = { 'High Priority': 3, 'Medium Priority': 2, 'Standard': 1, 'Low Priority': 0 };
+        const pa = pOrder[a.priority || ''] ?? 1;
+        const pb = pOrder[b.priority || ''] ?? 1;
+        if (pa !== pb) return pb - pa;
+        return a.date.localeCompare(b.date);
+      } else if (sortBy === 'status') {
+        return (a.status || '').localeCompare(b.status || '');
+      }
+      // Default: date_asc
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return (a.timeSlot || '').localeCompare(b.timeSlot || '');
+    });
+  }, [data, purposeFilter, filter, statusFilter, searchQuery, today, matchesVisitPurpose, matchesVisitSchedule, matchesVisitStatus, matchesVisitSearch, sortBy]);
 
   const getStatusBadge = (s: string) => {
-    const map: Record<string, { bg: string; color: string; dot: string }> = {
-      'Scheduled': { bg: '#dbeafe', color: '#1e40af', dot: '#3b82f6' },
-      'Completed': { bg: '#d1fae5', color: '#065f46', dot: '#10b981' },
-      'Cancelled': { bg: '#fee2e2', color: '#991b1b', dot: '#ef4444' },
-      'No Show': { bg: '#ffedd5', color: '#9a3412', dot: '#f97316' },
-      'Confirmed': { bg: '#d1fae5', color: '#065f46', dot: '#10b981' },
-    };
-    const style = map[s] || { bg: '#f1f5f9', color: '#475569', dot: '#94a3b8' };
+    const sc = getStatusColorStyle(s);
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, backgroundColor: style.bg, padding: '4px 10px', borderRadius: 20 }}>
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: style.dot }} />
-        <span style={{ color: style.color, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{s}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, backgroundColor: sc.bg, border: `1px solid ${sc.border}`, padding: '3px 10px', borderRadius: 20 }}>
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.dot }} />
+        <span style={{ color: sc.text, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{s}</span>
       </div>
     );
   };
+
+  const calendarDays = useMemo(() => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay(); // 0 = Sun
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const prevMonthTotalDays = new Date(year, month, 0).getDate();
+
+    const days: { dayNum: number; dateStr: string; isCurrentMonth: boolean }[] = [];
+
+    // Prev month padding
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      const dayNum = prevMonthTotalDays - i;
+      const prevMonth = month === 0 ? 11 : month - 1;
+      const prevYear = month === 0 ? year - 1 : year;
+      const dateStr = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+      days.push({ dayNum, dateStr, isCurrentMonth: false });
+    }
+
+    // Current month days
+    for (let d = 1; d <= totalDays; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      days.push({ dayNum: d, dateStr, isCurrentMonth: true });
+    }
+
+    // Next month padding to fill out 35 or 42 grid cells
+    const remaining = (7 - (days.length % 7)) % 7;
+    for (let j = 1; j <= remaining; j++) {
+      const nextMonth = month === 11 ? 0 : month + 1;
+      const nextYear = month === 11 ? year + 1 : year;
+      const dateStr = `${nextYear}-${String(nextMonth + 1).padStart(2, '0')}-${String(j).padStart(2, '0')}`;
+      days.push({ dayNum: j, dateStr, isCurrentMonth: false });
+    }
+
+    return days;
+  }, [calendarDate]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -257,6 +365,16 @@ export default function SiteVisitsPage() {
     groupedData[v.date].push(v);
   });
 
+  const nextMonth = () => {
+    setCalendarDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+  const prevMonth = () => {
+    setCalendarDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+  const goToToday = () => {
+    setCalendarDate(new Date());
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 12 }}>
@@ -267,19 +385,19 @@ export default function SiteVisitsPage() {
     );
   }
 
-  const handleOpenAdd = () => {
+  const handleOpenAdd = (defaultDate?: string) => {
     setEditingVisit(null);
     setFormData({ 
       client: '', 
       clientPhone: '', 
       property: '', 
       properties: [], 
-      date: today, 
-      timeSlot: '11:30 AM - 12:30 PM', 
-      purpose: 'Buy', 
+      date: defaultDate || today, 
+      timeSlot: '', 
+      purpose: '' as any, 
       notes: '', 
-      status: 'Scheduled', 
-      priority: 'High Priority' 
+      status: '', 
+      priority: '' 
     });
     setShowModal(true);
   };
@@ -298,8 +416,8 @@ export default function SiteVisitsPage() {
       date: visit.date || '',
       timeSlot: visit.timeSlot || '',
       purpose: getVisitPurpose(visit),
-      status: visit.status || 'Scheduled',
-      priority: visit.priority || (visit as any).urgency || 'High Priority',
+      status: visit.status || '',
+      priority: visit.priority || (visit as any).urgency || '',
       notes: visit.notes || ''
     });
     setShowModal(true);
@@ -342,6 +460,10 @@ export default function SiteVisitsPage() {
       showToast('error', 'Please select at least one property to visit.', 'Property Required');
       return;
     }
+    if (!formData.status) {
+      showToast('error', 'Please select a visit status.', 'Status Required');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -351,6 +473,7 @@ export default function SiteVisitsPage() {
       const payload = {
         ...(editingVisit ? { id: editingVisit.id } : {}),
         ...formData,
+        purpose: formData.purpose || 'Buy',
         property: primaryProperty,
         properties: finalProperties
       };
@@ -374,10 +497,10 @@ export default function SiteVisitsPage() {
           properties: [], 
           date: '', 
           timeSlot: '', 
-          purpose: 'Buy', 
+          purpose: '' as any, 
           notes: '', 
-          status: 'Scheduled', 
-          priority: 'High Priority' 
+          status: '', 
+          priority: '' 
         });
         showToast('success', editingVisit ? `Site visit updated for "${formData.client}"!` : `Site visit booked for "${formData.client}"!`, editingVisit ? 'Visit Updated' : 'Visit Booked');
         fetch('/api/site-visits').then(r => r.json()).then(j => { if (j.siteVisits) setData(j.siteVisits); });
@@ -419,6 +542,7 @@ export default function SiteVisitsPage() {
                     onChange={e => setFormData({...formData, status: e.target.value})}
                     style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
+                    <option value="">Select Visit Status...</option>
                     {siteVisitStatuses.map(st => (
                       <option key={st} value={st}>{st}</option>
                     ))}
@@ -431,10 +555,11 @@ export default function SiteVisitsPage() {
                     <InfoTooltip text="Priority level of this tour based on buyer readiness, property exclusivity, and deal velocity." />
                   </label>
                   <select 
-                    value={formData.priority || 'High Priority'} 
+                    value={formData.priority} 
                     onChange={e => setFormData({...formData, priority: e.target.value})}
                     style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
+                    <option value="">Select Priority / Urgency...</option>
                     <option value="High Priority">High Priority (Decision Maker / Ready to Close)</option>
                     <option value="Medium Priority">Medium Priority (Qualified Buyer)</option>
                     <option value="Standard">Standard Priority (First Screening)</option>
@@ -506,6 +631,7 @@ export default function SiteVisitsPage() {
                     onChange={e => setFormData({...formData, purpose: e.target.value as any})}
                     style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
                   >
+                    <option value="">Select Showing Type (Buy / Rent)...</option>
                     <option value="Buy">Buy / Sale Showing</option>
                     <option value="Rent">Rent / Lease Showing</option>
                   </select>
@@ -567,23 +693,92 @@ export default function SiteVisitsPage() {
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center' }}>
             Site Visits <InfoTooltip text="Schedule and track client property showings. Syncs automatically with your leads pipeline." />
           </h1>
-          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
-            Schedule and manage your property showings.
+          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span>{data.length} visits total</span>
+            <span>•</span>
+            <span style={{ fontWeight: 700, color: '#0f172a' }}>{filteredData.length} shown</span>
+            {(purposeFilter !== 'All' || filter !== 'All Dates' || statusFilter !== 'All' || searchQuery) && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                  Filtered: {[
+                    purposeFilter !== 'All' ? (purposeFilter === 'Buy' ? 'Buy Visits' : 'Rent Visits') : null,
+                    filter !== 'All Dates' ? filter : null,
+                    statusFilter !== 'All' ? statusFilter : null,
+                    searchQuery ? `"${searchQuery}"` : null
+                  ].filter(Boolean).join(' + ')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setPurposeFilter('All'); setFilter('All Dates'); setStatusFilter('All'); setSearchQuery(''); }}
+                  style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                >
+                  Clear filters
+                </button>
+              </span>
+            )}
           </p>
         </div>
-        <button 
-          onClick={handleOpenAdd}
-          style={{
-            backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
-            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
-            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
-        >
-          <PlusIcon size={16} color="#fff" strokeWidth={2.5} />
-          <span>Book Visit</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {/* View Mode Switcher: List View vs Calendar View */}
+          <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '10px', gap: '3px' }}>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '12.5px',
+                fontWeight: viewMode === 'list' ? 700 : 500,
+                backgroundColor: viewMode === 'list' ? 'var(--primary)' : 'transparent',
+                color: viewMode === 'list' ? '#ffffff' : '#64748b',
+                boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <ListIcon size={14} color={viewMode === 'list' ? '#ffffff' : '#64748b'} />
+              <span>List View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('calendar')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '12.5px',
+                fontWeight: viewMode === 'calendar' ? 700 : 500,
+                backgroundColor: viewMode === 'calendar' ? 'var(--primary)' : 'transparent',
+                color: viewMode === 'calendar' ? '#ffffff' : '#64748b',
+                boxShadow: viewMode === 'calendar' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <CalendarIcon size={14} color={viewMode === 'calendar' ? '#ffffff' : '#64748b'} />
+              <span>Calendar View</span>
+            </button>
+          </div>
+
+          <button 
+            onClick={() => handleOpenAdd()}
+            style={{
+              backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
+              fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
+              boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
+          >
+            <PlusIcon size={16} color="#fff" strokeWidth={2.5} />
+            <span>Book Visit</span>
+          </button>
+        </div>
       </div>
 
       {/* Unified Compact Filter Bar Card */}
@@ -594,9 +789,9 @@ export default function SiteVisitsPage() {
             variant="segmented"
             size="sm"
             tabs={[
-              { id: 'All', label: 'All Showings', count: data.length, icon: <ListIcon size={13} /> },
-              { id: 'Buy', label: 'Buy Visits', count: buyCount, icon: <HomeIcon size={13} /> },
-              { id: 'Rent', label: 'Rent Visits', count: rentCount, icon: <KeyIcon size={13} /> }
+              { id: 'All', label: 'All Showings', count: purposeCounts.all, icon: <ListIcon size={13} /> },
+              { id: 'Buy', label: 'Buy Visits', count: purposeCounts.buy, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'Rent Visits', count: purposeCounts.rent, icon: <KeyIcon size={13} /> }
             ]}
             activeTab={purposeFilter}
             onChange={(tabId) => setPurposeFilter(tabId as any)}
@@ -631,11 +826,12 @@ export default function SiteVisitsPage() {
             <FilterTabs
               label="Schedule:"
               size="sm"
-              tabs={['Upcoming', 'Past', 'Cancelled', 'All Dates'].map(f => ({
-                id: f,
-                label: f,
-                count: f === 'All Dates' ? data.length : (f === 'Upcoming' ? data.filter(v => v.date >= today && v.status !== 'Cancelled').length : (f === 'Past' ? data.filter(v => v.date < today).length : data.filter(v => v.status === 'Cancelled').length))
-              }))}
+              tabs={[
+                { id: 'Upcoming', label: 'Upcoming', count: scheduleCounts.upcoming },
+                { id: 'Past', label: 'Past', count: scheduleCounts.past },
+                { id: 'Cancelled', label: 'Cancelled', count: scheduleCounts.cancelled },
+                { id: 'All Dates', label: 'All Dates', count: scheduleCounts.all }
+              ]}
               activeTab={filter}
               onChange={(tabId) => setFilter(tabId as any)}
             />
@@ -646,11 +842,11 @@ export default function SiteVisitsPage() {
               label="Status:"
               size="sm"
               tabs={[
-                { id: 'All', label: 'All Statuses', count: data.length },
+                { id: 'All', label: 'All Statuses', count: statusCounts.all },
                 ...siteVisitStatuses.map(s => ({
                   id: s,
                   label: s,
-                  count: data.filter(v => v.status === s).length
+                  count: statusCounts[s] ?? 0
                 }))
               ]}
               activeTab={statusFilter}
@@ -660,7 +856,172 @@ export default function SiteVisitsPage() {
         </div>
       </div>
 
-      {/* Timeline View */}
+      {/* Main Content Area: Calendar View OR Timeline View */}
+      {viewMode === 'calendar' ? (
+        <div style={{ backgroundColor: '#ffffff', borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+          {/* Calendar Toolbar */}
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, backgroundColor: '#f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                {calendarDate.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}
+              </h2>
+              <span style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 20, backgroundColor: 'rgba(5, 150, 105, 0.1)', color: 'var(--primary)', border: '1px solid rgba(5, 150, 105, 0.2)' }}>
+                {filteredData.filter(v => v.date.startsWith(`${calendarDate.getFullYear()}-${String(calendarDate.getMonth() + 1).padStart(2, '0')}`)).length} Visits This Month
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                type="button"
+                onClick={prevMonth}
+                style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: 8, backgroundColor: '#ffffff', color: '#334155', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
+              >
+                ◀ Prev
+              </button>
+              <button
+                type="button"
+                onClick={goToToday}
+                style={{ padding: '6px 14px', border: '1px solid #cbd5e1', borderRadius: 8, backgroundColor: '#ffffff', color: '#0f172a', fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={nextMonth}
+                style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: 8, backgroundColor: '#ffffff', color: '#334155', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
+              >
+                Next ▶
+              </button>
+            </div>
+          </div>
+
+          {/* Weekday Header */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', backgroundColor: '#f1f5f9', borderBottom: '1px solid var(--border)' }}>
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+              <div key={day} style={{ padding: '10px 8px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: idx === 0 || idx === 6 ? '#dc2626' : '#475569', letterSpacing: '0.05em' }}>
+                {day.toUpperCase()}
+              </div>
+            ))}
+          </div>
+
+          {/* Days Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', backgroundColor: 'var(--border)', gap: '1px' }}>
+            {calendarDays.map((day) => {
+              const dayVisits = groupedData[day.dateStr] || [];
+              const isToday = day.dateStr === today;
+
+              return (
+                <div
+                  key={day.dateStr}
+                  style={{
+                    backgroundColor: day.isCurrentMonth ? '#ffffff' : '#f8fafc',
+                    minHeight: 125,
+                    padding: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 6,
+                    position: 'relative',
+                    transition: 'background-color 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: isToday ? 800 : (day.isCurrentMonth ? 700 : 500),
+                        color: isToday ? '#ffffff' : (day.isCurrentMonth ? '#0f172a' : '#94a3b8'),
+                        backgroundColor: isToday ? 'var(--primary)' : 'transparent',
+                        width: isToday ? 24 : 'auto',
+                        height: isToday ? 24 : 'auto',
+                        borderRadius: isToday ? '50%' : 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {day.dayNum}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAdd(day.dateStr)}
+                      title={`Book visit on ${day.dateStr}`}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        padding: '2px 4px',
+                        fontSize: 14,
+                        lineHeight: 1,
+                        borderRadius: 4
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Visits Chips */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, overflowY: 'auto', maxHeight: 110 }}>
+                    {dayVisits.map((v) => {
+                      const sc = getStatusColorStyle(v.status);
+                      const isRent = getVisitPurpose(v) === 'Rent';
+
+                      return (
+                        <div
+                          key={v.id}
+                          onClick={() => handleOpenEdit(v)}
+                          title={`${v.timeSlot || 'Visit'}: ${v.client} - ${v.property} (${v.status})`}
+                          style={{
+                            padding: '4px 6px',
+                            borderRadius: 6,
+                            backgroundColor: sc.bg,
+                            border: `1px solid ${sc.border}`,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 2,
+                            fontSize: 11,
+                            transition: 'all 0.12s ease',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.transform = 'none'; }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
+                            <span style={{ fontWeight: 800, color: sc.text, fontSize: 10.5 }}>
+                              {v.timeSlot || 'Anytime'}
+                            </span>
+                            <span style={{
+                              fontSize: 9.5,
+                              fontWeight: 700,
+                              padding: '1px 4px',
+                              borderRadius: 4,
+                              backgroundColor: isRent ? '#f3e8ff' : '#eff6ff',
+                              color: isRent ? '#7e22ce' : '#1d4ed8'
+                            }}>
+                              {isRent ? 'Rent' : 'Buy'}
+                            </span>
+                          </div>
+                          <div style={{ fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {v.client}
+                          </div>
+                          <div style={{ color: '#475569', fontSize: 10, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {v.property}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+      /* Timeline View */
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         {Object.keys(groupedData).length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', color: '#94a3b8', backgroundColor: '#f8fafc', borderRadius: 16, border: '1px dashed var(--border)' }}>
@@ -815,29 +1176,31 @@ export default function SiteVisitsPage() {
                       </div>
                     )}
                     
-                    {visit.clientPhone && (
                       <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <PhoneIcon size={12} color="#64748b" />
-                          <span>{visit.clientPhone}</span>
+                          {visit.clientPhone ? (
+                            <>
+                              <PhoneIcon size={12} color="#64748b" />
+                              <span>{visit.clientPhone}</span>
+                            </>
+                          ) : (
+                            <span style={{ color: '#94a3b8' }}>Client: {visit.client}</span>
+                          )}
                         </span>
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            const tourText = visit.properties && visit.properties.length > 1
-                              ? `your upcoming showing tour on ${formatDate(visit.date)} (${visit.timeSlot || 'Scheduled Time'}):\n` + visit.properties.map((p, i) => `Stop ${i + 1}: ${p}`).join('\n') + `\n\nPlease let me know if you need any directions or gate passes!`
-                              : `your upcoming site visit for ${visit.property} on ${formatDate(visit.date)} (${visit.timeSlot || 'Scheduled Time'}). Please let me know if you need location directions!`;
-                            openWa(visit.clientPhone, `Hi ${visit.client}, this is regarding ${tourText}`);
+                            setSharingVisit(visit);
                           }}
                           style={{ backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'opacity 0.15s ease' }}
                           onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
                           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                          title="Share Site Visit Schedule with Client or Anyone"
                         >
                           <WhatsAppIcon size={14} color="#fff" />
-                          <span>WhatsApp Client</span>
+                          <span>Share / WhatsApp</span>
                         </button>
                       </div>
-                    )}
                   </div>
                 );
               })}
@@ -846,7 +1209,37 @@ export default function SiteVisitsPage() {
           ))
         )}
       </div>
+      )}
     </div>
+
+      {/* Universal Share Modal */}
+      {sharingVisit && (() => {
+        const v = sharingVisit;
+        const tourText = v.properties && v.properties.length > 1
+          ? `showing tour on ${formatDate(v.date)} (${v.timeSlot || 'Scheduled Time'}):\n` + v.properties.map((p, i) => `Stop ${i + 1}: ${p}`).join('\n') + `\n\nPlease let me know if you need any directions or gate passes!`
+          : `site visit for ${v.property} on ${formatDate(v.date)} (${v.timeSlot || 'Scheduled Time'}). Please let me know if you need location directions!`;
+
+        const defaultMsg = `Hi ${v.client},\n\nGreetings from AgentLadders! This is regarding your upcoming ${tourText}`;
+
+        return (
+          <ShareModal
+            isOpen={!!sharingVisit}
+            onClose={() => setSharingVisit(null)}
+            shareItem={{
+              id: v.id,
+              type: 'site-visit',
+              title: `Site Visit • ${v.client}`,
+              subtitle: `${v.property || 'Property Showing'} • ${formatDate(v.date)} (${v.timeSlot || 'Scheduled'})`,
+              description: v.notes || undefined,
+              badge: v.status || 'Scheduled',
+              link: typeof window !== 'undefined' ? `${window.location.origin}/dashboard/site-visits` : '',
+              recipientName: v.client,
+              recipientPhone: v.clientPhone,
+              defaultMessage: defaultMsg
+            }}
+          />
+        );
+      })()}
 
       {/* Delete Confirmation Modal */}
       {deletingVisit && (

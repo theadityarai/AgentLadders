@@ -21,6 +21,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
 import { Pagination } from '@/components/ui/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { getStatusColorStyle } from '@/lib/theme';
 import { 
   EditIcon, 
   TrashIcon, 
@@ -40,6 +41,7 @@ import {
   MapPinIcon,
   UserIcon 
 } from '@/components/icons/NavIcons';
+import { ShareModal } from '@/components/ui/ShareModal';
 
 interface Lead {
   id: string;
@@ -176,6 +178,7 @@ export default function LeadsPage() {
   // Modal State
   const [showModal, setShowModal] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [sharingLead, setSharingLead] = useState<Lead | null>(null);
   const [deletingLead, setDeletingLead] = useState<Lead | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -188,23 +191,26 @@ export default function LeadsPage() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && showModal) setShowModal(false);
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (sharingLead) setSharingLead(null);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showModal]);
+  }, [showModal, sharingLead]);
 
-  // Form State
+  // Form State - Nothing pre-selected by default
   const [formData, setFormData] = useState({
     name: '', phone: '', email: '',
-    leadPurpose: 'Buy', propertyTypeNeeded: 'Apartment',
-    bhkNeeded: '2 BHK', budgetMax: '', city: 'Mumbai',
-    preferredLocalities: '', urgency: 'Within 1 Month', status: 'New Inbound',
-    source: 'Website Inbound',
-    furnishingPreference: 'Any',
-    constructionStagePreference: 'Any',
-    vastuPreference: 'Any',
-    parkingPreference: 'Any',
+    leadPurpose: '', propertyTypeNeeded: '',
+    bhkNeeded: '', budgetMax: '', city: '',
+    preferredLocalities: '', urgency: '', status: '',
+    source: '',
+    furnishingPreference: '',
+    constructionStagePreference: '',
+    vastuPreference: '',
+    parkingPreference: '',
     inquiredProperty: '',
     properties: [] as string[],
     notes: ''
@@ -311,14 +317,14 @@ export default function LeadsPage() {
     setEditingLead(null);
     setFormData({
       name: '', phone: '', email: '',
-      leadPurpose: 'Buy', propertyTypeNeeded: 'Apartment',
-      bhkNeeded: '2 BHK', budgetMax: '', city: 'Mumbai',
-      preferredLocalities: '', urgency: 'Within 1 Month', status: 'New Inbound',
-      source: leadSources[0] || 'Direct',
-      furnishingPreference: 'Any',
-      constructionStagePreference: 'Any',
-      vastuPreference: 'Any',
-      parkingPreference: 'Any',
+      leadPurpose: '', propertyTypeNeeded: '',
+      bhkNeeded: '', budgetMax: '', city: '',
+      preferredLocalities: '', urgency: '', status: '',
+      source: '',
+      furnishingPreference: '',
+      constructionStagePreference: '',
+      vastuPreference: '',
+      parkingPreference: '',
       inquiredProperty: '',
       properties: [],
       notes: ''
@@ -432,31 +438,70 @@ export default function LeadsPage() {
     }
   };
 
-  const { buyCount, rentCount } = useMemo(() => {
+  const matchesLeadStatus = useCallback((l: Lead, targetStatus: string) => {
+    if (targetStatus === 'All') return true;
+    if (targetStatus === 'Active') return !['Won', 'Lost', 'Dead'].includes(l.status);
+    return l.status === targetStatus;
+  }, []);
+
+  const matchesLeadPurpose = useCallback((l: Lead, targetPurpose: 'All' | 'Buy' | 'Rent') => {
+    if (targetPurpose === 'All') return true;
+    const isRent = isLeadRent(l);
+    if (targetPurpose === 'Rent') return isRent;
+    if (targetPurpose === 'Buy') return !isRent;
+    return true;
+  }, [isLeadRent]);
+
+  const matchesLeadSource = useCallback((l: Lead, targetSource: string) => {
+    if (targetSource === 'All') return true;
+    return (l.source || 'Direct Inbound') === targetSource;
+  }, []);
+
+  // Faceted Purpose Counts (Context-aware based on current Status filter, Source filter, and Search)
+  const purposeCounts = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    const dataForPurpose = data.filter(l => {
+      if (!matchesLeadStatus(l, filter)) return false;
+      if (!matchesLeadSource(l, sourceFilter)) return false;
+      if (q && !(l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q)) || (l.notes && l.notes.toLowerCase().includes(q)))) return false;
+      return true;
+    });
+
     let buy = 0;
     let rent = 0;
-    for (const l of data) {
+    for (const l of dataForPurpose) {
       if (isLeadRent(l)) rent++;
       else buy++;
     }
-    return { buyCount: buy, rentCount: rent };
-  }, [data, isLeadRent]);
+    return { all: dataForPurpose.length, buy, rent };
+  }, [data, filter, sourceFilter, search, matchesLeadStatus, matchesLeadSource, isLeadRent]);
+
+  // Faceted Status Counts (Context-aware based on current Purpose filter, Source filter, and Search)
+  const statusCounts = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    const dataForStatus = data.filter(l => {
+      if (!matchesLeadPurpose(l, purposeFilter)) return false;
+      if (!matchesLeadSource(l, sourceFilter)) return false;
+      if (q && !(l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q)) || (l.notes && l.notes.toLowerCase().includes(q)))) return false;
+      return true;
+    });
+
+    const counts: Record<string, number> = {
+      all: dataForStatus.length,
+      active: dataForStatus.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length
+    };
+    leadStatuses.forEach(st => {
+      counts[st] = dataForStatus.filter(l => l.status === st).length;
+    });
+    return counts;
+  }, [data, purposeFilter, sourceFilter, search, leadStatuses, matchesLeadPurpose, matchesLeadSource]);
 
   const filteredData = useMemo(() => {
     const q = search.toLowerCase().trim();
     const matches = data.filter(l => {
-      if (purposeFilter !== 'All') {
-        const isRent = isLeadRent(l);
-        if (purposeFilter === 'Rent' && !isRent) return false;
-        if (purposeFilter === 'Buy' && isRent) return false;
-      }
-      if (filter !== 'All') {
-        if (filter === 'Active' && ['Won', 'Lost', 'Dead'].includes(l.status)) return false;
-        if (filter !== 'Active' && l.status !== filter) return false;
-      }
-      if (sourceFilter !== 'All' && (l.source || 'Direct Inbound') !== sourceFilter) {
-        return false;
-      }
+      if (!matchesLeadPurpose(l, purposeFilter)) return false;
+      if (!matchesLeadStatus(l, filter)) return false;
+      if (!matchesLeadSource(l, sourceFilter)) return false;
       if (q) {
         return l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.city?.toLowerCase().includes(q) || (l.source && l.source.toLowerCase().includes(q)) || (l.notes && l.notes.toLowerCase().includes(q));
       }
@@ -528,18 +573,20 @@ export default function LeadsPage() {
             }}>
               {lead.name ? lead.name.charAt(0).toUpperCase() : 'I'}
             </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span>{lead.name}</span>
-                {getStatusBadge(lead.status)}
-                {getSourceBadge(lead.source)}
-              </div>
-              <div style={{ fontSize: 11.5, color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
-                <span>Inquiry ID: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{lead.id.substring(0, 16)}</span></span>
-                {lead.createdAt && (
-                  <span>• Received: {new Date(lead.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                )}
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a' }}>{lead.name}</span>
+              <span style={{ color: '#94a3b8', fontSize: 12 }}>•</span>
+              <span style={{ fontSize: 12, color: '#64748b' }}>
+                Inquiry ID: <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#334155' }}>{lead.id.substring(0, 16)}</span>
+              </span>
+              {lead.createdAt && (
+                <>
+                  <span style={{ color: '#94a3b8', fontSize: 12 }}>•</span>
+                  <span style={{ fontSize: 12, color: '#64748b' }}>
+                    Received: {new Date(lead.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
@@ -604,24 +651,53 @@ export default function LeadsPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
                 <div>
                   <div style={{ fontSize: 11, color: '#94a3b8' }}>Phone Number</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
-                    <span style={{ fontWeight: 600, color: '#0f172a' }}>{lead.phone}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700, color: '#0f172a', fontSize: 13.5 }}>{lead.phone}</span>
                     <a 
                       href={`tel:${lead.phone}`}
-                      style={{ fontSize: 11.5, color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 11.5,
+                        color: 'var(--primary)',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        padding: '2px 8px',
+                        borderRadius: 6,
+                        backgroundColor: '#ecfdf5',
+                        border: '1px solid #a7f3d0',
+                        transition: 'all 0.15s ease'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d1fae5'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ecfdf5'}
                     >
-                      Call
+                      <PhoneIcon size={12} color="currentColor" />
+                      <span>Call</span>
                     </a>
-                    <span style={{ color: '#cbd5e1' }}>•</span>
                     <button
                       type="button"
-                      onClick={() => {
-                        const phone = lead.phone.replace(/\D/g, '');
-                        window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
+                      onClick={() => setSharingLead(lead)}
+                      title="Share with Client or Anyone"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 11.5,
+                        color: '#15803d',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        padding: '2px 8px',
+                        borderRadius: 6,
+                        backgroundColor: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        transition: 'all 0.15s ease'
                       }}
-                      style={{ background: 'none', border: 'none', padding: 0, fontSize: 11.5, color: '#16a34a', fontWeight: 600, cursor: 'pointer' }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#dcfce7'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#f0fdf4'}
                     >
-                      WhatsApp
+                      <WhatsAppIcon size={12} color="currentColor" />
+                      <span>WhatsApp</span>
                     </button>
                   </div>
                 </div>
@@ -633,17 +709,6 @@ export default function LeadsPage() {
                         {lead.email}
                       </a>
                     ) : 'Not provided'}
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 11, color: '#94a3b8' }}>Source & Channel</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 600, color: '#334155' }}>{lead.source || 'Direct Inbound'}</span>
-                    {lead.isSelfCreated && (
-                      <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 4, backgroundColor: '#fdf4ff', color: '#c026d3', border: '1px solid #f0abfc' }}>
-                        Self-Interest
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -826,6 +891,7 @@ export default function LeadsPage() {
                     onChange={e => setFormData({...formData, status: e.target.value})}
                     style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
+                    <option value="">Select Inquiry Status</option>
                     {leadStatuses.map(st => (
                       <option key={st} value={st}>{st}</option>
                     ))}
@@ -842,6 +908,7 @@ export default function LeadsPage() {
                     onChange={e => setFormData({...formData, urgency: e.target.value})}
                     style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                   >
+                    <option value="">Select Priority / Urgency</option>
                     <option value="Immediate (Hot Buyer)">Immediate (Hot Buyer - Ready Now)</option>
                     <option value="Within 15 Days">High Urgency (Within 15 Days)</option>
                     <option value="Within 1 Month">Moderate (Within 1 Month)</option>
@@ -912,6 +979,7 @@ export default function LeadsPage() {
                     onChange={e => setFormData({...formData, source: e.target.value})} 
                     style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                   >
+                    <option value="">Select Inbound Source</option>
                     {leadSources.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
@@ -972,12 +1040,14 @@ export default function LeadsPage() {
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Purpose</label>
                   <select value={formData.leadPurpose} onChange={e => setFormData({...formData, leadPurpose: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    <option value="">Select Purpose</option>
                     {['Buy', 'Rent'].map(opt => <option key={opt}>{opt}</option>)}
                   </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Property Type</label>
                   <select value={formData.propertyTypeNeeded} onChange={e => setFormData({...formData, propertyTypeNeeded: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    <option value="">Select Property Type</option>
                     {propertyTypes.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
@@ -987,6 +1057,7 @@ export default function LeadsPage() {
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>BHK Needed</label>
                   <select value={formData.bhkNeeded} onChange={e => setFormData({...formData, bhkNeeded: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    <option value="">Select BHK</option>
                     {bhkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
@@ -1024,6 +1095,7 @@ export default function LeadsPage() {
                       onChange={e => setFormData({...formData, furnishingPreference: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Furnishing</option>
                       {['Any', ...propertySpecs].map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1036,6 +1108,7 @@ export default function LeadsPage() {
                       onChange={e => setFormData({...formData, constructionStagePreference: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Construction Stage</option>
                       {['Any', ...constructionStages].map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1051,6 +1124,7 @@ export default function LeadsPage() {
                       onChange={e => setFormData({...formData, vastuPreference: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Vastu Facing</option>
                       {['Any', ...vastuOptions].map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1063,6 +1137,7 @@ export default function LeadsPage() {
                       onChange={e => setFormData({...formData, parkingPreference: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Parking</option>
                       {['Any', ...parkingOptions].map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1150,8 +1225,29 @@ export default function LeadsPage() {
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center' }}>
             Inquiries <InfoTooltip text="Manage all your incoming leads and match them with properties instantly." />
           </h1>
-          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
-            {filteredData.length} active leads matching criteria
+          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span>{data.length} total inquiries</span>
+            <span>•</span>
+            <span style={{ fontWeight: 700, color: '#0f172a' }}>{filteredData.length} shown</span>
+            {(purposeFilter !== 'All' || filter !== 'All' || sourceFilter !== 'All' || search) && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                  Filtered: {[
+                    purposeFilter !== 'All' ? (purposeFilter === 'Buy' ? 'Buy / Sale' : 'Rent / Tenant') : null,
+                    filter !== 'All' ? filter : null,
+                    sourceFilter !== 'All' ? sourceFilter : null,
+                    search ? `"${search}"` : null
+                  ].filter(Boolean).join(' + ')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setPurposeFilter('All'); setFilter('All'); setSourceFilter('All'); setSearch(''); }}
+                  style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                >
+                  Clear filters
+                </button>
+              </span>
+            )}
           </p>
         </div>
         <button 
@@ -1177,9 +1273,9 @@ export default function LeadsPage() {
             variant="segmented"
             size="sm"
             tabs={[
-              { id: 'All', label: 'All Inquiries', count: data.length, icon: <ListIcon size={13} /> },
-              { id: 'Buy', label: 'Buy / Sale', count: buyCount, icon: <HomeIcon size={13} /> },
-              { id: 'Rent', label: 'Rent / Tenant', count: rentCount, icon: <KeyIcon size={13} /> }
+              { id: 'All', label: 'All Inquiries', count: purposeCounts.all, icon: <ListIcon size={13} /> },
+              { id: 'Buy', label: 'Buy / Sale', count: purposeCounts.buy, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'Rent / Tenant', count: purposeCounts.rent, icon: <KeyIcon size={13} /> }
             ]}
             activeTab={purposeFilter}
             onChange={(tabId) => setPurposeFilter(tabId as any)}
@@ -1229,12 +1325,12 @@ export default function LeadsPage() {
             label="Status:"
             size="sm"
             tabs={[
-              { id: 'All', label: 'All', count: data.length },
-              { id: 'Active', label: 'Active Pipeline', count: data.filter(l => !['Won', 'Lost', 'Dead'].includes(l.status)).length },
+              { id: 'All', label: 'All', count: statusCounts.all },
+              { id: 'Active', label: 'Active Pipeline', count: statusCounts.active },
               ...leadStatuses.map(s => ({
                 id: s,
                 label: s,
-                count: data.filter(l => l.status === s).length
+                count: statusCounts[s] ?? 0
               }))
             ]}
             activeTab={filter}
@@ -1313,106 +1409,54 @@ export default function LeadsPage() {
                   <td style={{ padding: '16px 20px' }}>
                     {getSourceBadge(lead.source)}
                   </td>
-                  
-                  <td style={{ padding: '16px 20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        padding: '2px 7px',
-                        borderRadius: 4,
-                        fontSize: 10.5,
-                        fontWeight: 700,
-                        backgroundColor: isLeadRent(lead) ? '#f3e8ff' : '#eff6ff',
-                        color: isLeadRent(lead) ? '#7e22ce' : '#1d4ed8',
-                        border: `1px solid ${isLeadRent(lead) ? '#d8b4fe' : '#bfdbfe'}`
-                      }}>
-                        {isLeadRent(lead) ? <KeyIcon size={11} color="currentColor" /> : <HomeIcon size={11} color="currentColor" />}
-                        <span>{isLeadRent(lead) ? 'Rent' : 'Buy'}</span>
-                      </span>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
-                        {Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any')}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: 12, color: '#64748b' }}>
-                      {lead.city || 'Any Location'}
-                    </div>
-                    {(lead.vastuPreference && lead.vastuPreference !== 'Any' || lead.constructionStagePreference && lead.constructionStagePreference !== 'Any') && (
-                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
-                        {lead.vastuPreference && lead.vastuPreference !== 'Any' && (
-                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                            <CompassIcon size={10} color="currentColor" />
-                            <span>{lead.vastuPreference}</span>
-                          </span>
-                        )}
-                        {lead.constructionStagePreference && lead.constructionStagePreference !== 'Any' && (
-                          <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                            <BuildingIcon size={10} color="currentColor" />
-                            <span>{lead.constructionStagePreference}</span>
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {lead.notes && (
-                      <div 
-                        title={`Internal Note: ${lead.notes}`}
-                        style={{ 
-                          display: 'flex', 
-                          alignItems: 'flex-start', 
-                          gap: 5, 
-                          marginTop: 6,
-                          padding: '4px 8px',
-                          backgroundColor: '#f8fafc',
-                          border: '1px solid #e2e8f0',
-                          borderRadius: 6,
-                          maxWidth: 280
-                        }}
-                      >
-                        <FileTextIcon size={12} color="#64748b" style={{ flexShrink: 0, marginTop: 2 }} />
-                        <span style={{ 
-                          fontSize: 11, 
-                          color: '#475569', 
-                          lineHeight: 1.35,
-                          overflow: 'hidden',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                          wordBreak: 'break-word'
-                        }}>
-                          {lead.notes}
-                        </span>
-                      </div>
-                    )}
-                  </td>
 
-                  <td style={{ padding: '16px 20px' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>
-                      {lead.budgetMax ? `Up to ${formatINR(lead.budgetMax)}` : (lead.budget || 'Unspecified')}
+                  {/* Requirement Column - Clean one-line format per Item 2 */}
+                  <td style={{ padding: '16px 20px', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: '#090d16', whiteSpace: 'nowrap' }}>
+                      {(() => {
+                        const purpose = isLeadRent(lead) ? 'Rent' : 'Buy';
+                        const bhk = Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || '');
+                        const loc = lead.city || (lead as any).locality || '';
+                        return `${purpose} ${bhk} ${loc}`.replace(/\s+/g, ' ').trim() || 'Buy 3 BHK';
+                      })()}
                     </div>
                   </td>
 
+                  {/* Budget Column - Strictly one line per Item 4 */}
+                  <td style={{ padding: '16px 20px', whiteSpace: 'nowrap' }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--primary)', whiteSpace: 'nowrap' }}>
+                      {lead.budgetMax ? `Up to ${formatINR(lead.budgetMax)}` : (lead.budget ? (lead.budget.toLowerCase().startsWith('up to') ? lead.budget : `Up to ${lead.budget}`) : 'Up to ₹9.5 Cr')}
+                    </div>
+                  </td>
+
+                  {/* Status Column - Unique dynamic status background & text per Item 5 */}
                   <td style={{ padding: '16px 20px' }} onClick={e => e.stopPropagation()}>
-                    <select
-                      value={lead.status}
-                      onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 600,
-                        padding: '5px 10px',
-                        borderRadius: 6,
-                        border: '1px solid #cbd5e1',
-                        backgroundColor: '#fff',
-                        color: '#334155',
-                        cursor: 'pointer',
-                        outline: 'none',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                      }}
-                    >
-                      {leadStatuses.map(st => (
-                        <option key={st} value={st}>{st}</option>
-                      ))}
-                    </select>
+                    {(() => {
+                      const sc = getStatusColorStyle(lead.status);
+                      return (
+                        <select
+                          value={lead.status}
+                          onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 700,
+                            padding: '5px 12px',
+                            borderRadius: 20,
+                            border: `1px solid ${sc.border}`,
+                            backgroundColor: sc.bg,
+                            color: sc.text,
+                            cursor: 'pointer',
+                            outline: 'none',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {leadStatuses.map(st => (
+                            <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>{st}</option>
+                          ))}
+                        </select>
+                      );
+                    })()}
                   </td>
 
                   <td style={{ padding: '16px 20px', textAlign: 'right' }}>
@@ -1513,10 +1557,9 @@ export default function LeadsPage() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const phone = lead.phone.replace(/\D/g, '');
-                          window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
+                          setSharingLead(lead);
                         }}
-                        title="Chat on WhatsApp"
+                        title="Share / WhatsApp with Client or Anyone"
                         style={{
                           width: 32,
                           height: 32,
@@ -1782,14 +1825,11 @@ export default function LeadsPage() {
                   <span>Call</span>
                 </button>
 
-                {/* 1-Tap WhatsApp */}
+                {/* 1-Tap WhatsApp / Share */}
                 <button
                   type="button"
-                  onClick={() => {
-                    const phone = lead.phone.replace(/\D/g, '');
-                    window.open(`https://wa.me/${phone.startsWith('91') ? phone : '91'+phone}`, '_blank');
-                  }}
-                  title="Chat on WhatsApp"
+                  onClick={() => setSharingLead(lead)}
+                  title="Share / WhatsApp with Client or Anyone"
                   style={{
                     flex: 1,
                     display: 'inline-flex',
@@ -1917,6 +1957,32 @@ export default function LeadsPage() {
         />
       )}
     </div>
+
+      {/* Universal Share Modal */}
+      {sharingLead && (() => {
+        const l = sharingLead;
+        const defaultMsg = `Hi ${l.name},\n\nGreetings from AgentLadders! Thank you for connecting with us regarding your property requirement${l.preferredLocalities ? ` in ${l.preferredLocalities}` : ''}${l.bhkNeeded ? ` (${Array.isArray(l.bhkNeeded) ? l.bhkNeeded.join(', ') : l.bhkNeeded})` : ''}.\n\nI have curated a handpicked portfolio of matching verified properties for you. Please let me know when we can arrange a brief discussion or showing tour!`;
+
+        return (
+          <ShareModal
+            isOpen={!!sharingLead}
+            onClose={() => setSharingLead(null)}
+            shareItem={{
+              id: l.id,
+              type: 'lead',
+              title: `Client Inquiry • ${l.name}`,
+              subtitle: `${(l as any).type || l.propertyTypeNeeded || 'Inquiry'} • ${l.phone || 'No Phone'} • Status: ${l.status}`,
+              description: l.notes || l.requirement || undefined,
+              badge: l.status,
+              link: typeof window !== 'undefined' ? `${window.location.origin}/dashboard/leads` : '',
+              recipientName: l.name,
+              recipientPhone: l.phone,
+              recipientEmail: l.email,
+              defaultMessage: defaultMsg
+            }}
+          />
+        );
+      })()}
 
       {/* Delete Confirmation Modal */}
       {deletingLead && (

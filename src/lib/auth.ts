@@ -93,11 +93,17 @@ export const authOptions: NextAuthOptions = {
 
             saveDb(db);
           } else {
-            // Validate standard 6-digit rolling TOTP code
+            // Validate Gmail OTP or standard 6-digit rolling TOTP code
+            const emailOtp = (user as any).emailOtp;
+            const isEmailOtpValid = emailOtp && emailOtp.code === code && emailOtp.expiresAt > Date.now();
             const secret = user.twoFactorSecret || 'AGLD-7734-K821-X992';
             const isValidTotp = verifyTOTP(code, secret) || (process.env.NODE_ENV !== 'production' && code === '123456');
-            if (!isValidTotp) {
-              throw new Error('Invalid 2FA verification code. Please check your authenticator app.');
+
+            if (isEmailOtpValid) {
+              delete (user as any).emailOtp;
+              saveDb(db);
+            } else if (!isValidTotp) {
+              throw new Error('Invalid or expired 2FA code. Please check your Gmail or authenticator app.');
             }
           }
         }

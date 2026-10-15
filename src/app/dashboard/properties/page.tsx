@@ -32,8 +32,11 @@ import {
   CopyIcon,
   ExternalLinkIcon,
   PlusIcon,
-  KeyIcon
+  KeyIcon,
+  ChevronDownIcon,
+  ListIcon
 } from '@/components/icons/NavIcons';
+import { getStatusColorStyle } from '@/lib/theme';
 
 export interface PropertyMedia {
   id: string;
@@ -385,42 +388,6 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
             <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WhatsApp Pitch</span>
           </button>
           
-          {/* Share Modal Trigger (Icon-only with hover tooltip) */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onShare && onShare(prop);
-            }}
-            title="Share Property Brochure & Photos"
-            aria-label="Share Property"
-            style={{
-              width: 32,
-              height: 32,
-              padding: 0,
-              flexShrink: 0,
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              borderRadius: 8,
-              color: '#334155',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#e2e8f0';
-              e.currentTarget.style.color = '#0f172a';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = '#f8fafc';
-              e.currentTarget.style.color = '#334155';
-            }}
-          >
-            <ShareIcon size={14} color="#475569" />
-          </button>
-          
           {/* Edit Button (Icon-only with hover tooltip) */}
           <button
             type="button"
@@ -502,11 +469,13 @@ export default function PropertiesPage() {
   const [data, setData] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState('Available');
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
   const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [expandedPropertyIds, setExpandedPropertyIds] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(9);
+  const [pageSize, setPageSize] = useState(12);
   const [sharingProperty, setSharingProperty] = useState<Property | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   
@@ -550,15 +519,15 @@ export default function PropertiesPage() {
   const [parkingOptions, setParkingOptions] = useState<string[]>(DEFAULT_PARKING_OPTIONS);
   const [propertyStatuses, setPropertyStatuses] = useState<string[]>(DEFAULT_PROPERTY_STATUSES);
 
-  // Form State
+  // Form State - Nothing pre-selected by default
   const [formData, setFormData] = useState({
-    title: '', purpose: 'For Sale', type: 'Apartment', bhk: '2 BHK',
-    city: 'Mumbai', locality: '', price: '', carpetAreaSqFt: '', status: 'Available',
-    furnishing: 'Semi-Furnished',
-    possessionStatus: 'Ready to Move (OC Received)',
-    vastuFacing: 'East Facing (Vastu Compliant)',
-    parking: '1 Covered Car Park',
-    bathrooms: '2',
+    title: '', purpose: '', type: '', bhk: '',
+    city: '', locality: '', price: '', carpetAreaSqFt: '', status: '',
+    furnishing: '',
+    possessionStatus: '',
+    vastuFacing: '',
+    parking: '',
+    bathrooms: '',
     description: '', privateNotes: ''
   });
   
@@ -637,18 +606,18 @@ export default function PropertiesPage() {
   const handleOpenAdd = useCallback(() => {
     setEditingProperty(null);
     setFormData({
-      title: '', purpose: 'For Sale', type: 'Apartment', bhk: '2 BHK',
-      city: 'Mumbai', locality: '', price: '', carpetAreaSqFt: '', status: 'Available',
-      furnishing: propertySpecs[0] || 'Semi-Furnished',
-      possessionStatus: constructionStages[0] || 'Ready to Move (OC Received)',
-      vastuFacing: vastuOptions[0] || 'East Facing (Vastu Compliant)',
-      parking: parkingOptions[0] || '1 Covered Car Park',
-      bathrooms: '2',
+      title: '', purpose: '', type: '', bhk: '',
+      city: '', locality: '', price: '', carpetAreaSqFt: '', status: '',
+      furnishing: '',
+      possessionStatus: '',
+      vastuFacing: '',
+      parking: '',
+      bathrooms: '',
       description: '', privateNotes: ''
     });
     setMediaItems([]);
     setShowModal(true);
-  }, [propertySpecs, constructionStages, vastuOptions, parkingOptions]);
+  }, []);
 
   const handleOpenEdit = useCallback((prop: Property) => {
     setEditingProperty(prop);
@@ -801,18 +770,18 @@ export default function PropertiesPage() {
             id: Date.now().toString(),
             type: 'success',
             title: 'Property Added! 🏠',
-            message: `"${formData.title}" has been added to inventory.`
+            message: `"${formData.title}" has been added to properties.`
           });
         }
         loadData();
         setFormData({ 
-          title: '', purpose: 'For Sale', type: 'Apartment', bhk: '2 BHK', 
-          city: 'Mumbai', locality: '', price: '', carpetAreaSqFt: '', status: 'Available',
-          furnishing: propertySpecs[0] || 'Semi-Furnished',
-          possessionStatus: constructionStages[0] || 'Ready to Move (OC Received)',
-          vastuFacing: vastuOptions[0] || 'East Facing (Vastu Compliant)',
-          parking: parkingOptions[0] || '1 Covered Car Park',
-          bathrooms: '2',
+          title: '', purpose: '', type: '', bhk: '', 
+          city: '', locality: '', price: '', carpetAreaSqFt: '', status: '',
+          furnishing: '',
+          possessionStatus: '',
+          vastuFacing: '',
+          parking: '',
+          bathrooms: '',
           description: '', privateNotes: '' 
         });
         setMediaItems([]);
@@ -837,37 +806,67 @@ export default function PropertiesPage() {
     }
   }, [editingProperty, formData, mediaItems, propertySpecs, constructionStages, vastuOptions, parkingOptions]);
 
-  // Memoized Buy/Rent Counts in a single pass
-  const { buyCount, rentCount } = useMemo(() => {
+  // Helper to check status match
+  const matchesStatus = useCallback((p: Property, targetStatus: string) => {
+    if (targetStatus === 'All') return true;
+    if (targetStatus === 'Rented') {
+      const s = p.status?.toLowerCase() || '';
+      return p.status === 'Rented' || s.includes('rent') || s.includes('lease');
+    }
+    return p.status === targetStatus;
+  }, []);
+
+  // Helper to check purpose match
+  const matchesPurpose = useCallback((p: Property, targetPurpose: 'All' | 'Buy' | 'Rent') => {
+    if (targetPurpose === 'All') return true;
+    const isRent = isPropertyRent(p);
+    if (targetPurpose === 'Rent') return isRent;
+    if (targetPurpose === 'Buy') return !isRent;
+    return true;
+  }, [isPropertyRent]);
+
+  // Faceted Purpose Counts (Context-aware based on current Status filter and Search)
+  const purposeCounts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const dataForPurpose = data.filter(p => {
+      if (!matchesStatus(p, filter)) return false;
+      if (q && !(p.title?.toLowerCase().includes(q) || p.locality?.toLowerCase().includes(q) || p.bhk?.toLowerCase().includes(q))) return false;
+      return true;
+    });
+
     let buy = 0;
     let rent = 0;
-    for (let i = 0; i < data.length; i++) {
-      if (isPropertyRent(data[i])) {
-        rent++;
-      } else {
-        buy++;
-      }
+    for (let i = 0; i < dataForPurpose.length; i++) {
+      if (isPropertyRent(dataForPurpose[i])) rent++;
+      else buy++;
     }
-    return { buyCount: buy, rentCount: rent };
-  }, [data, isPropertyRent]);
+    return { all: dataForPurpose.length, buy, rent };
+  }, [data, filter, search, matchesStatus, isPropertyRent]);
+
+  // Faceted Status Counts (Context-aware based on current Purpose filter and Search)
+  const statusCounts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const dataForStatus = data.filter(p => {
+      if (!matchesPurpose(p, purposeFilter)) return false;
+      if (q && !(p.title?.toLowerCase().includes(q) || p.locality?.toLowerCase().includes(q) || p.bhk?.toLowerCase().includes(q))) return false;
+      return true;
+    });
+
+    const counts: Record<string, number> = {
+      all: dataForStatus.length
+    };
+    propertyStatuses.forEach(st => {
+      counts[st] = dataForStatus.filter(p => matchesStatus(p, st)).length;
+    });
+    return counts;
+  }, [data, purposeFilter, search, propertyStatuses, matchesPurpose, matchesStatus]);
 
   // Memoized Filtered Properties
   const filteredData = useMemo(() => {
     const q = search.trim().toLowerCase();
     const matches = data.filter(p => {
-      if (purposeFilter !== 'All') {
-        const isRent = isPropertyRent(p);
-        if (purposeFilter === 'Rent' && !isRent) return false;
-        if (purposeFilter === 'Buy' && isRent) return false;
-      }
-      if (filter !== 'All') {
-        if (filter === 'Rented') {
-          const s = p.status?.toLowerCase() || '';
-          if (p.status !== 'Rented' && !s.includes('rent') && !s.includes('lease')) return false;
-        } else if (p.status !== filter) {
-          return false;
-        }
-      }
+      if (!matchesPurpose(p, purposeFilter)) return false;
+      if (!matchesStatus(p, filter)) return false;
       if (q) {
         return (
           p.title?.toLowerCase().includes(q) ||
@@ -1021,6 +1020,7 @@ export default function PropertiesPage() {
                   onChange={e => setFormData({...formData, status: e.target.value})}
                   style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
                 >
+                  <option value="">Select Status</option>
                   {propertyStatuses.map(st => (
                     <option key={st} value={st}>{st}</option>
                   ))}
@@ -1042,18 +1042,21 @@ export default function PropertiesPage() {
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>BHK</label>
                   <select value={formData.bhk} onChange={e => setFormData({...formData, bhk: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    <option value="">Select BHK</option>
                     {bhkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Type</label>
                   <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    <option value="">Select Type</option>
                     {propertyTypes.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Purpose / Listing Type</label>
                   <select value={formData.purpose} onChange={e => setFormData({...formData, purpose: e.target.value as any})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
+                    <option value="">Select Purpose</option>
                     {['For Sale', 'For Rent'].map(opt => <option key={opt}>{opt}</option>)}
                   </select>
                 </div>
@@ -1090,6 +1093,7 @@ export default function PropertiesPage() {
                       onChange={e => setFormData({...formData, furnishing: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Furnishing</option>
                       {propertySpecs.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1102,6 +1106,7 @@ export default function PropertiesPage() {
                       onChange={e => setFormData({...formData, possessionStatus: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Construction Stage</option>
                       {constructionStages.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1117,6 +1122,7 @@ export default function PropertiesPage() {
                       onChange={e => setFormData({...formData, vastuFacing: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Vastu Facing</option>
                       {vastuOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1129,6 +1135,7 @@ export default function PropertiesPage() {
                       onChange={e => setFormData({...formData, parking: e.target.value})} 
                       style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
                     >
+                      <option value="">Select Parking</option>
                       {parkingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                   </div>
@@ -1266,24 +1273,92 @@ export default function PropertiesPage() {
         <div className="responsive-header">
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center' }}>
-            Inventory <InfoTooltip text="Your central property catalog. Click on any card to edit details, or use the quick buttons to edit and delete." />
+            Properties <InfoTooltip text="Your central property catalog. View listings, expand for full descriptions, or share WhatsApp cards." />
           </h1>
-          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5 }}>
-            {data.length} properties total • {filteredData.length} shown
+          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 13.5, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <span>{data.length} properties total</span>
+            <span>•</span>
+            <span style={{ fontWeight: 700, color: '#0f172a' }}>{filteredData.length} shown</span>
+            {(purposeFilter !== 'All' || filter !== 'All' || search) && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 12, color: '#059669', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '1px 8px', borderRadius: 10, fontWeight: 600 }}>
+                  Filtered: {[
+                    purposeFilter !== 'All' ? (purposeFilter === 'Buy' ? 'For Sale' : 'For Rent') : null,
+                    filter !== 'All' ? filter : null,
+                    search ? `"${search}"` : null
+                  ].filter(Boolean).join(' + ')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setPurposeFilter('All'); setFilter('All'); setSearch(''); }}
+                  style={{ background: 'none', border: 'none', color: '#dc2626', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                >
+                  Clear filters
+                </button>
+              </span>
+            )}
           </p>
         </div>
-        <button 
-          onClick={handleOpenAdd}
-          style={{
-          backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
-          fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-          boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.15s ease',
-        }}
-        onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
-        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
-        >
-          + Add Property
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {/* View Mode Switcher: List Table vs Grid Cards */}
+          <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '10px', gap: '3px' }}>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '12.5px',
+                fontWeight: viewMode === 'list' ? 700 : 500,
+                backgroundColor: viewMode === 'list' ? 'var(--primary)' : 'transparent',
+                color: viewMode === 'list' ? '#ffffff' : '#64748b',
+                boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <ListIcon size={14} color="currentColor" />
+              <span>List View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '12.5px',
+                fontWeight: viewMode === 'grid' ? 700 : 500,
+                backgroundColor: viewMode === 'grid' ? 'var(--primary)' : 'transparent',
+                color: viewMode === 'grid' ? '#ffffff' : '#64748b',
+                boxShadow: viewMode === 'grid' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <BuildingIcon size={14} color="currentColor" />
+              <span>Cards View</span>
+            </button>
+          </div>
+
+          <button 
+            onClick={handleOpenAdd}
+            style={{
+            backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
+            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.15s ease',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
+          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
+          >
+            + Add Property
+          </button>
+        </div>
       </div>
 
       {/* Unified Compact Filter Bar Card */}
@@ -1294,9 +1369,9 @@ export default function PropertiesPage() {
             variant="segmented"
             size="sm"
             tabs={[
-              { id: 'All', label: 'All Inventory', count: data.length, icon: <BuildingIcon size={13} /> },
-              { id: 'Buy', label: 'For Sale', count: buyCount, icon: <HomeIcon size={13} /> },
-              { id: 'Rent', label: 'For Rent', count: rentCount, icon: <KeyIcon size={13} /> }
+              { id: 'All', label: 'All Properties', count: purposeCounts.all, icon: <BuildingIcon size={13} /> },
+              { id: 'Buy', label: 'For Sale', count: purposeCounts.buy, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'For Rent', count: purposeCounts.rent, icon: <KeyIcon size={13} /> }
             ]}
             activeTab={purposeFilter}
             onChange={(tabId) => setPurposeFilter(tabId as any)}
@@ -1331,13 +1406,12 @@ export default function PropertiesPage() {
             label="Status:"
             size="sm"
             tabs={[
-              { id: 'All', label: 'All Statuses', count: data.length },
-              { id: 'Available', label: 'Available', count: data.filter(p => p.status === 'Available').length },
-              { id: 'Under Offer', label: 'Under Offer', count: data.filter(p => p.status === 'Under Offer').length },
-              { id: 'Under Contract', label: 'Under Contract', count: data.filter(p => p.status === 'Under Contract').length },
-              { id: 'Sold', label: 'Sold', count: data.filter(p => p.status === 'Sold').length },
-              { id: 'Rented', label: 'Rented', count: data.filter(p => p.status === 'Rented' || p.status?.toLowerCase().includes('rent') || p.status?.toLowerCase().includes('lease')).length },
-              { id: 'Off Market', label: 'Off Market', count: data.filter(p => p.status === 'Off Market').length },
+              { id: 'All', label: 'All Statuses', count: statusCounts.all },
+              ...propertyStatuses.map(st => ({
+                id: st,
+                label: st,
+                count: statusCounts[st] ?? 0
+              }))
             ]}
             activeTab={filter}
             onChange={(tabId) => setFilter(tabId)}
@@ -1345,21 +1419,226 @@ export default function PropertiesPage() {
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="properties-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
-        {paginatedProperties.map(prop => (
-          <PropertyCardItem 
-            key={prop.id} 
-            prop={prop} 
-            statusStyle={getStatusStyle(prop.status)} 
-            priceFormatted={formatINR(prop.price)} 
-            onCopyPitchLink={handleCopyPitchLink}
-            onShare={setSharingProperty}
-            onEdit={handleOpenEdit}
-            onDelete={setDeletingProperty}
-          />
-        ))}
-      </div>
+      {/* Property Display: Expandable List View vs Card Grid */}
+      {viewMode === 'list' ? (
+        <div style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Property</th>
+                  <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Type & Specs</th>
+                  <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Location</th>
+                  <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Price</th>
+                  <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedProperties.map((prop, idx) => {
+                  const isExpanded = !!expandedPropertyIds[prop.id];
+                  const sc = getStatusColorStyle(prop.status);
+                  const isRent = isPropertyRent(prop);
+                  return (
+                    <React.Fragment key={prop.id}>
+                      <tr 
+                        onClick={() => setExpandedPropertyIds(prev => ({ ...prev, [prop.id]: !prev[prop.id] }))}
+                        style={{ 
+                          borderBottom: isExpanded ? 'none' : '1px solid var(--border)', 
+                          backgroundColor: idx % 2 === 0 ? '#ffffff' : '#fafafa',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#ffffff' : '#fafafa')}
+                      >
+                        <td style={{ padding: '14px 18px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 44, height: 44, borderRadius: 8, backgroundColor: '#e2e8f0', overflow: 'hidden', flexShrink: 0 }}>
+                              {prop.media && prop.media[0]?.url ? (
+                                <img src={prop.media[0].url} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => (e.currentTarget.src = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=100')} />
+                              ) : (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🏢</div>
+                              )}
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 700, color: '#090d16', fontSize: 14 }}>{prop.title}</div>
+                              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 2 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 4, backgroundColor: isRent ? '#f3e8ff' : '#eff6ff', color: isRent ? '#7e22ce' : '#1d4ed8' }}>
+                                  {isRent ? 'Rent' : 'Sale'}
+                                </span>
+                                {prop.bhk && <span style={{ fontSize: 12, color: '#475569', fontWeight: 600 }}>{prop.bhk}</span>}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td style={{ padding: '14px 18px' }}>
+                          <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 13 }}>{prop.type || 'Apartment'}</div>
+                          <div style={{ fontSize: 12, color: '#64748b' }}>
+                            {prop.carpetAreaSqFt ? `${prop.carpetAreaSqFt} sq.ft.` : (prop.furnishing || 'Specs TBA')}
+                          </div>
+                        </td>
+
+                        <td style={{ padding: '14px 18px' }}>
+                          <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 13 }}>{prop.locality || prop.city || 'Prime Location'}</div>
+                          {prop.locality && prop.city && <div style={{ fontSize: 11.5, color: '#64748b' }}>{prop.city}</div>}
+                        </td>
+
+                        <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: 14.5 }}>
+                            {formatINR(prop.price)}{isRent ? <span style={{ fontSize: 11, fontWeight: 500, color: '#64748b' }}> / mo</span> : ''}
+                          </div>
+                        </td>
+
+                        <td style={{ padding: '14px 18px' }} onClick={e => e.stopPropagation()}>
+                          <span style={{
+                            fontSize: 11.5,
+                            fontWeight: 700,
+                            padding: '3px 10px',
+                            borderRadius: 14,
+                            backgroundColor: sc.bg,
+                            color: sc.text,
+                            border: `1px solid ${sc.border}`,
+                            whiteSpace: 'nowrap'
+                          }}>
+                            {prop.status}
+                          </span>
+                        </td>
+
+                        <td style={{ padding: '14px 18px', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                            <button
+                              type="button"
+                              onClick={() => setExpandedPropertyIds(prev => ({ ...prev, [prop.id]: !prev[prop.id] }))}
+                              title={isExpanded ? 'Collapse Details' : 'Expand Details'}
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: 7,
+                                border: '1px solid #bfdbfe',
+                                backgroundColor: isExpanded ? 'var(--primary)' : '#eff6ff',
+                                color: isExpanded ? '#fff' : 'var(--primary)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <ChevronDownIcon size={14} color={isExpanded ? '#fff' : 'var(--primary)'} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const msg = generatePropertyPitchWhatsApp(prop as any);
+                                openWhatsApp(msg);
+                              }}
+                              title="Send WhatsApp Pitch"
+                              style={{ width: 32, height: 32, borderRadius: 7, border: '1px solid #bbf7d0', backgroundColor: '#dcfce7', color: '#166534', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            >
+                              <WhatsAppIcon size={14} color="#166534" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEdit(prop)}
+                              title="Edit Property"
+                              style={{ width: 32, height: 32, borderRadius: 7, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            >
+                              <EditIcon size={14} color="#1d4ed8" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeletingProperty(prop)}
+                              title="Delete Property"
+                              style={{ width: 32, height: 32, borderRadius: 7, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                            >
+                              <TrashIcon size={14} color="#dc2626" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Expandable collapse row with description & specs */}
+                      {isExpanded && (
+                        <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }} onClick={e => e.stopPropagation()}>
+                          <td colSpan={6} style={{ padding: '0 20px 20px 20px' }}>
+                            <div style={{ backgroundColor: '#ffffff', borderRadius: 10, border: '1px solid #e2e8f0', padding: '16px 20px', marginTop: 6, display: 'flex', flexDirection: 'column', gap: 14 }}>
+                              <div>
+                                <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6 }}>
+                                  📝 Property Description
+                                </div>
+                                <div style={{ fontSize: 13.5, color: '#1e293b', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                                  {prop.description || 'No detailed description provided by the agent.'}
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10, fontSize: 12.5 }}>
+                                <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                  <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>Furnishing</span>
+                                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{prop.furnishing || 'Unspecified'}</span>
+                                </div>
+                                <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                  <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>Possession</span>
+                                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{prop.possessionStatus || 'Ready to Move'}</span>
+                                </div>
+                                <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                  <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>Vastu Facing</span>
+                                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{prop.vastuFacing || 'Not Applicable'}</span>
+                                </div>
+                                <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
+                                  <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>Parking</span>
+                                  <span style={{ fontWeight: 600, color: '#0f172a' }}>{prop.parking || 'None'}</span>
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f1f5f9', padding: '8px 14px', borderRadius: 8, border: '1px solid #cbd5e1', flexWrap: 'wrap', gap: 8 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+                                  <span style={{ fontWeight: 700, color: '#0f172a' }}>Brochure Showcase URL:</span>
+                                  <a href={`/p/${prop.publicToken || prop.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', fontWeight: 600 }}>
+                                    {typeof window !== 'undefined' ? `${window.location.origin}/p/${prop.publicToken || prop.id}` : `/p/${prop.publicToken || prop.id}`}
+                                  </a>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const url = `${window.location.origin}/p/${prop.publicToken || prop.id}`;
+                                    navigator.clipboard.writeText(url);
+                                    handleCopyPitchLink(prop.title);
+                                  }}
+                                  style={{ padding: '5px 12px', fontSize: 12, fontWeight: 700, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                >
+                                  <CopyIcon size={12} color="#0f172a" />
+                                  <span>Copy Link</span>
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="properties-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
+          {paginatedProperties.map(prop => (
+            <PropertyCardItem 
+              key={prop.id} 
+              prop={prop} 
+              statusStyle={getStatusStyle(prop.status)} 
+              priceFormatted={formatINR(prop.price)} 
+              onCopyPitchLink={handleCopyPitchLink}
+              onShare={setSharingProperty}
+              onEdit={handleOpenEdit}
+              onDelete={setDeletingProperty}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Pagination Bar */}
       {filteredData.length > 0 && (
@@ -1369,7 +1648,7 @@ export default function PropertiesPage() {
           onPageChange={setCurrentPage}
           totalItems={filteredData.length}
           pageSize={pageSize}
-          pageSizeOptions={[6, 9, 18, 36]}
+          pageSizeOptions={[8, 12, 16, 24, 48]}
           onPageSizeChange={(newSize) => {
             setPageSize(newSize);
             setCurrentPage(1);

@@ -28,6 +28,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [activeDemo, setActiveDemo] = useState<'agency' | 'admin' | null>(null);
+  const [otpDispatched, setOtpDispatched] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   const handleSuccessRedirect = (targetEmail: string) => {
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
@@ -38,6 +40,28 @@ export default function LoginPage() {
       router.push('/admin');
     } else {
       router.push('/dashboard');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setIsSendingOtp(true);
+    setError('');
+    try {
+      const res = await fetch('/api/auth/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'send', email })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setOtpDispatched(true);
+      } else {
+        setError(data.error || 'Failed to dispatch OTP to Gmail.');
+      }
+    } catch {
+      setError('Network error while requesting OTP code.');
+    } finally {
+      setIsSendingOtp(false);
     }
   };
 
@@ -72,6 +96,11 @@ export default function LoginPage() {
         if (has2FA && password !== 'admin123') {
           setStep('2fa');
           setLoading(false);
+          fetch('/api/auth/otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'send', email })
+          }).then(() => setOtpDispatched(true)).catch(() => {});
           return;
         }
 
@@ -84,6 +113,11 @@ export default function LoginPage() {
         if (res?.error) {
           if (res.error.includes('2FA_REQUIRED')) {
             setStep('2fa');
+            fetch('/api/auth/otp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'send', email })
+            }).then(() => setOtpDispatched(true)).catch(() => {});
           } else if (res.error.includes('AGENCY_INACTIVE')) {
             setError('Agency Inactive: This agency account has been deactivated by Super Admin. Access is disabled.');
           } else if (res.error.includes('AGENCY_SUSPENDED')) {
@@ -430,11 +464,11 @@ export default function LoginPage() {
               {/* 2FA STEP */}
               <div className={styles.formHeader}>
                 <div className={styles.formTag} style={{ backgroundColor: '#ecfdf5', color: '#047857' }}>
-                  <ShieldIcon size={14} color="#047857" /> Two-Factor Authentication
+                  <ShieldIcon size={14} color="#047857" /> Gmail Two-Factor Authentication
                 </div>
-                <h2 className={styles.formTitle}>Enter Security Code</h2>
+                <h2 className={styles.formTitle}>Enter Security OTP</h2>
                 <p className={styles.formSubtitle}>
-                  Please enter the 6-digit TOTP code from your authenticator app or one of your 8-character backup recovery codes for <strong>{email}</strong>.
+                  Please enter the 6-digit verification code dispatched to your registered Gmail address <strong>{email}</strong> (or an emergency backup key).
                 </p>
               </div>
 
@@ -460,13 +494,13 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit} className={styles.form}>
                 <div className={styles.fieldGroup}>
                   <label htmlFor="login-2fa-code" className={styles.fieldLabel}>
-                    6-Digit Authenticator Code / Backup Key
+                    6-Digit Gmail OTP / Emergency Recovery Key
                   </label>
                   <input
                     id="login-2fa-code"
                     type="text"
                     inputMode="text"
-                    placeholder="123456"
+                    placeholder="e.g. 582019"
                     value={twoFactorCode}
                     onChange={e => {
                       setTwoFactorCode(e.target.value.trim().toUpperCase());
@@ -478,8 +512,21 @@ export default function LoginPage() {
                     className={`${styles.inputField} ${styles.twoFactorInput}`}
                     autoComplete="one-time-code"
                   />
-                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 6, lineHeight: 1.4, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <InfoIcon size={13} color="#059669" /> <span><em>Tip:</em> In demo mode, you can enter <code>123456</code> or your configured backup recovery code.</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                    <span style={{ fontSize: 12, color: otpDispatched ? '#15803d' : '#64748b', fontWeight: otpDispatched ? 700 : 400 }}>
+                      {otpDispatched ? '✓ 6-digit OTP code dispatched to Gmail' : 'Expires in 10 minutes'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={isSendingOtp}
+                      style={{ background: 'none', border: 'none', color: '#2563eb', fontSize: 12.5, fontWeight: 700, cursor: isSendingOtp ? 'wait' : 'pointer', padding: 0 }}
+                    >
+                      {isSendingOtp ? 'Sending...' : '↺ Resend OTP Code'}
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 8, lineHeight: 1.4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <InfoIcon size={13} color="#059669" /> <span><em>Tip:</em> In demo mode, you can also enter <code>123456</code> or your configured backup code.</span>
                   </div>
                 </div>
 

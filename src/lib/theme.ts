@@ -25,6 +25,15 @@ export interface ColorSchemeOption {
 
 export const FONT_OPTIONS: FontOption[] = [
   {
+    id: 'roboto',
+    name: 'Roboto',
+    category: 'Modern & Clean (Default)',
+    tagline: 'Google’s iconic neo-grotesque sans-serif with natural reading rhythm and supreme clarity across all screens',
+    fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    previewHeading: 'Vance Luxury Realty Residences',
+    previewBody: 'Precision-engineered real estate workflow with crystal clear legibility across every screen and invoice.'
+  },
+  {
     id: 'jakarta',
     name: 'Plus Jakarta Sans',
     category: 'Modern Corporate',
@@ -240,14 +249,232 @@ export function applyTheme(fontId: string, colorId: string) {
 
 export function getStoredTheme(): { fontId: string; colorId: string } {
   if (typeof window === 'undefined') {
-    return { fontId: 'montserrat', colorId: 'emerald' };
+    return { fontId: 'roboto', colorId: 'emerald' };
   }
 
   try {
-    const fontId = localStorage.getItem('agentladders_font') || 'montserrat';
+    const fontId = localStorage.getItem('agentladders_font') || 'roboto';
     const colorId = localStorage.getItem('agentladders_color') || 'emerald';
     return { fontId, colorId };
   } catch {
-    return { fontId: 'montserrat', colorId: 'emerald' };
+    return { fontId: 'roboto', colorId: 'emerald' };
   }
 }
+
+export interface StatusColorPalette {
+  id: string;
+  name: string;
+  bg: string;
+  text: string;
+  border: string;
+  dot: string;
+}
+
+export const STATUS_COLOR_PALETTES: StatusColorPalette[] = [
+  { id: 'emerald', name: 'Emerald Green', bg: '#dcfce7', text: '#15803d', border: '#86efac', dot: '#22c55e' },
+  { id: 'blue', name: 'Royal Blue', bg: '#eff6ff', text: '#1d4ed8', border: '#93c5fd', dot: '#3b82f6' },
+  { id: 'amber', name: 'Warm Amber', bg: '#fef3c7', text: '#92400e', border: '#fcd34d', dot: '#f59e0b' },
+  { id: 'purple', name: 'Royal Purple', bg: '#faf5ff', text: '#6b21a8', border: '#d8b4fe', dot: '#a855f7' },
+  { id: 'rose', name: 'Rose Red', bg: '#fee2e2', text: '#991b1b', border: '#fca5a5', dot: '#ef4444' },
+  { id: 'teal', name: 'Mint Teal', bg: '#ccfbf1', text: '#0f766e', border: '#5eead4', dot: '#14b8a6' },
+  { id: 'coral', name: 'Sunset Coral', bg: '#ffedd5', text: '#c2410c', border: '#fdba74', dot: '#f97316' },
+  { id: 'pink', name: 'Blush Pink', bg: '#fce7f3', text: '#9d174d', border: '#fbcfe8', dot: '#ec4899' },
+  { id: 'sky', name: 'Sky Cyan', bg: '#e0f2fe', text: '#0369a1', border: '#7dd3fc', dot: '#0ea5e9' },
+  { id: 'slate', name: 'Slate Gray', bg: '#f1f5f9', text: '#334155', border: '#cbd5e1', dot: '#64748b' }
+];
+
+export const DEFAULT_STATUS_COLOR_MAP: Record<string, string> = {
+  // Positive / Won / Available / Paid
+  'available': 'emerald',
+  'won': 'emerald',
+  'closed won': 'emerald',
+  'paid': 'emerald',
+  'completed': 'emerald',
+  'active': 'emerald',
+  'active search': 'emerald',
+  'verified': 'emerald',
+  'success': 'emerald',
+  'ready to move': 'emerald',
+
+  // Informative / New / Draft / Open / Blue
+  'new': 'blue',
+  'new inbound': 'blue',
+  'draft': 'blue',
+  'open': 'blue',
+  'in progress': 'blue',
+  'agreement drafted': 'blue',
+  'processing': 'blue',
+
+  // Pending / Negotiation / Scheduled / Amber
+  'pending': 'amber',
+  'pending clearance': 'amber',
+  'negotiation': 'amber',
+  'contacted': 'amber',
+  'scheduled': 'amber',
+  'partially paid': 'amber',
+  'token received': 'amber',
+  'token paid': 'amber',
+  'under offer': 'amber',
+  'under negotiation': 'amber',
+  'in contract': 'amber',
+
+  // Verified / Qualified / Confirmed / Teal
+  'qualified': 'teal',
+  'confirmed': 'teal',
+  'rescheduled': 'teal',
+
+  // High intent / Contract / VIP / Purple
+  'under contract': 'purple',
+  'booked': 'purple',
+  'vip': 'purple',
+  'site visit scheduled': 'purple',
+  'registration pending': 'purple',
+
+  // Red / Cancelled / Lost / Overdue / Failed
+  'lost': 'rose',
+  'dead': 'rose',
+  'cancelled': 'rose',
+  'overdue': 'rose',
+  'failed': 'rose',
+  'no show': 'rose',
+  'closed lost': 'rose',
+  'urgent': 'rose',
+
+  // Dark Neutral / Slate / Closed
+  'sold': 'slate',
+  'rented': 'slate',
+  'off market': 'slate',
+  'closed client': 'slate',
+  'past client': 'slate',
+  'inactive': 'slate',
+  'refunded': 'slate'
+};
+
+// In-memory cache for fast, synchronous lookups
+let _statusColorCache: Record<string, string> | null = null;
+
+export function getStoredStatusColors(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  if (_statusColorCache !== null) return _statusColorCache;
+  try {
+    const raw = localStorage.getItem('agentladders_status_colors');
+    if (raw) {
+      _statusColorCache = JSON.parse(raw);
+      return _statusColorCache || {};
+    }
+  } catch {}
+  return {};
+}
+
+export function saveStoredStatusColors(colors: Record<string, string>): void {
+  _statusColorCache = colors;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('agentladders_status_colors', JSON.stringify(colors));
+      window.dispatchEvent(new Event('agentladders_status_colors_updated'));
+    } catch {}
+  }
+}
+
+/**
+ * Universal dynamic status styling helper:
+ * Checks user-configured custom colors first, then falls back to defaults.
+ */
+export function getStatusColorStyle(
+  status: string = '',
+  explicitColor?: string
+): { bg: string; text: string; border: string; dot: string; paletteId?: string } {
+  const trimmed = status.trim();
+  const lower = trimmed.toLowerCase();
+
+  // 1. If explicit color passed or found in stored config
+  let colorKey = explicitColor;
+  if (!colorKey) {
+    const stored = getStoredStatusColors();
+    // Try exact match first, then lowercase match
+    colorKey = stored[trimmed] || stored[lower];
+  }
+
+  // 2. If colorKey matches one of our curated palettes
+  if (colorKey) {
+    const matched = STATUS_COLOR_PALETTES.find(p => p.id === colorKey || p.name.toLowerCase() === colorKey?.toLowerCase());
+    if (matched) {
+      return { ...matched, paletteId: matched.id };
+    }
+
+    // If it's a hex color (e.g. #2563eb)
+    if (colorKey.startsWith('#')) {
+      return {
+        bg: `${colorKey}15`,
+        text: colorKey,
+        border: `${colorKey}45`,
+        dot: colorKey,
+        paletteId: 'custom'
+      };
+    }
+  }
+
+  // 3. Check default status color mapping
+  const mappedPaletteId = DEFAULT_STATUS_COLOR_MAP[lower];
+  if (mappedPaletteId) {
+    const matched = STATUS_COLOR_PALETTES.find(p => p.id === mappedPaletteId);
+    if (matched) return { ...matched, paletteId: matched.id };
+  }
+
+  // 4. Semantic substring matching fallback
+  if (
+    lower.includes('won') ||
+    lower.includes('available') ||
+    lower.includes('paid') ||
+    lower.includes('completed') ||
+    lower.includes('active')
+  ) {
+    const pal = STATUS_COLOR_PALETTES.find(p => p.id === 'emerald')!;
+    return { ...pal, paletteId: 'emerald' };
+  }
+
+  if (
+    lower.includes('scheduled') ||
+    lower.includes('pending') ||
+    lower.includes('negotiation') ||
+    lower.includes('progress')
+  ) {
+    const pal = STATUS_COLOR_PALETTES.find(p => p.id === 'amber')!;
+    return { ...pal, paletteId: 'amber' };
+  }
+
+  if (
+    lower.includes('lost') ||
+    lower.includes('dead') ||
+    lower.includes('cancelled') ||
+    lower.includes('overdue') ||
+    lower.includes('failed')
+  ) {
+    const pal = STATUS_COLOR_PALETTES.find(p => p.id === 'rose')!;
+    return { ...pal, paletteId: 'rose' };
+  }
+
+  if (
+    lower.includes('under contract') ||
+    lower.includes('vip') ||
+    lower.includes('booked')
+  ) {
+    const pal = STATUS_COLOR_PALETTES.find(p => p.id === 'purple')!;
+    return { ...pal, paletteId: 'purple' };
+  }
+
+  if (
+    lower.includes('new') ||
+    lower.includes('draft') ||
+    lower.includes('open')
+  ) {
+    const pal = STATUS_COLOR_PALETTES.find(p => p.id === 'blue')!;
+    return { ...pal, paletteId: 'blue' };
+  }
+
+  // Default slate neutral
+  const defaultPal = STATUS_COLOR_PALETTES.find(p => p.id === 'slate')!;
+  return { ...defaultPal, paletteId: 'slate' };
+}
+
+

@@ -672,7 +672,7 @@ const FAQS = [
   {
     category: 'Agency Branding & Customization',
     question: 'How do custom typography and color schemes apply across our workspace?',
-    answer: 'In Settings > Agency Branding, you can select from 6 luxury font pairings (Plus Jakarta Sans, Inter, Outfit, Poppins, Montserrat, Playfair Display) and 6 curated real estate color palettes (Emerald Prosperity, Royal Sapphire, Midnight Obsidian, Tuscan Rose Gold, Warm Amber Bronze, Cyber Violet). The theme propagates instantly across all navigation, badges, and public pitch links.'
+    answer: 'In Settings > Agency Branding, you can select from 7 luxury font pairings (Roboto [Default], Plus Jakarta Sans, Inter, Outfit, Poppins, Montserrat, Playfair Display) and 6 curated real estate color palettes (Emerald Prosperity [Default], Royal Sapphire, Midnight Obsidian, Tuscan Rose Gold, Warm Amber Bronze, Cyber Violet). The theme propagates instantly across all navigation, badges, and public pitch links.'
   },
   {
     category: 'Agency Branding & Customization',
