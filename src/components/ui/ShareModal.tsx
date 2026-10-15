@@ -14,6 +14,46 @@ import {
   SpinnerIcon,
   PhoneIcon
 } from '@/components/icons/NavIcons';
+import {
+  extract10DigitPhone,
+  isValid10DigitPhone,
+  formatForWhatsApp,
+  isValidEmail,
+  format10DigitDisplay
+} from '@/lib/phone-validation';
+
+function safeOpenUrl(url: string, targetBlank = true) {
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    if (targetBlank) {
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    }
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch {
+    if (targetBlank) {
+      window.open(url, '_blank');
+    } else {
+      window.location.href = url;
+    }
+  }
+}
+
+function safeOpenMailto(email: string, subject: string, body: string) {
+  const mailtoUrl = `mailto:${encodeURIComponent(email.trim())}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  try {
+    const a = document.createElement('a');
+    a.href = mailtoUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch {
+    window.location.href = mailtoUrl;
+  }
+}
 
 export interface UniversalShareItem {
   id?: string;
@@ -211,6 +251,15 @@ export function ShareModal({
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const resolvedShareUrl = activeItem.link || (activeProperty ? `${origin}/p/${activeProperty.publicToken || activeProperty.id}` : '');
 
+  // Live 10-digit phone & email validation states
+  const isSavedPhoneValid = isValid10DigitPhone(savedClientPhone);
+  const savedPhoneDigits = extract10DigitPhone(savedClientPhone);
+  const isSavedEmailValid = isValidEmail(savedClientEmail);
+
+  const isCustomPhoneValid = isValid10DigitPhone(customPhone);
+  const customPhoneDigits = extract10DigitPhone(customPhone);
+  const isCustomEmailValid = isValidEmail(customEmail);
+
   // Resolve primary image for property flyer generator
   let primaryImage = '';
   if (activeProperty) {
@@ -272,21 +321,21 @@ export function ShareModal({
 
   // 1. WhatsApp to Saved Client
   const handleSendWhatsAppToSavedClient = () => {
-    if (!savedClientPhone.trim()) return;
-    const clean = savedClientPhone.replace(/\D/g, '');
-    const num = clean.startsWith('91') && clean.length > 10 ? clean : (clean.length === 10 ? `91${clean}` : clean);
+    if (!isValid10DigitPhone(savedClientPhone)) return;
+    const num = formatForWhatsApp(savedClientPhone, '91');
     recordShare(`WhatsApp to Saved Client: ${savedClientName || num}`);
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(messageText)}`, '_blank');
-    setShareNotice(`Opening WhatsApp to chat with ${savedClientName || savedClientPhone}...`);
+    const waUrl = `https://wa.me/${num}?text=${encodeURIComponent(messageText)}`;
+    safeOpenUrl(waUrl, true);
+    setShareNotice(`Opening WhatsApp to chat with ${savedClientName || format10DigitDisplay(savedClientPhone)}...`);
     setTimeout(() => setShareNotice(null), 4000);
   };
 
   // 2. Email to Saved Client
   const handleSendEmailToSavedClient = () => {
-    if (!savedClientEmail.trim()) return;
-    const subject = encodeURIComponent(`${activeItem.title} — Vance Luxury Realty`);
+    if (!savedClientEmail.trim() || !isValidEmail(savedClientEmail)) return;
+    const subject = `${activeItem.title} — Vance Luxury Realty`;
     recordShare(`Email to Saved Client: ${savedClientEmail}`);
-    window.open(`mailto:${encodeURIComponent(savedClientEmail.trim())}?subject=${subject}&body=${encodeURIComponent(messageText)}`, '_blank');
+    safeOpenMailto(savedClientEmail, subject, messageText);
     setShareNotice(`Opening email draft for ${savedClientName || savedClientEmail}...`);
     setTimeout(() => setShareNotice(null), 4000);
   };
@@ -295,17 +344,16 @@ export function ShareModal({
   const handleCallSavedClient = () => {
     if (!savedClientPhone.trim()) return;
     const clean = savedClientPhone.replace(/[^\d+]/g, '');
-    window.open(`tel:${clean}`, '_self');
+    window.location.href = `tel:${clean}`;
   };
 
   // 4. WhatsApp to Custom Number (Anyone)
   const handleSendWhatsAppToCustom = () => {
-    if (!customPhone.trim()) return;
-    const clean = customPhone.replace(/\D/g, '');
-    const code = countryCode.replace(/\D/g, '') || '91';
-    const num = clean.startsWith(code) && clean.length > 10 ? clean : (clean.length === 10 ? `${code}${clean}` : clean);
+    if (!isValid10DigitPhone(customPhone)) return;
+    const num = formatForWhatsApp(customPhone, countryCode);
     recordShare(`WhatsApp to +${num}`);
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(messageText)}`, '_blank');
+    const waUrl = `https://wa.me/${num}?text=${encodeURIComponent(messageText)}`;
+    safeOpenUrl(waUrl, true);
     setShareNotice(`Opening WhatsApp to message +${num}...`);
     setTimeout(() => setShareNotice(null), 4000);
   };
@@ -313,17 +361,18 @@ export function ShareModal({
   // 5. Open WhatsApp to choose Any Chat or Group
   const handleOpenWhatsAppAnyChat = () => {
     recordShare('WhatsApp Generic Broadcast');
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`, '_blank');
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+    safeOpenUrl(waUrl, true);
     setShareNotice('Opening WhatsApp to pick any contact or group...');
     setTimeout(() => setShareNotice(null), 4000);
   };
 
   // 6. Email to Custom Address
   const handleSendEmailToCustom = () => {
-    if (!customEmail.trim()) return;
-    const subject = encodeURIComponent(`${activeItem.title} — Vance Luxury Realty`);
+    if (!customEmail.trim() || !isValidEmail(customEmail)) return;
+    const subject = `${activeItem.title} — Vance Luxury Realty`;
     recordShare(`Email to ${customEmail}`);
-    window.open(`mailto:${encodeURIComponent(customEmail.trim())}?subject=${subject}&body=${encodeURIComponent(messageText)}`, '_blank');
+    safeOpenMailto(customEmail, subject, messageText);
     setShareNotice(`Opening email draft for ${customEmail}...`);
     setTimeout(() => setShareNotice(null), 4000);
   };
@@ -748,9 +797,16 @@ export function ShareModal({
                     <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
                       {savedClientName || 'Saved Client'}
                     </div>
-                    <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <span>📱 Phone: <strong style={{ color: '#0f172a' }}>{savedClientPhone || 'Not set'}</strong></span>
-                      <span>✉️ Email: <strong style={{ color: '#0f172a' }}>{savedClientEmail || 'Not set'}</strong></span>
+                    <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 3 }}>
+                      <span>📱 Phone: <strong style={{ color: isSavedPhoneValid ? '#15803d' : (savedClientPhone ? '#dc2626' : '#64748b') }}>
+                        {savedClientPhone ? (isSavedPhoneValid ? format10DigitDisplay(savedClientPhone) : savedClientPhone) : 'Not set'}
+                      </strong></span>
+                      {savedClientPhone && !isSavedPhoneValid && (
+                        <span style={{ color: '#dc2626', fontSize: '11px', fontWeight: 700 }}>
+                          (⚠️ {savedPhoneDigits.length}/10 digits - 10 required)
+                        </span>
+                      )}
+                      <span>✉️ Email: <strong style={{ color: isSavedEmailValid ? '#1d4ed8' : '#64748b' }}>{savedClientEmail || 'Not set'}</strong></span>
                     </div>
                   </div>
                 </div>
@@ -759,14 +815,27 @@ export function ShareModal({
                 {(!savedClientPhone || !savedClientEmail || selectedClientId === 'custom') && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px dashed #bbf7d0' }}>
                     <div>
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Phone Number:</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Phone Number (10 Digits):</span>
                       <input
                         type="tel"
                         value={savedClientPhone}
                         onChange={e => setSavedClientPhone(e.target.value)}
-                        placeholder="+91 98200 45678"
-                        style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', marginTop: 3 }}
+                        placeholder="e.g. 98200 45678"
+                        maxLength={15}
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          border: `1px solid ${savedClientPhone.trim() && !isSavedPhoneValid ? '#f87171' : '#cbd5e1'}`,
+                          fontSize: '12px',
+                          marginTop: 3
+                        }}
                       />
+                      {savedClientPhone.trim() && (
+                        <div style={{ fontSize: '10.5px', marginTop: 3, fontWeight: 600, color: isSavedPhoneValid ? '#16a34a' : '#ea580c' }}>
+                          {isSavedPhoneValid ? '✓ Valid 10-digit mobile' : `⚠️ ${savedPhoneDigits.length}/10 digits`}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Email Address:</span>
@@ -775,8 +844,20 @@ export function ShareModal({
                         value={savedClientEmail}
                         onChange={e => setSavedClientEmail(e.target.value)}
                         placeholder="client@gmail.com"
-                        style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', marginTop: 3 }}
+                        style={{
+                          width: '100%',
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          border: `1px solid ${savedClientEmail.trim() && !isSavedEmailValid ? '#f87171' : '#cbd5e1'}`,
+                          fontSize: '12px',
+                          marginTop: 3
+                        }}
                       />
+                      {savedClientEmail.trim() && (
+                        <div style={{ fontSize: '10.5px', marginTop: 3, fontWeight: 600, color: isSavedEmailValid ? '#16a34a' : '#ea580c' }}>
+                          {isSavedEmailValid ? '✓ Valid email' : '⚠️ Valid email required'}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -785,81 +866,167 @@ export function ShareModal({
               {/* 1-Click Action Buttons for Saved Client */}
               <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.2fr 0.8fr', gap: '8px' }}>
                 {/* Send on WhatsApp to Saved Number */}
-                <button
-                  type="button"
-                  onClick={handleSendWhatsAppToSavedClient}
-                  disabled={!savedClientPhone.trim()}
-                  style={{
-                    padding: '11px 12px',
-                    borderRadius: '8px',
-                    backgroundColor: savedClientPhone.trim() ? '#25D366' : '#94a3b8',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '12.5px',
-                    cursor: savedClientPhone.trim() ? 'pointer' : 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '7px',
-                    boxShadow: savedClientPhone.trim() ? '0 2px 6px rgba(37, 211, 102, 0.25)' : 'none'
-                  }}
-                  title="Send message to client on WhatsApp"
-                >
-                  <WhatsAppIcon size={16} color="#ffffff" />
-                  <span>Send on WhatsApp</span>
-                </button>
+                {isSavedPhoneValid ? (
+                  <a
+                    href={`https://wa.me/${formatForWhatsApp(savedClientPhone, '91')}?text=${encodeURIComponent(messageText)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      recordShare(`WhatsApp to Saved Client: ${savedClientName || savedClientPhone}`);
+                      setShareNotice(`Opening WhatsApp to chat with ${savedClientName || format10DigitDisplay(savedClientPhone)}...`);
+                      setTimeout(() => setShareNotice(null), 4000);
+                    }}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#25D366',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: '12.5px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '7px',
+                      boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title="Send message to client on WhatsApp"
+                  >
+                    <WhatsAppIcon size={16} color="#ffffff" />
+                    <span>Send on WhatsApp</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#cbd5e1',
+                      color: '#64748b',
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: '12.5px',
+                      cursor: 'not-allowed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '7px'
+                    }}
+                    title="Enter a valid 10-digit mobile number to enable"
+                  >
+                    <WhatsAppIcon size={16} color="#64748b" />
+                    <span>Send on WhatsApp</span>
+                  </button>
+                )}
 
                 {/* Send Email to Saved Email */}
-                <button
-                  type="button"
-                  onClick={handleSendEmailToSavedClient}
-                  disabled={!savedClientEmail.trim()}
-                  style={{
-                    padding: '11px 12px',
-                    borderRadius: '8px',
-                    backgroundColor: savedClientEmail.trim() ? '#2563eb' : '#94a3b8',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '12.5px',
-                    cursor: savedClientEmail.trim() ? 'pointer' : 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '7px',
-                    boxShadow: savedClientEmail.trim() ? '0 2px 6px rgba(37, 99, 235, 0.2)' : 'none'
-                  }}
-                  title="Send email to client"
-                >
-                  <span>✉️</span>
-                  <span>Send Email</span>
-                </button>
+                {isSavedEmailValid ? (
+                  <a
+                    href={`mailto:${encodeURIComponent(savedClientEmail.trim())}?subject=${encodeURIComponent(`${activeItem.title} — Vance Luxury Realty`)}&body=${encodeURIComponent(messageText)}`}
+                    onClick={() => {
+                      recordShare(`Email to Saved Client: ${savedClientEmail}`);
+                      setShareNotice(`Opening email draft for ${savedClientName || savedClientEmail}...`);
+                      setTimeout(() => setShareNotice(null), 4000);
+                    }}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#2563eb',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: '12.5px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '7px',
+                      boxShadow: '0 2px 6px rgba(37, 99, 235, 0.2)',
+                      transition: 'all 0.15s ease'
+                    }}
+                    title="Send email to client"
+                  >
+                    <span>✉️</span>
+                    <span>Send Email</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#cbd5e1',
+                      color: '#64748b',
+                      border: 'none',
+                      fontWeight: 700,
+                      fontSize: '12.5px',
+                      cursor: 'not-allowed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '7px'
+                    }}
+                    title="Enter a valid email address to enable"
+                  >
+                    <span>✉️</span>
+                    <span>Send Email</span>
+                  </button>
+                )}
 
                 {/* Call Saved Phone */}
-                <button
-                  type="button"
-                  onClick={handleCallSavedClient}
-                  disabled={!savedClientPhone.trim()}
-                  style={{
-                    padding: '11px 12px',
-                    borderRadius: '8px',
-                    backgroundColor: '#ffffff',
-                    color: savedClientPhone.trim() ? '#0f172a' : '#94a3b8',
-                    border: '1px solid #cbd5e1',
-                    fontWeight: 700,
-                    fontSize: '12px',
-                    cursor: savedClientPhone.trim() ? 'pointer' : 'not-allowed',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '5px'
-                  }}
-                  title="Direct Phone Call"
-                >
-                  <PhoneIcon size={14} color="currentColor" />
-                  <span>Call</span>
-                </button>
+                {isSavedPhoneValid ? (
+                  <a
+                    href={`tel:${formatForWhatsApp(savedClientPhone, '91')}`}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      color: '#0f172a',
+                      border: '1px solid #cbd5e1',
+                      textDecoration: 'none',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px'
+                    }}
+                    title="Direct Phone Call"
+                  >
+                    <PhoneIcon size={14} color="currentColor" />
+                    <span>Call</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      color: '#94a3b8',
+                      border: '1px solid #cbd5e1',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      cursor: 'not-allowed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '5px'
+                    }}
+                    title="Valid 10-digit phone required"
+                  >
+                    <PhoneIcon size={14} color="currentColor" />
+                    <span>Call</span>
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -888,7 +1055,7 @@ export function ShareModal({
               {/* Share to specific custom phone number */}
               <div>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
-                  Send on WhatsApp to Any Phone Number:
+                  Send on WhatsApp to Any Phone Number (10 Digits Required):
                 </label>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <select
@@ -914,43 +1081,98 @@ export function ShareModal({
                     type="tel"
                     value={customPhone}
                     onChange={e => setCustomPhone(e.target.value)}
-                    placeholder="e.g. 98200 12345"
+                    placeholder="e.g. 98200 12345 (10 digits)"
+                    maxLength={15}
                     style={{
                       flex: 1,
                       padding: '8px 12px',
                       borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
+                      border: `1px solid ${customPhone.trim() && !isCustomPhoneValid ? '#f87171' : '#cbd5e1'}`,
                       fontSize: '13px',
                       outline: 'none',
                       backgroundColor: '#ffffff'
                     }}
-                    onKeyDown={e => { if (e.key === 'Enter') handleSendWhatsAppToCustom(); }}
+                    onKeyDown={e => { if (e.key === 'Enter' && isCustomPhoneValid) handleSendWhatsAppToCustom(); }}
                   />
 
-                  <button
-                    type="button"
-                    onClick={handleSendWhatsAppToCustom}
-                    disabled={!customPhone.trim()}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: customPhone.trim() ? '#25D366' : '#94a3b8',
-                      color: '#ffffff',
-                      borderRadius: '8px',
-                      border: 'none',
-                      fontWeight: 700,
-                      fontSize: '12.5px',
-                      cursor: customPhone.trim() ? 'pointer' : 'not-allowed',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      whiteSpace: 'nowrap',
-                      boxShadow: customPhone.trim() ? '0 2px 6px rgba(37, 211, 102, 0.25)' : 'none'
-                    }}
-                  >
-                    <WhatsAppIcon size={14} color="#ffffff" />
-                    <span>Send WhatsApp</span>
-                  </button>
+                  {isCustomPhoneValid ? (
+                    <a
+                      href={`https://wa.me/${formatForWhatsApp(customPhone, countryCode)}?text=${encodeURIComponent(messageText)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => {
+                        recordShare(`WhatsApp to +${formatForWhatsApp(customPhone, countryCode)}`);
+                        setShareNotice(`Opening WhatsApp to message +${formatForWhatsApp(customPhone, countryCode)}...`);
+                        setTimeout(() => setShareNotice(null), 4000);
+                      }}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#25D366',
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '12.5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        whiteSpace: 'nowrap',
+                        boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title="Send on WhatsApp"
+                    >
+                      <WhatsAppIcon size={14} color="#ffffff" />
+                      <span>Send WhatsApp</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#cbd5e1',
+                        color: '#64748b',
+                        borderRadius: '8px',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '12.5px',
+                        cursor: 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title="Enter a valid 10-digit mobile number to enable"
+                    >
+                      <WhatsAppIcon size={14} color="#64748b" />
+                      <span>Send WhatsApp</span>
+                    </button>
+                  )}
                 </div>
+
+                {/* 10-Digit Real-Time Validation Feedback */}
+                {customPhone.trim() && (
+                  <div style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    marginTop: '5px',
+                    color: isCustomPhoneValid ? '#15803d' : '#b45309',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4
+                  }}>
+                    <span>{isCustomPhoneValid ? '✓' : '⚠️'}</span>
+                    <span>
+                      {isCustomPhoneValid 
+                        ? `Valid 10-digit number (+${countryCode.replace(/\D/g, '') || '91'} ${format10DigitDisplay(customPhone, false)})`
+                        : `Please enter 10 digits (${customPhoneDigits.length}/10 digits entered)`
+                      }
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Or Open WhatsApp to Pick Any Chat/Group */}
@@ -972,15 +1194,22 @@ export function ShareModal({
                     Opens your WhatsApp app or Web so you can pick from your recent conversations
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleOpenWhatsAppAnyChat}
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    recordShare('WhatsApp Generic Broadcast');
+                    setShareNotice('Opening WhatsApp to pick any contact or group...');
+                    setTimeout(() => setShareNotice(null), 4000);
+                  }}
                   style={{
                     padding: '8px 14px',
                     borderRadius: '8px',
                     backgroundColor: '#f0fdf4',
                     color: '#15803d',
                     border: '1px solid #86efac',
+                    textDecoration: 'none',
                     fontWeight: 700,
                     fontSize: '12px',
                     cursor: 'pointer',
@@ -992,7 +1221,7 @@ export function ShareModal({
                 >
                   <WhatsAppIcon size={14} color="#15803d" />
                   <span>Choose Chat ↗</span>
-                </button>
+                </a>
               </div>
 
               {/* Send to Custom Email */}
@@ -1010,36 +1239,71 @@ export function ShareModal({
                       flex: 1,
                       padding: '8px 12px',
                       borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
+                      border: `1px solid ${customEmail.trim() && !isCustomEmailValid ? '#f87171' : '#cbd5e1'}`,
                       fontSize: '13px',
                       outline: 'none',
                       backgroundColor: '#ffffff'
                     }}
-                    onKeyDown={e => { if (e.key === 'Enter') handleSendEmailToCustom(); }}
+                    onKeyDown={e => { if (e.key === 'Enter' && isCustomEmailValid) handleSendEmailToCustom(); }}
                   />
-                  <button
-                    type="button"
-                    onClick={handleSendEmailToCustom}
-                    disabled={!customEmail.trim()}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: customEmail.trim() ? '#2563eb' : '#94a3b8',
-                      color: '#ffffff',
-                      borderRadius: '8px',
-                      border: 'none',
-                      fontWeight: 700,
-                      fontSize: '12.5px',
-                      cursor: customEmail.trim() ? 'pointer' : 'not-allowed',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <span>✉️</span>
-                    <span>Send Email</span>
-                  </button>
+                  {isCustomEmailValid ? (
+                    <a
+                      href={`mailto:${encodeURIComponent(customEmail.trim())}?subject=${encodeURIComponent(`${activeItem.title} — Vance Luxury Realty`)}&body=${encodeURIComponent(messageText)}`}
+                      onClick={() => {
+                        recordShare(`Email to ${customEmail}`);
+                        setShareNotice(`Opening email draft for ${customEmail}...`);
+                        setTimeout(() => setShareNotice(null), 4000);
+                      }}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#2563eb',
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        fontSize: '12.5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.15s ease'
+                      }}
+                      title="Send Email"
+                    >
+                      <span>✉️</span>
+                      <span>Send Email</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#cbd5e1',
+                        color: '#64748b',
+                        borderRadius: '8px',
+                        border: 'none',
+                        fontWeight: 700,
+                        fontSize: '12.5px',
+                        cursor: 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        whiteSpace: 'nowrap'
+                      }}
+                      title="Enter a valid email address to enable"
+                    >
+                      <span>✉️</span>
+                      <span>Send Email</span>
+                    </button>
+                  )}
                 </div>
+                {customEmail.trim() && !isCustomEmailValid && (
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: '#dc2626', marginTop: 4 }}>
+                    ⚠️ Please enter a valid email format (e.g. name@domain.com)
+                  </div>
+                )}
               </div>
 
               {/* Quick Actions (Copy Message, Native Share) */}

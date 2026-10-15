@@ -42,6 +42,7 @@ import {
   UserIcon 
 } from '@/components/icons/NavIcons';
 import { ShareModal } from '@/components/ui/ShareModal';
+import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
 
 interface Lead {
   id: string;
@@ -390,6 +391,10 @@ export default function LeadsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValid10DigitPhone(formData.phone)) {
+      showToast('error', 'Please enter a valid 10-digit mobile number.', 'Invalid Phone Number');
+      return;
+    }
     setIsSubmitting(true);
     try {
       const primaryProperty = formData.properties[0] || formData.inquiredProperty || '';
@@ -960,8 +965,28 @@ export default function LeadsPage() {
                   <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="e.g. Rahul Sharma" />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Phone *</label>
-                  <input required type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none' }} placeholder="e.g. 9876543210" />
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Phone (10 Digits) *</label>
+                  <input
+                    required
+                    type="tel"
+                    maxLength={15}
+                    value={formData.phone}
+                    onChange={e => setFormData({...formData, phone: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${formData.phone.trim() && !isValid10DigitPhone(formData.phone) ? '#ef4444' : 'var(--border)'}`,
+                      borderRadius: 8,
+                      fontSize: 14,
+                      outline: 'none'
+                    }}
+                    placeholder="e.g. 98200 45678"
+                  />
+                  {formData.phone.trim() && (
+                    <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(formData.phone) ? '#16a34a' : '#ea580c' }}>
+                      {isValid10DigitPhone(formData.phone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(formData.phone).length}/10 digits)`}
+                    </div>
+                  )}
                 </div>
               </div>
 

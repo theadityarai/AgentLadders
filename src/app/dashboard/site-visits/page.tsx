@@ -28,6 +28,7 @@ import {
   SparklesIcon
 } from '@/components/icons/NavIcons';
 import { ShareModal } from '@/components/ui/ShareModal';
+import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
 
 interface SiteVisit {
   id: string;
@@ -107,7 +108,18 @@ export default function SiteVisitsPage() {
     if (!phone) return;
     const clean = phone.replace(/\D/g, '');
     const num = clean.startsWith('91') ? clean : `91${clean}`;
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(text || '')}`, '_blank');
+    const url = `https://wa.me/${num}?text=${encodeURIComponent(text || '')}`;
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      window.open(url, '_blank');
+    }
   };
 
   useEffect(() => {
@@ -464,6 +476,10 @@ export default function SiteVisitsPage() {
       showToast('error', 'Please select a visit status.', 'Status Required');
       return;
     }
+    if (formData.clientPhone?.trim() && !isValid10DigitPhone(formData.clientPhone)) {
+      showToast('error', 'Please enter a valid 10-digit mobile number for the client.', 'Invalid Phone Number');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -594,6 +610,33 @@ export default function SiteVisitsPage() {
                   }}
                   addNewLabel="+ Add New Client / Inquiry..."
                 />
+
+                {/* Client Phone with 10-digit validation */}
+                <div style={{ marginTop: 8 }}>
+                  <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#475569', marginBottom: 4 }}>
+                    Client Mobile Number (10 Digits for WhatsApp):
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.clientPhone || ''}
+                    onChange={e => setFormData({ ...formData, clientPhone: e.target.value })}
+                    placeholder="e.g. 98200 45678"
+                    maxLength={15}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      border: `1px solid ${formData.clientPhone?.trim() && !isValid10DigitPhone(formData.clientPhone) ? '#ef4444' : '#cbd5e1'}`,
+                      fontSize: 13,
+                      outline: 'none'
+                    }}
+                  />
+                  {formData.clientPhone?.trim() && (
+                    <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(formData.clientPhone) ? '#16a34a' : '#ea580c' }}>
+                      {isValid10DigitPhone(formData.clientPhone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(formData.clientPhone).length}/10 digits)`}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>

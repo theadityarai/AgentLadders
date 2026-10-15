@@ -21,6 +21,7 @@ import {
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { ShareModal } from '@/components/ui/ShareModal';
+import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
 import {
   WhatsAppIcon,
   DownloadIcon,
@@ -404,6 +405,10 @@ export default function InvoicesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (form.clientPhone?.trim() && !isValid10DigitPhone(form.clientPhone)) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Invalid Phone Number', message: 'Please enter a valid 10-digit mobile number for the client.' });
+      return;
+    }
     const method = editingInvoice ? 'PUT' : 'POST';
 
     // Parse sanitized items
@@ -531,7 +536,17 @@ export default function InvoicesPage() {
     const msg = `Dear *${inv.clientName}*,\n\nGreetings from *${firmName}*!\n\nHere are the details of your Official Commission Invoice *#${inv.number}* for real estate advisory services:\n\n• *Deal / Transaction:* ${inv.dealRef || 'Exclusive Advisory Mandate'}\n• *Taxable Base Value:* ${formatINR(subtotal)}\n• *GST Rate:* ${taxRate}% GST\n• *TOTAL AMOUNT PAYABLE:* *${formatINR(total)}* (${formatINRFull(total)})\n• *Due Date:* ${inv.dueDate}\n• *Billing Status:* ${inv.status.toUpperCase()}\n\n*Bank Remittance Details (${accType} A/c):*\n• *Account Name:* ${invoiceSettings.accountName}\n• *Bank:* ${invoiceSettings.bankName}\n• *Account Number:* ${invoiceSettings.accountNumber}\n• *IFSC Code:* ${invoiceSettings.ifscCode}${invoiceSettings.upiId ? `\n• *UPI ID:* ${invoiceSettings.upiId}` : ''}\n\nKindly process remittance via RTGS/NEFT or UPI and share the UTR reference for receipt generation.\n\nThank you for choosing *${firmName}*!`;
 
     const url = phoneTarget ? `https://wa.me/${phoneTarget}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      window.open(url, '_blank');
+    }
   };
 
   const handleEmailShare = (inv: Invoice) => {
@@ -1342,13 +1357,29 @@ export default function InvoicesPage() {
 
                 <div className="responsive-grid-2" style={{ gap: 12, marginBottom: 10 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Client WhatsApp / Phone</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                      Client WhatsApp / Phone (10 Digits)
+                    </label>
                     <input
+                      type="tel"
+                      maxLength={15}
                       value={form.clientPhone}
                       onChange={e => setForm({ ...form, clientPhone: e.target.value })}
-                      placeholder="e.g. +91 98200 45678"
-                      style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 7, fontSize: 13, outline: 'none' }}
+                      placeholder="e.g. 98200 45678"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        border: `1px solid ${form.clientPhone?.trim() && !isValid10DigitPhone(form.clientPhone) ? '#ef4444' : '#cbd5e1'}`,
+                        borderRadius: 7,
+                        fontSize: 13,
+                        outline: 'none'
+                      }}
                     />
+                    {form.clientPhone?.trim() && (
+                      <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(form.clientPhone) ? '#16a34a' : '#ea580c' }}>
+                        {isValid10DigitPhone(form.clientPhone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(form.clientPhone).length}/10 digits)`}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Client Email Address</label>

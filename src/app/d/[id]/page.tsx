@@ -97,7 +97,17 @@ export default function PublicDocumentViewPage() {
     const phone = doc.agencyPhone ? doc.agencyPhone.replace(/[^0-9]/g, '') : '';
     const msg = `Hello ${doc.agencyName}, I am reviewing the document "${doc.name}" shared with me.`;
     const url = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      window.open(url, '_blank');
+    }
   };
 
   if (loading) {

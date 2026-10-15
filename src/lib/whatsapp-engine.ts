@@ -14,8 +14,7 @@ export function openWhatsAppDirect(phone: string, message: string) {
   const encoded = encodeURIComponent(message);
   const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://api.whatsapp.com/send?text=${encoded}`;
   if (typeof window !== 'undefined') {
-    const win = window.open(url, '_blank', 'noopener,noreferrer');
-    if (!win) {
+    try {
       const a = document.createElement('a');
       a.href = url;
       a.target = '_blank';
@@ -23,6 +22,8 @@ export function openWhatsAppDirect(phone: string, message: string) {
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    } catch {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   }
 }

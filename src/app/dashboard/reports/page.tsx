@@ -351,7 +351,18 @@ export default function ReportsPage() {
       `🛡️ *Audit Status:* 100% Reconciled & RERA Compliant.\n` +
       `_Generated via AgentLadders High-Velocity Real Estate Platform_`;
     
-    window.open(`https://wa.me/?text=${encodeURIComponent(summaryText)}`, '_blank');
+    const url = `https://wa.me/?text=${encodeURIComponent(summaryText)}`;
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      window.open(url, '_blank');
+    }
   };
 
   // Filtered Table Data

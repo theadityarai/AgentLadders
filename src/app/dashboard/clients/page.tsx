@@ -9,6 +9,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { DEFAULT_LEAD_SOURCES, DEFAULT_CLIENT_STATUSES } from '@/lib/formatters';
 import { getStatusColorStyle } from '@/lib/theme';
+import { isValid10DigitPhone, extract10DigitPhone, formatForWhatsApp } from '@/lib/phone-validation';
 
 interface Client {
   [key: string]: unknown;
@@ -137,6 +138,10 @@ export default function ClientsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValid10DigitPhone(form.phone)) {
+      showToast('error', 'Please enter a valid 10-digit mobile number.', 'Invalid Phone Number');
+      return;
+    }
     try {
       const res = await fetch('/api/clients', {
         method: 'POST',
@@ -165,6 +170,10 @@ export default function ClientsPage() {
   const handleUpdateClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingClient) return;
+    if (!isValid10DigitPhone(editingClient.phone)) {
+      showToast('error', 'Please enter a valid 10-digit mobile number.', 'Invalid Phone Number');
+      return;
+    }
     try {
       const res = await fetch('/api/clients', {
         method: 'PUT',
@@ -212,9 +221,20 @@ export default function ClientsPage() {
 
   // WhatsApp click handler
   const openWhatsApp = (phone: string, name: string) => {
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const cleanPhone = formatForWhatsApp(phone, '91');
     const message = encodeURIComponent(`Hello ${name}, this is Marcus Vance following up regarding our curated property opportunities. Let me know when you'd like to schedule your next private viewing!`);
-    window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${message}`, '_blank');
+    const url = `https://wa.me/${cleanPhone}?text=${message}`;
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      window.open(url, '_blank');
+    }
   };
 
   const filteredData = useMemo(() => {
@@ -494,15 +514,27 @@ export default function ClientsPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp *</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
                   <input
                     type="tel"
                     required
-                    placeholder="e.g. +91 99887 76655"
+                    maxLength={15}
+                    placeholder="e.g. 98200 45678"
                     value={form.phone}
                     onChange={e => setForm({ ...form, phone: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: `1px solid ${form.phone.trim() && !isValid10DigitPhone(form.phone) ? '#ef4444' : '#cbd5e1'}`,
+                      fontSize: '13px'
+                    }}
                   />
+                  {form.phone.trim() && (
+                    <div style={{ fontSize: '11px', marginTop: '4px', fontWeight: 600, color: isValid10DigitPhone(form.phone) ? '#16a34a' : '#ea580c' }}>
+                      {isValid10DigitPhone(form.phone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(form.phone).length}/10 digits)`}
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -641,14 +673,26 @@ export default function ClientsPage() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp</label>
+                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
                   <input
                     type="tel"
                     required
+                    maxLength={15}
                     value={editingClient.phone}
                     onChange={e => setEditingClient({ ...editingClient, phone: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    style={{
+                      width: '100%',
+                      padding: '9px 12px',
+                      borderRadius: '8px',
+                      border: `1px solid ${editingClient.phone.trim() && !isValid10DigitPhone(editingClient.phone) ? '#ef4444' : '#cbd5e1'}`,
+                      fontSize: '13px'
+                    }}
                   />
+                  {editingClient.phone.trim() && (
+                    <div style={{ fontSize: '11px', marginTop: '4px', fontWeight: 600, color: isValid10DigitPhone(editingClient.phone) ? '#16a34a' : '#ea580c' }}>
+                      {isValid10DigitPhone(editingClient.phone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(editingClient.phone).length}/10 digits)`}
+                    </div>
+                  )}
                 </div>
 
                 <div>

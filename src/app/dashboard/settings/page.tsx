@@ -37,6 +37,7 @@ import {
   DEFAULT_INVOICE_SETTINGS,
   AgencyInvoiceSettings
 } from '@/lib/formatters';
+import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
 import styles from './settings.module.css';
 
 const tabs = [
@@ -617,8 +618,7 @@ export default function SettingsPage() {
   };
 
   const handleSaveAgency = async () => {
-    const cleanWa = (agencyData.whatsapp || '').replace(/\D/g, '');
-    if (!agencyData.whatsapp || cleanWa.length < 10) {
+    if (!agencyData.whatsapp || !isValid10DigitPhone(agencyData.whatsapp)) {
       showToast('error', 'Please enter a valid 10-digit WhatsApp number for your agency.', 'WhatsApp Number Required');
       return;
     }
@@ -1211,12 +1211,21 @@ export default function SettingsPage() {
                       </label>
                       <input 
                         type="tel" 
+                        maxLength={15}
                         value={agencyData.whatsapp || ''} 
                         onChange={e => setAgencyData({...agencyData, whatsapp: e.target.value})} 
-                        placeholder="+91 98200 12345" 
+                        placeholder="e.g. 98200 12345" 
                         className={styles.input} 
+                        style={{
+                          border: agencyData.whatsapp?.trim() && !isValid10DigitPhone(agencyData.whatsapp) ? '1px solid #ef4444' : undefined
+                        }}
                         required
                       />
+                      {agencyData.whatsapp?.trim() && (
+                        <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(agencyData.whatsapp) ? '#16a34a' : '#ea580c' }}>
+                          {isValid10DigitPhone(agencyData.whatsapp) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(agencyData.whatsapp).length}/10 digits)`}
+                        </div>
+                      )}
                       <span style={{ fontSize: 12, color: '#64748b', marginTop: 4, display: 'block' }}>
                         💬 Leads clicking <strong>Connect with me on WhatsApp</strong> on public showcases will start a chat directly with this number.
                       </span>
