@@ -168,15 +168,9 @@ export function PhoneInput({
       </div>
 
       {/* 3. Real-time Strict Validation Message */}
-      {showValidationMessage && (
-        <div style={{ marginTop: 4, minHeight: 18 }}>
-          {rawDigits.length === 0 ? (
-            required ? (
-              <span style={{ fontSize: 11, color: '#94a3b8' }}>
-                * Exactly 10-digit mobile number required
-              </span>
-            ) : null
-          ) : rawDigits.length < 10 ? (
+      {showValidationMessage && rawDigits.length > 0 && (
+        <div style={{ marginTop: 4 }}>
+          {rawDigits.length < 10 ? (
             <span style={{ fontSize: 11, fontWeight: 600, color: '#ea580c' }}>
               ⚠️ Exactly 10 digits required ({rawDigits.length}/10 digits entered)
             </span>
