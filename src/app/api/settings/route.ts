@@ -102,10 +102,6 @@ export async function GET() {
       agency.invoiceStatuses = DEFAULT_INVOICE_STATUSES;
       modified = true;
     }
-    if (!agency.paymentStatuses || agency.paymentStatuses.length === 0) {
-      agency.paymentStatuses = DEFAULT_PAYMENT_STATUSES;
-      modified = true;
-    }
     if (!agency.statusColors || typeof agency.statusColors !== 'object') {
       agency.statusColors = {};
       modified = true;
@@ -248,7 +244,6 @@ export async function PUT(req: Request) {
     if (data.taskStatuses) db.agencies[agencyIndex].taskStatuses = data.taskStatuses;
     if (data.clientStatuses) db.agencies[agencyIndex].clientStatuses = data.clientStatuses;
     if (data.invoiceStatuses) db.agencies[agencyIndex].invoiceStatuses = data.invoiceStatuses;
-    if (data.paymentStatuses) db.agencies[agencyIndex].paymentStatuses = data.paymentStatuses;
     if (data.statusColors && typeof data.statusColors === 'object') {
       db.agencies[agencyIndex].statusColors = {
         ...(db.agencies[agencyIndex].statusColors || {}),

@@ -34,11 +34,26 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+
+  if (!data.title || !data.title.trim()) {
+    return NextResponse.json({ error: 'Deal title / mandate name is required.' }, { status: 400 });
+  }
+  if (!data.clientName || !data.clientName.trim()) {
+    return NextResponse.json({ error: 'Client name is required for this deal.' }, { status: 400 });
+  }
+  const amt = parseFloat(data.amount);
+  if (isNaN(amt) || amt <= 0) {
+    return NextResponse.json({ error: 'Deal transaction value must be greater than ₹0.' }, { status: 400 });
+  }
+  if (!data.stage || !data.stage.trim()) {
+    return NextResponse.json({ error: 'Deal pipeline stage is required.' }, { status: 400 });
+  }
+
   const newDeal = {
     ...data,
     id: 'deal_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    title: sanitizeString(data.title || 'New Deal', 200),
+    title: sanitizeString(data.title.trim(), 200),
     propertyId: sanitizeString(data.propertyId || '', 100),
     propertyName: sanitizeString(data.propertyName || (Array.isArray(data.properties) && data.properties.length > 0 ? data.properties[0] : ''), 200),
     properties: Array.isArray(data.properties) ? data.properties.map((p: any) => sanitizeString(String(p), 200)) : (data.propertyName ? [sanitizeString(data.propertyName, 200)] : []),

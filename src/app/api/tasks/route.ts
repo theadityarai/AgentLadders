@@ -35,11 +35,22 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+
+  if (!data.title || !data.title.trim()) {
+    return NextResponse.json({ error: 'Task title is required.' }, { status: 400 });
+  }
+  if (!data.dueDate || !data.dueDate.trim()) {
+    return NextResponse.json({ error: 'Task due date is required.' }, { status: 400 });
+  }
+  if (!data.status || !data.status.trim()) {
+    return NextResponse.json({ error: 'Task status is required.' }, { status: 400 });
+  }
+
   const newTask = {
     ...data,
     id: 'task_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    title: sanitizeString(data.title || 'New Task', 200),
+    title: sanitizeString(data.title.trim(), 200),
     assignedTo: sanitizeString(data.assignedTo || user.name || 'Agent', 100),
     dueDate: sanitizeString(data.dueDate || new Date().toISOString().split('T')[0], 50),
     category: sanitizeString(data.category || 'Follow-up Call', 50),

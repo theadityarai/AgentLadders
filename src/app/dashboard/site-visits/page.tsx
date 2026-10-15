@@ -870,6 +870,7 @@ export default function SiteVisitsPage() {
             <FilterTabs
               label="Status:"
               size="sm"
+              useStatusColors={true}
               tabs={[
                 { id: 'All', label: 'All Statuses', count: statusCounts.all },
                 ...siteVisitStatuses.map(s => ({

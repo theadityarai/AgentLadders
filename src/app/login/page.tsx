@@ -31,7 +31,22 @@ export default function LoginPage() {
   const [otpDispatched, setOtpDispatched] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('revoked') === 'true') {
+        setError('🔒 Your session was terminated remotely from another device. Please sign in again.');
+      }
+    }
+  }, []);
+
   const handleSuccessRedirect = (targetEmail: string) => {
+    // Generate fresh device ID on successful login
+    if (typeof window !== 'undefined') {
+      const newDevId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+      localStorage.setItem('agentladders_device_id', newDevId);
+    }
+
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const callbackUrl = searchParams?.get('callbackUrl');
     if (callbackUrl) {

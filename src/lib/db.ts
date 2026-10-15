@@ -50,6 +50,12 @@ export interface UserSession {
   current?: boolean;
 }
 
+export interface RevokedSession {
+  id: string; // deviceId / sessionId
+  userId: string;
+  revokedAt: string;
+}
+
 export interface Agency {
   id: string;
   name: string;
@@ -546,6 +552,7 @@ export interface DB {
   supportTickets: SupportTicket[];
   sharedLinks: PropertyShareRecord[];
   activeSessions?: UserSession[];
+  revokedSessions?: RevokedSession[];
 }
 
 // Ensure the data directory exists
@@ -649,6 +656,7 @@ export function getDb(): DB {
   db.recycleBin = db.recycleBin || [];
   db.supportTickets = db.supportTickets || [];
   db.activeSessions = db.activeSessions || [];
+  db.revokedSessions = db.revokedSessions || [];
   if (db.supportTickets.length === 0) {
     const firstAgency = (db.agencies && db.agencies[0]) ? db.agencies[0] : { id: 'agency_1', name: 'Vance Luxury Realty' };
     db.supportTickets = [

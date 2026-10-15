@@ -34,11 +34,20 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+
+  if (!data.name || !data.name.trim()) {
+    return NextResponse.json({ error: 'Client name is required.' }, { status: 400 });
+  }
+  const cleanPhone = (data.phone || '').replace(/\D/g, '').slice(-10);
+  if (!cleanPhone || cleanPhone.length !== 10) {
+    return NextResponse.json({ error: 'A valid 10-digit mobile number is required.' }, { status: 400 });
+  }
+
   const newClient = {
     ...data,
     id: 'cli_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    name: sanitizeString(data.name || 'New Client', 100),
+    name: sanitizeString(data.name.trim(), 100),
     email: sanitizeString(data.email || '', 100),
     phone: sanitizeString(data.phone || '', 30),
     type: sanitizeString(data.type || 'Buyer', 50),

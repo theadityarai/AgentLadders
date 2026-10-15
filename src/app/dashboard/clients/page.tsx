@@ -139,6 +139,10 @@ export default function ClientsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.name?.trim() || form.name.trim().length < 2) {
+      showToast('error', 'Please enter a client name (at least 2 characters).', 'Name Required');
+      return;
+    }
     if (!isValid10DigitPhone(form.phone)) {
       showToast('error', 'Please enter a valid 10-digit mobile number.', 'Invalid Phone Number');
       return;
@@ -171,6 +175,10 @@ export default function ClientsPage() {
   const handleUpdateClient = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingClient) return;
+    if (!editingClient.name?.trim() || editingClient.name.trim().length < 2) {
+      showToast('error', 'Please enter a client name (at least 2 characters).', 'Name Required');
+      return;
+    }
     if (!isValid10DigitPhone(editingClient.phone)) {
       showToast('error', 'Please enter a valid 10-digit mobile number.', 'Invalid Phone Number');
       return;

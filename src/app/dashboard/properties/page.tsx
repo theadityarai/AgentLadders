@@ -737,6 +737,46 @@ export default function PropertiesPage() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const cleanTitle = (formData.title || '').trim();
+    if (!cleanTitle || cleanTitle.length < 2) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Title Required',
+        message: 'Please enter a property title / project name (at least 2 characters).'
+      });
+      return;
+    }
+    const priceNum = Number(formData.price);
+    if (!formData.price || isNaN(priceNum) || priceNum <= 0) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Price Required',
+        message: 'Please enter a valid property price greater than ₹0.'
+      });
+      return;
+    }
+    if (!formData.status || !formData.status.trim()) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Status Required',
+        message: 'Please select a property listing status.'
+      });
+      return;
+    }
+    if (!formData.type || !formData.type.trim()) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Asset Type Required',
+        message: 'Please select a property asset type (e.g. Apartment, Villa).'
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const payload = {
@@ -1405,6 +1445,7 @@ export default function PropertiesPage() {
           <FilterTabs
             label="Status:"
             size="sm"
+            useStatusColors={true}
             tabs={[
               { id: 'All', label: 'All Statuses', count: statusCounts.all },
               ...propertyStatuses.map(st => ({

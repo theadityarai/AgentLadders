@@ -98,8 +98,37 @@ export async function GET(req: NextRequest) {
   }
 
   db.activeSessions = db.activeSessions || [];
+  db.revokedSessions = db.revokedSessions || [];
 
   const deviceId = req.nextUrl.searchParams.get('deviceId') || req.headers.get('x-device-id') || 'sess_current';
+  const isCheck = req.nextUrl.searchParams.get('check') === 'true';
+
+  // Check if this device has been revoked/terminated
+  const isRevoked = db.revokedSessions.some(r => r.id === deviceId && r.userId === user.id);
+  if (isRevoked) {
+    return NextResponse.json({
+      valid: false,
+      revoked: true,
+      error: 'Session has been terminated remotely from another device.'
+    }, { status: 401 });
+  }
+
+  // If lightweight polling check, verify existence without re-creating
+  if (isCheck) {
+    const activeSession = db.activeSessions.find(s => s.id === deviceId && s.userId === user.id);
+    if (!activeSession) {
+      return NextResponse.json({
+        valid: false,
+        revoked: true,
+        error: 'Active session was terminated or expired.'
+      }, { status: 401 });
+    }
+    // Session is valid - update heartbeat
+    activeSession.lastActive = new Date().toISOString();
+    saveDb(db);
+    return NextResponse.json({ valid: true, revoked: false });
+  }
+
   const ua = req.headers.get('user-agent') || '';
   const parsedUa = parseUserAgent(ua);
   const { ipAddress, location } = resolveIpAndLocation(req);
@@ -143,53 +172,19 @@ export async function GET(req: NextRequest) {
     db.activeSessions.push(newSession);
   }
 
-  // Seed sample multi-device sessions if user only has 1 session so they can immediately see multiple devices
-  const userSessionsCount = db.activeSessions.filter(s => s.userId === user.id).length;
-  if (userSessionsCount === 1) {
-    const isFirefoxCurrent = parsedUa.browser.includes('Firefox');
-    
-    // Add a secondary companion session (e.g. Firefox on Mac if Chrome is current, or Chrome if Firefox is current)
-    db.activeSessions.push({
-      id: 'sess_secondary_mac_' + Math.random().toString(36).substring(2, 7),
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      browser: isFirefoxCurrent ? 'Google Chrome' : 'Mozilla Firefox',
-      browserVersion: isFirefoxCurrent ? '131.0' : '133.0',
-      os: 'macOS Sequoia (MacBook Pro)',
-      deviceType: 'desktop',
-      deviceModel: 'Apple MacBook Pro 16"',
-      ipAddress: '103.21.124.62 (Bandra West HQ WiFi)',
-      location: 'Mumbai, Maharashtra, India',
-      screen: '2560 × 1600',
-      timezone: 'Asia/Kolkata',
-      createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
-      lastActive: new Date(Date.now() - 14 * 60 * 1000).toISOString()
-    });
-
-    // Add a tertiary mobile session (Apple Safari on iPhone 15 Pro)
-    db.activeSessions.push({
-      id: 'sess_mobile_ios_' + Math.random().toString(36).substring(2, 7),
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      browser: 'Apple Safari Mobile',
-      browserVersion: '18.0',
-      os: 'iOS 18 (iPhone 15 Pro)',
-      deviceType: 'mobile',
-      deviceModel: 'Apple iPhone 15 Pro',
-      ipAddress: '49.37.152.12 (Airtel 5G Network)',
-      location: 'Pune, Maharashtra, India',
-      screen: '393 × 852',
-      timezone: 'Asia/Kolkata',
-      createdAt: new Date(Date.now() - 26 * 3600 * 1000).toISOString(),
-      lastActive: new Date(Date.now() - 48 * 60 * 1000).toISOString()
-    });
-  }
+  // Purge any previously seeded fake/test sessions
+  db.activeSessions = db.activeSessions.filter(s => 
+    !s.id.startsWith('sess_secondary_') && 
+    !s.id.startsWith('sess_mobile_') && 
+    !s.id.startsWith('sess_sim_') && 
+    !s.id.startsWith('sess_firefox') && 
+    !s.id.startsWith('sess_apple_safari') &&
+    s.browser !== 'Apple Safari Mobile'
+  );
 
   saveDb(db);
 
-  // Return all active sessions belonging to this user
+  // Return all real active sessions belonging to this user
   const userSessions = db.activeSessions
     .filter(s => s.userId === user.id)
     .map(s => ({
@@ -233,34 +228,8 @@ export async function POST(req: NextRequest) {
     os,
     deviceType,
     screen,
-    timezone,
-    action,
-    simulatedBrowser
+    timezone
   } = body;
-
-  if (action === 'simulate' && simulatedBrowser) {
-    // Allows user to test adding a simulated login (e.g. from Firefox, Chrome, iPhone)
-    const simId = 'sess_' + simulatedBrowser.toLowerCase().replace(/\s+/g, '_') + '_' + Math.random().toString(36).substring(2, 7);
-    const newSimSession: UserSession = {
-      id: simId,
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      browser: simulatedBrowser,
-      os: simulatedBrowser.includes('Safari') ? 'iOS 18 (Apple iPhone)' : simulatedBrowser.includes('Firefox') ? 'Mozilla Firefox on Windows PC' : 'Google Chrome on macOS',
-      deviceType: simulatedBrowser.includes('Safari') ? 'mobile' : 'desktop',
-      deviceModel: simulatedBrowser.includes('Safari') ? 'iPhone 15 Pro' : 'Workstation',
-      ipAddress: simulatedBrowser.includes('Safari') ? '49.37.152.12 (Cellular 5G)' : '103.21.124.62 (Fibre Gateway)',
-      location: simulatedBrowser.includes('Safari') ? 'Bengaluru, Karnataka, India' : 'Mumbai, Maharashtra, India',
-      screen: simulatedBrowser.includes('Safari') ? '393 × 852' : '1920 × 1080',
-      timezone: 'Asia/Kolkata',
-      createdAt: new Date().toISOString(),
-      lastActive: new Date().toISOString()
-    };
-    db.activeSessions.push(newSimSession);
-    saveDb(db);
-    return NextResponse.json({ success: true, session: newSimSession });
-  }
 
   if (deviceId) {
     const existingIndex = db.activeSessions.findIndex(s => s.id === deviceId && s.userId === user.id);
@@ -294,9 +263,10 @@ export async function POST(req: NextRequest) {
       db.activeSessions.push(newSession);
     }
     saveDb(db);
+    return NextResponse.json({ success: true });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ error: 'Device ID required' }, { status: 400 });
 }
 
 export async function DELETE(req: NextRequest) {
@@ -315,13 +285,26 @@ export async function DELETE(req: NextRequest) {
   }
 
   db.activeSessions = db.activeSessions || [];
+  db.revokedSessions = db.revokedSessions || [];
   const body = await req.json().catch(() => ({}));
-  const { sessionId, action, currentDeviceId } = body;
+  const { sessionId, action, currentDeviceId, selfLogout } = body;
 
   if (action === 'revokeAllOther') {
     const keepId = currentDeviceId || req.headers.get('x-device-id') || '';
     const initialCount = db.activeSessions.filter(s => s.userId === user.id).length;
     
+    // Find all sessions to terminate
+    const sessionsToRevoke = db.activeSessions.filter(s => s.userId === user.id && s.id !== keepId);
+    sessionsToRevoke.forEach(s => {
+      if (!db.revokedSessions!.some(r => r.id === s.id && r.userId === user.id)) {
+        db.revokedSessions!.push({
+          id: s.id,
+          userId: user.id,
+          revokedAt: new Date().toISOString()
+        });
+      }
+    });
+
     db.activeSessions = db.activeSessions.filter(s => s.userId !== user.id || s.id === keepId);
     const removedCount = initialCount - db.activeSessions.filter(s => s.userId === user.id).length;
 
@@ -347,6 +330,15 @@ export async function DELETE(req: NextRequest) {
   }
 
   if (sessionId) {
+    // Record as revoked so the remote device is forced to logout immediately
+    if (!db.revokedSessions.some(r => r.id === sessionId && r.userId === user.id)) {
+      db.revokedSessions.push({
+        id: sessionId,
+        userId: user.id,
+        revokedAt: new Date().toISOString()
+      });
+    }
+
     const sessionToRevoke = db.activeSessions.find(s => s.id === sessionId && s.userId === user.id);
     db.activeSessions = db.activeSessions.filter(s => !(s.id === sessionId && s.userId === user.id));
 
@@ -359,7 +351,9 @@ export async function DELETE(req: NextRequest) {
       action: 'DELETE',
       entity: 'ActiveSession',
       entityId: sessionId,
-      details: `Revoked active session on ${sessionToRevoke?.browser || 'device'} (${sessionToRevoke?.ipAddress || 'IP'}).`,
+      details: selfLogout 
+        ? `User signed out from ${sessionToRevoke?.browser || 'device'} (${sessionToRevoke?.ipAddress || 'IP'}).`
+        : `Terminated active session on ${sessionToRevoke?.browser || 'device'} (${sessionToRevoke?.ipAddress || 'IP'}).`,
       createdAt: new Date().toISOString()
     });
 

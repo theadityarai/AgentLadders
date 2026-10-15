@@ -205,6 +205,18 @@ export default function TasksPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.title?.trim() || form.title.trim().length < 2) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Task Title Required', message: 'Please enter a task title / description.' });
+      return;
+    }
+    if (!form.dueDate?.trim()) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Due Date Required', message: 'Please select a due date for this task.' });
+      return;
+    }
+    if (!form.status?.trim()) {
+      setToast({ id: Date.now().toString(), type: 'error', title: 'Status Required', message: 'Please select a status for this task.' });
+      return;
+    }
     if (form.phone?.trim() && !isValid10DigitPhone(form.phone)) {
       setToast({ id: Date.now().toString(), type: 'error', title: 'Invalid Phone Number', message: 'Please enter a valid 10-digit mobile number.' });
       return;
@@ -648,41 +660,17 @@ export default function TasksPage() {
 
         {/* Filter Pills Toolbar */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
-          <div className="touch-scroll-container" style={{ display: 'flex', gap: 8, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            {[
+          <FilterTabs
+            tabs={[
               { id: 'all', label: 'All Tasks', count: tabCounts.all },
               { id: 'today', label: 'Due Today', count: tabCounts.today },
               { id: 'overdue', label: 'Overdue', count: tabCounts.overdue },
               { id: 'high', label: 'High Priority', count: tabCounts.high },
               { id: 'completed', label: 'Completed', count: tabCounts.completed }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setFilterTab(tab.id as any)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  border: filterTab === tab.id ? '1px solid #0f172a' : '1px solid #e2e8f0',
-                  backgroundColor: filterTab === tab.id ? '#0f172a' : '#ffffff',
-                  color: filterTab === tab.id ? '#ffffff' : '#334155',
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <span>{tab.label}</span>
-                <span style={{ fontSize: 11, backgroundColor: filterTab === tab.id ? 'rgba(255,255,255,0.2)' : '#f1f5f9', padding: '1px 6px', borderRadius: 10 }}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
+            ]}
+            activeTab={filterTab}
+            onChange={(tabId) => setFilterTab(tabId as any)}
+          />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <div style={{ minWidth: 200 }}>

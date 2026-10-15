@@ -757,7 +757,7 @@ export default function ReportsPage() {
                   fontWeight: 600,
                   border: 'none',
                   cursor: 'pointer',
-                  backgroundColor: categoryFilter === cat ? '#0f172a' : '#f1f5f9',
+                  backgroundColor: categoryFilter === cat ? 'var(--primary, #059669)' : '#f1f5f9',
                   color: categoryFilter === cat ? '#ffffff' : '#475569',
                   transition: 'all 0.15s ease',
                   whiteSpace: 'nowrap'

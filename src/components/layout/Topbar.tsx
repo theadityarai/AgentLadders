@@ -28,11 +28,15 @@ import {
   CheckIcon,
   ChevronDownIcon,
   CompassIcon,
-  SparklesIcon
+  SparklesIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon
 } from '@/components/icons/NavIcons';
+import { useSidebar } from '@/contexts/SidebarContext';
 
 export function Topbar() {
   const { data: session } = useSession();
+  const { isCollapsed, toggleSidebar } = useSidebar();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -55,6 +59,21 @@ export function Topbar() {
     };
     loadProfile();
     window.addEventListener('profile-updated', loadProfile);
+
+    // Register or heartbeat active device session for this device
+    if (typeof window !== 'undefined' && session?.user) {
+      try {
+        let devId = localStorage.getItem('agentladders_device_id');
+        if (!devId) {
+          devId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+          localStorage.setItem('agentladders_device_id', devId);
+        }
+        const screenRes = `${window.screen.width} × ${window.screen.height}`;
+        const tz = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'Asia/Kolkata';
+        fetch(`/api/auth/sessions?deviceId=${encodeURIComponent(devId)}&screen=${encodeURIComponent(screenRes)}&timezone=${encodeURIComponent(tz)}`).catch(() => {});
+      } catch {}
+    }
+
     return () => window.removeEventListener('profile-updated', loadProfile);
   }, [session?.user]);
 
@@ -63,6 +82,21 @@ export function Topbar() {
     window.addEventListener('open-mobile-drawer', handleOpenDrawer);
     return () => window.removeEventListener('open-mobile-drawer', handleOpenDrawer);
   }, []);
+
+  const handleSignOut = async () => {
+    try {
+      const devId = typeof window !== 'undefined' ? localStorage.getItem('agentladders_device_id') : null;
+      if (devId) {
+        await fetch('/api/auth/sessions', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: devId, selfLogout: true })
+        }).catch(() => {});
+        localStorage.removeItem('agentladders_device_id');
+      }
+    } catch {}
+    await signOut({ callbackUrl: '/login' });
+  };
 
   // Notification State
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -252,7 +286,42 @@ export function Topbar() {
           </span>
         </div>
 
-        <div className="hide-on-tablet" style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="hide-on-tablet" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            title={isCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'}
+            style={{
+              background: 'none',
+              border: '1px solid #e2e8f0',
+              borderRadius: 8,
+              width: 32,
+              height: 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#475569',
+              transition: 'all 0.15s ease',
+              marginRight: 4
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#f1f5f9';
+              e.currentTarget.style.color = '#0f172a';
+              e.currentTarget.style.borderColor = '#cbd5e1';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#475569';
+              e.currentTarget.style.borderColor = '#e2e8f0';
+            }}
+          >
+            {isCollapsed ? (
+              <PanelLeftOpenIcon size={17} color="currentColor" strokeWidth={1.8} />
+            ) : (
+              <PanelLeftCloseIcon size={17} color="currentColor" strokeWidth={1.8} />
+            )}
+          </button>
           <Breadcrumbs compact />
         </div>
       </div>
@@ -612,7 +681,7 @@ export function Topbar() {
 
             <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: '1px solid #e2e8f0' }}>
               <button 
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={handleSignOut}
                 style={{ width: '100%', padding: '10px', backgroundColor: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 8, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
               >
                 <LogOutIcon size={16} color="#991b1b" />
@@ -1015,7 +1084,7 @@ export function Topbar() {
                   </div>
                 </Link>
                 <div 
-                  onClick={() => signOut({ callbackUrl: '/login' })}
+                  onClick={handleSignOut}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 12px', fontSize: '13px', color: '#ef4444', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.15s ease' }} 
                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fef2f2')} 
                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}

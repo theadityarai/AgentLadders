@@ -392,8 +392,16 @@ export default function LeadsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name?.trim() || formData.name.trim().length < 2) {
+      showToast('error', 'Please enter client / lead name (at least 2 characters).', 'Name Required');
+      return;
+    }
     if (!isValid10DigitPhone(formData.phone)) {
       showToast('error', 'Please enter a valid 10-digit mobile number.', 'Invalid Phone Number');
+      return;
+    }
+    if (!formData.status?.trim()) {
+      showToast('error', 'Please select an inquiry pipeline status.', 'Status Required');
       return;
     }
     setIsSubmitting(true);
@@ -1335,6 +1343,7 @@ export default function LeadsPage() {
           <FilterTabs
             label="Status:"
             size="sm"
+            useStatusColors={true}
             tabs={[
               { id: 'All', label: 'All', count: statusCounts.all },
               { id: 'Active', label: 'Active Pipeline', count: statusCounts.active },

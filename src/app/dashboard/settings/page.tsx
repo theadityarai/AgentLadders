@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { signOut } from 'next-auth/react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -65,7 +66,6 @@ export default function SettingsPage() {
     | 'taskStatuses'
     | 'clientStatuses'
     | 'invoiceStatuses'
-    | 'paymentStatuses'
     | 'bhkOptions'
     | 'propertyTypes'
     | 'leadSources'
@@ -82,8 +82,7 @@ export default function SettingsPage() {
       'siteVisitStatuses',
       'taskStatuses',
       'clientStatuses',
-      'invoiceStatuses',
-      'paymentStatuses'
+      'invoiceStatuses'
     ].includes(type);
   };
 
@@ -96,7 +95,6 @@ export default function SettingsPage() {
       case 'taskStatuses': return 'Task Status';
       case 'clientStatuses': return 'Client Status';
       case 'invoiceStatuses': return 'Invoice & Billing Status';
-      case 'paymentStatuses': return 'Payment Clearance Status';
       case 'bhkOptions': return 'BHK Option';
       case 'propertyTypes': return 'Property Type';
       case 'leadSources': return 'Lead Source';
@@ -124,7 +122,6 @@ export default function SettingsPage() {
     taskStatuses: [] as string[],
     clientStatuses: [] as string[],
     invoiceStatuses: [] as string[],
-    paymentStatuses: [] as string[],
     statusColors: {} as Record<string, string>
   });
   const [selectedStatusColor, setSelectedStatusColor] = useState('emerald');
@@ -300,8 +297,13 @@ export default function SettingsPage() {
       });
       const data = await res.json();
       if (res.ok) {
+        if (sessionId === currentDeviceId) {
+          localStorage.removeItem('agentladders_device_id');
+          await signOut({ callbackUrl: '/login' });
+          return;
+        }
         setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
-        showToast('success', data.message || 'Session revoked successfully.', 'Session Terminated');
+        showToast('success', data.message || 'Session terminated. Device has been logged out.', 'Device Logged Out');
       } else {
         showToast('error', data.error || 'Failed to revoke session.', 'Error');
       }
@@ -322,26 +324,10 @@ export default function SettingsPage() {
       const data = await res.json();
       if (res.ok) {
         setActiveSessions(prev => prev.filter(s => s.current || s.id === currentDeviceId));
-        showToast('success', data.message || 'Terminated all other active sessions.', 'Sessions Cleared');
+        showToast('success', data.message || 'Terminated all other active sessions and logged them out.', 'Sessions Logged Out');
       }
     } catch {
       showToast('error', 'Failed to terminate other sessions.', 'Error');
-    }
-  };
-
-  const handleSimulateSession = async (simulatedBrowser: string) => {
-    try {
-      const res = await fetch('/api/auth/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'simulate', simulatedBrowser })
-      });
-      if (res.ok) {
-        loadActiveSessions();
-        showToast('success', `Simulated login session created for ${simulatedBrowser}.`, 'New Session Connected');
-      }
-    } catch {
-      showToast('error', 'Failed to simulate session', 'Error');
     }
   };
 
@@ -405,7 +391,6 @@ export default function SettingsPage() {
           taskStatuses: (data.agency.taskStatuses && data.agency.taskStatuses.length > 0) ? data.agency.taskStatuses : DEFAULT_TASK_STATUSES,
           clientStatuses: (data.agency.clientStatuses && data.agency.clientStatuses.length > 0) ? data.agency.clientStatuses : DEFAULT_CLIENT_STATUSES,
           invoiceStatuses: (data.agency.invoiceStatuses && data.agency.invoiceStatuses.length > 0) ? data.agency.invoiceStatuses : DEFAULT_INVOICE_STATUSES,
-          paymentStatuses: (data.agency.paymentStatuses && data.agency.paymentStatuses.length > 0) ? data.agency.paymentStatuses : DEFAULT_PAYMENT_STATUSES,
           statusColors: data.agency.statusColors || {}
         };
         setConfigs(loadedConfigs);
@@ -1022,7 +1007,6 @@ export default function SettingsPage() {
     else if (type === 'taskStatuses') defaults = DEFAULT_TASK_STATUSES;
     else if (type === 'clientStatuses') defaults = DEFAULT_CLIENT_STATUSES;
     else if (type === 'invoiceStatuses') defaults = DEFAULT_INVOICE_STATUSES;
-    else if (type === 'paymentStatuses') defaults = DEFAULT_PAYMENT_STATUSES;
     else if (type === 'bhkOptions') defaults = DEFAULT_BHK_OPTIONS;
     else if (type === 'propertyTypes') defaults = DEFAULT_PROPERTY_TYPES;
     else if (type === 'leadSources') defaults = DEFAULT_LEAD_SOURCES;
@@ -2901,45 +2885,6 @@ export default function SettingsPage() {
                     );
                   })}
                 </div>
-
-                {/* Quick Multi-Device Test Helper */}
-                <div style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-                  <span style={{ fontSize: 12, color: '#64748b' }}>
-                    💡 Log in from any other browser (Chrome, Firefox, Safari, Edge, Mobile) to see it appear here in real-time.
-                  </span>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
-                      type="button"
-                      onClick={() => handleSimulateSession('Mozilla Firefox')}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: 6,
-                        border: '1px solid #e2e8f0',
-                        backgroundColor: '#fff',
-                        fontSize: 11.5,
-                        color: '#475569',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      + Test Firefox Login
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSimulateSession('Apple Safari Mobile')}
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: 6,
-                        border: '1px solid #e2e8f0',
-                        backgroundColor: '#fff',
-                        fontSize: 11.5,
-                        color: '#475569',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      + Test Mobile Safari Login
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -3035,17 +2980,6 @@ export default function SettingsPage() {
                 description: 'Lifecycle stages for client commission invoices (Draft, Pending, Partially Paid, Paid, Overdue, Cancelled).',
                 placeholder: 'e.g. Under Dispute or Escrow Hold',
                 tip: '💡 This status appears in the Invoices table, invoice edit modal, live status dropdown, and printable tax invoice.'
-              },
-              {
-                key: 'paymentStatuses',
-                title: 'Payment Clearance Statuses',
-                icon: '💳',
-                group: 'statuses',
-                groupLabel: 'Status & Workflow',
-                usageBadges: ['Payments History', 'Clearance Tracker'],
-                description: 'Financial settlement and clearance states for agency commission receipts (Completed, Pending Clearance, Processing, Failed, Refunded).',
-                placeholder: 'e.g. Cheque Clearing or On Hold',
-                tip: '💡 This status appears in the Payments table, payment filters, and receipt clearance records.'
               },
 
               // 2. Property Taxonomy & Attributes
@@ -3793,8 +3727,6 @@ export default function SettingsPage() {
                       ? 'e.g. VIP Dormant or Renewal Due'
                       : configModal.type === 'invoiceStatuses'
                       ? 'e.g. Under Dispute or Escrow Hold'
-                      : configModal.type === 'paymentStatuses'
-                      ? 'e.g. Cheque Clearing or On Hold'
                       : configModal.type === 'bhkOptions'
                       ? 'e.g. 3.5 BHK, Studio, or 6 BHK'
                       : configModal.type === 'propertyTypes'
@@ -3828,8 +3760,6 @@ export default function SettingsPage() {
                     ? '💡 This status appears in client detail views, contact filters, and relationship manager dashboards.'
                     : configModal.type === 'invoiceStatuses'
                     ? '💡 This status appears in the Invoices table, invoice edit modal, live status dropdown, and printable tax invoice.'
-                    : configModal.type === 'paymentStatuses'
-                    ? '💡 This status appears in the Payments table, payment filters, and receipt clearance records.'
                     : configModal.type === 'bhkOptions'
                     ? '💡 This option will immediately appear in both Property listings (BHK) and Buyer Inquiries (BHK Needed).'
                     : configModal.type === 'propertyTypes'

@@ -691,7 +691,7 @@ export default function DashboardPage() {
                   onClick={() => setPriorityFilter('all')}
                   style={{
                     border: 'none',
-                    backgroundColor: priorityFilter === 'all' ? '#0f172a' : '#f1f5f9',
+                    backgroundColor: priorityFilter === 'all' ? 'var(--primary, #059669)' : '#f1f5f9',
                     color: priorityFilter === 'all' ? '#ffffff' : '#475569',
                     fontSize: 12,
                     fontWeight: 700,

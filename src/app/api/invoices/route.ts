@@ -34,28 +34,50 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+
+  // Strict Validation
+  const clientName = data.clientName ? sanitizeString(data.clientName, 100).trim() : '';
+  if (!clientName || clientName.length < 2) {
+    return NextResponse.json({ error: 'Client / Bill To Name is required (minimum 2 characters).' }, { status: 400 });
+  }
+
+  const clientPhone = data.clientPhone ? sanitizeString(data.clientPhone, 30).trim() : '';
+  const digitsOnly = clientPhone.replace(/\D/g, '').slice(-10);
+  if (!clientPhone || digitsOnly.length !== 10) {
+    return NextResponse.json({ error: 'A valid 10-digit mobile number for the client is required.' }, { status: 400 });
+  }
+
+  const items = Array.isArray(data.items) ? data.items : [];
+  const validItems = items.filter((it: any) => it.description && it.description.trim() && (parseFloat(it.amount) || 0) > 0);
+  if (validItems.length === 0) {
+    return NextResponse.json({ error: 'At least one line item with a description and taxable amount greater than ₹0 is required.' }, { status: 400 });
+  }
+
   const baseAmount = parseFloat(data.amount) || 0;
   const totalAmount = data.totalAmount !== undefined ? parseFloat(data.totalAmount) : (baseAmount * 1.18);
+  if (isNaN(totalAmount) || totalAmount <= 0) {
+    return NextResponse.json({ error: 'Total invoice payable amount must be greater than ₹0.' }, { status: 400 });
+  }
 
   const newInvoice = {
     ...data,
     id: 'inv_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
     number: data.number || `INV-${Date.now().toString().slice(-4)}`,
-    clientName: data.clientName ? sanitizeString(data.clientName, 100) : 'Valued Client',
-    clientPhone: data.clientPhone ? sanitizeString(data.clientPhone, 30) : '',
+    clientName,
+    clientPhone,
     clientEmail: data.clientEmail ? sanitizeString(data.clientEmail, 80) : '',
     clientAddress: data.clientAddress ? sanitizeString(data.clientAddress, 250) : '',
     clientGstin: data.clientGstin ? sanitizeString(data.clientGstin, 30).toUpperCase() : '',
     amount: baseAmount,
-    totalAmount: isNaN(totalAmount) ? baseAmount : totalAmount,
+    totalAmount,
     taxType: data.taxType !== undefined ? data.taxType : 'none',
     status: data.status || 'Pending',
     dueDate: data.dueDate || new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0],
     dealRef: data.dealRef ? sanitizeString(data.dealRef, 200) : '',
     issueDate: data.issueDate || new Date().toISOString().split('T')[0],
     taxRate: (data.taxRate !== undefined && data.taxRate !== 'none' && data.taxRate !== '') ? Number(data.taxRate) : 0,
-    items: Array.isArray(data.items) ? data.items : undefined,
+    items: validItems,
     notes: data.notes ? sanitizeString(data.notes, 1000) : '',
     paymentDetails: data.paymentDetails || undefined,
     createdAt: new Date().toISOString()
@@ -87,10 +109,28 @@ export async function PUT(req: Request) {
   const index = db.invoices.findIndex(i => i.id === data.id && i.agencyId === user.agencyId);
   if (index === -1) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
 
+  if (data.clientName !== undefined) {
+    const trimmed = data.clientName.trim();
+    if (!trimmed || trimmed.length < 2) {
+      return NextResponse.json({ error: 'Client / Bill To Name is required (minimum 2 characters).' }, { status: 400 });
+    }
+  }
+
+  if (data.clientPhone !== undefined) {
+    const digitsOnly = data.clientPhone.replace(/\D/g, '').slice(-10);
+    if (!data.clientPhone.trim() || digitsOnly.length !== 10) {
+      return NextResponse.json({ error: 'A valid 10-digit mobile number for the client is required.' }, { status: 400 });
+    }
+  }
+
   const baseAmount = data.amount !== undefined ? parseFloat(data.amount) || 0 : db.invoices[index].amount;
   const totalAmount = data.totalAmount !== undefined 
     ? parseFloat(data.totalAmount) 
     : (db.invoices[index].totalAmount || baseAmount * 1.18);
+
+  if (isNaN(totalAmount) || totalAmount <= 0) {
+    return NextResponse.json({ error: 'Total invoice payable amount must be greater than ₹0.' }, { status: 400 });
+  }
 
   const updatedInvoice = {
     ...db.invoices[index],

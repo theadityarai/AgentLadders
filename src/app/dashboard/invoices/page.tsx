@@ -7,6 +7,8 @@ import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { getStatusColorStyle } from '@/lib/theme';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
+import { FilterTabs } from '@/components/ui/FilterTabs';
+import { SearchBar } from '@/components/ui/SearchBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
@@ -453,19 +455,95 @@ export default function InvoicesPage() {
     setForm(prev => ({ ...prev, dueDate: d.toISOString().split('T')[0] }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (form.clientPhone?.trim() && !isValid10DigitPhone(form.clientPhone)) {
-      setToast({ id: Date.now().toString(), type: 'error', title: 'Invalid Phone Number', message: 'Please enter a valid 10-digit mobile number for the client.' });
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    // 1. Validate Client Name
+    const cleanClientName = (form.clientName || '').trim();
+    if (!cleanClientName || cleanClientName.length < 2) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Client Name Required',
+        message: 'Please enter the Client / Bill To Name (at least 2 characters).'
+      });
       return;
     }
+
+    // 2. Validate Client Phone
+    const cleanPhone = (form.clientPhone || '').trim();
+    if (!cleanPhone || !isValid10DigitPhone(cleanPhone)) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Valid Mobile Number Required',
+        message: 'Please enter a valid 10-digit mobile number for the client.'
+      });
+      return;
+    }
+
+    // 3. Validate Line Items
+    if (!form.items || form.items.length === 0) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Line Item Required',
+        message: 'Please add at least one line item to this invoice.'
+      });
+      return;
+    }
+
+    const hasEmptyDescription = form.items.some(it => !it.description || !it.description.trim());
+    if (hasEmptyDescription) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Description Missing',
+        message: 'All line items must have a service description or particulars.'
+      });
+      return;
+    }
+
+    const validItemsWithAmount = form.items.filter(it => (parseFloat(it.amount) || 0) > 0);
+    if (validItemsWithAmount.length === 0) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Taxable Amount Required',
+        message: 'Please enter a taxable amount greater than ₹0 on at least one line item.'
+      });
+      return;
+    }
+
+    // 4. Validate Total Payable
+    if (formCalculations.totalAmount <= 0) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Invoice Total Zero',
+        message: 'Total invoice payable amount must be greater than ₹0.'
+      });
+      return;
+    }
+
+    // 5. Validate Dates
+    if (!form.issueDate || !form.dueDate) {
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Dates Required',
+        message: 'Please specify both the Issue Date and Due Date.'
+      });
+      return;
+    }
+
     const method = editingInvoice ? 'PUT' : 'POST';
 
     // Parse sanitized items
     const parsedItems: InvoiceItem[] = form.items.map((it, idx) => ({
       id: it.id || `item_${idx + 1}`,
-      description: it.description || 'Professional Real Estate Brokerage Advisory',
-      sacCode: it.sacCode || invoiceSettings.sacCode || '997221',
+      description: it.description?.trim() || 'Professional Real Estate Brokerage Advisory',
+      sacCode: it.sacCode?.trim() || invoiceSettings.sacCode || '997221',
       amount: parseFloat(it.amount) || 0
     }));
 
@@ -877,6 +955,14 @@ export default function InvoicesPage() {
     };
   }, [data]);
 
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: data.length };
+    invoiceStatuses.forEach(st => {
+      counts[st] = data.filter(inv => inv.status === st).length;
+    });
+    return counts;
+  }, [data, invoiceStatuses]);
+
   const filteredData = useMemo(() => {
     return data.filter(inv => {
       const matchesSearch =
@@ -1148,42 +1234,80 @@ export default function InvoicesPage() {
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <TableFilterBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Search invoices by invoice #, client, GSTIN, or deal..."
-          totalCount={data.length}
-          filteredCount={filteredData.length}
-          onReset={handleResetFilters}
-          filters={[
-            {
-              key: 'status',
-              label: 'Billing Status',
-              value: statusFilter,
-              onChange: setStatusFilter,
-              options: [
-                { label: 'All Statuses', value: 'All' },
-                ...invoiceStatuses.map(s => ({ label: s, value: s }))
-              ]
-            },
-            {
-              key: 'sort',
-              label: 'Sort',
-              value: sortBy,
-              onChange: setSortBy,
-              options: [
-                { label: 'Newest First', value: 'newest' },
-                { label: 'Oldest First', value: 'oldest' },
-                { label: 'Amount: High to Low', value: 'amount_desc' },
-                { label: 'Amount: Low to High', value: 'amount_asc' },
-                { label: 'Client Name (A - Z)', value: 'client_asc' },
-                { label: 'Due Date: Earliest', value: 'due_date_asc' },
-                { label: 'Due Date: Latest', value: 'due_date_desc' }
-              ]
-            }
-          ]}
-        />
+        {/* Unified Compact Filter Bar Card */}
+        <div className="unified-filter-card" style={{ marginBottom: 20 }}>
+          {/* Row 1: Search + Sort + Reset */}
+          <div className="unified-filter-row-top">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 'min(280px, 100%)' }}>
+              <SearchBar
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search invoices by invoice #, client, GSTIN, or deal..."
+                maxWidth={380}
+              />
+              <span style={{ fontSize: 12, color: '#64748b', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: 9999, fontWeight: 500, whiteSpace: 'nowrap' }}>
+                Showing <strong style={{ color: '#0f172a' }}>{filteredData.length}</strong> of {data.length} invoices
+              </span>
+            </div>
+
+            <div className="unified-filter-controls">
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className="unified-filter-select"
+              >
+                <option value="newest">Sort: Newest First</option>
+                <option value="oldest">Sort: Oldest First</option>
+                <option value="amount_desc">Amount: High → Low</option>
+                <option value="amount_asc">Amount: Low → High</option>
+                <option value="client_asc">Client Name (A → Z)</option>
+                <option value="due_date_asc">Due Date: Earliest</option>
+                <option value="due_date_desc">Due Date: Latest</option>
+              </select>
+
+              {(searchQuery.trim() !== '' || statusFilter !== 'All') && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  style={{
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    backgroundColor: '#fee2e2',
+                    border: '1px solid #fca5a5',
+                    borderRadius: '7px',
+                    color: '#b91c1c',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  ✕ Clear Filters
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Row 2: Status Filter Pills in a Compact Horizontal Strip */}
+          <div className="unified-filter-row-bottom">
+            <FilterTabs
+              label="Status:"
+              size="sm"
+              useStatusColors={true}
+              tabs={[
+                { id: 'All', label: 'All Invoices', count: statusCounts.all },
+                ...invoiceStatuses.map(s => ({
+                  id: s,
+                  label: s,
+                  count: statusCounts[s] ?? 0
+                }))
+              ]}
+              activeTab={statusFilter}
+              onChange={(tabId) => setStatusFilter(tabId)}
+            />
+          </div>
+        </div>
 
         {/* Data Table */}
         <div style={{ paddingBottom: 30 }}>

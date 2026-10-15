@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { getStatusColorStyle } from '@/lib/theme';
 
 export interface TabItem<T extends string = string> {
   id: T;
@@ -18,6 +19,7 @@ export interface FilterTabsProps<T extends string = string> {
   variant?: 'pills' | 'segmented' | 'underline' | 'soft';
   size?: 'sm' | 'md' | 'lg';
   label?: string; // Optional label on the left (e.g. "LISTING TYPE:")
+  useStatusColors?: boolean; // When true, tabs representing CRM statuses use their specific status palette colors
   fullWidth?: boolean;
   className?: string;
   style?: React.CSSProperties;
@@ -30,6 +32,7 @@ export function FilterTabs<T extends string = string>({
   variant = 'pills',
   size = 'md',
   label,
+  useStatusColors = false,
   fullWidth = false,
   className = '',
   style
@@ -103,7 +106,7 @@ export function FilterTabs<T extends string = string>({
   };
 
   // Button styling depending on variant and active state
-  const getButtonStyle = (isActive: boolean, disabled?: boolean): React.CSSProperties => {
+  const getButtonStyle = (isActive: boolean, disabled?: boolean, tab?: TabItem<T>): React.CSSProperties => {
     const base: React.CSSProperties = {
       display: 'inline-flex',
       alignItems: 'center',
@@ -143,8 +146,8 @@ export function FilterTabs<T extends string = string>({
         backgroundColor: 'transparent',
         borderRadius: 0,
         padding: `${sizeStyles.padding.split(' ')[0]} 4px`,
-        color: isActive ? '#0f172a' : '#64748b',
-        borderBottom: isActive ? '2px solid #0f172a' : '2px solid transparent',
+        color: isActive ? 'var(--primary, #059669)' : '#64748b',
+        borderBottom: isActive ? '2px solid var(--primary, #059669)' : '2px solid transparent',
         marginBottom: '-1px'
       };
     }
@@ -160,26 +163,65 @@ export function FilterTabs<T extends string = string>({
     }
 
     // Default 'pills' variant
+    const isAll = !tab || tab.id.toLowerCase() === 'all' || tab.id.toLowerCase().startsWith('all ');
+    const sc = useStatusColors && !isAll && tab ? getStatusColorStyle(tab.id || tab.label) : null;
+
+    if (sc) {
+      if (isActive) {
+        return {
+          ...base,
+          borderRadius: '20px',
+          backgroundColor: sc.bg,
+          color: sc.text,
+          border: `2px solid ${sc.text}`,
+          boxShadow: `0 2px 6px ${sc.border}`,
+          fontWeight: 800
+        };
+      } else {
+        return {
+          ...base,
+          borderRadius: '20px',
+          backgroundColor: sc.bg,
+          color: sc.text,
+          border: `1px solid ${sc.border}`,
+          fontWeight: 600
+        };
+      }
+    }
+
     return {
       ...base,
       borderRadius: '20px',
-      backgroundColor: isActive ? '#0f172a' : '#f1f5f9',
+      backgroundColor: isActive ? 'var(--primary, #059669)' : '#f1f5f9',
       color: isActive ? '#ffffff' : '#475569',
-      border: '1px solid transparent'
+      border: isActive ? '1px solid var(--primary, #059669)' : '1px solid #e2e8f0',
+      boxShadow: isActive ? '0 2px 6px rgba(var(--primary-rgb, 5, 150, 105), 0.28)' : 'none',
+      fontWeight: isActive ? 700 : 500
     };
   };
 
   // Badge styling
-  const getBadgeStyle = (isActive: boolean, customColor?: string): React.CSSProperties => {
+  const getBadgeStyle = (isActive: boolean, customColor?: string, tab?: TabItem<T>): React.CSSProperties => {
     let bg = '#e2e8f0';
     let text = '#475569';
 
-    if (isActive) {
+    const isAll = !tab || tab.id.toLowerCase() === 'all' || tab.id.toLowerCase().startsWith('all ');
+    const sc = useStatusColors && !isAll && tab && variant === 'pills' ? getStatusColorStyle(tab.id || tab.label) : null;
+
+    if (sc) {
+      if (isActive) {
+        bg = sc.text;
+        text = '#ffffff';
+      } else {
+        bg = sc.border;
+        text = sc.text;
+      }
+    } else if (isActive) {
       if (variant === 'pills' || variant === 'segmented') {
         bg = 'rgba(255, 255, 255, 0.25)';
         text = '#ffffff';
       } else {
-        bg = '#0f172a';
+        bg = 'var(--primary, #059669)';
         text = '#ffffff';
       }
     } else if (customColor) {
@@ -233,6 +275,8 @@ export function FilterTabs<T extends string = string>({
       <div style={{ ...getContainerStyle(), minWidth: 0, flex: '1 1 auto' }}>
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
+          const isAll = tab.id.toLowerCase() === 'all' || tab.id.toLowerCase().startsWith('all ');
+          const sc = useStatusColors && !isAll && variant === 'pills' ? getStatusColorStyle(tab.id || tab.label) : null;
 
           return (
             <button
@@ -240,14 +284,18 @@ export function FilterTabs<T extends string = string>({
               type="button"
               disabled={tab.disabled}
               onClick={() => onChange(tab.id)}
-              style={getButtonStyle(isActive, tab.disabled)}
+              style={getButtonStyle(isActive, tab.disabled, tab)}
               aria-selected={isActive}
               role="tab"
             >
-              {tab.icon && <span style={{ display: 'inline-flex', alignItems: 'center' }}>{tab.icon}</span>}
+              {tab.icon ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center' }}>{tab.icon}</span>
+              ) : sc ? (
+                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.dot, flexShrink: 0 }} />
+              ) : null}
               <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span style={getBadgeStyle(isActive, tab.badgeColor)}>
+                <span style={getBadgeStyle(isActive, tab.badgeColor, tab)}>
                   {tab.count}
                 </span>
               )}

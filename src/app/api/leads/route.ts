@@ -34,11 +34,23 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+
+  if (!data.name || !data.name.trim() || data.name.trim().length < 2) {
+    return NextResponse.json({ error: 'Client / lead name is required (minimum 2 characters).' }, { status: 400 });
+  }
+  const cleanPhone = (data.phone || '').replace(/\D/g, '').slice(-10);
+  if (!cleanPhone || cleanPhone.length !== 10) {
+    return NextResponse.json({ error: 'A valid 10-digit mobile number is required.' }, { status: 400 });
+  }
+  if (!data.status || !data.status.trim()) {
+    return NextResponse.json({ error: 'Inquiry pipeline status is required.' }, { status: 400 });
+  }
+
   const newLead = {
     ...data,
     id: 'lead_' + Math.random().toString(36).substring(2, 10),
     agencyId: user.agencyId,
-    name: sanitizeString(data.name || 'New Lead', 100),
+    name: sanitizeString(data.name.trim(), 100),
     email: sanitizeString(data.email || '', 100),
     phone: sanitizeString(data.phone || '', 30),
     status: sanitizeString(data.status || 'New', 50),

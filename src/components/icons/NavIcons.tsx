@@ -149,6 +149,28 @@ export const ChevronRightIcon = ({ size = 14, color = 'currentColor', strokeWidt
   </svg>
 );
 
+export const ChevronLeftIcon = ({ size = 16, color = 'currentColor', strokeWidth = 2, style }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <polyline points="15 18 9 12 15 6"/>
+  </svg>
+);
+
+export const PanelLeftCloseIcon = ({ size = 18, color = 'currentColor', strokeWidth = 1.75, style }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <rect width="18" height="18" x="3" y="3" rx="2" />
+    <path d="M9 3v18" />
+    <path d="m16 15-3-3 3-3" />
+  </svg>
+);
+
+export const PanelLeftOpenIcon = ({ size = 18, color = 'currentColor', strokeWidth = 1.75, style }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+    <rect width="18" height="18" x="3" y="3" rx="2" />
+    <path d="M9 3v18" />
+    <path d="m14 9 3 3-3 3" />
+  </svg>
+);
+
 export const FolderIcon = ({ size = 16, color = 'currentColor', strokeWidth = 1.75, style }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>

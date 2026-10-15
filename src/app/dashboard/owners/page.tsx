@@ -82,6 +82,10 @@ export default function OwnersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.name?.trim() || form.name.trim().length < 2) {
+      alert('Please enter owner / landlord name (at least 2 characters).');
+      return;
+    }
     if (!isValid10DigitPhone(form.phone)) {
       alert('Please enter a valid 10-digit phone number.');
       return;
@@ -106,6 +110,10 @@ export default function OwnersPage() {
   const handleUpdateOwner = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingOwner) return;
+    if (!editingOwner.name?.trim() || editingOwner.name.trim().length < 2) {
+      alert('Please enter owner / landlord name (at least 2 characters).');
+      return;
+    }
     if (editingOwner.phone && !isValid10DigitPhone(editingOwner.phone)) {
       alert('Please enter a valid 10-digit phone number.');
       return;

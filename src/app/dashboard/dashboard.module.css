@@ -1,7 +1,12 @@
 .dashboardContainer {
+  --sidebar-active-width: var(--sidebar-width, 240px);
   display: flex;
   min-height: 100vh;
   background-color: #f8fafc;
+}
+
+.dashboardContainer[data-sidebar-collapsed="true"] {
+  --sidebar-active-width: 68px;
 }
 
 .mainArea {
@@ -9,7 +14,8 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  margin-left: var(--sidebar-width);
+  margin-left: var(--sidebar-active-width);
+  transition: margin-left 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mainContent {

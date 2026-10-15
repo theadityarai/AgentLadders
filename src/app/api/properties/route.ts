@@ -45,6 +45,18 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+
+  if (!data.title || !data.title.trim()) {
+    return NextResponse.json({ error: 'Property title / project name is required.' }, { status: 400 });
+  }
+  const parsedPrice = parseFloat(data.price);
+  if (isNaN(parsedPrice) || parsedPrice <= 0) {
+    return NextResponse.json({ error: 'Valid property price greater than ₹0 is required.' }, { status: 400 });
+  }
+  if (!data.status || !data.status.trim()) {
+    return NextResponse.json({ error: 'Property listing status is required.' }, { status: 400 });
+  }
+
   const propId = 'prop_' + Math.random().toString(36).substring(2, 10);
   const newProperty = {
     ...data,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { getStatusColorStyle } from '@/lib/theme';
 
 export interface FilterOption {
   label: string;
@@ -50,35 +51,62 @@ export function TableFilterBar({
         />
 
         {/* Dropdown Filters */}
-        {filters.map((f) => (
-          <div key={f.key} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>
-              {f.label}:
-            </label>
-            <select
-              value={f.value}
-              onChange={(e) => f.onChange(e.target.value)}
-              style={{
-                padding: '7px 12px',
-                borderRadius: '8px',
-                border: f.value !== '' && f.value !== 'All' ? '1px solid var(--primary)' : '1px solid #cbd5e1',
-                backgroundColor: f.value !== '' && f.value !== 'All' ? 'var(--primary-light)' : '#ffffff',
-                color: f.value !== '' && f.value !== 'All' ? 'var(--primary-text)' : '#0f172a',
-                fontSize: '13px',
-                fontWeight: f.value !== '' && f.value !== 'All' ? 600 : 400,
-                outline: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s'
-              }}
-            >
-              {f.options.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+        {filters.map((f) => {
+          const isStatusFilter = f.key.toLowerCase().includes('status') || f.key.toLowerCase().includes('stage');
+          const isSelected = f.value !== '' && f.value !== 'All';
+          const statusStyle = isSelected && isStatusFilter ? getStatusColorStyle(f.value) : null;
+
+          return (
+            <div key={f.key} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>
+                {f.label}:
+              </label>
+              <select
+                value={f.value}
+                onChange={(e) => f.onChange(e.target.value)}
+                style={{
+                  padding: '7px 12px',
+                  borderRadius: '8px',
+                  border: statusStyle 
+                    ? `1.5px solid ${statusStyle.border}` 
+                    : isSelected 
+                      ? '1px solid var(--primary)' 
+                      : '1px solid #cbd5e1',
+                  backgroundColor: statusStyle 
+                    ? statusStyle.bg 
+                    : isSelected 
+                      ? 'var(--primary-light)' 
+                      : '#ffffff',
+                  color: statusStyle 
+                    ? statusStyle.text 
+                    : isSelected 
+                      ? 'var(--primary-text)' 
+                      : '#0f172a',
+                  fontSize: '13px',
+                  fontWeight: isSelected ? 700 : 500,
+                  outline: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s'
+                }}
+              >
+                {f.options.map((opt) => {
+                  const isAll = opt.value === '' || opt.value === 'All';
+                  const optSc = !isAll && isStatusFilter ? getStatusColorStyle(opt.value) : null;
+
+                  return (
+                    <option 
+                      key={opt.value} 
+                      value={opt.value}
+                      style={optSc ? { backgroundColor: optSc.bg, color: optSc.text, fontWeight: 600 } : {}}
+                    >
+                      {optSc ? `● ${opt.label}` : opt.label}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          );
+        })}
 
         {/* Reset / Clear Button */}
         {isFiltered && onReset && (

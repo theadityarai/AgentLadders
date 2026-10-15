@@ -352,6 +352,25 @@ export default function DealsPage() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.title?.trim() || formData.title.trim().length < 2) {
+      showToast('error', 'Please enter a deal title / mandate name (at least 2 characters).', 'Title Required');
+      return;
+    }
+    if (!formData.clientName?.trim()) {
+      showToast('error', 'Please select or enter a client name for this deal.', 'Client Required');
+      return;
+    }
+    const amt = parseFloat(formData.amount);
+    if (isNaN(amt) || amt <= 0) {
+      showToast('error', 'Please enter a valid deal / transaction value greater than ₹0.', 'Amount Required');
+      return;
+    }
+    if (!formData.stage?.trim()) {
+      showToast('error', 'Please select a pipeline stage for this deal.', 'Stage Required');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const primaryProperty = formData.properties[0] || formData.propertyName || '';
@@ -655,6 +674,7 @@ export default function DealsPage() {
           <FilterTabs
             label="Stage:"
             size="sm"
+            useStatusColors={true}
             tabs={[
               { id: 'All', label: 'All Stages', count: stageCounts.all },
               { id: 'Active', label: 'Active Pipeline', count: stageCounts.active },
