@@ -11,6 +11,7 @@ import { DEFAULT_LEAD_SOURCES, DEFAULT_CLIENT_STATUSES } from '@/lib/formatters'
 import { isValid10DigitPhone, extract10DigitPhone, formatForWhatsApp } from '@/lib/phone-validation';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { getStatusColorStyle } from '@/lib/theme';
+import { PhoneIcon, WhatsAppIcon, EditIcon, TrashIcon } from '@/components/icons/NavIcons';
 
 interface Client {
   [key: string]: unknown;
@@ -463,14 +464,247 @@ export default function ClientsPage() {
         }}
       />
 
-      {/* DATA TABLE */}
+      {/* DATA TABLE & MOBILE CARDS */}
       <div style={{ paddingBottom: '24px' }}>
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          loading={loading}
-          emptyMessage="No clients found. Click '+ Add Client' or convert an inbound lead."
-        />
+        <div className="desktop-only-table">
+          <DataTable
+            columns={columns}
+            data={filteredData}
+            loading={loading}
+            emptyMessage="No clients found. Click '+ Add Client' or convert an inbound lead."
+          />
+        </div>
+
+        <div className="mobile-only-cards">
+          {filteredData.length === 0 ? (
+            <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '48px 20px', textAlign: 'center', color: '#94a3b8' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>No clients found</div>
+              <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
+            </div>
+          ) : (
+            filteredData.map(c => {
+              const sc = getStatusColorStyle(c.status || 'Active Search');
+              const isInvestor = c.type === 'Investor / VIP';
+              const isBuyer = c.type === 'Buyer';
+
+              return (
+                <div
+                  key={`m-cli-${c.id}`}
+                  onClick={() => handleOpenEdit(c)}
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: 12,
+                    border: '1px solid var(--border)',
+                    padding: '14px 16px',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {/* Top Bar: Name, Avatar, Category Pill */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                      <div style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: '50%',
+                        backgroundColor: isInvestor ? '#fef3c7' : isBuyer ? '#dbeafe' : '#ede9fe',
+                        color: isInvestor ? '#92400e' : isBuyer ? '#1e40af' : '#6b21a8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 14,
+                        fontWeight: 800,
+                        flexShrink: 0
+                      }}>
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {c.name}
+                        </div>
+                        <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 1, fontWeight: 500 }}>
+                          {c.phone}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <span style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        backgroundColor: isInvestor ? '#fffbeb' : isBuyer ? '#eff6ff' : '#f5f3ff',
+                        color: isInvestor ? '#92400e' : isBuyer ? '#1e40af' : '#6b21a8',
+                        border: `1px solid ${isInvestor ? '#fde68a' : isBuyer ? '#bfdbfe' : '#ddd6fe'}`
+                      }}>
+                        {c.type || 'Buyer'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status & Source Tags */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      backgroundColor: sc.bg,
+                      color: sc.text,
+                      border: `1px solid ${sc.border}`
+                    }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.dot }} />
+                      {c.status || 'Active Search'}
+                    </span>
+                    {c.source && (
+                      <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 7px', borderRadius: '5px', backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
+                        📢 {c.source}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Requirement & Budget Box */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '9px 12px',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: 8,
+                    fontSize: 12.5
+                  }}>
+                    <div style={{ minWidth: 0, flex: 1, paddingRight: 8 }}>
+                      <div style={{ fontWeight: 600, color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {c.requirement || 'Requirement TBA'}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 1 }}>
+                        📍 {c.preferredLocation || 'Location TBA'}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontWeight: 800, color: '#059669', fontSize: 13.5 }}>
+                        {c.budget || 'TBA'}
+                      </div>
+                      <div style={{ fontSize: 10.5, color: '#94a3b8' }}>
+                        {c.assignedManager || 'Agent Assigned'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes snippet */}
+                  {c.notes && (
+                    <div style={{ fontSize: 11.5, color: '#64748b', fontStyle: 'italic', backgroundColor: '#fafafa', padding: '6px 10px', borderRadius: 6, border: '1px dashed #e2e8f0' }}>
+                      &ldquo;{c.notes}&rdquo;
+                    </div>
+                  )}
+
+                  {/* Touch Action Buttons Row (min 44px height for mobile) */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 44px', gap: 6, paddingTop: 4 }} onClick={e => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={() => window.location.href = `tel:${c.phone}`}
+                      title="Call Client"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        minHeight: 44,
+                        borderRadius: 8,
+                        backgroundColor: '#eff6ff',
+                        color: '#1d4ed8',
+                        border: '1px solid #bfdbfe',
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <PhoneIcon size={14} color="#1d4ed8" />
+                      <span>Call</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cleanPhone = formatForWhatsApp(c.phone);
+                        const msg = encodeURIComponent(`Hi ${c.name}, this is regarding your property search with our agency.`);
+                        window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+                      }}
+                      title="WhatsApp Client"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        minHeight: 44,
+                        borderRadius: 8,
+                        backgroundColor: '#ecfdf5',
+                        color: '#15803d',
+                        border: '1px solid #bbf7d0',
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <WhatsAppIcon size={14} color="#15803d" />
+                      <span>WhatsApp</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(c)}
+                      title="Edit Client"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        minHeight: 44,
+                        borderRadius: 8,
+                        backgroundColor: '#f8fafc',
+                        color: '#334155',
+                        border: '1px solid #cbd5e1',
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <EditIcon size={14} color="#475569" />
+                      <span>Edit</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(c.id, c.name)}
+                      title="Delete Client"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: 44,
+                        borderRadius: 8,
+                        backgroundColor: '#fff1f2',
+                        color: '#dc2626',
+                        border: '1px solid #fecdd3',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <TrashIcon size={14} color="#dc2626" />
+                    </button>
+                  </div>
+
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* MODAL: ADD CLIENT */}

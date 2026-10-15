@@ -815,7 +815,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: 16, marginBottom: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 16, marginBottom: 32 }}>
             {filteredData.map(doc => {
               const fileIcon = getFileIcon(doc.type, doc.name);
               // Split relatedTo into separate entity tags if multi-selected

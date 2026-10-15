@@ -28,15 +28,11 @@ import {
   CheckIcon,
   ChevronDownIcon,
   CompassIcon,
-  SparklesIcon,
-  PanelLeftCloseIcon,
-  PanelLeftOpenIcon
+  SparklesIcon
 } from '@/components/icons/NavIcons';
-import { useSidebar } from '@/contexts/SidebarContext';
 
 export function Topbar() {
   const { data: session } = useSession();
-  const { isCollapsed, toggleSidebar } = useSidebar();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -286,42 +282,7 @@ export function Topbar() {
           </span>
         </div>
 
-        <div className="hide-on-tablet" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            title={isCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'}
-            style={{
-              background: 'none',
-              border: '1px solid #e2e8f0',
-              borderRadius: 8,
-              width: 32,
-              height: 32,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: '#475569',
-              transition: 'all 0.15s ease',
-              marginRight: 4
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#f1f5f9';
-              e.currentTarget.style.color = '#0f172a';
-              e.currentTarget.style.borderColor = '#cbd5e1';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = '#475569';
-              e.currentTarget.style.borderColor = '#e2e8f0';
-            }}
-          >
-            {isCollapsed ? (
-              <PanelLeftOpenIcon size={17} color="currentColor" strokeWidth={1.8} />
-            ) : (
-              <PanelLeftCloseIcon size={17} color="currentColor" strokeWidth={1.8} />
-            )}
-          </button>
+        <div className="hide-on-tablet" style={{ display: 'flex', alignItems: 'center' }}>
           <Breadcrumbs compact />
         </div>
       </div>

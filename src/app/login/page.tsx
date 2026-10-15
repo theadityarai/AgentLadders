@@ -45,6 +45,9 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       const newDevId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
       localStorage.setItem('agentladders_device_id', newDevId);
+      const screenRes = `${window.screen.width} × ${window.screen.height}`;
+      const tz = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'Asia/Kolkata';
+      fetch(`/api/auth/sessions?deviceId=${encodeURIComponent(newDevId)}&screen=${encodeURIComponent(screenRes)}&timezone=${encodeURIComponent(tz)}`).catch(() => {});
     }
 
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;

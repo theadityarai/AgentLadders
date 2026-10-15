@@ -721,7 +721,7 @@ export default function TasksPage() {
 
         {/* View Mode 1: Kanban Board */}
         {viewMode === 'board' ? (
-          <div className="touch-scroll-container" style={{ display: 'flex', gap: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24 }}>
+          <div className="touch-scroll-container kanban-snap-container" style={{ display: 'flex', gap: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24 }}>
             {kanbanColumns.map((col, colIdx) => {
               const colTasks = filteredData.filter(t => {
                 const tStatus = (t.status || '').trim().toLowerCase();
@@ -737,6 +737,7 @@ export default function TasksPage() {
               return (
                 <div
                   key={col.id}
+                  className="kanban-snap-lane"
                   style={{
                     flex: '0 0 min(320px, 85vw)',
                     backgroundColor: '#f8fafc',
@@ -896,14 +897,209 @@ export default function TasksPage() {
             })}
           </div>
         ) : (
-          /* View Mode 2: Detailed List Table */
+          /* View Mode 2: Detailed List Table & Mobile Cards */
           <div style={{ paddingBottom: 30 }}>
-            <DataTable
-              columns={columns}
-              data={filteredData}
-              loading={loading}
-              emptyMessage="No tasks found matching your filter criteria."
-            />
+            <div className="desktop-only-table">
+              <DataTable
+                columns={columns}
+                data={filteredData}
+                loading={loading}
+                emptyMessage="No tasks found matching your filter criteria."
+              />
+            </div>
+
+            <div className="mobile-only-cards">
+              {filteredData.length === 0 ? (
+                <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '48px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>No tasks found</div>
+                  <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
+                </div>
+              ) : (
+                filteredData.map(task => {
+                  const priorityBadge = getPriorityBadge(task.priority);
+                  const isOverdue = task.dueDate < todayStr && task.status !== 'Completed';
+
+                  return (
+                    <div
+                      key={`m-task-${task.id}`}
+                      style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 12,
+                        border: '1px solid var(--border)',
+                        padding: '14px 16px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 10
+                      }}
+                    >
+                      {/* Top Bar: Checkbox + Priority + Category */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(task)}
+                            style={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: 6,
+                              border: task.status === 'Completed' ? 'none' : '1.5px solid #cbd5e1',
+                              backgroundColor: task.status === 'Completed' ? '#059669' : '#ffffff',
+                              color: '#ffffff',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexShrink: 0
+                            }}
+                          >
+                            {task.status === 'Completed' && <CheckIcon size={14} color="#ffffff" strokeWidth={3} />}
+                          </button>
+                          <span style={{ fontSize: 11, fontWeight: 700, backgroundColor: priorityBadge.bg, color: priorityBadge.text, border: `1px solid ${priorityBadge.border}`, padding: '2px 8px', borderRadius: 4 }}>
+                            {task.priority || 'Medium'}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 11.5, color: '#64748b', fontWeight: 500 }}>
+                          {getCategoryIcon(task.category)} {task.category || 'Follow-up'}
+                        </span>
+                      </div>
+
+                      {/* Title & Notes */}
+                      <div>
+                        <h4
+                          onClick={() => handleOpenEdit(task)}
+                          style={{
+                            fontSize: 14.5,
+                            fontWeight: 700,
+                            color: task.status === 'Completed' ? '#94a3b8' : '#0f172a',
+                            textDecoration: task.status === 'Completed' ? 'line-through' : 'none',
+                            margin: '0 0 4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {task.title}
+                        </h4>
+                        {task.relatedTo && (
+                          <div style={{ fontSize: 12, color: '#059669', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span>🔗</span>
+                            <span>{task.relatedTo}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Meta & Status Select */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 12px',
+                        backgroundColor: '#f8fafc',
+                        borderRadius: 8,
+                        fontSize: 12
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontWeight: isOverdue ? 700 : 500, color: isOverdue ? '#dc2626' : '#64748b' }}>
+                            📅 {task.dueDate} {isOverdue && <span style={{ color: '#dc2626', fontWeight: 800 }}>• OVERDUE</span>}
+                          </span>
+                        </div>
+                        <div>
+                          <select
+                            value={task.status}
+                            onChange={(e) => handleMoveKanban(task.id, e.target.value)}
+                            style={{
+                              fontSize: 11.5,
+                              fontWeight: 700,
+                              padding: '3px 8px',
+                              borderRadius: 6,
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: '#fff',
+                              color: '#334155',
+                              cursor: 'pointer',
+                              outline: 'none'
+                            }}
+                          >
+                            {taskStatuses.map(st => (
+                              <option key={st} value={st}>{st}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Touch Action Buttons Row (min 44px height for mobile) */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, paddingTop: 4 }}>
+                        <button
+                          type="button"
+                          onClick={() => handleWhatsAppAction(task)}
+                          title="WhatsApp Follow-up"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            minHeight: 44,
+                            borderRadius: 8,
+                            backgroundColor: '#ecfdf5',
+                            border: '1px solid #a7f3d0',
+                            color: '#059669',
+                            fontWeight: 700,
+                            fontSize: 12.5,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <WhatsAppIcon size={15} color="#059669" />
+                          <span>WhatsApp</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(task)}
+                          title="Edit Task"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            minHeight: 44,
+                            borderRadius: 8,
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #cbd5e1',
+                            color: '#334155',
+                            fontWeight: 700,
+                            fontSize: 12.5,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <EditIcon size={14} color="#475569" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(task.id, task.title)}
+                          title="Delete Task"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            minHeight: 44,
+                            borderRadius: 8,
+                            backgroundColor: '#fff1f2',
+                            border: '1px solid #fecdd3',
+                            color: '#dc2626',
+                            fontWeight: 700,
+                            fontSize: 12.5,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          <TrashIcon size={14} color="#dc2626" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         )}
 

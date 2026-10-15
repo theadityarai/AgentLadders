@@ -19,8 +19,6 @@ import {
   SettingsIcon,
   ShieldIcon,
   CompassIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   PanelLeftCloseIcon,
   PanelLeftOpenIcon
 } from '@/components/icons/NavIcons';
@@ -172,39 +170,6 @@ export function Sidebar() {
             </div>
           )}
         </div>
-
-        {/* Header Collapse Button (when expanded) */}
-        {!isCollapsed && (
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            title="Collapse sidebar (Ctrl+B)"
-            style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.65)',
-              borderRadius: 7,
-              width: 26,
-              height: 26,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              flexShrink: 0,
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.14)';
-              e.currentTarget.style.color = '#ffffff';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.65)';
-            }}
-          >
-            <ChevronLeftIcon size={14} color="currentColor" strokeWidth={2.2} />
-          </button>
-        )}
       </div>
 
       {/* Main Navigation */}

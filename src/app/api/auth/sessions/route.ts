@@ -100,10 +100,17 @@ export async function GET(req: NextRequest) {
   db.activeSessions = db.activeSessions || [];
   db.revokedSessions = db.revokedSessions || [];
 
+  // Prune stale revoked session entries older than 2 hours
+  const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+  db.revokedSessions = db.revokedSessions.filter(r => {
+    const t = new Date(r.revokedAt).getTime();
+    return !isNaN(t) && t > twoHoursAgo;
+  });
+
   const deviceId = req.nextUrl.searchParams.get('deviceId') || req.headers.get('x-device-id') || 'sess_current';
   const isCheck = req.nextUrl.searchParams.get('check') === 'true';
 
-  // Check if this device has been revoked/terminated
+  // Check if this device has been explicitly revoked/terminated
   const isRevoked = db.revokedSessions.some(r => r.id === deviceId && r.userId === user.id);
   if (isRevoked) {
     return NextResponse.json({
@@ -113,19 +120,38 @@ export async function GET(req: NextRequest) {
     }, { status: 401 });
   }
 
-  // If lightweight polling check, verify existence without re-creating
+  // If lightweight polling check, verify existence or auto-register if missing
   if (isCheck) {
-    const activeSession = db.activeSessions.find(s => s.id === deviceId && s.userId === user.id);
+    let activeSession = db.activeSessions.find(s => s.id === deviceId && s.userId === user.id);
     if (!activeSession) {
-      return NextResponse.json({
-        valid: false,
-        revoked: true,
-        error: 'Active session was terminated or expired.'
-      }, { status: 401 });
+      // Auto-register session for this authenticated user rather than falsely kicking them out
+      const ua = req.headers.get('user-agent') || '';
+      const parsedUa = parseUserAgent(ua);
+      const { ipAddress, location } = resolveIpAndLocation(req);
+      activeSession = {
+        id: deviceId,
+        userId: user.id,
+        userName: user.name,
+        userEmail: user.email,
+        browser: parsedUa.browser,
+        browserVersion: parsedUa.browserVersion,
+        os: parsedUa.os,
+        deviceType: parsedUa.deviceType,
+        deviceModel: parsedUa.deviceModel,
+        ipAddress,
+        location,
+        screen: '1920 × 1080',
+        timezone: 'Asia/Kolkata',
+        userAgent: ua,
+        createdAt: new Date().toISOString(),
+        lastActive: new Date().toISOString()
+      };
+      db.activeSessions.push(activeSession);
+      saveDb(db);
+    } else {
+      activeSession.lastActive = new Date().toISOString();
+      saveDb(db);
     }
-    // Session is valid - update heartbeat
-    activeSession.lastActive = new Date().toISOString();
-    saveDb(db);
     return NextResponse.json({ valid: true, revoked: false });
   }
 

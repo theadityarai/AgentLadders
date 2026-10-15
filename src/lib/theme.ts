@@ -283,71 +283,130 @@ export const STATUS_COLOR_PALETTES: StatusColorPalette[] = [
   { id: 'slate', name: 'Slate Gray', bg: '#f1f5f9', text: '#334155', border: '#cbd5e1', dot: '#64748b' }
 ];
 
+export const DEFAULT_STATUS_COLORS_BY_NAME: Record<string, string> = {
+  // 1. Property Listing Statuses (all 6 distinct colors)
+  'Available': 'emerald',
+  'Under Offer': 'amber',
+  'Under Negotiation': 'coral',
+  'Sold': 'purple',
+  'Rented': 'sky',
+  'Off Market': 'slate',
+
+  // 2. Inquiry / Lead Statuses (all 8 distinct colors)
+  'New Inbound': 'blue',
+  'Contacted': 'teal',
+  'Qualified': 'emerald',
+  'Site Visit Scheduled': 'purple',
+  'Negotiation': 'amber',
+  'Won': 'coral',
+  'Lost': 'rose',
+  'Dead': 'slate',
+
+  // 3. Deal Pipeline Stages (all 6 distinct colors)
+  'Token Received': 'coral',
+  'Agreement Drafted': 'blue',
+  'Registration Pending': 'purple',
+  'Closed Won': 'emerald',
+
+  // 4. Site Visit Statuses (all 6 distinct colors)
+  'Scheduled': 'blue',
+  'Confirmed': 'teal',
+  'Completed': 'emerald',
+  'Rescheduled': 'amber',
+  'Cancelled': 'slate',
+  'No Show': 'rose',
+
+  // 5. Task Statuses (all 5 distinct colors)
+  'Pending': 'amber',
+  'In Progress': 'blue',
+  'Overdue': 'rose',
+
+  // 6. Client Relationship Statuses (all 5 distinct colors)
+  'Active Search': 'emerald',
+  'In Contract': 'purple',
+  'Closed Client': 'teal',
+  'Past Client': 'sky',
+  'Inactive': 'slate',
+
+  // 7. Invoice & Billing Statuses (all 6 distinct colors)
+  'Draft': 'sky',
+  'Partially Paid': 'coral',
+  'Paid': 'emerald'
+};
+
+export const DEFAULT_AGENCY_STATUS_COLORS: Record<string, string> = {
+  ...DEFAULT_STATUS_COLORS_BY_NAME
+};
+
 export const DEFAULT_STATUS_COLOR_MAP: Record<string, string> = {
-  // Positive / Won / Available / Paid
+  // 1. Property Listing Statuses (all 6 distinct colors)
   'available': 'emerald',
-  'won': 'emerald',
+  'under offer': 'amber',
+  'under negotiation': 'coral',
+  'sold': 'purple',
+  'rented': 'sky',
+  'off market': 'slate',
+
+  // 2. Inquiry / Lead Statuses (all 8 distinct colors)
+  'new inbound': 'blue',
+  'new': 'blue',
+  'contacted': 'teal',
+  'qualified': 'emerald',
+  'site visit scheduled': 'purple',
+  'negotiation': 'amber',
+  'won': 'coral',
+  'lost': 'rose',
+  'dead': 'slate',
+
+  // 3. Deal Pipeline Stages (all 6 distinct colors)
+  'token received': 'coral',
+  'token paid': 'coral',
+  'agreement drafted': 'blue',
+  'registration pending': 'purple',
   'closed won': 'emerald',
-  'paid': 'emerald',
+
+  // 4. Site Visit Statuses (all 6 distinct colors)
+  'scheduled': 'blue',
+  'confirmed': 'teal',
   'completed': 'emerald',
-  'active': 'emerald',
+  'rescheduled': 'amber',
+  'cancelled': 'slate',
+  'no show': 'rose',
+
+  // 5. Task Statuses (all 5 distinct colors)
+  'pending': 'amber',
+  'in progress': 'blue',
+  'overdue': 'rose',
+
+  // 6. Client Relationship Statuses (all 5 distinct colors)
   'active search': 'emerald',
+  'active': 'emerald',
+  'in contract': 'purple',
+  'under contract': 'purple',
+  'closed client': 'teal',
+  'past client': 'sky',
+  'inactive': 'slate',
+
+  // 7. Invoice & Billing Statuses (all 6 distinct colors)
+  'draft': 'sky',
+  'partially paid': 'coral',
+  'paid': 'emerald',
+
+  // 8. Payment Statuses (all 5 distinct colors)
+  'pending clearance': 'amber',
+  'processing': 'blue',
+  'failed': 'rose',
+  'refunded': 'slate',
+
+  // Additional general aliases & tags
+  'open': 'blue',
   'verified': 'emerald',
   'success': 'emerald',
   'ready to move': 'emerald',
-
-  // Informative / New / Draft / Open / Blue
-  'new': 'blue',
-  'new inbound': 'blue',
-  'draft': 'blue',
-  'open': 'blue',
-  'in progress': 'blue',
-  'agreement drafted': 'blue',
-  'processing': 'blue',
-
-  // Pending / Negotiation / Scheduled / Amber
-  'pending': 'amber',
-  'pending clearance': 'amber',
-  'negotiation': 'amber',
-  'contacted': 'amber',
-  'scheduled': 'amber',
-  'partially paid': 'amber',
-  'token received': 'amber',
-  'token paid': 'amber',
-  'under offer': 'amber',
-  'under negotiation': 'amber',
-  'in contract': 'amber',
-
-  // Verified / Qualified / Confirmed / Teal
-  'qualified': 'teal',
-  'confirmed': 'teal',
-  'rescheduled': 'teal',
-
-  // High intent / Contract / VIP / Purple
-  'under contract': 'purple',
   'booked': 'purple',
   'vip': 'purple',
-  'site visit scheduled': 'purple',
-  'registration pending': 'purple',
-
-  // Red / Cancelled / Lost / Overdue / Failed
-  'lost': 'rose',
-  'dead': 'rose',
-  'cancelled': 'rose',
-  'overdue': 'rose',
-  'failed': 'rose',
-  'no show': 'rose',
   'closed lost': 'rose',
-  'urgent': 'rose',
-
-  // Dark Neutral / Slate / Closed
-  'sold': 'slate',
-  'rented': 'slate',
-  'off market': 'slate',
-  'closed client': 'slate',
-  'past client': 'slate',
-  'inactive': 'slate',
-  'refunded': 'slate'
+  'urgent': 'rose'
 };
 
 // In-memory cache for fast, synchronous lookups
@@ -415,7 +474,7 @@ export function getStatusColorStyle(
   }
 
   // 3. Check default status color mapping
-  const mappedPaletteId = DEFAULT_STATUS_COLOR_MAP[lower];
+  const mappedPaletteId = DEFAULT_STATUS_COLOR_MAP[lower] || DEFAULT_STATUS_COLORS_BY_NAME[trimmed];
   if (mappedPaletteId) {
     const matched = STATUS_COLOR_PALETTES.find(p => p.id === mappedPaletteId);
     if (matched) return { ...matched, paletteId: matched.id };

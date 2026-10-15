@@ -24,6 +24,7 @@ import {
   DEFAULT_PAYMENT_STATUSES,
   DEFAULT_INVOICE_SETTINGS
 } from '@/lib/formatters';
+import { DEFAULT_AGENCY_STATUS_COLORS } from '@/lib/theme';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -103,8 +104,17 @@ export async function GET() {
       modified = true;
     }
     if (!agency.statusColors || typeof agency.statusColors !== 'object') {
-      agency.statusColors = {};
+      agency.statusColors = { ...DEFAULT_AGENCY_STATUS_COLORS };
       modified = true;
+    } else {
+      let colorsUpdated = false;
+      for (const [key, val] of Object.entries(DEFAULT_AGENCY_STATUS_COLORS)) {
+        if (!agency.statusColors[key]) {
+          agency.statusColors[key] = val;
+          colorsUpdated = true;
+        }
+      }
+      if (colorsUpdated) modified = true;
     }
     if (!agency.timezone) {
       agency.timezone = 'Asia/Kolkata';

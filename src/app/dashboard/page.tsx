@@ -786,38 +786,38 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={item.id}
+                    className="priority-item-row"
                     style={{
-                      padding: '14px 20px',
                       borderBottom: idx === filteredPriorities.length - 1 ? 'none' : '1px solid #f1f5f9',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 14,
-                      transition: 'background-color 0.15s ease'
                     }}
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fafafa')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
-                    {/* Status Tag Pill */}
-                    <span style={{
-                      backgroundColor: badgeConfig.bg,
-                      color: badgeConfig.text,
-                      border: `1px solid ${badgeConfig.border}`,
-                      fontSize: 11.5,
-                      fontWeight: 700,
-                      padding: '4px 10px',
-                      borderRadius: 20,
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      minWidth: 88,
-                      textAlign: 'center'
-                    }}>
-                      {item.category}
-                    </span>
+                    {/* Top Row (Category Badge & Time) */}
+                    <div className="priority-item-top" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                      <span style={{
+                        backgroundColor: badgeConfig.bg,
+                        color: badgeConfig.text,
+                        border: `1px solid ${badgeConfig.border}`,
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        padding: '3px 9px',
+                        borderRadius: 20,
+                        whiteSpace: 'nowrap',
+                        display: 'inline-block',
+                        minWidth: 80,
+                        textAlign: 'center'
+                      }}>
+                        {item.category}
+                      </span>
+                      <div className="show-on-mobile" style={{ fontSize: 12, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>
+                        {item.time}
+                      </div>
+                    </div>
 
                     {/* Content: Title & Subtitle */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
+                    <div style={{ flex: 1, minWidth: 0, width: '100%' }}>
+                      <div className="priority-item-title" style={{
                         fontSize: 14,
                         fontWeight: 700,
                         color: '#0f172a',
@@ -827,7 +827,7 @@ export default function DashboardPage() {
                       }}>
                         {item.title}
                       </div>
-                      <div style={{
+                      <div className="priority-item-subtitle" style={{
                         fontSize: 12.5,
                         color: '#64748b',
                         marginTop: 2,
@@ -840,13 +840,13 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    {/* Time Slot */}
-                    <div style={{ fontSize: 12.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap', flexShrink: 0, width: 72, textAlign: 'right' }}>
+                    {/* Desktop Time Slot */}
+                    <div className="hide-on-mobile" style={{ fontSize: 12.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap', flexShrink: 0, width: 72, textAlign: 'right' }}>
                       {item.time}
                     </div>
 
                     {/* Direct Action Button */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <div className="priority-item-actions" style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                       {/* Priority Action 1: Call or Done or WhatsApp */}
                       {item.category === 'Overdue' && item.phone ? (
                         <button

@@ -294,6 +294,11 @@
   margin-top: 16px;
 }
 
+.configItemCard {
+  padding: 22px 24px;
+  gap: 16px;
+}
+
 @media (max-width: 1024px) {
   .settingsLayout {
     flex-direction: column;

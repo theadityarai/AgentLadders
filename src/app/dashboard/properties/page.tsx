@@ -489,6 +489,12 @@ export default function PropertiesPage() {
     setCurrentPage(1);
   }, [search, filter, purposeFilter, sortBy]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setViewMode('grid');
+    }
+  }, []);
+
   const isPropertyRent = useCallback((p: Property) => {
     return p.purpose === 'For Rent' || p.listingType === 'For Rent';
   }, []);
@@ -1462,9 +1468,10 @@ export default function PropertiesPage() {
 
       {/* Property Display: Expandable List View vs Card Grid */}
       {viewMode === 'list' ? (
-        <div style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
+        <>
+          <div className="desktop-only-table" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Property</th>
@@ -1664,7 +1671,23 @@ export default function PropertiesPage() {
             </table>
           </div>
         </div>
-      ) : (
+
+        <div className="mobile-only-cards properties-card-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
+          {paginatedProperties.map(prop => (
+            <PropertyCardItem 
+              key={`m-prop-${prop.id}`} 
+              prop={prop} 
+              statusStyle={getStatusStyle(prop.status)} 
+              priceFormatted={formatINR(prop.price)} 
+              onCopyPitchLink={handleCopyPitchLink}
+              onShare={setSharingProperty}
+              onEdit={handleOpenEdit}
+              onDelete={setDeletingProperty}
+            />
+          ))}
+        </div>
+      </>
+    ) : (
         <div className="properties-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 24 }}>
           {paginatedProperties.map(prop => (
             <PropertyCardItem 

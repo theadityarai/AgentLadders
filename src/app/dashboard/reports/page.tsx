@@ -440,9 +440,9 @@ export default function ReportsPage() {
         />
 
         {/* 1. Top Executive Cockpit Telemetry Cards */}
-        <div style={{
+        <div className="dashboard-metric-grid" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           gap: '16px'
         }}>
           {/* Card 1: Audited Won Volume */}
@@ -1117,7 +1117,7 @@ export default function ReportsPage() {
               </div>
 
               {/* KPI Summary Strip */}
-              <div style={{
+              <div className="dashboard-metric-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '12px',

@@ -17,6 +17,9 @@ import {
   getStatusColorStyle,
   getStoredStatusColors,
   saveStoredStatusColors,
+  DEFAULT_STATUS_COLOR_MAP,
+  DEFAULT_STATUS_COLORS_BY_NAME,
+  DEFAULT_AGENCY_STATUS_COLORS,
   StatusColorPalette
 } from '@/lib/theme';
 import { 
@@ -391,12 +394,13 @@ export default function SettingsPage() {
           taskStatuses: (data.agency.taskStatuses && data.agency.taskStatuses.length > 0) ? data.agency.taskStatuses : DEFAULT_TASK_STATUSES,
           clientStatuses: (data.agency.clientStatuses && data.agency.clientStatuses.length > 0) ? data.agency.clientStatuses : DEFAULT_CLIENT_STATUSES,
           invoiceStatuses: (data.agency.invoiceStatuses && data.agency.invoiceStatuses.length > 0) ? data.agency.invoiceStatuses : DEFAULT_INVOICE_STATUSES,
-          statusColors: data.agency.statusColors || {}
+          statusColors: {
+            ...DEFAULT_AGENCY_STATUS_COLORS,
+            ...(data.agency.statusColors || {})
+          }
         };
         setConfigs(loadedConfigs);
-        if (data.agency.statusColors) {
-          saveStoredStatusColors(data.agency.statusColors);
-        }
+        saveStoredStatusColors(loadedConfigs.statusColors);
         if (typeof window !== 'undefined') {
           try {
             localStorage.setItem('agentladders_agency_configs', JSON.stringify(loadedConfigs));
@@ -1021,7 +1025,8 @@ export default function SettingsPage() {
     const updatedColors = { ...configs.statusColors };
     if (isStatus) {
       defaults.forEach(d => {
-        delete updatedColors[d];
+        const defaultColor = DEFAULT_STATUS_COLORS_BY_NAME[d] || DEFAULT_STATUS_COLOR_MAP[d.toLowerCase()] || 'emerald';
+        updatedColors[d] = defaultColor;
       });
       saveStoredStatusColors(updatedColors);
     }
@@ -3205,6 +3210,8 @@ export default function SettingsPage() {
                             boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
                             display: 'flex',
                             flexDirection: 'column',
+                            gap: 16,
+                            padding: '22px 24px',
                             transition: 'border-color 0.15s ease'
                           }}
                         >
@@ -3289,6 +3296,11 @@ export default function SettingsPage() {
                                 onClick={() => {
                                   setConfigModal({ mode: 'add', type: sec.key, label: getCategoryLabel(sec.key) });
                                   setConfigInputValue('');
+                                  if (isStatusCategory(sec.key)) {
+                                    const usedColors = items.map(it => configs.statusColors[it] || DEFAULT_STATUS_COLORS_BY_NAME[it] || DEFAULT_STATUS_COLOR_MAP[it.toLowerCase()]);
+                                    const unusedPalette = STATUS_COLOR_PALETTES.find(p => !usedColors.includes(p.id)) || STATUS_COLOR_PALETTES[0];
+                                    setSelectedStatusColor(unusedPalette.id);
+                                  }
                                 }}
                                 style={{
                                   padding: '6px 12px',

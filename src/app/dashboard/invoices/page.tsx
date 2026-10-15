@@ -1309,14 +1309,228 @@ export default function InvoicesPage() {
           </div>
         </div>
 
-        {/* Data Table */}
+        {/* Data Table & Mobile Cards */}
         <div style={{ paddingBottom: 30 }}>
-          <DataTable
-            columns={columns}
-            data={filteredData}
-            loading={loading}
-            emptyMessage="No invoices found. Issue your first brokerage commission invoice."
-          />
+          <div className="desktop-only-table">
+            <DataTable
+              columns={columns}
+              data={filteredData}
+              loading={loading}
+              emptyMessage="No invoices found. Issue your first brokerage commission invoice."
+            />
+          </div>
+
+          <div className="mobile-only-cards">
+            {filteredData.length === 0 ? (
+              <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '48px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>No invoices found</div>
+                <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
+              </div>
+            ) : (
+              filteredData.map(inv => {
+                const subtotal = inv.items?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || inv.amount;
+                const isNoTax = inv.taxType === 'none';
+                const taxRate = isNoTax ? 0 : (Number(inv.taxRate) || 18);
+                const taxAmount = isNoTax ? 0 : Math.round(subtotal * (taxRate / 100));
+                const total = subtotal + taxAmount;
+                const isPastDue = new Date(inv.dueDate) < new Date() && inv.status !== 'Paid';
+                const statusStyle = getStatusColorStyle(inv.status);
+
+                return (
+                  <div
+                    key={`m-inv-${inv.id}`}
+                    onClick={() => setSelectedInvoiceForPrint(inv)}
+                    style={{
+                      backgroundColor: '#ffffff',
+                      borderRadius: 12,
+                      border: '1px solid var(--border)',
+                      padding: '14px 16px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 10,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {/* Header: Invoice # and Status Dropdown */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
+                          #{inv.number}
+                        </span>
+                        <span style={{ fontSize: 11, color: '#64748b' }}>
+                          {inv.issueDate}
+                        </span>
+                      </div>
+                      <div onClick={e => e.stopPropagation()}>
+                        <select
+                          value={inv.status}
+                          onChange={(e) => handleStatusChange(inv, e.target.value)}
+                          style={{
+                            backgroundColor: statusStyle.bg,
+                            color: statusStyle.text,
+                            border: `1.5px solid ${statusStyle.border}`,
+                            padding: '4px 8px',
+                            borderRadius: 6,
+                            fontSize: '11.5px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            outline: 'none'
+                          }}
+                        >
+                          {invoiceStatuses.map(st => (
+                            <option key={st} value={st}>{st}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Client & Deal Information */}
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>
+                        {inv.clientName}
+                      </div>
+                      <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 2, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        {inv.dealRef && <span>Deal: <strong style={{ color: '#334155' }}>{inv.dealRef}</strong></span>}
+                        {inv.clientPhone && <span>• {inv.clientPhone}</span>}
+                      </div>
+                    </div>
+
+                    {/* Financial Summary Box */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '10px 12px',
+                      backgroundColor: '#f8fafc',
+                      borderRadius: 8,
+                      border: '1px solid #f1f5f9'
+                    }}>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+                          Amount Due
+                        </div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: '#059669', marginTop: 2 }}>
+                          {formatActualINR(total)}
+                        </div>
+                        <div style={{ fontSize: 10.5, color: '#94a3b8' }}>
+                          Base: {formatActualINR(subtotal)}{!isNoTax && taxRate > 0 ? ` + ${taxRate}% GST` : ''}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: isPastDue ? '#dc2626' : '#64748b' }}>
+                          {isPastDue ? 'OVERDUE' : 'Due Date'}
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: isPastDue ? '#dc2626' : '#334155', marginTop: 2 }}>
+                          {inv.dueDate}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Touch Action Buttons Row (min 44px height for touch accessibility) */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, paddingTop: 4 }} onClick={e => e.stopPropagation()}>
+                      {/* WhatsApp Share */}
+                      <button
+                        type="button"
+                        onClick={() => setSharingInvoice(inv)}
+                        title="Share on WhatsApp"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 4,
+                          minHeight: 44,
+                          borderRadius: 8,
+                          backgroundColor: '#f0fdf4',
+                          border: '1px solid #bbf7d0',
+                          color: '#059669',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <WhatsAppIcon size={15} color="#059669" />
+                        <span>WA</span>
+                      </button>
+
+                      {/* View / Print */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInvoiceForPrint(inv)}
+                        title="View / Print PDF"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 4,
+                          minHeight: 44,
+                          borderRadius: 8,
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #cbd5e1',
+                          color: '#334155',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <PrinterIcon size={14} color="#475569" />
+                        <span>View</span>
+                      </button>
+
+                      {/* Edit */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(inv)}
+                        title="Edit Invoice"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 4,
+                          minHeight: 44,
+                          borderRadius: 8,
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #cbd5e1',
+                          color: '#334155',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <EditIcon size={14} color="#475569" />
+                        <span>Edit</span>
+                      </button>
+
+                      {/* Delete */}
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(inv.id, inv.number)}
+                        title="Delete Invoice"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 4,
+                          minHeight: 44,
+                          borderRadius: 8,
+                          backgroundColor: '#fff1f2',
+                          border: '1px solid #fecdd3',
+                          color: '#dc2626',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <TrashIcon size={14} color="#dc2626" />
+                        <span>Del</span>
+                      </button>
+                    </div>
+
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
       </div>

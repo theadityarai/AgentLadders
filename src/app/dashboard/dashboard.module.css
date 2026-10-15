@@ -122,25 +122,28 @@
     max-width: 100vw !important;
   }
   .mainContent {
-    padding: 20px 20px 96px !important;
+    padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 16px)) !important;
     width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
   }
   .statsRow {
     grid-template-columns: repeat(2, 1fr) !important;
+    gap: 14px !important;
   }
   .gridTwo {
     grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 }
 
 @media (max-width: 640px) {
   .mainContent {
-    padding: 12px 12px 92px !important;
+    padding: 12px 12px calc(92px + env(safe-area-inset-bottom, 16px)) !important;
   }
   .statsRow {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
   }
 }
 

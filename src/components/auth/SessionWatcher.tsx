@@ -30,9 +30,10 @@ export function SessionWatcher() {
           }
         });
 
-        if (res.status === 401 || !res.ok) {
+        if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          if (data.revoked || res.status === 401) {
+          // Only force logout if the server explicitly confirmed this device was revoked/terminated remotely
+          if (data && data.revoked === true) {
             isTerminatingRef.current = true;
             console.warn('[SessionWatcher] Active session was terminated remotely. Logging out.');
             localStorage.removeItem('agentladders_device_id');
