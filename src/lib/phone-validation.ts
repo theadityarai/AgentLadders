@@ -25,16 +25,46 @@ export const COUNTRY_CODES: CountryCodeOption[] = [
 /**
  * Extracts country code (default +91) and the 10-digit number from any raw phone string.
  */
-export function extractCountryCodeAndPhone(input: string | null | undefined, defaultCode = '+91'): { countryCode: string; digits: string } {
+export function extractCountryCodeAndPhone(
+  input: string | null | undefined, 
+  defaultCode = '+91'
+): { countryCode: string; digits: string } {
   if (!input) return { countryCode: defaultCode, digits: '' };
   const str = input.trim();
-  for (const c of COUNTRY_CODES) {
+
+  // 1. Check if starts with a recognized '+' code (sort longest first e.g. +971 before +91)
+  const sorted = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length);
+  for (const c of sorted) {
     if (str.startsWith(c.code)) {
       const rest = str.slice(c.code.length).trim();
-      return { countryCode: c.code, digits: extract10DigitPhone(rest) };
+      const cleaned = rest.replace(/\D/g, '').slice(0, 10);
+      return { countryCode: c.code, digits: cleaned };
     }
   }
-  return { countryCode: defaultCode, digits: extract10DigitPhone(str) };
+
+  // 2. If it starts with '+' followed by another custom country code (e.g. "+44 7911...")
+  if (str.startsWith('+')) {
+    const spaceIdx = str.indexOf(' ');
+    if (spaceIdx > 1) {
+      const customCode = str.slice(0, spaceIdx).trim();
+      const rest = str.slice(spaceIdx).replace(/\D/g, '').slice(0, 10);
+      return { countryCode: customCode, digits: rest };
+    }
+  }
+
+  // 3. Check for standard 12-digit Indian number without '+' (e.g. 919820012345)
+  const digitsOnly = str.replace(/\D/g, '');
+  if (digitsOnly.length === 12 && digitsOnly.startsWith('91')) {
+    return { countryCode: '+91', digits: digitsOnly.slice(2) };
+  }
+
+  // 4. Check for 11-digit number with leading trunk 0 (e.g. 09820012345)
+  if (digitsOnly.length === 11 && digitsOnly.startsWith('0')) {
+    return { countryCode: defaultCode, digits: digitsOnly.slice(1) };
+  }
+
+  // 5. Default: treat whatever digits exist (up to 10) as the user's phone digits
+  return { countryCode: defaultCode, digits: digitsOnly.slice(0, 10) };
 }
 
 /**
@@ -43,30 +73,8 @@ export function extractCountryCodeAndPhone(input: string | null | undefined, def
  */
 export function extract10DigitPhone(phone: string | null | undefined): string {
   if (!phone) return '';
-  const digits = String(phone).replace(/\D/g, '');
-
-  // Case 1: If 12 digits and starts with 91 (e.g. 919820045678)
-  if (digits.length === 12 && digits.startsWith('91')) {
-    return digits.slice(2);
-  }
-
-  // Case 2: If 11 digits and starts with 0 (e.g. 09820045678)
-  if (digits.length === 11 && digits.startsWith('0')) {
-    return digits.slice(1);
-  }
-
-  // Case 3: If 10 digits
-  if (digits.length === 10) {
-    return digits;
-  }
-
-  // Case 4: If more than 10 digits, take the trailing 10 digits
-  if (digits.length > 10) {
-    return digits.slice(-10);
-  }
-
-  // Fewer than 10 digits
-  return digits;
+  const parsed = extractCountryCodeAndPhone(phone);
+  return parsed.digits;
 }
 
 /**
@@ -86,10 +94,10 @@ export function isValid10DigitPhone(phone: string | null | undefined): boolean {
  */
 export function format10DigitDisplay(phone: string | null | undefined, includePrefix = true): string {
   if (!phone) return '';
-  const ten = extract10DigitPhone(phone);
-  if (ten.length !== 10) return String(phone);
-  const formatted = `${ten.slice(0, 5)} ${ten.slice(5)}`;
-  return includePrefix ? `+91 ${formatted}` : formatted;
+  const parsed = extractCountryCodeAndPhone(phone);
+  if (parsed.digits.length !== 10) return String(phone);
+  const formatted = `${parsed.digits.slice(0, 5)} ${parsed.digits.slice(5)}`;
+  return includePrefix ? `${parsed.countryCode} ${formatted}` : formatted;
 }
 
 /**
@@ -97,9 +105,10 @@ export function format10DigitDisplay(phone: string | null | undefined, includePr
  * e.g., "919820045678"
  */
 export function formatForWhatsApp(phone: string | null | undefined, countryCode = '91'): string {
-  const ten = extract10DigitPhone(phone);
-  const code = countryCode.replace(/\D/g, '') || '91';
-  return `${code}${ten}`;
+  if (!phone) return '';
+  const parsed = extractCountryCodeAndPhone(phone);
+  const code = (parsed.countryCode ? parsed.countryCode.replace(/\D/g, '') : countryCode.replace(/\D/g, '')) || '91';
+  return `${code}${parsed.digits}`;
 }
 
 /**

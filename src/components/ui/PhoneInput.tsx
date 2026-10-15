@@ -58,7 +58,7 @@ export function PhoneInput({
   }, [value, controlledCountryCode]);
 
   const activeCode = controlledCountryCode || internalCode;
-  const rawDigits = extract10DigitPhone(value);
+  const rawDigits = parsed.digits;
   const isValid = rawDigits.length === 10;
   const isTouched = rawDigits.length > 0;
 
@@ -73,10 +73,25 @@ export function PhoneInput({
   };
 
   const handleDigitsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Strictly filter non-digit characters and truncate to maximum 10 digits
-    const cleanedDigits = e.target.value.replace(/\D/g, '').slice(0, 10);
-    const fullPhone = cleanedDigits ? `${activeCode} ${cleanedDigits}` : '';
-    onChange(fullPhone, cleanedDigits, activeCode);
+    const inputVal = e.target.value;
+    let targetCode = activeCode;
+    let cleanedDigits = '';
+
+    if (inputVal.includes('+')) {
+      const extracted = extractCountryCodeAndPhone(inputVal, activeCode);
+      targetCode = extracted.countryCode;
+      cleanedDigits = extracted.digits.slice(0, 10);
+      if (targetCode !== activeCode) {
+        setInternalCode(targetCode);
+        if (onCountryCodeChange) onCountryCodeChange(targetCode);
+      }
+    } else {
+      // Strictly numeric, capped at 10 digits
+      cleanedDigits = inputVal.replace(/\D/g, '').slice(0, 10);
+    }
+
+    const fullPhone = cleanedDigits ? `${targetCode} ${cleanedDigits}` : '';
+    onChange(fullPhone, cleanedDigits, targetCode);
   };
 
   return (
