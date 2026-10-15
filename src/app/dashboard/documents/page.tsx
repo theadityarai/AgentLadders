@@ -51,38 +51,6 @@ const DOCUMENT_CATEGORIES = [
 
 type DocCategory = typeof DOCUMENT_CATEGORIES[number];
 
-// Standard legal & operational real estate starter templates
-const REAL_ESTATE_TEMPLATES = [
-  {
-    title: 'Sole Selling Brokerage Agreement',
-    category: 'Contracts & MOUs',
-    format: 'PDF / DOC',
-    desc: 'Standard RERA compliant agency mandate granting exclusive or semi-exclusive marketing rights.',
-    sampleFileName: 'Agency_Sole_Selling_Rights_Mandate.pdf'
-  },
-  {
-    title: 'Client Tenant Verification Form',
-    category: 'Client KYC & Identity',
-    format: 'PDF Form',
-    desc: 'Police intimation and identity declaration form for residential rental agreements.',
-    sampleFileName: 'Tenant_Police_Verification_KYC.pdf'
-  },
-  {
-    title: 'Token Advance Acknowledgment Receipt',
-    category: 'Payment Receipts',
-    format: 'PDF Document',
-    desc: 'Official earnest money receipt with non-refundable clauses and title escrow timeline.',
-    sampleFileName: 'Token_Advance_Escrow_Receipt.pdf'
-  },
-  {
-    title: 'Property Handover Inspection Checklist',
-    category: 'Brochures & Floor Plans',
-    format: 'Audit Sheet',
-    desc: 'Room-by-room inventory, fittings, keys, electricity meter reading, and possession signoff.',
-    sampleFileName: 'Possession_Handover_Inspection_Checklist.pdf'
-  }
-];
-
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -707,39 +675,6 @@ export default function DocumentsPage() {
     }
   };
 
-  const handleDownloadSample = (template: typeof REAL_ESTATE_TEMPLATES[0]) => {
-    const textContent =
-      `=================================================================\n` +
-      `       AGENTLADDERS OFFICIAL REAL ESTATE LEGAL TEMPLATE          \n` +
-      `=================================================================\n` +
-      `Document Title:    ${template.title}\n` +
-      `Category:          ${template.category}\n` +
-      `Format Compliance: RERA & Indian Real Estate Law Standard\n` +
-      `Generated On:      ${new Date().toLocaleDateString('en-IN')}\n` +
-      `-----------------------------------------------------------------\n` +
-      `PURPOSE & SCOPE:\n` +
-      `${template.desc}\n` +
-      `-----------------------------------------------------------------\n` +
-      `TERMS & MANDATE PROVISIONS:\n` +
-      `1. PARTIES: Entered into between Owner / Landlord and Real Estate Broker.\n` +
-      `2. COMMISSION SPLIT: Standard 1% to 2% brokerage due upon registration.\n` +
-      `3. VALIDITY & ESCROW: Token advance strictly acknowledged in written receipt.\n` +
-      `4. JURISDICTION: Governed by the local civil court and RERA Appellate.\n` +
-      `=================================================================\n` +
-      `Ready for execution. AgentLadders Agency Operations Vault\n`;
-
-    const blob = new Blob([textContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = template.sampleFileName.replace('.pdf', '.txt');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    setToast({ id: Date.now().toString(), type: 'info', title: 'Template Saved', message: `"${template.title}" downloaded to your device!` });
-  };
-
   const handleWhatsAppShare = (doc: DocumentItem) => {
     setSharingDoc(doc);
   };
@@ -1183,17 +1118,25 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
           </div>
         ) : viewMode === 'list' ? (
           <>
-            <div className="desktop-only-table" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20 }}>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20, width: '100%' }}>
+              <div style={{ width: '100%', overflowX: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: '27%' }} />
+                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '18%' }} />
+                    <col style={{ width: '13%' }} />
+                    <col style={{ width: '11%' }} />
+                    <col style={{ width: '17%' }} />
+                  </colgroup>
                   <thead>
                     <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border, #e2e8f0)' }}>
-                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Document</th>
-                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Category</th>
-                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Linked Record</th>
-                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Date &amp; Size</th>
-                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Uploaded By</th>
-                      <th style={{ padding: '12px 18px', fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
+                      <th style={{ padding: '12px 14px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Document</th>
+                      <th style={{ padding: '12px 10px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Category</th>
+                      <th style={{ padding: '12px 10px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Linked Record</th>
+                      <th style={{ padding: '12px 10px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Date &amp; Size</th>
+                      <th style={{ padding: '12px 10px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Uploaded By</th>
+                      <th style={{ padding: '12px 12px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1217,59 +1160,64 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                             onMouseLeave={e => (e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#ffffff' : '#fafafa')}
                           >
                             {/* Document Title & Icon */}
-                            <td style={{ padding: '14px 18px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <td style={{ padding: '12px 14px', overflow: 'hidden' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
                                 <div style={{
-                                  width: 42,
-                                  height: 42,
+                                  width: 36,
+                                  height: 36,
                                   borderRadius: 8,
                                   backgroundColor: '#f1f5f9',
                                   border: '1px solid #e2e8f0',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  fontSize: 22,
+                                  fontSize: 18,
                                   flexShrink: 0
                                 }}>
                                   {fileIcon}
                                 </div>
-                                <div style={{ minWidth: 0 }}>
+                                <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
                                   <div
-                                    style={{ fontWeight: 700, color: '#090d16', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}
+                                    style={{ fontWeight: 700, color: '#090d16', fontSize: 13.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                                     title={doc.name}
                                   >
                                     {doc.name}
                                   </div>
-                                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 3 }}>
-                                    <span style={{ fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 4, backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
+                                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 2 }}>
+                                    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '1px 5px', borderRadius: 4, backgroundColor: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0' }}>
                                       {doc.type}
                                     </span>
-                                    <span style={{ fontSize: 11.5, color: '#64748b' }}>{doc.size}</span>
+                                    <span style={{ fontSize: 11, color: '#64748b' }}>{doc.size}</span>
                                   </div>
                                 </div>
                               </div>
                             </td>
 
                             {/* Category Badge */}
-                            <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
+                            <td style={{ padding: '12px 10px', overflow: 'hidden' }}>
                               <span style={{
-                                fontSize: 11.5,
+                                fontSize: 11,
                                 fontWeight: 700,
-                                padding: '3px 10px',
-                                borderRadius: 14,
+                                padding: '3px 8px',
+                                borderRadius: 12,
                                 backgroundColor: catStyle.bg,
                                 color: catStyle.color,
-                                border: `1px solid ${catStyle.border}`
+                                border: `1px solid ${catStyle.border}`,
+                                display: 'inline-block',
+                                maxWidth: '100%',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
                               }}>
                                 {doc.category || 'General'}
                               </span>
                             </td>
 
                             {/* Linked Record */}
-                            <td style={{ padding: '14px 18px' }}>
+                            <td style={{ padding: '12px 10px', overflow: 'hidden' }}>
                               {relatedList.length > 0 ? (
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxWidth: 240 }}>
-                                  {relatedList.slice(0, 2).map((rel, i) => {
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%', overflow: 'hidden' }}>
+                                  {relatedList.slice(0, 1).map((rel, i) => {
                                     const icon = rel.startsWith('Property') ? '🏢' : rel.startsWith('Client') ? '👤' : '💼';
                                     return (
                                       <span
@@ -1279,13 +1227,13 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                           color: '#334155',
                                           backgroundColor: '#f1f5f9',
                                           border: '1px solid #e2e8f0',
-                                          padding: '2px 8px',
-                                          borderRadius: 12,
+                                          padding: '2px 7px',
+                                          borderRadius: 10,
                                           display: 'inline-flex',
                                           alignItems: 'center',
-                                          gap: 4,
+                                          gap: 3,
                                           fontWeight: 600,
-                                          maxWidth: '100%',
+                                          maxWidth: relatedList.length > 1 ? 'calc(100% - 55px)' : '100%',
                                           overflow: 'hidden',
                                           textOverflow: 'ellipsis',
                                           whiteSpace: 'nowrap'
@@ -1297,49 +1245,49 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                       </span>
                                     );
                                   })}
-                                  {relatedList.length > 2 && (
-                                    <span style={{ fontSize: 10.5, fontWeight: 700, color: '#64748b', padding: '2px 6px', borderRadius: 10, backgroundColor: '#e2e8f0' }}>
-                                      +{relatedList.length - 2} more
+                                  {relatedList.length > 1 && (
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: '#64748b', padding: '2px 5px', borderRadius: 8, backgroundColor: '#e2e8f0', flexShrink: 0 }}>
+                                      +{relatedList.length - 1}
                                     </span>
                                   )}
                                 </div>
                               ) : (
-                                <span style={{ color: '#94a3b8', fontSize: 12 }}>Unlinked</span>
+                                <span style={{ color: '#94a3b8', fontSize: 11.5 }}>Unlinked</span>
                               )}
                             </td>
 
                             {/* Date & Size */}
-                            <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
-                              <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 13 }}>
+                            <td style={{ padding: '12px 10px', overflow: 'hidden' }}>
+                              <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 12.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {new Date(doc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                               </div>
-                              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
+                              <div style={{ fontSize: 11, color: '#64748b', marginTop: 1, whiteSpace: 'nowrap' }}>
                                 {doc.size}
                               </div>
                             </td>
 
                             {/* Uploaded By */}
-                            <td style={{ padding: '14px 18px', whiteSpace: 'nowrap' }}>
-                              <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 13 }}>
+                            <td style={{ padding: '12px 10px', overflow: 'hidden' }}>
+                              <div style={{ fontWeight: 600, color: '#1e293b', fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {doc.uploadedBy || 'Agent'}
                               </div>
-                              <div style={{ fontSize: 11, color: '#059669', fontWeight: 600 }}>
+                              <div style={{ fontSize: 10.5, color: '#059669', fontWeight: 600, whiteSpace: 'nowrap' }}>
                                 Verified
                               </div>
                             </td>
 
                             {/* Actions Column */}
-                            <td style={{ padding: '14px 18px', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                            <td style={{ padding: '12px 12px', textAlign: 'right', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3, flexWrap: 'nowrap' }}>
                                 {/* Expand / Collapse */}
                                 <button
                                   type="button"
                                   onClick={() => setExpandedDocIds(prev => ({ ...prev, [doc.id]: !prev[doc.id] }))}
                                   title={isExpanded ? 'Collapse Details' : 'Expand Details'}
                                   style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 7,
+                                    width: 27,
+                                    height: 27,
+                                    borderRadius: 6,
                                     border: '1px solid #bfdbfe',
                                     backgroundColor: isExpanded ? 'var(--primary, #059669)' : '#eff6ff',
                                     color: isExpanded ? '#fff' : 'var(--primary, #059669)',
@@ -1347,10 +1295,10 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    transition: 'all 0.15s ease'
+                                    flexShrink: 0
                                   }}
                                 >
-                                  <ChevronDownIcon size={14} color={isExpanded ? '#fff' : 'var(--primary, #059669)'} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
+                                  <ChevronDownIcon size={12} color={isExpanded ? '#fff' : 'var(--primary, #059669)'} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
                                 </button>
 
                                 {/* Preview Button */}
@@ -1359,9 +1307,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                   onClick={() => handleOpenPreview(doc)}
                                   title="Preview Document"
                                   style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 7,
+                                    width: 27,
+                                    height: 27,
+                                    borderRadius: 6,
                                     border: '1px solid #e2e8f0',
                                     backgroundColor: '#ffffff',
                                     color: '#0f172a',
@@ -1369,8 +1317,8 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    fontSize: 13,
-                                    transition: 'all 0.15s ease'
+                                    fontSize: 12,
+                                    flexShrink: 0
                                   }}
                                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
                                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
@@ -1384,9 +1332,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                   onClick={() => handleWhatsAppShare(doc)}
                                   title="Share Document on WhatsApp"
                                   style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 7,
+                                    width: 27,
+                                    height: 27,
+                                    borderRadius: 6,
                                     border: '1px solid #bbf7d0',
                                     backgroundColor: '#dcfce7',
                                     color: '#166534',
@@ -1394,12 +1342,12 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    transition: 'all 0.15s ease'
+                                    flexShrink: 0
                                   }}
                                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#bbf7d0')}
                                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#dcfce7')}
                                 >
-                                  <WhatsAppIcon size={14} color="#166534" />
+                                  <WhatsAppIcon size={12} color="#166534" />
                                 </button>
 
                                 {/* Download */}
@@ -1408,9 +1356,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                   download={doc.name}
                                   title="Download File"
                                   style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 7,
+                                    width: 27,
+                                    height: 27,
+                                    borderRadius: 6,
                                     border: '1px solid #0f172a',
                                     backgroundColor: '#0f172a',
                                     color: '#ffffff',
@@ -1419,12 +1367,12 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                     justifyContent: 'center',
                                     textDecoration: 'none',
                                     cursor: 'pointer',
-                                    transition: 'all 0.15s ease'
+                                    flexShrink: 0
                                   }}
                                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#334155')}
                                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#0f172a')}
                                 >
-                                  <DownloadIcon size={13} color="#ffffff" />
+                                  <DownloadIcon size={12} color="#ffffff" />
                                 </a>
 
                                 {/* Edit */}
@@ -1433,9 +1381,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                   onClick={() => handleOpenEdit(doc)}
                                   title="Edit Document"
                                   style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 7,
+                                    width: 27,
+                                    height: 27,
+                                    borderRadius: 6,
                                     border: '1px solid #bfdbfe',
                                     backgroundColor: '#eff6ff',
                                     color: '#1d4ed8',
@@ -1443,12 +1391,12 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    transition: 'all 0.15s ease'
+                                    flexShrink: 0
                                   }}
                                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#dbeafe')}
                                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#eff6ff')}
                                 >
-                                  <EditIcon size={14} color="#1d4ed8" />
+                                  <EditIcon size={12} color="#1d4ed8" />
                                 </button>
 
                                 {/* Delete */}
@@ -1457,9 +1405,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                   onClick={() => setDocToDelete(doc)}
                                   title="Delete Document"
                                   style={{
-                                    width: 32,
-                                    height: 32,
-                                    borderRadius: 7,
+                                    width: 27,
+                                    height: 27,
+                                    borderRadius: 6,
                                     border: '1px solid #fecaca',
                                     backgroundColor: '#fee2e2',
                                     color: '#dc2626',
@@ -1467,12 +1415,12 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    transition: 'all 0.15s ease'
+                                    flexShrink: 0
                                   }}
                                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fecaca')}
                                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fee2e2')}
                                 >
-                                  <TrashIcon size={14} color="#dc2626" />
+                                  <TrashIcon size={12} color="#dc2626" />
                                 </button>
                               </div>
                             </td>
@@ -1584,20 +1532,6 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 </table>
               </div>
             </div>
-
-            {/* Mobile fallback for list view */}
-            <div className="mobile-only-cards" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14, marginBottom: 20 }}>
-              {paginatedData.map(doc => (
-                <DocumentCardItem
-                  key={`m-${doc.id}`}
-                  doc={doc}
-                  onOpenPreview={handleOpenPreview}
-                  onOpenEdit={handleOpenEdit}
-                  onDelete={setDocToDelete}
-                  onWhatsAppShare={handleWhatsAppShare}
-                />
-              ))}
-            </div>
           </>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 16, marginBottom: 20 }}>
@@ -1632,111 +1566,6 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
             />
           </div>
         )}
-
-        {/* Real Estate Standard Legal & Deal Starter Templates */}
-        <div style={{ backgroundColor: '#ffffff', borderRadius: 14, border: '1px solid #e2e8f0', padding: 22, marginBottom: 24, boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-            <div>
-              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                📜 Standard Real Estate Legal &amp; Deal Templates
-              </h3>
-              <p style={{ fontSize: 12.5, color: '#64748b', margin: '3px 0 0' }}>
-                Pre-formatted, RERA-aligned agreements and checklists ready for client execution
-              </p>
-            </div>
-            <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--primary-text, var(--primary, #059669))', backgroundColor: 'var(--primary-light, #ecfdf5)', padding: '4px 10px', borderRadius: 20 }}>
-              Free Agency Assets
-            </span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
-            {REAL_ESTATE_TEMPLATES.map(tpl => (
-              <div
-                key={tpl.title}
-                style={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 12,
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#2563eb', backgroundColor: '#eff6ff', padding: '2px 7px', borderRadius: 4 }}>
-                      {tpl.category}
-                    </span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: '#64748b' }}>{tpl.format}</span>
-                  </div>
-                  <h4 style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>{tpl.title}</h4>
-                  <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5, margin: '0 0 14px' }}>{tpl.desc}</p>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 8 }}>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenPreview({
-                      id: 'tpl_' + tpl.sampleFileName,
-                      name: tpl.sampleFileName,
-                      type: tpl.format,
-                      category: tpl.category,
-                      size: '1.4 MB',
-                      uploadedBy: 'AgentLadders Legal Desk',
-                      description: tpl.desc,
-                      createdAt: new Date().toISOString()
-                    })}
-                    style={{
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      backgroundColor: '#eff6ff',
-                      border: '1px solid #bfdbfe',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: '#2563eb',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 5
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#dbeafe')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#eff6ff')}
-                  >
-                    <span>👁️</span>
-                    <span>Preview</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadSample(tpl)}
-                    style={{
-                      padding: '8px 10px',
-                      borderRadius: 8,
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: '#0f172a',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 5
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
-                  >
-                    <DownloadIcon size={13} color="#475569" />
-                    <span>Download</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
       </div>
 
       {/* Upload Document Modal */}
