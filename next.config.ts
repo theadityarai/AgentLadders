@@ -81,7 +81,8 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com https://avatar.vercel.sh https://api.qrserver.com https://via.placeholder.com",
               "connect-src 'self' https://api.qrserver.com",
-              "frame-src 'self' https://www.youtube.com https://my.matterport.com",
+              "frame-src 'self' blob: data: https://www.youtube.com https://my.matterport.com",
+              "object-src 'self' blob: data:",
               "frame-ancestors 'self'"
             ].join('; ')
           }

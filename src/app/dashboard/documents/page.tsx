@@ -109,14 +109,40 @@ export default function DocumentsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [sharingDoc, setSharingDoc] = useState<DocumentItem | null>(null);
   const [previewDoc, setPreviewDoc] = useState<DocumentItem | null>(null);
-  const [viewerEngine, setViewerEngine] = useState<'native' | 'google'>('native');
   const [previewZoom, setPreviewZoom] = useState(1);
   const [previewRotation, setPreviewRotation] = useState(0);
   const [toast, setToast] = useState<ToastMessage | null>(null);
 
+  // Secure Blob URL for previewing PDFs and documents without Chromium data-URI blocking
+  const previewBlobUrl = useMemo(() => {
+    if (!previewDoc?.fileData) return null;
+    if (!previewDoc.fileData.startsWith('data:')) return null;
+    try {
+      const parts = previewDoc.fileData.split(',');
+      const mimeMatch = parts[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : 'application/pdf';
+      const binaryString = atob(parts[1]);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: mime });
+      return URL.createObjectURL(blob);
+    } catch {
+      return null;
+    }
+  }, [previewDoc]);
+
+  useEffect(() => {
+    return () => {
+      if (previewBlobUrl) {
+        URL.revokeObjectURL(previewBlobUrl);
+      }
+    };
+  }, [previewBlobUrl]);
+
   const handleOpenPreview = (doc: DocumentItem) => {
     setPreviewDoc(doc);
-    setViewerEngine('native');
     setPreviewZoom(1);
     setPreviewRotation(0);
   };
@@ -332,6 +358,10 @@ export default function DocumentsPage() {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
+        const json = await res.json().catch(() => ({}));
+        if (json.document) {
+          setData(prev => [json.document, ...prev.filter(d => d.id !== json.document.id)]);
+        }
         setShowUpload(false);
         setSelectedFile(null);
         setFileDataUrl('');
@@ -531,7 +561,10 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
 
       return matchesSearch && matchesCat;
     }).sort((a, b) => {
+      const timeA = new Date(a.createdAt || 0).getTime() || 0;
+      const timeB = new Date(b.createdAt || 0).getTime() || 0;
       if (sortBy === 'oldest') {
+        if (timeA !== timeB) return timeA - timeB;
         return (a.id || '').localeCompare(b.id || '');
       } else if (sortBy === 'name_asc') {
         return a.name.localeCompare(b.name);
@@ -540,7 +573,8 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
       } else if (sortBy === 'category') {
         return (a.category || '').localeCompare(b.category || '');
       }
-      // default: newest
+      // default: newest (latest upload/creation comes first)
+      if (timeB !== timeA) return timeB - timeA;
       return (b.id || '').localeCompare(a.id || '');
     });
   }, [data, search, activeCategory, sortBy]);
@@ -1897,18 +1931,15 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
         </div>
       )}
 
-      {/* Real Document Preview Modal (Google Docs Cloud Viewer + Direct Native Streaming Viewer) */}
+      {/* Document Preview Modal (Clean Single-Viewer for PDFs & Images) */}
       {previewDoc && (() => {
         const isImage = Boolean(previewDoc.fileData?.startsWith('data:image')) ||
                         previewDoc.type.toLowerCase().includes('image') ||
                         previewDoc.type.toLowerCase().includes('blueprint') ||
                         /\.(jpe?g|png|webp|gif|svg)$/i.test(previewDoc.name);
 
-        const origin = typeof window !== 'undefined' ? window.location.origin : '';
         const docRawUrl = `/api/public/document/${previewDoc.id}/raw`;
-        const publicRawUrl = `${origin}${docRawUrl}`;
-        const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(publicRawUrl)}&embedded=true`;
-        const externalGoogleUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(publicRawUrl)}`;
+        const pdfViewerSrc = `${docRawUrl}#toolbar=1`;
 
         return (
           <div
@@ -1949,8 +1980,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   backgroundColor: '#ffffff',
-                  gap: 12,
-                  flexWrap: 'wrap'
+                  gap: 12
                 }}
               >
                 {/* File Title and Category */}
@@ -1981,7 +2011,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          maxWidth: 320
+                          maxWidth: 480
                         }}
                         title={previewDoc.name}
                       >
@@ -2007,69 +2037,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   </div>
                 </div>
 
-                {/* Center: Viewer Engine Switcher */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    backgroundColor: '#f1f5f9',
-                    padding: 3,
-                    borderRadius: 8,
-                    border: '1px solid #e2e8f0',
-                    gap: 3
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setViewerEngine('native')}
-                    style={{
-                      padding: '5px 12px',
-                      borderRadius: 6,
-                      border: 'none',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      backgroundColor: viewerEngine === 'native' ? '#ffffff' : 'transparent',
-                      color: viewerEngine === 'native' ? '#0f172a' : '#64748b',
-                      boxShadow: viewerEngine === 'native' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      transition: 'all 0.15s ease'
-                    }}
-                    title="Render directly using browser's high-speed native document & PDF engine"
-                  >
-                    <span>⚡</span>
-                    <span>Direct / Native Viewer</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setViewerEngine('google')}
-                    style={{
-                      padding: '5px 12px',
-                      borderRadius: 6,
-                      border: 'none',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      backgroundColor: viewerEngine === 'google' ? '#ffffff' : 'transparent',
-                      color: viewerEngine === 'google' ? '#0284c7' : '#64748b',
-                      boxShadow: viewerEngine === 'google' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 5,
-                      transition: 'all 0.15s ease'
-                    }}
-                    title="Render using Google Docs Online Cloud Viewer"
-                  >
-                    <span>🌐</span>
-                    <span>Google Docs Viewer</span>
-                  </button>
-                </div>
-
-                {/* Right controls: Zoom/Rotate (for images), External Links & Close */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {isImage && viewerEngine === 'native' && (
+                {/* Right controls: Zoom/Rotate (for images) & Close */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {isImage && (
                     <div
                       style={{
                         display: 'flex',
@@ -2078,8 +2048,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                         border: '1px solid #e2e8f0',
                         borderRadius: 6,
                         padding: '2px 4px',
-                        gap: 4,
-                        marginRight: 4
+                        gap: 4
                       }}
                     >
                       <button
@@ -2112,54 +2081,6 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                     </div>
                   )}
 
-                  {/* Open in Google Docs in new tab */}
-                  <a
-                    href={externalGoogleUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Open Document in Google Docs in a new tab"
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: 6,
-                      backgroundColor: '#f8fafc',
-                      color: '#0284c7',
-                      border: '1px solid #bae6fd',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 4
-                    }}
-                  >
-                    <span>Google Docs</span>
-                    <ExternalLinkIcon size={12} color="#0284c7" />
-                  </a>
-
-                  {/* Open Raw File in new tab */}
-                  <a
-                    href={previewDoc.fileData || docRawUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Open Raw Binary File in a new tab"
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: 6,
-                      backgroundColor: '#f8fafc',
-                      color: '#475569',
-                      border: '1px solid #e2e8f0',
-                      fontSize: 12,
-                      fontWeight: 600,
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 4
-                    }}
-                  >
-                    <span>Raw File</span>
-                    <ExternalLinkIcon size={12} color="#64748b" />
-                  </a>
-
                   {/* Close modal */}
                   <button
                     type="button"
@@ -2174,37 +2095,13 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#64748b',
-                      marginLeft: 4
+                      color: '#64748b'
                     }}
                     title="Close Preview (Esc)"
                   >
                     <XIcon size={16} color="currentColor" />
                   </button>
                 </div>
-              </div>
-
-              {/* Informational Sub-header */}
-              <div
-                style={{
-                  padding: '6px 20px',
-                  backgroundColor: viewerEngine === 'google' ? '#f0f9ff' : '#f8fafc',
-                  borderBottom: '1px solid #e2e8f0',
-                  fontSize: 11.5,
-                  color: viewerEngine === 'google' ? '#0369a1' : '#64748b',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>
-                  {viewerEngine === 'google'
-                    ? '🌐 Powered by Google Docs Cloud Viewer • Supports PDF, Word (.docx), Sheets (.xlsx), and PPT'
-                    : '⚡ Direct Native Viewer • High-performance streaming with native PDF pan, zoom, search, and page navigation'}
-                </span>
-                <span style={{ fontSize: 11, color: '#94a3b8' }}>
-                  Press <kbd style={{ padding: '1px 5px', backgroundColor: '#ffffff', borderRadius: 3, border: '1px solid #cbd5e1' }}>Esc</kbd> to exit
-                </span>
               </div>
 
               {/* Viewer Body Canvas */}
@@ -2219,8 +2116,8 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   position: 'relative'
                 }}
               >
-                {/* 1. Image Viewer Mode */}
-                {isImage && viewerEngine === 'native' ? (
+                {isImage ? (
+                  /* Image Viewer */
                   <div
                     style={{
                       width: '100%',
@@ -2251,25 +2148,11 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                       }}
                     />
                   </div>
-                ) : viewerEngine === 'google' ? (
-                  /* 2. Google Docs Viewer Mode */
-                  <div style={{ width: '100%', height: '100%', position: 'relative', backgroundColor: '#f1f5f9' }}>
-                    <iframe
-                      src={googleViewerUrl}
-                      title={`Google Docs Viewer - ${previewDoc.name}`}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                        backgroundColor: '#ffffff'
-                      }}
-                    />
-                  </div>
                 ) : (
-                  /* 3. Native Direct PDF & Binary Stream Viewer */
+                  /* Native PDF & Document Viewer (Uses blob/http stream to bypass Chromium iframe security block) */
                   <iframe
-                    src={previewDoc.fileData && previewDoc.fileData.startsWith('data:') ? previewDoc.fileData : `${docRawUrl}#toolbar=1`}
-                    title={`Document Viewer - ${previewDoc.name}`}
+                    src={pdfViewerSrc}
+                    title={previewDoc.name}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -2287,141 +2170,101 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   borderTop: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
+                  justifyContent: 'flex-end',
                   backgroundColor: '#ffffff',
-                  gap: 12,
-                  flexWrap: 'wrap'
+                  gap: 8
                 }}
               >
-                {/* Description / Metadata notes */}
-                <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span>📅 Archived: {new Date(previewDoc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                  {previewDoc.description && (
-                    <>
-                      <span>•</span>
-                      <span style={{ fontStyle: 'italic', color: '#475569', maxWidth: 450, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={previewDoc.description}>
-                        &ldquo;{previewDoc.description}&rdquo;
-                      </span>
-                    </>
-                  )}
-                </div>
+                {/* Print */}
+                <button
+                  type="button"
+                  onClick={handlePrintDocument}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: 8,
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#334155',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  title="Print Document"
+                >
+                  <PrinterIcon size={14} color="#475569" />
+                  <span>Print</span>
+                </button>
 
-                {/* Action Buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {/* Print */}
-                  <button
-                    type="button"
-                    onClick={handlePrintDocument}
-                    style={{
-                      padding: '8px 14px',
-                      borderRadius: 8,
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      color: '#334155',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6
-                    }}
-                    title="Print Document"
-                  >
-                    <PrinterIcon size={14} color="#475569" />
-                    <span>Print</span>
-                  </button>
+                {/* WhatsApp Share */}
+                <button
+                  type="button"
+                  onClick={() => handleWhatsAppShare(previewDoc)}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: 8,
+                    border: '1px solid #bbf7d0',
+                    backgroundColor: '#ecfdf5',
+                    color: '#059669',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  title="Share Document on WhatsApp"
+                >
+                  <WhatsAppIcon size={14} color="#059669" />
+                  <span>WhatsApp</span>
+                </button>
 
-                  {/* WhatsApp Share */}
-                  <button
-                    type="button"
-                    onClick={() => handleWhatsAppShare(previewDoc)}
-                    style={{
-                      padding: '8px 14px',
-                      borderRadius: 8,
-                      border: '1px solid #bbf7d0',
-                      backgroundColor: '#ecfdf5',
-                      color: '#059669',
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6
-                    }}
-                    title="Share Document on WhatsApp"
-                  >
-                    <WhatsAppIcon size={14} color="#059669" />
-                    <span>WhatsApp</span>
-                  </button>
+                {/* Share Modal */}
+                <button
+                  type="button"
+                  onClick={() => setSharingDoc(previewDoc)}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: 8,
+                    border: '1px solid #e2e8f0',
+                    backgroundColor: '#f8fafc',
+                    color: '#0f172a',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                  }}
+                  title="Share with Client or External Contact"
+                >
+                  <ShareIcon size={14} color="#0f172a" />
+                  <span>Share</span>
+                </button>
 
-                  {/* Share Modal */}
-                  <button
-                    type="button"
-                    onClick={() => setSharingDoc(previewDoc)}
-                    style={{
-                      padding: '8px 14px',
-                      borderRadius: 8,
-                      border: '1px solid #e2e8f0',
-                      backgroundColor: '#f8fafc',
-                      color: '#0f172a',
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6
-                    }}
-                    title="Share with Client or External Contact"
-                  >
-                    <ShareIcon size={14} color="#0f172a" />
-                    <span>Share</span>
-                  </button>
-
-                  {/* Download */}
-                  {previewDoc.fileData ? (
-                    <a
-                      href={previewDoc.fileData}
-                      download={previewDoc.name}
-                      style={{
-                        padding: '8px 16px',
-                        borderRadius: 8,
-                        backgroundColor: '#0f172a',
-                        color: '#ffffff',
-                        fontSize: 13,
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 7
-                      }}
-                      title="Download File"
-                    >
-                      <DownloadIcon size={14} color="#ffffff" />
-                      <span>Download</span>
-                    </a>
-                  ) : (
-                    <a
-                      href={docRawUrl}
-                      download={previewDoc.name}
-                      style={{
-                        padding: '8px 16px',
-                        borderRadius: 8,
-                        backgroundColor: '#0f172a',
-                        color: '#ffffff',
-                        fontSize: 13,
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 7
-                      }}
-                      title="Download File"
-                    >
-                      <DownloadIcon size={14} color="#ffffff" />
-                      <span>Download</span>
-                    </a>
-                  )}
-                </div>
+                {/* Download */}
+                <a
+                  href={previewDoc.fileData || docRawUrl}
+                  download={previewDoc.name}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 8,
+                    backgroundColor: '#0f172a',
+                    color: '#ffffff',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 7
+                  }}
+                  title="Download File"
+                >
+                  <DownloadIcon size={14} color="#ffffff" />
+                  <span>Download</span>
+                </a>
               </div>
             </div>
           </div>

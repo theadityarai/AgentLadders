@@ -13,7 +13,9 @@ export async function GET() {
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-  const agencyDocs = (db.documents || []).filter(d => d.agencyId === user.agencyId);
+  const agencyDocs = (db.documents || [])
+    .filter(d => d.agencyId === user.agencyId)
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
   return NextResponse.json({ documents: agencyDocs });
 }
 
@@ -38,7 +40,7 @@ export async function POST(req: Request) {
   }
 
   const newDoc = {
-    id: 'doc_' + Math.random().toString(36).substring(2, 10),
+    id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
     agencyId: user.agencyId,
     name: sanitizeString(data.name || 'Document.pdf', 150),
     type: sanitizeString(data.type || 'PDF', 50),
@@ -52,7 +54,7 @@ export async function POST(req: Request) {
   };
 
   if (!db.documents) db.documents = [];
-  db.documents.push(newDoc);
+  db.documents.unshift(newDoc);
   saveDb(db);
 
   return NextResponse.json({ success: true, document: newDoc });
