@@ -22,6 +22,7 @@ import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 import {
   WhatsAppIcon,
   DownloadIcon,
@@ -1360,26 +1361,11 @@ export default function InvoicesPage() {
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
                       Client WhatsApp / Phone (10 Digits)
                     </label>
-                    <input
-                      type="tel"
-                      maxLength={15}
-                      value={form.clientPhone}
-                      onChange={e => setForm({ ...form, clientPhone: e.target.value })}
-                      placeholder="e.g. 98200 45678"
-                      style={{
-                        width: '100%',
-                        padding: '8px 10px',
-                        border: `1px solid ${form.clientPhone?.trim() && !isValid10DigitPhone(form.clientPhone) ? '#ef4444' : '#cbd5e1'}`,
-                        borderRadius: 7,
-                        fontSize: 13,
-                        outline: 'none'
-                      }}
+                    <PhoneInput
+                      value={form.clientPhone || ''}
+                      onChange={(full) => setForm({ ...form, clientPhone: full })}
+                      placeholder="98200 45678"
                     />
-                    {form.clientPhone?.trim() && (
-                      <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(form.clientPhone) ? '#16a34a' : '#ea580c' }}>
-                        {isValid10DigitPhone(form.clientPhone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(form.clientPhone).length}/10 digits)`}
-                      </div>
-                    )}
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>Client Email Address</label>

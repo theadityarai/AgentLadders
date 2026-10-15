@@ -29,6 +29,7 @@ import {
 } from '@/components/icons/NavIcons';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 interface SiteVisit {
   id: string;
@@ -616,26 +617,11 @@ export default function SiteVisitsPage() {
                   <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#475569', marginBottom: 4 }}>
                     Client Mobile Number (10 Digits for WhatsApp):
                   </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     value={formData.clientPhone || ''}
-                    onChange={e => setFormData({ ...formData, clientPhone: e.target.value })}
-                    placeholder="e.g. 98200 45678"
-                    maxLength={15}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: 8,
-                      border: `1px solid ${formData.clientPhone?.trim() && !isValid10DigitPhone(formData.clientPhone) ? '#ef4444' : '#cbd5e1'}`,
-                      fontSize: 13,
-                      outline: 'none'
-                    }}
+                    onChange={(full) => setFormData({ ...formData, clientPhone: full })}
+                    placeholder="98200 45678"
                   />
-                  {formData.clientPhone?.trim() && (
-                    <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(formData.clientPhone) ? '#16a34a' : '#ea580c' }}>
-                      {isValid10DigitPhone(formData.clientPhone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(formData.clientPhone).length}/10 digits)`}
-                    </div>
-                  )}
                 </div>
               </div>
 

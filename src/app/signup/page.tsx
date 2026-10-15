@@ -16,6 +16,8 @@ import {
   ShieldIcon, 
   LockIcon 
 } from '@/components/icons/NavIcons';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { isValid10DigitPhone } from '@/lib/phone-validation';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -71,8 +73,7 @@ export default function SignupPage() {
       setError('Please enter your full name.');
       return;
     }
-    const cleanPhoneDigits = form.phone.replace(/\D/g, '');
-    if (!cleanPhoneDigits || cleanPhoneDigits.length < 10) {
+    if (!isValid10DigitPhone(form.phone)) {
       setError('Please enter your agency official 10-digit WhatsApp phone number.');
       return;
     }
@@ -310,21 +311,13 @@ export default function SignupPage() {
                 <label htmlFor="signup-phone" className={styles.fieldLabel}>
                   Official Agency WhatsApp *
                 </label>
-                <div className={styles.inputWrapper}>
-                  <span className={styles.phonePrefix}>
-                    <span>🇮🇳</span> +91
-                  </span>
-                  <input
-                    id="signup-phone"
-                    type="tel"
-                    placeholder="98765 43210"
-                    value={form.phone}
-                    onChange={e => update('phone', e.target.value)}
-                    required
-                    className={`${styles.inputField} ${styles.phoneField}`}
-                    autoComplete="tel"
-                  />
-                </div>
+                <PhoneInput
+                  id="signup-phone"
+                  value={form.phone}
+                  onChange={(full) => update('phone', full)}
+                  placeholder="98765 43210"
+                  required
+                />
               </div>
             </div>
 

@@ -14,6 +14,8 @@ import {
   CheckIcon,
   AlertCircleIcon
 } from '@/components/icons/NavIcons';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { isValid10DigitPhone } from '@/lib/phone-validation';
 
 interface PublicPropertyMedia {
   id: string;
@@ -105,6 +107,10 @@ export default function PublicPropertyPage() {
 
   const handleInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValid10DigitPhone(form.phone)) {
+      setInquiryError('Please enter a valid 10-digit mobile phone number.');
+      return;
+    }
     setSubmitting(true);
     setInquiryError(null);
     try {
@@ -633,7 +639,14 @@ export default function PublicPropertyPage() {
                 <div className="responsive-grid-2">
                   <div>
                     <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>Phone Number *</label>
-                    <input required type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={{ width: '100%', padding: '12px 16px', border: '1px solid #cbd5e1', borderRadius: 12, fontSize: 15, outline: 'none' }} placeholder="10-digit number" />
+                    <PhoneInput
+                      required
+                      value={form.phone}
+                      onChange={(full) => setForm({...form, phone: full})}
+                      placeholder="98200 12345"
+                      inputStyle={{ padding: '12px 14px', fontSize: 14 }}
+                      selectStyle={{ padding: '12px 10px', fontSize: 13 }}
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#475569', marginBottom: 8 }}>Email (Optional)</label>

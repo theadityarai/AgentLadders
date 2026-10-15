@@ -21,6 +21,7 @@ import {
   isValidEmail,
   format10DigitDisplay
 } from '@/lib/phone-validation';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 function safeOpenUrl(url: string, targetBlank = true) {
   try {
@@ -816,26 +817,13 @@ export function ShareModal({
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px dashed #bbf7d0' }}>
                     <div>
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Phone Number (10 Digits):</span>
-                      <input
-                        type="tel"
+                      <PhoneInput
                         value={savedClientPhone}
-                        onChange={e => setSavedClientPhone(e.target.value)}
-                        placeholder="e.g. 98200 45678"
-                        maxLength={15}
-                        style={{
-                          width: '100%',
-                          padding: '6px 10px',
-                          borderRadius: '6px',
-                          border: `1px solid ${savedClientPhone.trim() && !isSavedPhoneValid ? '#f87171' : '#cbd5e1'}`,
-                          fontSize: '12px',
-                          marginTop: 3
-                        }}
+                        onChange={(full, raw) => setSavedClientPhone(raw)}
+                        placeholder="98200 45678"
+                        style={{ marginTop: 3 }}
+                        showValidationMessage={true}
                       />
-                      {savedClientPhone.trim() && (
-                        <div style={{ fontSize: '10.5px', marginTop: 3, fontWeight: 600, color: isSavedPhoneValid ? '#16a34a' : '#ea580c' }}>
-                          {isSavedPhoneValid ? '✓ Valid 10-digit mobile' : `⚠️ ${savedPhoneDigits.length}/10 digits`}
-                        </div>
-                      )}
                     </div>
                     <div>
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Email Address:</span>
@@ -1057,42 +1045,18 @@ export function ShareModal({
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
                   Send on WhatsApp to Any Phone Number (10 Digits Required):
                 </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <select
-                    value={countryCode}
-                    onChange={e => setCountryCode(e.target.value)}
-                    style={{
-                      padding: '8px 10px',
-                      borderRadius: '8px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#ffffff',
-                      fontSize: '12.5px',
-                      fontWeight: 700
-                    }}
-                  >
-                    <option value="+91">+91 (IN)</option>
-                    <option value="+1">+1 (US/CA)</option>
-                    <option value="+971">+971 (UAE)</option>
-                    <option value="+44">+44 (UK)</option>
-                    <option value="+65">+65 (SG)</option>
-                  </select>
-
-                  <input
-                    type="tel"
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                  <PhoneInput
                     value={customPhone}
-                    onChange={e => setCustomPhone(e.target.value)}
-                    placeholder="e.g. 98200 12345 (10 digits)"
-                    maxLength={15}
-                    style={{
-                      flex: 1,
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: `1px solid ${customPhone.trim() && !isCustomPhoneValid ? '#f87171' : '#cbd5e1'}`,
-                      fontSize: '13px',
-                      outline: 'none',
-                      backgroundColor: '#ffffff'
+                    countryCode={countryCode}
+                    onCountryCodeChange={setCountryCode}
+                    onChange={(full, raw, code) => {
+                      setCustomPhone(raw);
+                      setCountryCode(code);
                     }}
-                    onKeyDown={e => { if (e.key === 'Enter' && isCustomPhoneValid) handleSendWhatsAppToCustom(); }}
+                    placeholder="98200 12345"
+                    showValidationMessage={true}
+                    style={{ flex: 1 }}
                   />
 
                   {isCustomPhoneValid ? (
@@ -1106,7 +1070,7 @@ export function ShareModal({
                         setTimeout(() => setShareNotice(null), 4000);
                       }}
                       style={{
-                        padding: '8px 16px',
+                        padding: '9px 16px',
                         backgroundColor: '#25D366',
                         color: '#ffffff',
                         textDecoration: 'none',
@@ -1132,7 +1096,7 @@ export function ShareModal({
                       type="button"
                       disabled
                       style={{
-                        padding: '8px 16px',
+                        padding: '9px 16px',
                         backgroundColor: '#cbd5e1',
                         color: '#64748b',
                         borderRadius: '8px',
@@ -1152,27 +1116,6 @@ export function ShareModal({
                     </button>
                   )}
                 </div>
-
-                {/* 10-Digit Real-Time Validation Feedback */}
-                {customPhone.trim() && (
-                  <div style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    marginTop: '5px',
-                    color: isCustomPhoneValid ? '#15803d' : '#b45309',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4
-                  }}>
-                    <span>{isCustomPhoneValid ? '✓' : '⚠️'}</span>
-                    <span>
-                      {isCustomPhoneValid 
-                        ? `Valid 10-digit number (+${countryCode.replace(/\D/g, '') || '91'} ${format10DigitDisplay(customPhone, false)})`
-                        : `Please enter 10 digits (${customPhoneDigits.length}/10 digits entered)`
-                      }
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Or Open WhatsApp to Pick Any Chat/Group */}

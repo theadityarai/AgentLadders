@@ -43,6 +43,7 @@ import {
 } from '@/components/icons/NavIcons';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 interface Lead {
   id: string;
@@ -966,27 +967,12 @@ export default function LeadsPage() {
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Phone (10 Digits) *</label>
-                  <input
+                  <PhoneInput
                     required
-                    type="tel"
-                    maxLength={15}
                     value={formData.phone}
-                    onChange={e => setFormData({...formData, phone: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: `1px solid ${formData.phone.trim() && !isValid10DigitPhone(formData.phone) ? '#ef4444' : 'var(--border)'}`,
-                      borderRadius: 8,
-                      fontSize: 14,
-                      outline: 'none'
-                    }}
-                    placeholder="e.g. 98200 45678"
+                    onChange={(full) => setFormData({ ...formData, phone: full })}
+                    placeholder="98200 45678"
                   />
-                  {formData.phone.trim() && (
-                    <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(formData.phone) ? '#16a34a' : '#ea580c' }}>
-                      {isValid10DigitPhone(formData.phone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(formData.phone).length}/10 digits)`}
-                    </div>
-                  )}
                 </div>
               </div>
 

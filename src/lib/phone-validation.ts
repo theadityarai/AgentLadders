@@ -1,7 +1,41 @@
+export interface CountryCodeOption {
+  code: string;
+  country: string;
+  label: string;
+  flag: string;
+}
+
+export const COUNTRY_CODES: CountryCodeOption[] = [
+  { code: '+91', country: 'IN', label: '+91 (India)', flag: '🇮🇳' },
+  { code: '+1', country: 'US', label: '+1 (USA/Canada)', flag: '🇺🇸' },
+  { code: '+971', country: 'AE', label: '+971 (UAE)', flag: '🇦🇪' },
+  { code: '+44', country: 'GB', label: '+44 (UK)', flag: '🇬🇧' },
+  { code: '+65', country: 'SG', label: '+65 (Singapore)', flag: '🇸🇬' },
+  { code: '+61', country: 'AU', label: '+61 (Australia)', flag: '🇦🇺' },
+  { code: '+966', country: 'SA', label: '+966 (Saudi Arabia)', flag: '🇸🇦' },
+  { code: '+974', country: 'QA', label: '+974 (Qatar)', flag: '🇶🇦' },
+  { code: '+49', country: 'DE', label: '+49 (Germany)', flag: '🇩🇪' },
+  { code: '+33', country: 'FR', label: '+33 (France)', flag: '🇫🇷' },
+  { code: '+81', country: 'JP', label: '+81 (Japan)', flag: '🇯🇵' },
+  { code: '+86', country: 'CN', label: '+86 (China)', flag: '🇨🇳' },
+  { code: '+27', country: 'ZA', label: '+27 (South Africa)', flag: '🇿🇦' },
+  { code: '+234', country: 'NG', label: '+234 (Nigeria)', flag: '🇳🇬' }
+];
+
 /**
- * Centralized Phone Number Utilities & Validation for AgentLadders CRM
- * Enforces strict 10-digit mobile number validation across the entire platform.
+ * Extracts country code (default +91) and the 10-digit number from any raw phone string.
  */
+export function extractCountryCodeAndPhone(input: string | null | undefined, defaultCode = '+91'): { countryCode: string; digits: string } {
+  if (!input) return { countryCode: defaultCode, digits: '' };
+  const str = input.trim();
+  for (const c of COUNTRY_CODES) {
+    if (str.startsWith(c.code)) {
+      const rest = str.slice(c.code.length).trim();
+      return { countryCode: c.code, digits: extract10DigitPhone(rest) };
+    }
+  }
+  return { countryCode: defaultCode, digits: extract10DigitPhone(str) };
+}
 
 /**
  * Extracts raw 10-digit mobile number by stripping non-digit characters,

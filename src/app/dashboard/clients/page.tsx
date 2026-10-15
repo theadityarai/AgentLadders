@@ -8,8 +8,9 @@ import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { DEFAULT_LEAD_SOURCES, DEFAULT_CLIENT_STATUSES } from '@/lib/formatters';
-import { getStatusColorStyle } from '@/lib/theme';
 import { isValid10DigitPhone, extract10DigitPhone, formatForWhatsApp } from '@/lib/phone-validation';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { getStatusColorStyle } from '@/lib/theme';
 
 interface Client {
   [key: string]: unknown;
@@ -515,26 +516,12 @@ export default function ClientsPage() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     required
-                    maxLength={15}
-                    placeholder="e.g. 98200 45678"
                     value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: `1px solid ${form.phone.trim() && !isValid10DigitPhone(form.phone) ? '#ef4444' : '#cbd5e1'}`,
-                      fontSize: '13px'
-                    }}
+                    onChange={(full) => setForm({ ...form, phone: full })}
+                    placeholder="98200 45678"
                   />
-                  {form.phone.trim() && (
-                    <div style={{ fontSize: '11px', marginTop: '4px', fontWeight: 600, color: isValid10DigitPhone(form.phone) ? '#16a34a' : '#ea580c' }}>
-                      {isValid10DigitPhone(form.phone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(form.phone).length}/10 digits)`}
-                    </div>
-                  )}
                 </div>
 
                 <div style={{ gridColumn: '1 / -1' }}>
@@ -674,25 +661,12 @@ export default function ClientsPage() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     required
-                    maxLength={15}
                     value={editingClient.phone}
-                    onChange={e => setEditingClient({ ...editingClient, phone: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '9px 12px',
-                      borderRadius: '8px',
-                      border: `1px solid ${editingClient.phone.trim() && !isValid10DigitPhone(editingClient.phone) ? '#ef4444' : '#cbd5e1'}`,
-                      fontSize: '13px'
-                    }}
+                    onChange={(full) => setEditingClient({ ...editingClient, phone: full })}
+                    placeholder="98200 45678"
                   />
-                  {editingClient.phone.trim() && (
-                    <div style={{ fontSize: '11px', marginTop: '4px', fontWeight: 600, color: isValid10DigitPhone(editingClient.phone) ? '#16a34a' : '#ea580c' }}>
-                      {isValid10DigitPhone(editingClient.phone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(editingClient.phone).length}/10 digits)`}
-                    </div>
-                  )}
                 </div>
 
                 <div>

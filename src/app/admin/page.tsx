@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { isValid10DigitPhone } from '@/lib/phone-validation';
 import { formatINR } from '@/lib/formatters';
 
 interface AgencyItem {
@@ -195,8 +197,7 @@ export default function SuperAdminPage() {
 
   const handleCreateAgency = async (e: React.FormEvent) => {
     e.preventDefault();
-    const digitsOnly = formData.ownerPhone.replace(/\D/g, '');
-    if (!formData.ownerPhone.trim() || digitsOnly.length < 10) {
+    if (!isValid10DigitPhone(formData.ownerPhone)) {
       showToast('Please enter a valid 10-digit official WhatsApp number for the agency', 'error');
       return;
     }
@@ -1333,13 +1334,11 @@ export default function SuperAdminPage() {
                       <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
                         Agency Official WhatsApp Number *
                       </label>
-                      <input
+                      <PhoneInput
                         required
-                        type="tel"
                         value={formData.ownerPhone}
-                        onChange={e => setFormData({ ...formData, ownerPhone: e.target.value })}
-                        placeholder="+91 98200 54321"
-                        style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13.5, outline: 'none' }}
+                        onChange={(full) => setFormData({ ...formData, ownerPhone: full })}
+                        placeholder="98200 54321"
                       />
                     </div>
 

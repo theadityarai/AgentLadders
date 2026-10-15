@@ -26,6 +26,7 @@ import {
 } from '@/components/icons/NavIcons';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 export interface Task {
   [key: string]: unknown;
@@ -1085,25 +1086,11 @@ export default function TasksPage() {
                 <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>
                   Client Phone / WhatsApp (10 Digits for 1-Tap Messaging)
                 </label>
-                <input
-                  type="tel"
-                  maxLength={15}
+                <PhoneInput
                   value={form.phone}
-                  onChange={e => setForm({ ...form, phone: e.target.value })}
-                  placeholder="e.g. 98200 45678"
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    border: `1px solid ${form.phone?.trim() && !isValid10DigitPhone(form.phone) ? '#ef4444' : '#cbd5e1'}`,
-                    borderRadius: 8,
-                    fontSize: 13.5
-                  }}
+                  onChange={(full) => setForm({ ...form, phone: full })}
+                  placeholder="98200 45678"
                 />
-                {form.phone?.trim() && (
-                  <div style={{ fontSize: 11, marginTop: 4, fontWeight: 600, color: isValid10DigitPhone(form.phone) ? '#16a34a' : '#ea580c' }}>
-                    {isValid10DigitPhone(form.phone) ? '✓ Valid 10-digit mobile number' : `⚠️ Enter 10 digits (${extract10DigitPhone(form.phone).length}/10 digits)`}
-                  </div>
-                )}
               </div>
 
               {/* Description */}

@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { isValid10DigitPhone } from '@/lib/phone-validation';
 
 interface Owner {
   [key: string]: unknown;
@@ -80,6 +82,10 @@ export default function OwnersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValid10DigitPhone(form.phone)) {
+      alert('Please enter a valid 10-digit phone number.');
+      return;
+    }
     await fetch('/api/owners', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -100,6 +106,10 @@ export default function OwnersPage() {
   const handleUpdateOwner = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingOwner) return;
+    if (editingOwner.phone && !isValid10DigitPhone(editingOwner.phone)) {
+      alert('Please enter a valid 10-digit phone number.');
+      return;
+    }
     const res = await fetch('/api/owners', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -310,12 +320,11 @@ export default function OwnersPage() {
                 </div>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Phone Number *</label>
-                  <input
+                  <PhoneInput
                     required
-                    placeholder="+971 50 789 0123"
                     value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    onChange={(full) => setForm({ ...form, phone: full })}
+                    placeholder="98200 12345"
                   />
                 </div>
               </div>
@@ -424,11 +433,11 @@ export default function OwnersPage() {
                 </div>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Phone Number *</label>
-                  <input
+                  <PhoneInput
                     required
                     value={editingOwner.phone || ''}
-                    onChange={e => setEditingOwner({ ...editingOwner, phone: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    onChange={(full) => setEditingOwner({ ...editingOwner, phone: full })}
+                    placeholder="98200 12345"
                   />
                 </div>
               </div>
