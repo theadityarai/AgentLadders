@@ -1565,52 +1565,54 @@ export default function InvoicesPage() {
             style={{ backgroundColor: '#ffffff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', maxWidth: 880, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
           >
             {/* Modal Header */}
-            <div style={{ padding: '16px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: 'var(--primary-light, #ecfdf5)', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FileTextIcon size={20} color="var(--primary, #059669)" />
-                </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: 0, whiteSpace: 'nowrap' }}>
-                      {editingInvoice ? `Edit Tax Invoice #${form.number}` : 'Create Tax Invoice'}
-                    </h3>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, backgroundColor: 'var(--primary-light, #ecfdf5)', color: 'var(--primary-text, var(--primary, #059669))', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', whiteSpace: 'nowrap' }}>
-                      RERA &amp; GST Compliant
-                    </span>
+            <div className="invoice-modal-header">
+              <div className="invoice-modal-header-top">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, backgroundColor: 'var(--primary-light, #ecfdf5)', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <FileTextIcon size={19} color="var(--primary, #059669)" />
                   </div>
-                  <p style={{ fontSize: 12, color: '#64748b', margin: '2px 0 0' }}>
-                    Generate real estate brokerage commission invoice with automatic GST calculations
-                  </p>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                        {editingInvoice ? `Edit Tax Invoice #${form.number}` : 'Create Tax Invoice'}
+                      </h3>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 12, backgroundColor: 'var(--primary-light, #ecfdf5)', color: 'var(--primary-text, var(--primary, #059669))', border: '1px solid rgba(var(--primary-rgb, 5, 150, 105), 0.25)', whiteSpace: 'nowrap' }}>
+                        RERA &amp; GST Compliant
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 11.5, color: '#64748b', margin: '2px 0 0' }}>
+                      Generate real estate brokerage commission invoice with automatic GST calculations
+                    </p>
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: 6, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  title="Close modal"
+                >
+                  <XIcon size={20} color="#64748b" />
+                </button>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                {/* Invoice Number Badge with Regenerate */}
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 12, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap' }}>
+              {/* Invoice Number Badge with Regenerate */}
+              <div className="invoice-modal-header-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 12, fontWeight: 700, color: '#0f172a' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ color: '#475569', whiteSpace: 'nowrap' }}>Invoice #:</span>
                   <input
                     value={form.number}
                     onChange={e => setForm({ ...form, number: e.target.value })}
                     style={{ width: 120, border: 'none', background: 'transparent', fontWeight: 800, color: '#0f172a', fontSize: 12.5, outline: 'none' }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setForm(prev => ({ ...prev, number: generateInvoiceNumber() }))}
-                    title="Generate new invoice sequence"
-                    style={{ background: 'none', border: 'none', color: '#059669', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
-                  >
-                    <RotateCcwIcon size={13} color="#059669" />
-                  </button>
                 </div>
-
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: 6, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                  title="Close modal"
+                  onClick={() => setForm(prev => ({ ...prev, number: generateInvoiceNumber() }))}
+                  title="Generate new invoice sequence"
+                  style={{ background: 'none', border: 'none', color: '#059669', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
                 >
-                  <XIcon size={20} color="#64748b" />
+                  <RotateCcwIcon size={14} color="#059669" />
                 </button>
               </div>
             </div>
@@ -1828,8 +1830,8 @@ export default function InvoicesPage() {
                   </div>
 
                   {/* Second row: Preset buttons + Custom Percentage Input */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', borderTop: '1px solid #dcfce7', paddingTop: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <div className="invoice-calculator-row">
+                    <div className="invoice-calculator-presets" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 11.5, fontWeight: 700, color: '#166534', marginRight: 4 }}>
                         Presets:
                       </span>
@@ -1857,8 +1859,8 @@ export default function InvoicesPage() {
                     </div>
 
                     {/* Custom Percentage Input & Apply */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#166534' }}>
+                    <div className="invoice-calculator-custom">
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#166534', whiteSpace: 'nowrap' }}>
                         Custom %:
                       </span>
                       <input
@@ -1869,7 +1871,7 @@ export default function InvoicesPage() {
                         value={customPercentage}
                         onChange={e => setCustomPercentage(e.target.value)}
                         placeholder="e.g. 1.5"
-                        style={{ width: 75, padding: '5px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12, backgroundColor: '#ffffff', fontWeight: 700, color: '#166534', outline: 'none' }}
+                        style={{ width: 75, padding: '6px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12, backgroundColor: '#ffffff', fontWeight: 700, color: '#166534', outline: 'none' }}
                       />
                       <button
                         type="button"
@@ -1881,7 +1883,7 @@ export default function InvoicesPage() {
                           }
                           applyCommission(p);
                         }}
-                        style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: 'none', backgroundColor: '#16a34a', color: '#ffffff', whiteSpace: 'nowrap' }}
+                        style={{ padding: '6px 14px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: 'none', backgroundColor: '#16a34a', color: '#ffffff', whiteSpace: 'nowrap' }}
                       >
                         Apply %
                       </button>
@@ -1909,7 +1911,7 @@ export default function InvoicesPage() {
                 </div>
 
                 {/* Table Header */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 130px 170px 36px', gap: 10, padding: '6px 10px', fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0' }}>
+                <div className="invoice-line-items-header">
                   <span>Service Description / Particulars</span>
                   <span style={{ textAlign: 'center' }}>SAC / HSN Code</span>
                   <span style={{ textAlign: 'right' }}>Taxable Amount (₹)</span>
@@ -1917,65 +1919,97 @@ export default function InvoicesPage() {
                 </div>
 
                 {/* Line Items List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8 }}>
                   {form.items.map((it, idx) => (
                     <div
                       key={it.id || idx}
-                      style={{
-                        padding: '8px 10px',
-                        backgroundColor: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: 8,
-                        display: 'grid',
-                        gridTemplateColumns: 'minmax(0, 1fr) 130px 170px 36px',
-                        gap: 10,
-                        alignItems: 'center'
-                      }}
+                      className="invoice-line-item-row"
                     >
-                      <div>
+                      {/* Mobile Header: Item Counter & Trash Icon */}
+                      <div className="invoice-line-item-mobile-header">
+                        <span style={{ fontSize: 12, fontWeight: 800, color: '#059669', backgroundColor: '#ecfdf5', padding: '2px 8px', borderRadius: 6, border: '1px solid #bbf7d0' }}>
+                          Line Item #{idx + 1}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={form.items.length <= 1}
+                          onClick={() => handleRemoveItem(idx)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: form.items.length <= 1 ? 'not-allowed' : 'pointer',
+                            color: form.items.length <= 1 ? '#cbd5e1' : '#dc2626',
+                            padding: 4,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Remove Line Item"
+                        >
+                          <TrashIcon size={16} color="currentColor" />
+                        </button>
+                      </div>
+
+                      {/* Description input */}
+                      <div style={{ width: '100%' }}>
+                        <label className="invoice-line-item-mobile-label" style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                          Service Description / Particulars *
+                        </label>
                         <input
                           required
                           value={it.description}
                           onChange={e => handleUpdateItem(idx, 'description', e.target.value)}
                           placeholder="e.g. Real Estate Acquisition & Brokerage Advisory"
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 13, outline: 'none' }}
+                          style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 13, outline: 'none' }}
                         />
                       </div>
-                      <div>
-                        <input
-                          value={it.sacCode}
-                          onChange={e => handleUpdateItem(idx, 'sacCode', e.target.value)}
-                          placeholder="998224"
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12.5, textAlign: 'center', outline: 'none' }}
-                        />
+
+                      {/* Inputs Grid for SAC Code & Amount */}
+                      <div className="invoice-line-item-inputs-grid">
+                        <div>
+                          <label className="invoice-line-item-mobile-label" style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                            SAC Code
+                          </label>
+                          <input
+                            value={it.sacCode}
+                            onChange={e => handleUpdateItem(idx, 'sacCode', e.target.value)}
+                            placeholder="997221"
+                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12.5, textAlign: 'center', outline: 'none' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="invoice-line-item-mobile-label" style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                            Taxable Amount (₹) *
+                          </label>
+                          <input
+                            required
+                            type="text"
+                            inputMode="decimal"
+                            value={it.amount}
+                            onKeyDown={(e) => {
+                              if (!/[0-9.]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Home', 'End'].includes(e.key) && !e.ctrlKey && !e.metaKey) {
+                                e.preventDefault();
+                              }
+                              if (e.key === '.' && it.amount.includes('.')) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onChange={e => {
+                              let val = e.target.value.replace(/[^0-9.]/g, '');
+                              const parts = val.split('.');
+                              if (parts.length > 2) {
+                                val = parts[0] + '.' + parts.slice(1).join('');
+                              }
+                              handleUpdateItem(idx, 'amount', val);
+                            }}
+                            placeholder="0.00"
+                            style={{ width: '100%', padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 13, fontWeight: 700, textAlign: 'right', outline: 'none' }}
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <input
-                          required
-                          type="text"
-                          inputMode="decimal"
-                          value={it.amount}
-                          onKeyDown={(e) => {
-                            if (!/[0-9.]/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Home', 'End'].includes(e.key) && !e.ctrlKey && !e.metaKey) {
-                              e.preventDefault();
-                            }
-                            if (e.key === '.' && it.amount.includes('.')) {
-                              e.preventDefault();
-                            }
-                          }}
-                          onChange={e => {
-                            let val = e.target.value.replace(/[^0-9.]/g, '');
-                            const parts = val.split('.');
-                            if (parts.length > 2) {
-                              val = parts[0] + '.' + parts.slice(1).join('');
-                            }
-                            handleUpdateItem(idx, 'amount', val);
-                          }}
-                          placeholder="0.00"
-                          style={{ width: '100%', padding: '7px 10px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 13, fontWeight: 700, textAlign: 'right', outline: 'none' }}
-                        />
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
+
+                      {/* Desktop Remove Button */}
+                      <div style={{ textAlign: 'center' }} className="hide-on-mobile">
                         <button
                           type="button"
                           disabled={form.items.length <= 1}
@@ -2001,7 +2035,7 @@ export default function InvoicesPage() {
               </div>
 
               {/* SECTION 4: INVOICE TERMS & TOTALS (2-COLUMN BALANCED BOTTOM SECTION) */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(320px, 1fr)', gap: 16, alignItems: 'start' }} className="invoice-modal-grid">
+              <div className="invoice-modal-grid">
                 
                 {/* LEFT BOX: Dates, Tax Regime, Status & Payment Clearance */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -2284,15 +2318,19 @@ export default function InvoicesPage() {
             </form>
 
             {/* Modal Actions Footer (Fixed at Bottom) */}
-            <div className="responsive-modal-footer form-sticky-footer" style={{ borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', flexShrink: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#64748b' }}>
-                <span style={{ fontWeight: 700, color: '#0f172a' }}>Total Payable:</span>
-                <span style={{ fontWeight: 800, color: '#059669' }}>{formatINRFull(formCalculations.totalAmount)}</span>
-                <span>•</span>
-                <span>{form.items.length} {form.items.length === 1 ? 'Line Item' : 'Line Items'}</span>
+            <div className="invoice-modal-actions-footer form-sticky-footer">
+              <div className="invoice-modal-total-summary" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: '#64748b' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>Total Payable:</span>
+                  <span style={{ fontWeight: 800, color: '#059669', fontSize: 14 }}>{formatINRFull(formCalculations.totalAmount)}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>•</span>
+                  <span>{form.items.length} {form.items.length === 1 ? 'Line Item' : 'Line Items'}</span>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div className="invoice-modal-buttons">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
@@ -2363,17 +2401,6 @@ export default function InvoicesPage() {
                   >
                     <MailIcon size={13} color="#2563eb" />
                     <span>Email</span>
-                  </button>
-
-                  {/* Print */}
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    style={{ padding: '6px 12px', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}
-                    title="Print or Save as PDF"
-                  >
-                    <PrinterIcon size={13} color="#ffffff" />
-                    <span>Print / PDF</span>
                   </button>
 
                   <button

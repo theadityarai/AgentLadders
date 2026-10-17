@@ -21,7 +21,6 @@ import {
   WhatsAppIcon,
   EditIcon,
   ExternalLinkIcon,
-  PrinterIcon,
   ListIcon,
   ChevronDownIcon,
   EyeIcon,
@@ -929,10 +928,6 @@ export default function DocumentsPage() {
         message: 'Direct document download link copied to clipboard!'
       });
     }
-  };
-
-  const handlePrintDocument = () => {
-    window.print();
   };
 
   const handleDownloadPdf = (doc: DocumentItem) => {
@@ -2955,29 +2950,6 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   gap: 8
                 }}
               >
-                {/* Print */}
-                <button
-                  type="button"
-                  onClick={handlePrintDocument}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 8,
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#334155',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6
-                  }}
-                  title="Print Document"
-                >
-                  <PrinterIcon size={14} color="#475569" />
-                  <span>Print</span>
-                </button>
-
                 {/* WhatsApp Share */}
                 <button
                   type="button"

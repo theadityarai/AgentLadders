@@ -560,21 +560,308 @@ div[style*="position: 'fixed'"][style*="inset: 0"] {
   }
 }
 
+/* ── SHARE MODAL RESPONSIVE ARCHITECTURE ── */
+.share-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+@media (max-width: 640px) {
+  .share-modal-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+}
+
 .share-modal-dialog {
-  width: 100%;
-  max-width: min(580px, calc(100vw - 24px));
-  max-height: 90vh;
-  box-sizing: border-box;
+  width: 100% !important;
+  max-width: min(660px, calc(100vw - 20px)) !important;
+  max-height: 92vh !important;
+  box-sizing: border-box !important;
+  margin: auto !important;
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
 }
 @media (max-width: 640px) {
   .share-modal-dialog {
     max-width: 100% !important;
+    width: 100% !important;
     border-radius: 20px 20px 0 0 !important;
-    margin-top: auto !important;
-    max-height: 92vh !important;
+    margin: auto 0 0 0 !important;
+    max-height: 94vh !important;
   }
-  .share-modal-buttons-grid {
+}
+
+.share-responsive-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .share-responsive-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .share-responsive-row > div,
+  .share-responsive-row > input {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .share-responsive-row > button,
+  .share-responsive-row > a {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 11px 16px !important;
+    font-size: 13.5px !important;
+  }
+}
+
+.share-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .share-card-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .share-card-row > a,
+  .share-card-row > button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+}
+
+.share-client-actions-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 0.8fr;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .share-client-actions-grid {
     grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  .share-client-actions-grid > a,
+  .share-client-actions-grid > button {
+    width: 100% !important;
+    padding: 11px 14px !important;
+    font-size: 13px !important;
+    justify-content: center !important;
+  }
+}
+
+.share-2col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .share-2col-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}
+
+/* ── INVOICE MODAL RESPONSIVE ARCHITECTURE ── */
+.invoice-modal-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .invoice-modal-header {
+    padding: 14px 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .invoice-modal-header-top {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  .invoice-modal-header-badge {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+  }
+  .invoice-modal-header-badge input {
+    flex: 1 !important;
+    max-width: none !important;
+  }
+}
+
+.invoice-line-items-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 170px 36px;
+  gap: 10px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+}
+@media (max-width: 640px) {
+  .invoice-line-items-header {
+    display: none !important;
+  }
+}
+
+.invoice-line-item-row {
+  padding: 8px 10px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 170px 36px;
+  gap: 10px;
+  align-items: center;
+}
+@media (max-width: 640px) {
+  .invoice-line-item-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 12px !important;
+    gap: 10px !important;
+    border-radius: 10px !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+  .invoice-line-item-mobile-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  .invoice-line-item-inputs-grid {
+    display: grid !important;
+    grid-template-columns: 110px 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+}
+@media (min-width: 641px) {
+  .invoice-line-item-mobile-header,
+  .invoice-line-item-mobile-label {
+    display: none !important;
+  }
+}
+
+.invoice-calculator-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid #dcfce7;
+  padding-top: 10px;
+}
+@media (max-width: 640px) {
+  .invoice-calculator-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  .invoice-calculator-presets {
+    width: 100% !important;
+  }
+  .invoice-calculator-custom {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+  .invoice-calculator-custom input {
+    flex: 1 !important;
+    width: auto !important;
+  }
+  .invoice-calculator-custom button {
+    flex-shrink: 0 !important;
+    padding: 8px 14px !important;
+  }
+}
+
+.invoice-modal-actions-footer {
+  padding: 14px 20px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .invoice-modal-actions-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .invoice-modal-total-summary {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 13px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px dashed #e2e8f0 !important;
+  }
+  .invoice-modal-buttons {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1.3fr !important;
+    gap: 8px !important;
+  }
+  .invoice-modal-buttons button {
+    width: 100% !important;
+    padding: 11px 12px !important;
+    font-size: 13px !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+}
+
+.invoice-modal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .invoice-modal-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
 }
 

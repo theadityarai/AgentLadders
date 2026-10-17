@@ -12,7 +12,8 @@ import {
   XIcon,
   CheckIcon,
   SpinnerIcon,
-  PhoneIcon
+  PhoneIcon,
+  MailIcon
 } from '@/components/icons/NavIcons';
 import {
   extract10DigitPhone,
@@ -503,33 +504,11 @@ export function ShareModal({
   return (
     <div 
       onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.7)',
-        backdropFilter: 'blur(5px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '16px'
-      }}
+      className="share-modal-overlay"
     >
       <div 
         onClick={e => e.stopPropagation()}
-        className="responsive-modal modal-wide animate-enter"
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '660px',
-          boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25)',
-          overflow: 'hidden',
-          border: '1px solid #e2e8f0',
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '92vh'
-        }}
+        className="share-modal-dialog animate-enter"
       >
         {/* Modal Header */}
         <div style={{
@@ -814,7 +793,7 @@ export function ShareModal({
 
                 {/* Edit fields if custom client selected or phone/email missing */}
                 {(!savedClientPhone || !savedClientEmail || selectedClientId === 'custom') && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10, paddingTop: 10, borderTop: '1px dashed #bbf7d0' }}>
+                  <div className="share-2col-grid" style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed #bbf7d0' }}>
                     <div>
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#475569' }}>Phone Number (10 Digits):</span>
                       <PhoneInput
@@ -852,7 +831,7 @@ export function ShareModal({
               </div>
 
               {/* 1-Click Action Buttons for Saved Client */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1.2fr 0.8fr', gap: '8px' }}>
+              <div className="share-client-actions-grid">
                 {/* Send on WhatsApp to Saved Number */}
                 {isSavedPhoneValid ? (
                   <a
@@ -1045,7 +1024,7 @@ export function ShareModal({
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
                   Send on WhatsApp to Any Phone Number (10 Digits Required):
                 </label>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                <div className="share-responsive-row">
                   <PhoneInput
                     value={customPhone}
                     countryCode={countryCode}
@@ -1081,6 +1060,7 @@ export function ShareModal({
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: '6px',
                         whiteSpace: 'nowrap',
                         boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)',
@@ -1106,6 +1086,7 @@ export function ShareModal({
                         cursor: 'not-allowed',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: '6px',
                         whiteSpace: 'nowrap'
                       }}
@@ -1119,16 +1100,15 @@ export function ShareModal({
               </div>
 
               {/* Or Open WhatsApp to Pick Any Chat/Group */}
-              <div style={{
-                padding: '12px 14px',
-                borderRadius: '9px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12
-              }}>
+              <div
+                className="share-card-row"
+                style={{
+                  padding: '12px 14px',
+                  borderRadius: '9px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0'
+                }}
+              >
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
                     Open WhatsApp to Choose Any Chat / Group
@@ -1158,6 +1138,7 @@ export function ShareModal({
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: 6,
                     whiteSpace: 'nowrap'
                   }}
@@ -1172,7 +1153,7 @@ export function ShareModal({
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
                   Send via Email to Anyone:
                 </label>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div className="share-responsive-row">
                   <input
                     type="email"
                     value={customEmail}
@@ -1198,7 +1179,7 @@ export function ShareModal({
                         setTimeout(() => setShareNotice(null), 4000);
                       }}
                       style={{
-                        padding: '8px 16px',
+                        padding: '9px 16px',
                         backgroundColor: '#2563eb',
                         color: '#ffffff',
                         textDecoration: 'none',
@@ -1208,13 +1189,14 @@ export function ShareModal({
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: '6px',
                         whiteSpace: 'nowrap',
                         transition: 'all 0.15s ease'
                       }}
                       title="Send Email"
                     >
-                      <span>✉️</span>
+                      <MailIcon size={14} color="#ffffff" />
                       <span>Send Email</span>
                     </a>
                   ) : (
@@ -1222,7 +1204,7 @@ export function ShareModal({
                       type="button"
                       disabled
                       style={{
-                        padding: '8px 16px',
+                        padding: '9px 16px',
                         backgroundColor: '#cbd5e1',
                         color: '#64748b',
                         borderRadius: '8px',
@@ -1232,12 +1214,13 @@ export function ShareModal({
                         cursor: 'not-allowed',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: '6px',
                         whiteSpace: 'nowrap'
                       }}
                       title="Enter a valid email address to enable"
                     >
-                      <span>✉️</span>
+                      <MailIcon size={14} color="#64748b" />
                       <span>Send Email</span>
                     </button>
                   )}
@@ -1316,7 +1299,7 @@ export function ShareModal({
                 <span style={{ fontSize: '11px', color: '#166534', fontWeight: 700 }}>{sharesCount} Shares Logged</span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div className="share-2col-grid">
                 <button
                   type="button"
                   onClick={handleWhatsAppWithPhoto}
@@ -1450,7 +1433,7 @@ export function ShareModal({
 
         {/* Modal Footer */}
         <div style={{
-          padding: '12px 22px',
+          padding: '12px 20px calc(14px + env(safe-area-inset-bottom, 0px))',
           borderTop: '1px solid #e2e8f0',
           backgroundColor: '#f8fafc',
           display: 'flex',
@@ -1461,13 +1444,13 @@ export function ShareModal({
             type="button"
             onClick={onClose}
             style={{
-              padding: '8px 18px',
+              padding: '10px 24px',
               borderRadius: '8px',
               border: '1px solid #cbd5e1',
               backgroundColor: '#ffffff',
               color: '#334155',
               fontWeight: 700,
-              fontSize: '12.5px',
+              fontSize: '13px',
               cursor: 'pointer'
             }}
           >
