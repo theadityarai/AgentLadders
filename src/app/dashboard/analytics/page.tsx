@@ -35,15 +35,21 @@ export default function AnalyticsPage() {
 
   // Dynamically compute KPIs based on active timeRange
   const reactiveMetrics = useMemo(() => {
-    if (!data) return { revenue: '$0', leads: 0, deals: 0, conversionRate: '0%' };
+    if (!data) return { revenue: '₹0', leads: 0, deals: 0, conversionRate: '0%' };
 
     const totalRawRevenue = chartData.reduce((acc: number, curr: any) => acc + (curr.revenue || 0), 0);
     const totalLeads = chartData.reduce((acc: number, curr: any) => acc + (curr.leads || 0), 0);
     const estimatedDeals = Math.max(1, Math.round(totalLeads * 0.18));
     const conversionRate = totalLeads > 0 ? ((estimatedDeals / totalLeads) * 100).toFixed(1) + '%' : '18.5%';
 
+    const formatINR = (val: number) => {
+      if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
+      if (val >= 100000) return `₹${(val / 100000).toFixed(2)} L`;
+      return `₹${val.toLocaleString('en-IN')}`;
+    };
+
     return {
-      revenue: `$${totalRawRevenue.toLocaleString()}`,
+      revenue: formatINR(totalRawRevenue),
       leads: totalLeads,
       deals: estimatedDeals,
       conversionRate
@@ -59,7 +65,7 @@ export default function AnalyticsPage() {
       ['Deals Closed', reactiveMetrics.deals, timeRange.toUpperCase()],
       ['Pipeline Conversion Rate', reactiveMetrics.conversionRate, timeRange.toUpperCase()],
       [],
-      ['Month', 'Revenue ($)', 'Inbound Leads']
+      ['Month', 'Revenue (₹)', 'Inbound Leads']
     ];
     chartData.forEach((row: any) => {
       rows.push([row.name, row.revenue, row.leads]);
@@ -75,10 +81,10 @@ export default function AnalyticsPage() {
   };
 
   const agentsLeaderboard = [
-    { name: 'Marcus Vance', role: 'Senior Partner', deals: 14, volume: '$18,400,000', commission: '$460,000', winRate: '78%' },
-    { name: 'Elena Rostova', role: 'Luxury Director', deals: 11, volume: '$14,250,000', commission: '$356,250', winRate: '71%' },
-    { name: 'Aditya Rai', role: 'Managing Broker', deals: 18, volume: '$24,800,000', commission: '$620,000', winRate: '84%' },
-    { name: 'Tariq Mansoor', role: 'Commercial Associate', deals: 8, volume: '$9,800,000', commission: '$245,000', winRate: '65%' }
+    { name: 'Aditya Rai', role: 'Managing Broker', deals: 18, volume: '₹24.80 Cr', commission: '₹49.60 L', winRate: '84%' },
+    { name: 'Marcus Vance', role: 'Senior Partner', deals: 14, volume: '₹18.40 Cr', commission: '₹36.80 L', winRate: '78%' },
+    { name: 'Elena Rostova', role: 'Luxury Director', deals: 11, volume: '₹14.25 Cr', commission: '₹28.50 L', winRate: '71%' },
+    { name: 'Tariq Mansoor', role: 'Commercial Associate', deals: 8, volume: '₹9.80 Cr', commission: '₹19.60 L', winRate: '65%' }
   ];
 
   return (
@@ -188,10 +194,15 @@ export default function AnalyticsPage() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)', fontSize: 12}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fill: 'var(--text-secondary)', fontSize: 12}} tickFormatter={(value) => `$${value / 1000}k`} />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fill: 'var(--text-secondary)', fontSize: 12}} 
+                      tickFormatter={(value) => value >= 10000000 ? `₹${(value / 10000000).toFixed(1)}Cr` : value >= 100000 ? `₹${(value / 100000).toFixed(0)}L` : `₹${(value / 1000).toFixed(0)}k`} 
+                    />
                     <Tooltip 
                       contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }}
-                      formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
+                      formatter={(value: any) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Revenue']}
                     />
                     <Area type="monotone" dataKey="revenue" stroke="var(--primary-color)" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                   </AreaChart>

@@ -25,7 +25,9 @@
       "emailOtp": {
         "code": "121051",
         "expiresAt": 1792041049137
-      }
+      },
+      "resetPasswordToken": "45b099cb931d007a6becaf5cde5fa098d2caac42384ff802b2a75b8cc125bfec",
+      "resetPasswordExpires": 1792265240059
     },
     {
       "id": "usr_super_admin",
@@ -3019,6 +3021,24 @@
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
       "createdAt": "2026-10-17T18:10:11.582Z",
       "lastActive": "2026-10-17T18:10:11.582Z"
+    },
+    {
+      "id": "sess_aa05e6ebad24861e_mvcpx7we",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "userEmail": "marcus@vancerealty.com",
+      "browser": "Google Chrome",
+      "browserVersion": "155.0.0.0",
+      "os": "Windows 11 PC",
+      "deviceType": "desktop",
+      "deviceModel": "Windows PC",
+      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
+      "location": "Mumbai, Maharashtra, India",
+      "screen": "1536 × 864",
+      "timezone": "Asia/Calcutta",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "createdAt": "2026-10-17T18:16:57.120Z",
+      "lastActive": "2026-10-17T18:26:29.095Z"
     }
   ],
   "revokedSessions": [

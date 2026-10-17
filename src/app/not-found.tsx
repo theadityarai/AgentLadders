@@ -166,6 +166,9 @@ export default function NotFound() {
           <Link href="/dashboard/site-visits" style={{ color: '#38bdf8', fontSize: '13px', textDecoration: 'none', fontWeight: 500 }}>
             Site Visits
           </Link>
+          <Link href="/help" style={{ color: '#38bdf8', fontSize: '13px', textDecoration: 'none', fontWeight: 500 }}>
+            Help & Legal
+          </Link>
           <Link href="/login" style={{ color: '#38bdf8', fontSize: '13px', textDecoration: 'none', fontWeight: 500 }}>
             Sign In
           </Link>

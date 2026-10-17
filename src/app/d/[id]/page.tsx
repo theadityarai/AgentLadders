@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -30,7 +30,7 @@ function getFileIcon(type: string, name: string = ''): string {
   return '📄';
 }
 
-export default function PublicDocumentViewPage() {
+function DocumentViewContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = params?.id as string;
@@ -473,5 +473,17 @@ export default function PublicDocumentViewPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PublicDocumentViewPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '14px' }}>
+        Loading document...
+      </div>
+    }>
+      <DocumentViewContent />
+    </Suspense>
   );
 }

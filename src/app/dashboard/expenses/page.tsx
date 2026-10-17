@@ -124,9 +124,9 @@ export default function ExpensesPage() {
       `Description:   ${exp.description}\n` +
       `Vendor:        ${exp.vendor || 'Authorized Supplier'}\n` +
       `Payment Mode:  ${exp.paymentMethod || 'Corporate Card'}\n` +
-      `Tax Eligible:  ${exp.taxDeductible ? 'YES (VAT Deductible)' : 'NO'}\n` +
+      `Tax Eligible:  ${exp.taxDeductible ? 'YES (GST / IT Act Sec 37 Deductible)' : 'NO'}\n` +
       `-----------------------------------------------------------------\n` +
-      `TOTAL CHARGED: $${exp.amount.toLocaleString()}\n` +
+      `TOTAL CHARGED: ₹${exp.amount.toLocaleString('en-IN')}\n` +
       `=================================================================\n` +
       `Approved by Agency Finance & Auditing Controller\n`;
 
@@ -210,7 +210,7 @@ export default function ExpensesPage() {
     { 
       key: 'amount', 
       label: 'Amount', 
-      render: (r) => <span style={{ fontWeight: 700, color: '#e11d48' }}>-${r.amount.toLocaleString()}</span> 
+      render: (r) => <span style={{ fontWeight: 700, color: '#e11d48' }}>-₹{r.amount.toLocaleString('en-IN')}</span> 
     },
     {
       key: 'paymentMethod',
@@ -353,7 +353,7 @@ export default function ExpensesPage() {
                     color: '#0f172a',
                     flexShrink: 0
                   }}>
-                    ${exp.amount.toLocaleString()}
+                    ₹{exp.amount.toLocaleString('en-IN')}
                   </span>
                 </div>
 
@@ -505,7 +505,7 @@ export default function ExpensesPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount (₹) *</label>
                     <input
                       required
                       type="number"
@@ -617,7 +617,7 @@ export default function ExpensesPage() {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount (₹) *</label>
                     <input
                       required
                       type="number"

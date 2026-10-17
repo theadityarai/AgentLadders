@@ -1,10 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
-import { PlusIcon } from '@/components/icons/NavIcons';
+import { 
+  PlusIcon, 
+  ShieldIcon, 
+  FileTextIcon, 
+  PrinterIcon, 
+  ExternalLinkIcon,
+  LockIcon,
+  CheckIcon
+} from '@/components/icons/NavIcons';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 
@@ -684,11 +693,33 @@ const FAQS = [
     category: 'Agency Branding & Customization',
     question: 'How do the System Configuration settings in Settings allow adding custom options?',
     answer: 'In Settings > System Configuration, agency owners can add custom options for Property Types, BHK Configurations, Lead & Inbound Sources, Amenities, Construction Stages, Vastu Orientations, and Deal Stages with 1 click.'
+  },
+  {
+    category: 'Legal, DPDP Act & Statutory Compliance',
+    question: 'How does AgentLadders comply with the Digital Personal Data Protection Act, 2023 (DPDP Act, India)?',
+    answer: 'AgentLadders adheres strictly to DPDP Act 2023 standards. Your agency serves as the primary Data Fiduciary for client information, while AgentLadders operates as an encrypted Data Processor. Client phone numbers, Aadhaar/PAN identity documents, and private financial notes are stored under AES-256 cryptographic encryption with multi-tenant row-level access control. We never resell, monetize, cross-target, or inspect your private broker data.'
+  },
+  {
+    category: 'Legal, DPDP Act & Statutory Compliance',
+    question: 'Who legally owns the client leads, property inventory, and deal records created on AgentLadders?',
+    answer: 'You and your agency hold 100% unconditional proprietary ownership of all leads, client databases, property inventory, transaction records, and uploaded contracts. AgentLadders claims zero intellectual property or commercial rights over your brokerage data. You can export your full portfolio to CSV / Excel or request permanent cryptographically verified erasure at any time.'
+  },
+  {
+    category: 'Legal, DPDP Act & Statutory Compliance',
+    question: 'How do State RERA carpet area mandates and broker disclosures apply to listings?',
+    answer: 'Under Section 4(2) of the Real Estate (Regulation and Development) Act, 2016 (RERA), all properties pitched or advertised must explicitly state the RERA Carpet Area in square feet/meters and the official Project/Agent RERA Registration Number. AgentLadders enforces dedicated fields for RERA Carpet Area, Super Built-up Area, and RERA IDs on every property profile and automatically includes required regulatory disclosures on public share links.'
+  },
+  {
+    category: 'Legal, DPDP Act & Statutory Compliance',
+    question: 'Where can I read and download the full Terms of Service and Privacy Policy for our records?',
+    answer: 'You can review, search, copy, and print the complete Terms of Service (governed by Indian Contract Act 1872 & IT Act 2000) and statutory Privacy Policy (DPDP Act 2023) directly from the "Terms & Privacy Policy" tab above, or visit the public links at /terms and /privacy.'
   }
 ];
 
 export default function SupportPage() {
-  const [activeTab, setActiveTab] = useState<'faqs' | 'contracts' | 'tickets'>('faqs');
+  const [activeTab, setActiveTab] = useState<'faqs' | 'contracts' | 'legal' | 'tickets'>('faqs');
+  const [legalDocType, setLegalDocType] = useState<'terms' | 'privacy'>('terms');
+  const [legalSearch, setLegalSearch] = useState('');
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
@@ -963,6 +994,7 @@ export default function SupportPage() {
         {[
           { key: 'faqs', label: 'Broker FAQs & Guides', icon: '💡' },
           { key: 'contracts', label: 'Legal Contracts & Mandates', icon: '⚖️' },
+          { key: 'legal', label: 'Terms & Privacy Policy', icon: '🛡️' },
           { key: 'tickets', label: `My Inquiries & Tickets (${tickets.length})`, icon: '💬' },
         ].map(tab => {
           const isActive = activeTab === tab.key;
@@ -1288,7 +1320,416 @@ export default function SupportPage() {
         </div>
       )}
 
-      {/* TAB 3: TICKETS & INQUIRIES */}
+      {/* TAB 3: LEGAL, TERMS & PRIVACY POLICY */}
+      {activeTab === 'legal' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Top Banner with Direct Links */}
+          <div style={{
+            backgroundColor: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            borderRadius: 14,
+            padding: '20px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 16
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flex: '1 1 320px' }}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                backgroundColor: '#eff6ff',
+                color: '#2563eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <ShieldIcon size={24} color="#2563eb" />
+              </div>
+              <div>
+                <strong style={{ fontSize: 15, color: '#0f172a', display: 'block', marginBottom: 4 }}>
+                  Statutory Broker Governance & Data Protection Policy
+                </strong>
+                <p style={{ fontSize: 13, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                  Governed by the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act, India)</strong>, <strong>RERA 2016</strong>, <strong>Information Technology Act, 2000</strong>, and <strong>Indian Contract Act, 1872</strong>. Your agency retains 100% data ownership.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <Link href="/terms" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <ExternalLinkIcon size={14} /> Full Terms Page ↗
+                  </span>
+                </Button>
+              </Link>
+              <Link href="/privacy" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <ExternalLinkIcon size={14} /> Full Privacy Page ↗
+                  </span>
+                </Button>
+              </Link>
+              <Button variant="primary" size="sm" onClick={() => {
+                if (typeof window !== 'undefined') window.print();
+              }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <PrinterIcon size={14} color="#fff" /> Print Document 🖨️
+                </span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Sub-Tabs: Terms vs Privacy & Search Filter */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: 14,
+            padding: '16px 20px',
+            border: '1px solid #e2e8f0',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 14,
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setLegalDocType('terms')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 16px',
+                  borderRadius: 20,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  border: '1px solid',
+                  borderColor: legalDocType === 'terms' ? 'var(--primary)' : '#e2e8f0',
+                  backgroundColor: legalDocType === 'terms' ? 'var(--primary)' : '#f8fafc',
+                  color: legalDocType === 'terms' ? '#fff' : '#64748b',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>📜</span>
+                <span>Terms of Service (v2.4 — RERA & IT Act)</span>
+              </button>
+
+              <button
+                onClick={() => setLegalDocType('privacy')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 16px',
+                  borderRadius: 20,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  border: '1px solid',
+                  borderColor: legalDocType === 'privacy' ? 'var(--primary)' : '#e2e8f0',
+                  backgroundColor: legalDocType === 'privacy' ? 'var(--primary)' : '#f8fafc',
+                  color: legalDocType === 'privacy' ? '#fff' : '#64748b',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>🛡️</span>
+                <span>Privacy Policy (DPDP Act 2023 Compliant)</span>
+              </button>
+            </div>
+
+            <SearchBar
+              value={legalSearch}
+              onChange={setLegalSearch}
+              placeholder="Search legal clauses (e.g. RERA, carpet area, encryption, data ownership, GST)..."
+              maxWidth={380}
+              minWidth={260}
+            />
+          </div>
+
+          {/* Quick Pillars Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))',
+            gap: 16
+          }}>
+            <div style={{ backgroundColor: '#fff', borderRadius: 12, padding: 18, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 22, marginBottom: 6 }}>🔒</div>
+              <strong style={{ fontSize: 13.5, color: '#0f172a', display: 'block', marginBottom: 4 }}>100% Broker Data Ownership</strong>
+              <p style={{ fontSize: 12.5, color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                Your client leads, landlord phone numbers, and commission margins belong solely to your agency. Never resold or shared.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: '#fff', borderRadius: 12, padding: 18, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 22, marginBottom: 6 }}>⚖️</div>
+              <strong style={{ fontSize: 13.5, color: '#0f172a', display: 'block', marginBottom: 4 }}>State RERA Compliance</strong>
+              <p style={{ fontSize: 12.5, color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                Enforces statutory RERA Carpet Area standards (Sec 4(2)) and verified agent registration disclosures on public links.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: '#fff', borderRadius: 12, padding: 18, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 22, marginBottom: 6 }}>🛡️</div>
+              <strong style={{ fontSize: 13.5, color: '#0f172a', display: 'block', marginBottom: 4 }}>DPDP Act 2023 & AES-256</strong>
+              <p style={{ fontSize: 12.5, color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                Row-level database isolation, 256-bit encryption at rest, data portability, and the right to permanent cryptographic erasure.
+              </p>
+            </div>
+
+            <div style={{ backgroundColor: '#fff', borderRadius: 12, padding: 18, border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: 22, marginBottom: 6 }}>🧾</div>
+              <strong style={{ fontSize: 13.5, color: '#0f172a', display: 'block', marginBottom: 4 }}>18% GST SAC 997222 & TDS</strong>
+              <p style={{ fontSize: 12.5, color: '#64748b', margin: 0, lineHeight: 1.45 }}>
+                Compliant with Indian tax legislation for brokerage services, supporting CGST/SGST/IGST and Section 194H 5% TDS tracking.
+              </p>
+            </div>
+          </div>
+
+          {/* Legal Document Reader Container */}
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 14,
+            border: '1px solid #e2e8f0',
+            overflow: 'hidden',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{
+              padding: '16px 24px',
+              backgroundColor: '#f8fafc',
+              borderBottom: '1px solid #e2e8f0',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 12
+            }}>
+              <div>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+                  {legalDocType === 'terms' ? 'Statutory Enterprise Terms of Service' : 'Digital Personal Data Protection Policy'}
+                </span>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: '4px 0 0' }}>
+                  {legalDocType === 'terms' 
+                    ? 'AgentLadders Terms of Service & Broker Operating Agreement' 
+                    : 'AgentLadders Privacy Policy & Data Fiduciary Disclosure'}
+                </h3>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const text = legalDocType === 'terms'
+                    ? `AGENTLADDERS TERMS OF SERVICE (v2.4)\nGoverned by Information Technology Act, 2000 & Indian Contract Act, 1872.\n100% Broker Lead Ownership Guaranteed. RERA Carpet Area Compliant.\nOfficial Grievance Officer: grievance@agentladders.com`
+                    : `AGENTLADDERS PRIVACY POLICY (DPDP ACT 2023 COMPLIANT)\nGoverned by the Digital Personal Data Protection Act, 2023 (India).\n256-Bit Cryptographic Encryption. Zero Unauthorized Lead Monetization.\nOfficial Grievance Officer: grievance@agentladders.com`;
+                  navigator.clipboard.writeText(text);
+                  showToast('success', `${legalDocType === 'terms' ? 'Terms of Service' : 'Privacy Policy'} copied to clipboard!`, 'Copied');
+                }}>
+                  📋 Copy Summary
+                </Button>
+                <Link href={legalDocType === 'terms' ? '/terms' : '/privacy'} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <Button variant="primary" size="sm">
+                    Open Dedicated Page ↗
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Document Content */}
+            <div style={{ padding: '24px 28px', maxHeight: '680px', overflowY: 'auto', lineHeight: 1.65, fontSize: 13.5, color: '#334155' }}>
+              {legalDocType === 'terms' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  {/* Terms Sections */}
+                  {[
+                    {
+                      num: '1',
+                      title: 'Acceptance of Terms & Regulatory Framework',
+                      badge: 'Indian Contract Act 1872',
+                      text: 'These Terms of Service ("Terms") constitute a legally binding agreement between AgentLadders Technologies Pvt. Ltd. ("AgentLadders", "We", "Us") and you or the real estate enterprise you represent ("Broker", "Subscriber", "You"). By creating an account, accessing the Cockpit, or utilizing our software services, you unconditionally agree to comply with and be bound by these Terms, governed under the Indian Contract Act, 1872 and the Information Technology Act, 2000.'
+                    },
+                    {
+                      num: '2',
+                      title: 'Eligibility & Authorized Broker Representation',
+                      badge: 'RERA Agent Mandate',
+                      text: 'The Platform is designed strictly for commercial and professional use by licensed real estate brokers, channel partners, real estate developers, property advisors, and authorized corporate sales executives. By registering, you warrant that you are at least 18 years of age and hold all requisite statutory registrations (including State Real Estate Regulatory Authority (RERA) licenses) necessary to carry on real estate brokerage in your respective state or union territory.'
+                    },
+                    {
+                      num: '3',
+                      title: 'RERA Compliance & Section 4(2) Carpet Area Disclosure',
+                      badge: 'Statutory Real Estate Law',
+                      text: 'Under Section 4(2) of the Real Estate (Regulation and Development) Act, 2016, all real estate marketing must explicitly disclose the approved RERA Carpet Area in square meters or square feet. You agree that whenever you input, pitch, or publicly share property listings through AgentLadders, you will provide accurate Carpet Area measurements and valid RERA Project / Agent Registration Numbers. Misrepresentation of super built-up area as carpet area without regulatory disclosure is strictly prohibited.'
+                    },
+                    {
+                      num: '4',
+                      title: '100% Broker Data Ownership & Cryptographic Silos',
+                      badge: 'Zero Lead Reselling Pledge',
+                      text: 'AgentLadders recognizes that client contacts, prospective buyer phone numbers, landlord leads, and deal commissions constitute confidential, proprietary trade assets of your agency. You retain 100% unconditional proprietary ownership of all data entered into your workspace. AgentLadders pledges that your lead and property data will never be sold, leased, shared, aggregated with competitors, or used for third-party commercial marketing.'
+                    },
+                    {
+                      num: '5',
+                      title: 'WhatsApp Cloud Pitching & Anti-Spam Compliance',
+                      badge: 'TRAI & Meta Compliance',
+                      text: 'AgentLadders facilitates 1-click wa.me dispatch directly through your native WhatsApp client. In compliance with Telecom Regulatory Authority of India (TRAI) Telecom Commercial Communications Customer Preference Regulations (TCCCPR) 2018 and Meta Business policies, you agree to only transmit property pitches, site visit confirmations, and brochures to recipients who have explicitly consented or expressed bona fide commercial interest in real estate offerings.'
+                    },
+                    {
+                      num: '6',
+                      title: 'Brokerage Invoicing, 18% GST & Section 194H TDS',
+                      badge: 'GST SAC 997222',
+                      text: 'All brokerage invoices generated through the Platform adhere to Indian Goods and Services Tax (GST) provisions under Service Accounting Code (SAC) 997222 (Real estate agency services). The software supports tax computation for CGST (9%) + SGST (9%) or IGST (18%) and records TDS deductions under Section 194H of the Income Tax Act, 1961 (5% TDS on brokerage/commission). You remain solely responsible for statutory tax remittances to the Government of India.'
+                    },
+                    {
+                      num: '7',
+                      title: 'HNW Client & Escrow Confidentiality',
+                      badge: 'Client Privacy',
+                      text: 'High-Net-Worth (HNW) client negotiation notes, token bayana amounts, bank account details, and commission split structures recorded within your workspace are treated as strictly confidential trade secrets. They remain accessible only to authorized agency staff members with appropriate role-based credentials.'
+                    },
+                    {
+                      num: '8',
+                      title: 'Subscription Billing, 14-Day Trial & Zero Vendor Lock-In',
+                      badge: 'INR Pricing',
+                      text: 'All subscription fees are billed in Indian Rupees (₹). Subscribers enjoy a 14-day free trial with zero credit card commitment. You may cancel your subscription at any time without penalty. You can download and export your entire database in open CSV format with 1 click at any time.'
+                    },
+                    {
+                      num: '9',
+                      title: 'Limitation of Liability & Real Estate Transactions',
+                      badge: 'Platform Scope',
+                      text: 'AgentLadders operates exclusively as a Software-as-a-Service (SaaS) CRM platform. AgentLadders is not a licensed real estate broker, lender, escrow agent, or title insurer. We do not participate in negotiations or hold closing escrow funds. You remain solely responsible for conducting legal title due diligence, police tenant verifications, and property deed registrations.'
+                    },
+                    {
+                      num: '10',
+                      title: 'Governing Law, Jurisdiction & Statutory Grievance Redressal',
+                      badge: 'Bengaluru, India',
+                      text: 'These Terms are governed by and construed in accordance with the laws of the Republic of India. Any disputes arising out of these Terms shall be subject to the exclusive jurisdiction of the civil courts located in Bengaluru, Karnataka, India. Grievance Officer: Adv. R. S. Venkatesh, Email: grievance@agentladders.com, Address: Level 4, UB City Tech Tower, Vittal Mallya Road, Bengaluru 560001, Karnataka.'
+                    }
+                  ]
+                    .filter(sec => !legalSearch || sec.title.toLowerCase().includes(legalSearch.toLowerCase()) || sec.text.toLowerCase().includes(legalSearch.toLowerCase()) || sec.badge.toLowerCase().includes(legalSearch.toLowerCase()))
+                    .map(sec => (
+                      <div key={sec.num} style={{ padding: '16px 20px', borderRadius: 10, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+                          <h4 style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                            {sec.num}. {sec.title}
+                          </h4>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: '#eff6ff', color: '#1d4ed8' }}>
+                            {sec.badge}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, color: '#475569', lineHeight: 1.6 }}>{sec.text}</p>
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  {/* Privacy Policy Sections */}
+                  {[
+                    {
+                      num: '1',
+                      title: 'Statutory Commitment under DPDP Act 2023',
+                      badge: 'Statutory Compliance',
+                      text: 'This Privacy Policy is formulated in strict accordance with the Digital Personal Data Protection Act, 2023 (DPDP Act, Act No. 22 of 2023, Republic of India) and the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011. AgentLadders is committed to safeguarding personal and professional real estate information processed through our systems.'
+                    },
+                    {
+                      num: '2',
+                      title: 'Data Fiduciary vs. Data Processor Designations',
+                      badge: 'DPDP Architecture',
+                      text: 'Under the DPDP Act 2023, your agency acts as the primary "Data Fiduciary" regarding personal data of prospective buyers, tenants, and landlords. AgentLadders acts solely as a secure "Data Processor", handling such data exclusively on your documented instructions to deliver CRM, pipeline, and pitch functionalities. We maintain zero independent commercial rights to target or contact your clients.'
+                    },
+                    {
+                      num: '3',
+                      title: 'Zero-Leakage & Non-Monetization Pledge',
+                      badge: 'Strict Lead Isolation',
+                      text: 'AgentLadders does not and will never sell, rent, monetize, or disclose your client contacts, high-net-worth investor phone numbers, landlord details, or commission structures to any competitor, property portal, financial institution, or marketing agency. Each agency workspace is isolated in a multi-tenant cryptographic silo.'
+                    },
+                    {
+                      num: '4',
+                      title: 'Categories of Information Processed',
+                      badge: 'Real Estate Data',
+                      text: 'We collect and process: (a) Broker Account Data (Agent Name, Agency Name, Official Mobile Number, Email, RERA Agent License ID, GSTIN); (b) Client Inquiries (Buyer/Tenant Name, Contact Phone, Budget Range in ₹, BHK Preferences, Locality Criteria); (c) Property Inventory (Unit details, RERA Carpet Area, Pricing, Photos); and (d) Audit Logs (User timestamps, IP addresses for security).'
+                    },
+                    {
+                      num: '5',
+                      title: 'Document Vault & Sensitive Identity Protection',
+                      badge: 'KYC & AES-256',
+                      text: 'When you upload legal title deeds, Leave & License drafts, Aadhaar/PAN identity copies, or bank payment receipts to the Document Vault, files are encrypted at rest using industry-standard AES-256 encryption and transmitted over TLS 1.3 cryptographic protocols. Only authenticated users with explicit agency role permissions can access or preview documents.'
+                    },
+                    {
+                      num: '6',
+                      title: 'WhatsApp Cloud & Direct Communications Privacy',
+                      badge: 'Client-Side Links',
+                      text: 'AgentLadders creates wa.me deep links locally within your browser. When you click "Pitch on WhatsApp", your native WhatsApp application handles transmission directly with Meta servers. AgentLadders does not inspect, read, or log private end-to-end encrypted conversations between you and your clients.'
+                    },
+                    {
+                      num: '7',
+                      title: 'Data Principal Rights: Access, Portability & Erasure',
+                      badge: 'DPDP Section 11-14',
+                      text: 'In alignment with the DPDP Act 2023, you and your clients maintain the statutory rights to: (a) Access an itemized summary of personal data processed; (b) Correct, update, or complete records; (c) Portability: export your full agency dataset to CSV / Excel at any time; and (d) Right to Erasure: request permanent, cryptographically verified deletion of all records upon account termination.'
+                    },
+                    {
+                      num: '8',
+                      title: 'Statutory Grievance Redressal Officer',
+                      badge: 'DPDP Mandate',
+                      text: 'Pursuant to Section 13 of the DPDP Act 2023, AgentLadders has designated a Grievance Officer to resolve privacy, data processing, and security inquiries within the statutory SLA of 7 business days. Grievance Officer: Adv. R. S. Venkatesh, Email: grievance@agentladders.com, Physical Office: Level 4, UB City Tech Tower, Vittal Mallya Road, Bengaluru 560001, Karnataka, India.'
+                    }
+                  ]
+                    .filter(sec => !legalSearch || sec.title.toLowerCase().includes(legalSearch.toLowerCase()) || sec.text.toLowerCase().includes(legalSearch.toLowerCase()) || sec.badge.toLowerCase().includes(legalSearch.toLowerCase()))
+                    .map(sec => (
+                      <div key={sec.num} style={{ padding: '16px 20px', borderRadius: 10, backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+                          <h4 style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                            {sec.num}. {sec.title}
+                          </h4>
+                          <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: '#ecfdf5', color: '#047857' }}>
+                            {sec.badge}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, color: '#475569', lineHeight: 1.6 }}>{sec.text}</p>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            {/* Document Footer Bar */}
+            <div style={{
+              padding: '14px 24px',
+              borderTop: '1px solid #e2e8f0',
+              backgroundColor: '#f8fafc',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 12
+            }}>
+              <span style={{ fontSize: 12, color: '#64748b' }}>
+                Effective Date: January 1, 2026 · Complies with DPDP Act 2023 & Indian Contract Act 1872
+              </span>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Link href={legalDocType === 'terms' ? '/terms' : '/privacy'} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <Button variant="outline" size="sm">
+                    View Interactive Table of Contents ↗
+                  </Button>
+                </Link>
+                <Button variant="secondary" size="sm" onClick={() => {
+                  setFormSource('general');
+                  setTicketForm({
+                    subject: `Legal Inquiry: ${legalDocType === 'terms' ? 'Terms of Service' : 'Privacy Policy & DPDP Act'}`,
+                    category: 'Contract Inquiry',
+                    priority: 'Medium',
+                    contractType: 'Statutory Compliance',
+                    message: `Hi Legal Team,\n\nWe have a question regarding the ${legalDocType === 'terms' ? 'Terms of Service' : 'Privacy Policy'} for our agency:\n\nSpecific questions/clauses:\n- \n- `
+                  });
+                  setShowNewTicketModal(true);
+                }}>
+                  Ask Legal Support ✉️
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: TICKETS & INQUIRIES */}
       {activeTab === 'tickets' && (
         <div className="support-tickets-grid" style={{ alignItems: 'start' }}>
           {/* Left Column: Tickets List */}

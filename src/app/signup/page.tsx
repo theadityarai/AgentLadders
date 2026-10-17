@@ -483,7 +483,7 @@ export default function SignupPage() {
                 className={styles.checkbox}
               />
               <span>
-                I agree to the <a href="#">Terms of Service</a>, <a href="#">Privacy Policy</a>, and to receive real-time broker notifications.
+                I agree to the <Link href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</Link>, <Link href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>, and to receive real-time broker notifications.
               </span>
             </label>
 

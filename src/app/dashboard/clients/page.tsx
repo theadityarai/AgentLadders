@@ -798,7 +798,7 @@ export default function ClientsPage() {
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Budget / Net Worth</label>
                     <input
                       type="text"
-                      placeholder="e.g. $2,500,000"
+                      placeholder="e.g. ₹2.5 Cr"
                       value={form.budget}
                       onChange={e => setForm({ ...form, budget: e.target.value })}
                       style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
@@ -819,7 +819,7 @@ export default function ClientsPage() {
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Specific Requirements & Preferred Locations</label>
                     <input
                       type="text"
-                      placeholder="e.g. Looking for sea-view 4 BHK or penthouse in Jumeirah"
+                      placeholder="e.g. Looking for 3 BHK or luxury penthouse in Worli / Bandra"
                       value={form.requirement}
                       onChange={e => setForm({ ...form, requirement: e.target.value })}
                       style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
