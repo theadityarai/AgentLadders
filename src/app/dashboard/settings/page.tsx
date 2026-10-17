@@ -2730,131 +2730,155 @@ export default function SettingsPage() {
                       <div
                         key={session.id}
                         style={{
-                          backgroundColor: isCurrent ? '#f0fdf4' : '#f8fafc',
+                          backgroundColor: isCurrent ? '#f0fdf4' : '#ffffff',
                           border: isCurrent ? '1.5px solid #86efac' : '1px solid #e2e8f0',
-                          borderRadius: 12,
-                          padding: '16px 18px',
+                          borderRadius: 14,
+                          padding: '14px 16px',
                           display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          flexWrap: 'wrap',
-                          gap: 16,
+                          flexDirection: 'column',
+                          gap: 10,
+                          boxShadow: isCurrent ? '0 2px 8px rgba(16,185,129,0.08)' : '0 1px 3px rgba(0,0,0,0.02)',
                           transition: 'all 0.15s ease'
                         }}
                       >
-                        {/* Left: Device Info */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, minWidth: 260 }}>
-                          <span style={{
-                            fontSize: 24,
-                            backgroundColor: isCurrent ? '#dcfce7' : '#ffffff',
-                            padding: '8px 10px',
-                            borderRadius: 10,
-                            border: isCurrent ? '1px solid #bbf7d0' : '1px solid #e2e8f0'
-                          }}>
-                            {browserIcon}
-                          </span>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                              <strong style={{ fontSize: 14.5, color: '#0f172a' }}>
-                                {session.browser}
-                              </strong>
-                              <span style={{ fontSize: 13, color: '#475569', fontWeight: 500 }}>
-                                on {session.os}
-                              </span>
-                              
-                              {isCurrent && (
-                                <span style={{
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  backgroundColor: '#16a34a',
-                                  color: '#ffffff',
-                                  padding: '2px 8px',
-                                  borderRadius: 12,
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: 4
-                                }}>
-                                  ✓ This Device
-                                </span>
-                              )}
-
-                              <span style={{
-                                fontSize: 11,
-                                fontWeight: 700,
-                                backgroundColor: isCurrent ? '#dcfce7' : '#e2e8f0',
-                                color: isCurrent ? '#15803d' : '#475569',
-                                padding: '2px 7px',
-                                borderRadius: 10
-                              }}>
-                                {isCurrent ? '● Active Now' : '● Signed In'}
-                              </span>
+                        {/* Top Row: Device Icon, Device Name, OS, Badges & Desktop Action */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+                            <div style={{
+                              width: 42,
+                              height: 42,
+                              borderRadius: 10,
+                              backgroundColor: isCurrent ? '#dcfce7' : '#f1f5f9',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 20,
+                              flexShrink: 0
+                            }}>
+                              {browserIcon}
                             </div>
 
-                            {/* IP Address & Location Row */}
-                            {showIpDetails && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8, flexWrap: 'wrap', fontSize: 12.5, color: '#334155' }}>
-                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, backgroundColor: '#ffffff', padding: '3px 8px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
-                                  <span style={{ color: '#0284c7' }}>🌐</span>
-                                  <span style={{ fontWeight: 600 }}>IP:</span>
-                                  <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0f172a' }}>{session.ipAddress}</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const cleanIp = session.ipAddress.split(' ')[0];
-                                      navigator.clipboard?.writeText(cleanIp);
-                                      showToast('info', `Copied IP address: ${cleanIp}`, 'IP Copied');
-                                    }}
-                                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, fontSize: 11, color: '#64748b' }}
-                                    title="Copy IP Address"
-                                  >
-                                    📋
-                                  </button>
-                                </div>
-
-                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, backgroundColor: '#ffffff', padding: '3px 8px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
-                                  <span style={{ color: '#ea580c' }}>📍</span>
-                                  <span style={{ fontWeight: 600 }}>Location:</span>
-                                  <span style={{ fontWeight: 700, color: '#0f172a' }}>{session.location}</span>
-                                </div>
-
-                                {session.screen && (
-                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#64748b', fontSize: 11.5 }}>
-                                    <span>🖥️ {session.screen}</span>
-                                  </div>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                                  {session.browser}
+                                </strong>
+                                <span style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>
+                                  on {session.os}
+                                </span>
+                                {isCurrent && (
+                                  <span style={{
+                                    fontSize: 10.5,
+                                    fontWeight: 700,
+                                    backgroundColor: '#16a34a',
+                                    color: '#ffffff',
+                                    padding: '2px 7px',
+                                    borderRadius: 12,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 3
+                                  }}>
+                                    ✓ This Device
+                                  </span>
                                 )}
-
-                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#64748b', fontSize: 11.5 }}>
-                                  <span>🕒 {formatSessionTime(session.lastActive)}</span>
-                                </div>
+                                <span style={{
+                                  fontSize: 10.5,
+                                  fontWeight: 700,
+                                  backgroundColor: isCurrent ? '#dcfce7' : '#f1f5f9',
+                                  color: isCurrent ? '#15803d' : '#64748b',
+                                  padding: '2px 7px',
+                                  borderRadius: 10
+                                }}>
+                                  {isCurrent ? '● Active Now' : '● Signed In'}
+                                </span>
                               </div>
+                            </div>
+                          </div>
+
+                          {/* Desktop Right Action */}
+                          <div className="hide-on-mobile">
+                            {isCurrent ? (
+                              <span style={{ fontSize: 12, fontWeight: 700, color: '#15803d', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                🔒 Current Session
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleRevokeSession(session.id)}
+                                disabled={revokingSessionId === session.id}
+                                style={{
+                                  padding: '6px 14px',
+                                  borderRadius: 8,
+                                  border: '1px solid #fecaca',
+                                  backgroundColor: '#ffffff',
+                                  color: '#dc2626',
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                {revokingSessionId === session.id ? 'Revoking...' : 'Terminate Session'}
+                              </button>
                             )}
                           </div>
                         </div>
 
-                        {/* Right Action */}
-                        <div>
-                          {isCurrent ? (
-                            <span style={{
-                              fontSize: 12,
-                              fontWeight: 700,
-                              color: '#15803d',
-                              backgroundColor: '#dcfce7',
-                              padding: '6px 12px',
-                              borderRadius: 8,
-                              border: '1px solid #bbf7d0',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 5
-                            }}>
-                              🔒 Current Session
+                        {/* Bottom Metadata Row: Location, IP, Screen, Time */}
+                        {showIpDetails && (
+                          <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            flexWrap: 'wrap',
+                            fontSize: 12,
+                            color: '#64748b',
+                            paddingTop: 8,
+                            borderTop: '1px dashed #e2e8f0'
+                          }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#0f172a', fontWeight: 600 }}>
+                              📍 {session.location}
                             </span>
+                            <span>•</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                              🌐 IP: <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#334155' }}>{session.ipAddress}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const cleanIp = session.ipAddress.split(' ')[0];
+                                  navigator.clipboard?.writeText(cleanIp);
+                                  showToast('info', `Copied IP address: ${cleanIp}`, 'IP Copied');
+                                }}
+                                style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, fontSize: 11, color: '#64748b' }}
+                                title="Copy IP Address"
+                              >
+                                📋
+                              </button>
+                            </span>
+                            {session.screen && (
+                              <>
+                                <span>•</span>
+                                <span>🖥️ {session.screen}</span>
+                              </>
+                            )}
+                            <span>•</span>
+                            <span>🕒 {formatSessionTime(session.lastActive)}</span>
+                          </div>
+                        )}
+
+                        {/* Mobile Action Button (Full-width clean tap target) */}
+                        <div className="show-on-mobile" style={{ marginTop: 2 }}>
+                          {isCurrent ? (
+                            <div style={{ width: '100%', textAlign: 'center', fontSize: 12, fontWeight: 700, color: '#15803d', padding: '6px', backgroundColor: '#dcfce7', borderRadius: 8 }}>
+                              🔒 Current Device Session
+                            </div>
                           ) : (
                             <button
                               type="button"
                               onClick={() => handleRevokeSession(session.id)}
                               disabled={revokingSessionId === session.id}
                               style={{
-                                padding: '6px 14px',
+                                width: '100%',
+                                padding: '8px 14px',
                                 borderRadius: 8,
                                 border: '1px solid #fecaca',
                                 backgroundColor: '#ffffff',
@@ -2862,10 +2886,7 @@ export default function SettingsPage() {
                                 fontSize: 12.5,
                                 fontWeight: 700,
                                 cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 6,
-                                transition: 'all 0.15s ease'
+                                textAlign: 'center'
                               }}
                             >
                               {revokingSessionId === session.id ? 'Revoking...' : 'Terminate Session'}

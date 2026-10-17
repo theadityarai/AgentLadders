@@ -1423,9 +1423,11 @@ div[style*="position: 'fixed'"][style*="inset: 0"] {
 /* Support Tickets Grid */
 .support-tickets-grid {
   display: grid;
-  grid-template-columns: minmax(300px, 360px) 1fr;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 }
 @media (max-width: 900px) {
   .support-tickets-grid {
@@ -1492,12 +1494,14 @@ div[style*="position: 'fixed'"][style*="inset: 0"] {
   -webkit-text-fill-color: transparent;
 }
 
-/* Tutorial Page Responsive Grid */
+/* Tutorial Page Responsive Architecture */
 .tutorial-layout-grid {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 28px;
   align-items: start;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tutorial-sidebar {
@@ -1505,13 +1509,137 @@ div[style*="position: 'fixed'"][style*="inset: 0"] {
   top: 84px;
 }
 
+.tutorial-header-banner {
+  background: linear-gradient(135deg, #091e17 0%, #0f2e24 45%, #051f18 100%);
+  border-radius: 24px;
+  padding: 32px 36px;
+  color: #ffffff;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 40px -10px rgba(5, 46, 36, 0.4);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.tutorial-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 24px 28px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.tutorial-summary-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #f1f5f9;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tutorial-tab-nav {
+  display: flex;
+  gap: 8px;
+  background-color: #ffffff;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.tutorial-tab-nav::-webkit-scrollbar {
+  display: none;
+}
+.tutorial-tab-nav button {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tutorial-step-card {
+  display: flex;
+  gap: 20px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.tutorial-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background-color: #ffffff;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.tutorial-script-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 @media (max-width: 1024px) {
   .tutorial-layout-grid {
     grid-template-columns: 1fr !important;
-    gap: 20px !important;
+    gap: 16px !important;
   }
   .tutorial-sidebar {
     position: static !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutorial-header-banner {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+  .tutorial-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+  }
+  .tutorial-summary-metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .tutorial-step-card {
+    flex-direction: column !important;
+    padding: 14px 14px !important;
+    gap: 12px !important;
+  }
+  .tutorial-field-grid {
+    grid-template-columns: 1fr !important;
+    padding: 12px !important;
+  }
+  .tutorial-script-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tutorial-summary-metrics-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
 }
 

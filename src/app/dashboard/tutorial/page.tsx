@@ -72,7 +72,7 @@ export default function PlaybookAndTutorialPage() {
   }, [activeModule, activeStepNumber]);
 
   return (
-    <div style={{ maxWidth: 1440, margin: '0 auto', paddingBottom: 100 }}>
+    <div style={{ maxWidth: 1440, margin: '0 auto', paddingBottom: 100, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
       {toastMessage && (
         <Toast
           toast={{ id: 'tutorial-toast', type: 'success', message: toastMessage }}
@@ -229,17 +229,7 @@ export default function PlaybookAndTutorialPage() {
       {/* ─────────────────────────────────────────────────────────────────────
           HEADER BANNER
       ───────────────────────────────────────────────────────────────────── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #091e17 0%, #0f2e24 45%, #051f18 100%)',
-        borderRadius: 24,
-        padding: '36px 40px',
-        color: '#ffffff',
-        marginBottom: 28,
-        position: 'relative',
-        overflow: 'hidden',
-        boxShadow: '0 16px 40px -10px rgba(5, 46, 36, 0.4)',
-        border: '1px solid rgba(16, 185, 129, 0.2)'
-      }}>
+      <div className="tutorial-header-banner">
         <div style={{ position: 'absolute', top: -70, right: -70, width: 260, height: 260, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.2)', pointerEvents: 'none', filter: 'blur(50px)' }} />
         <div style={{ position: 'absolute', bottom: -60, right: 240, width: 200, height: 200, borderRadius: '50%', background: 'rgba(59, 130, 246, 0.15)', pointerEvents: 'none', filter: 'blur(40px)' }} />
 
@@ -262,7 +252,7 @@ export default function PlaybookAndTutorialPage() {
               <span>Broker Operating System & Mastery Blueprint</span>
             </div>
 
-            <h1 style={{ fontSize: 34, fontWeight: 800, margin: '0 0 10px', letterSpacing: '-0.5px', color: '#ffffff' }}>
+            <h1 style={{ fontSize: 'clamp(24px, 5vw, 34px)', fontWeight: 800, margin: '0 0 10px', letterSpacing: '-0.5px', color: '#ffffff' }}>
               Playbook & Tutorial 📖
             </h1>
 
@@ -493,16 +483,10 @@ export default function PlaybookAndTutorialPage() {
         </div>
 
         {/* ── RIGHT MAIN CANVAS (IN-DEPTH MODULE SHOWCASE) ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%', minWidth: 0, overflow: 'hidden' }}>
 
           {/* Module Banner Card */}
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 20,
-            padding: '26px 30px',
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
-          }}>
+          <div className="tutorial-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
@@ -521,7 +505,7 @@ export default function PlaybookAndTutorialPage() {
                   </span>
                 </div>
 
-                <h2 style={{ fontSize: 28, fontWeight: 800, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+                <h2 style={{ fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: 800, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.3px', wordBreak: 'break-word' }}>
                   {activeModule.name}
                 </h2>
 
@@ -530,7 +514,7 @@ export default function PlaybookAndTutorialPage() {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => setIsLightboxOpen(true)}
                   style={{
@@ -573,14 +557,7 @@ export default function PlaybookAndTutorialPage() {
             </div>
 
             {/* 4 Summary Metric Pills */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 14,
-              marginTop: 22,
-              paddingTop: 20,
-              borderTop: '1px solid #f1f5f9'
-            }}>
+            <div className="tutorial-summary-metrics-grid">
               <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>🎯 Goal</div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#0f172a', marginTop: 3 }}>{activeModule.primaryGoal}</div>
@@ -601,15 +578,7 @@ export default function PlaybookAndTutorialPage() {
           </div>
 
           {/* Tab Navigation Switcher */}
-          <div style={{
-            display: 'flex',
-            gap: 8,
-            backgroundColor: '#ffffff',
-            padding: '6px',
-            borderRadius: 16,
-            border: '1px solid #e2e8f0',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-          }}>
+          <div className="tutorial-tab-nav touch-scroll-container">
             {[
               { id: 'steps', label: '⚡ Step-by-Step Operator Guide', emoji: '⚡' },
               { id: 'visual', label: '📸 Live Screenshot & Hotspots', emoji: '📸' },
@@ -620,20 +589,20 @@ export default function PlaybookAndTutorialPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 style={{
-                  flex: 1,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
                   gap: 8,
-                  padding: '11px 16px',
-                  borderRadius: 12,
-                  fontSize: 13.5,
+                  padding: '9px 15px',
+                  borderRadius: 10,
+                  fontSize: 13,
                   fontWeight: 700,
                   cursor: 'pointer',
                   border: 'none',
                   backgroundColor: activeTab === tab.id ? 'var(--primary, #059669)' : 'transparent',
                   color: activeTab === tab.id ? '#ffffff' : '#64748b',
-                  transition: 'all 0.15s ease'
+                  transition: 'all 0.15s ease',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
                 }}
               >
                 <span>{tab.label}</span>
@@ -676,7 +645,7 @@ export default function PlaybookAndTutorialPage() {
                   </div>
 
                   {/* Step Buttons */}
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {activeModule.steps.map(s => {
                       const isActiveStep = s.number === activeStepNumber;
                       return (
@@ -781,6 +750,9 @@ export default function PlaybookAndTutorialPage() {
                     position: 'absolute',
                     bottom: 12,
                     left: 14,
+                    right: 14,
+                    maxWidth: 'calc(100% - 28px)',
+                    boxSizing: 'border-box',
                     backgroundColor: 'rgba(15, 23, 42, 0.85)',
                     padding: '6px 14px',
                     borderRadius: 20,
@@ -795,13 +767,7 @@ export default function PlaybookAndTutorialPage() {
               </div>
 
               {/* Detailed Step Cards Container */}
-              <div style={{
-                backgroundColor: '#ffffff',
-                borderRadius: 20,
-                padding: '28px 32px',
-                border: '1px solid #e2e8f0',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
-              }}>
+              <div className="tutorial-card">
                 <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 4 }}>
                   Detailed Operational SOP: {activeModule.shortName}
                 </div>
@@ -819,16 +785,12 @@ export default function PlaybookAndTutorialPage() {
                           setActiveStepNumber(st.number);
                           setActiveHotspotId(st.hotspotIndex);
                         }}
+                        className="tutorial-step-card"
                         style={{
-                          display: 'flex',
-                          gap: 20,
-                          padding: '22px 24px',
-                          borderRadius: 16,
                           backgroundColor: isSelected ? '#f0fdf4' : '#f8fafc',
                           border: isSelected ? '2px solid #34d399' : '1px solid #e2e8f0',
                           boxShadow: isSelected ? '0 8px 24px rgba(16, 185, 129, 0.12)' : 'none',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
+                          cursor: 'pointer'
                         }}
                       >
                         {/* Step Number Badge */}
@@ -875,16 +837,7 @@ export default function PlaybookAndTutorialPage() {
                           </div>
 
                           {/* Specific UI Element & Exact Field */}
-                          <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                            gap: 12,
-                            backgroundColor: '#ffffff',
-                            padding: '14px 16px',
-                            borderRadius: 12,
-                            border: '1px solid #e2e8f0',
-                            marginBottom: 12
-                          }}>
+                          <div className="tutorial-field-grid">
                             <div>
                               <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 4 }}>
                                 🔘 Exact Button / Field to Click:
@@ -1162,13 +1115,7 @@ export default function PlaybookAndTutorialPage() {
               TAB 3: WHATSAPP CLOSING SCRIPTS VAULT
           ───────────────────────────────────────────────────────────────── */}
           {activeTab === 'scripts' && (
-            <div style={{
-              backgroundColor: '#ffffff',
-              borderRadius: 20,
-              padding: '28px 32px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
-            }}>
+            <div className="tutorial-card">
               <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>
                 Ready-to-Copy WhatsApp Closing Scripts
               </div>
@@ -1191,7 +1138,7 @@ export default function PlaybookAndTutorialPage() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 14 }}>
+                    <div className="tutorial-script-grid">
                       {/* Hinglish Version */}
                       <div style={{ backgroundColor: '#ffffff', padding: '14px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -1283,10 +1230,8 @@ export default function PlaybookAndTutorialPage() {
           )}
 
           {/* Bottom Action Footer */}
-          <div style={{
+          <div className="tutorial-card" style={{
             backgroundColor: '#0f172a',
-            borderRadius: 20,
-            padding: '26px 30px',
             color: '#ffffff',
             display: 'flex',
             justifyContent: 'space-between',
@@ -1303,7 +1248,7 @@ export default function PlaybookAndTutorialPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button
                 onClick={launchOnScreenTour}
                 style={{

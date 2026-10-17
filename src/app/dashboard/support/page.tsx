@@ -999,7 +999,7 @@ export default function SupportPage() {
           {/* Quick SLA Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
             gap: 16
           }}>
             <div style={{ backgroundColor: '#fff', borderRadius: 14, padding: 20, border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
@@ -1094,20 +1094,43 @@ export default function SupportPage() {
                         padding: '16px 20px',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center',
+                        alignItems: 'flex-start',
+                        gap: 14,
                         cursor: 'pointer',
                         backgroundColor: isExpanded ? '#f8fafc' : '#fff'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 6, backgroundColor: '#eff6ff', color: '#2563eb' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 0 }}>
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: '2px 8px',
+                          borderRadius: 6,
+                          backgroundColor: '#eff6ff',
+                          color: '#2563eb',
+                          alignSelf: 'flex-start',
+                          letterSpacing: '0.02em'
+                        }}>
                           {faq.category}
                         </span>
-                        <span style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a' }}>
+                        <span style={{ fontSize: 14.5, fontWeight: 700, color: '#0f172a', lineHeight: 1.45 }}>
                           {faq.question}
                         </span>
                       </div>
-                      <span style={{ fontSize: 16, color: '#64748b', fontWeight: 800 }}>
+                      <span style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 8,
+                        backgroundColor: isExpanded ? '#e0e7ff' : '#f1f5f9',
+                        color: isExpanded ? '#4338ca' : '#64748b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 16,
+                        fontWeight: 800,
+                        flexShrink: 0,
+                        marginTop: 2
+                      }}>
                         {isExpanded ? '−' : '+'}
                       </span>
                     </div>
@@ -1127,12 +1150,12 @@ export default function SupportPage() {
       {/* TAB 2: LEGAL CONTRACTS & AGREEMENTS */}
       {activeTab === 'contracts' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 24 }}>⚖️</span>
+          <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flex: '1 1 280px' }}>
+              <span style={{ fontSize: 24, lineHeight: 1 }}>⚖️</span>
               <div>
-                <strong style={{ fontSize: 14, color: '#1e40af' }}>Standard Indian Real Estate Brokerage Agreements & Legal Contracts</strong>
-                <p style={{ fontSize: 12.5, color: '#3b82f6', margin: '2px 0 0' }}>
+                <strong style={{ fontSize: 14, color: '#1e40af', display: 'block', lineHeight: 1.35 }}>Standard Indian Real Estate Brokerage Agreements & Legal Contracts</strong>
+                <p style={{ fontSize: 12.5, color: '#3b82f6', margin: '4px 0 0', lineHeight: 1.45 }}>
                   100% accurate, legally binding model agreements for residential rent, commercial leases, earnest bayana tokens, seller mandates, channel partner slabs, and co-brokering.
                 </p>
               </div>
@@ -1240,12 +1263,12 @@ export default function SupportPage() {
                     </ul>
                   </div>
 
-                  <div style={{ marginTop: 'auto', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 8 }}>
                     <Button variant="outline" size="sm" onClick={() => setPreviewContract(contract)}>
                       🔍 Preview
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => handleDownloadContract(contract)}>
-                      ⬇️ Download (.txt)
+                      ⬇️ Download
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
                       navigator.clipboard.writeText(contract.fullLegalText);
@@ -1334,17 +1357,17 @@ export default function SupportPage() {
             {selectedTicket ? (
               <>
                 {/* Header */}
-                <div style={{ padding: '20px 24px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc', borderRadius: '14px 14px 0 0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', backgroundColor: '#f8fafc', borderRadius: '14px 14px 0 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>{selectedTicket.ticketNumber}</span>
                         <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 10, backgroundColor: selectedTicket.status === 'Resolved' ? '#dcfce7' : '#eff6ff', color: selectedTicket.status === 'Resolved' ? '#15803d' : '#1d4ed8' }}>
                           {selectedTicket.status}
                         </span>
                         <span style={{ fontSize: 11, color: '#94a3b8' }}>Priority: {selectedTicket.priority}</span>
                       </div>
-                      <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                      <h2 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0, wordBreak: 'break-word' }}>
                         {selectedTicket.subject}
                       </h2>
                       {selectedTicket.contractType && (
@@ -1353,7 +1376,7 @@ export default function SupportPage() {
                         </span>
                       )}
                     </div>
-                    <span style={{ fontSize: 12, color: '#94a3b8' }}>
+                    <span style={{ fontSize: 12, color: '#94a3b8', flexShrink: 0 }}>
                       {new Date(selectedTicket.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
