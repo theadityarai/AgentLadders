@@ -10,6 +10,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { FilterTabs } from '@/components/ui/FilterTabs';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
+import { StatusSelect } from '@/components/ui/StatusSelect';
 import { getStatusColorStyle } from '@/lib/theme';
 import { DEFAULT_TASK_STATUSES } from '@/lib/formatters';
 import {
@@ -439,15 +440,17 @@ export default function TasksPage() {
     {
       key: 'status',
       label: 'Status',
-      render: (r) => {
-        const sc = getStatusColorStyle(r.status);
-        return (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: sc.bg, border: `1px solid ${sc.border}`, padding: '3px 10px', borderRadius: 20 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: sc.dot }} />
-            <span style={{ color: sc.text, fontSize: 11.5, fontWeight: 700, whiteSpace: 'nowrap' }}>{r.status}</span>
-          </div>
-        );
-      }
+      render: (r) => (
+        <div onClick={e => e.stopPropagation()}>
+          <StatusSelect
+            value={r.status}
+            onChange={(newStatus) => handleMoveKanban(r.id, newStatus)}
+            options={taskStatuses}
+            variant="pill"
+            size="sm"
+          />
+        </div>
+      )
     },
     {
       key: 'category',
@@ -1002,36 +1005,15 @@ export default function TasksPage() {
                             📅 {task.dueDate} {isOverdue && <span style={{ color: '#dc2626', fontWeight: 800 }}>• OVERDUE</span>}
                           </span>
                         </div>
-                        <div>
-                          {(() => {
-                            const sc = getStatusColorStyle(task.status);
-                            return (
-                              <select
-                                value={task.status}
-                                onChange={(e) => handleMoveKanban(task.id, e.target.value)}
-                                style={{
-                                  fontSize: 11.5,
-                                  fontWeight: 700,
-                                  padding: '3px 8px',
-                                  borderRadius: 6,
-                                  border: `1px solid ${sc.border}`,
-                                  backgroundColor: sc.bg,
-                                  color: sc.text,
-                                  cursor: 'pointer',
-                                  outline: 'none'
-                                }}
-                              >
-                                {taskStatuses.map(st => {
-                                  const optSc = getStatusColorStyle(st);
-                                  return (
-                                    <option key={st} value={st} style={{ backgroundColor: optSc.bg, color: optSc.text }}>
-                                      {`● ${st}`}
-                                    </option>
-                                  );
-                                })}
-                              </select>
-                            );
-                          })()}
+                        <div onClick={e => e.stopPropagation()}>
+                          <StatusSelect
+                            value={task.status}
+                            onChange={(newStatus) => handleMoveKanban(task.id, newStatus)}
+                            options={taskStatuses}
+                            variant="pill"
+                            size="sm"
+                            align="right"
+                          />
                         </div>
                       </div>
 
@@ -1183,74 +1165,13 @@ export default function TasksPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Status</label>
-                  {(() => {
-                    const sc = form.status ? getStatusColorStyle(form.status) : null;
-                    return (
-                      <>
-                        <select
-                          value={form.status}
-                          onChange={e => setForm({ ...form, status: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '9px 12px',
-                            border: sc ? `1.5px solid ${sc.border}` : '1px solid #cbd5e1',
-                            borderRadius: 8,
-                            fontSize: 13.5,
-                            fontWeight: 700,
-                            backgroundColor: sc ? sc.bg : '#ffffff',
-                            color: sc ? sc.text : '#0f172a',
-                            cursor: 'pointer',
-                            outline: 'none',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <option value="">Select Status...</option>
-                          {taskStatuses.map(s => {
-                            const optSc = getStatusColorStyle(s);
-                            return (
-                              <option key={s} value={s} style={{ backgroundColor: optSc.bg, color: optSc.text, fontWeight: 600 }}>
-                                {`● ${s}`}
-                              </option>
-                            );
-                          })}
-                        </select>
-                        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', padding: '6px 0 2px 0', width: '100%' }}>
-                          {taskStatuses.map(s => {
-                            const isSelected = form.status === s;
-                            const optSc = getStatusColorStyle(s);
-                            return (
-                              <button
-                                key={s}
-                                type="button"
-                                onClick={() => setForm(prev => ({ ...prev, status: s }))}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: 5,
-                                  padding: '4px 10px',
-                                  borderRadius: 16,
-                                  fontSize: 11.5,
-                                  fontWeight: isSelected ? 700 : 500,
-                                  backgroundColor: isSelected ? optSc.bg : '#ffffff',
-                                  color: isSelected ? optSc.text : '#64748b',
-                                  border: isSelected ? `1.5px solid ${optSc.border}` : '1px solid #e2e8f0',
-                                  cursor: 'pointer',
-                                  whiteSpace: 'nowrap',
-                                  flexShrink: 0,
-                                  boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: optSc.dot }} />
-                                <span>{s}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    );
-                  })()}
+                  <StatusSelect
+                    value={form.status}
+                    onChange={(newStatus) => setForm(prev => ({ ...prev, status: newStatus }))}
+                    options={taskStatuses}
+                    placeholder="Select Status..."
+                    variant="form"
+                  />
                 </div>
               </div>
 

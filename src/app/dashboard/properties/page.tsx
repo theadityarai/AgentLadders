@@ -37,6 +37,7 @@ import {
   ListIcon
 } from '@/components/icons/NavIcons';
 import { getStatusColorStyle } from '@/lib/theme';
+import { StatusSelect } from '@/components/ui/StatusSelect';
 
 export interface PropertyMedia {
   id: string;
@@ -166,39 +167,14 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
 
         {/* Top-Right: Status Badge / Select Dropdown */}
         <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 6 }} onClick={e => e.stopPropagation()}>
-          {onStatusChange ? (
-            <select
-              value={prop.status}
-              onChange={(e) => onStatusChange(prop.id, e.target.value)}
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: 14,
-                backgroundColor: statusStyle.bg,
-                color: statusStyle.color,
-                border: `1px solid ${statusStyle.border || 'transparent'}`,
-                cursor: 'pointer',
-                outline: 'none',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.18)'
-              }}
-            >
-              {(propertyStatuses || DEFAULT_PROPERTY_STATUSES).map(st => (
-                <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>
-                  {`● ${st}`}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div style={{
-              backgroundColor: statusStyle.bg, color: statusStyle.color,
-              padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-              boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
-              letterSpacing: '0.02em'
-            }}>
-              {prop.status}
-            </div>
-          )}
+          <StatusSelect
+            value={prop.status}
+            onChange={(newStatus) => onStatusChange && onStatusChange(prop.id, newStatus)}
+            options={propertyStatuses || DEFAULT_PROPERTY_STATUSES}
+            variant="pill"
+            size="sm"
+            align="right"
+          />
         </div>
 
         {/* Media Tag if available */}
@@ -559,44 +535,16 @@ const PropertyListItem = React.memo(function PropertyListItem({
               {priceFormatted}
               {isRent && <span style={{ fontSize: 11, fontWeight: 500, color: '#64748b' }}>/mo</span>}
             </span>
-            {onStatusChange ? (
-              <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
-                <select
-                  value={prop.status}
-                  onChange={(e) => onStatusChange(prop.id, e.target.value)}
-                  style={{
-                    fontSize: 10.5,
-                    fontWeight: 700,
-                    backgroundColor: statusStyle.bg,
-                    color: statusStyle.color,
-                    border: `1px solid ${statusStyle.border || '#cbd5e1'}`,
-                    padding: '2px 6px',
-                    borderRadius: 10,
-                    cursor: 'pointer',
-                    outline: 'none'
-                  }}
-                >
-                  {(propertyStatuses || DEFAULT_PROPERTY_STATUSES).map(st => (
-                    <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>
-                      {`● ${st}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <span style={{
-                fontSize: 10.5,
-                fontWeight: 700,
-                backgroundColor: statusStyle.bg,
-                color: statusStyle.color,
-                padding: '2px 7px',
-                borderRadius: 10,
-                whiteSpace: 'nowrap',
-                flexShrink: 0
-              }}>
-                {prop.status}
-              </span>
-            )}
+            <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
+              <StatusSelect
+                value={prop.status}
+                onChange={(newStatus) => onStatusChange && onStatusChange(prop.id, newStatus)}
+                options={propertyStatuses || DEFAULT_PROPERTY_STATUSES}
+                variant="pill"
+                size="sm"
+                align="right"
+              />
+            </div>
           </div>
 
           <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1306,73 +1254,13 @@ export default function PropertiesPage() {
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
                   Property Status *
                 </label>
-                {(() => {
-                  const sc = formData.status ? getStatusColorStyle(formData.status) : null;
-                  return (
-                    <>
-                      <select 
-                        value={formData.status} 
-                        onChange={e => setFormData({...formData, status: e.target.value})}
-                        style={{
-                          width: '100%',
-                          padding: '10px 12px',
-                          border: sc ? `1.5px solid ${sc.border}` : '1.5px solid #cbd5e1',
-                          borderRadius: 8,
-                          fontSize: 14,
-                          fontWeight: 700,
-                          outline: 'none',
-                          backgroundColor: sc ? sc.bg : '#f8fafc',
-                          color: sc ? sc.text : '#0f172a',
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease'
-                        }}
-                      >
-                        <option value="">Select Status</option>
-                        {propertyStatuses.map(st => {
-                          const optSc = getStatusColorStyle(st);
-                          return (
-                            <option key={st} value={st} style={{ backgroundColor: optSc.bg, color: optSc.text, fontWeight: 600 }}>
-                              {`● ${st}`}
-                            </option>
-                          );
-                        })}
-                      </select>
-                      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', padding: '6px 0 2px 0', width: '100%' }}>
-                        {propertyStatuses.map(st => {
-                          const isSelected = formData.status === st;
-                          const optSc = getStatusColorStyle(st);
-                          return (
-                            <button
-                              key={st}
-                              type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, status: st }))}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 5,
-                                padding: '4px 10px',
-                                borderRadius: 16,
-                                fontSize: 11.5,
-                                fontWeight: isSelected ? 700 : 500,
-                                backgroundColor: isSelected ? optSc.bg : '#ffffff',
-                                color: isSelected ? optSc.text : '#64748b',
-                                border: isSelected ? `1.5px solid ${optSc.border}` : '1px solid #e2e8f0',
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap',
-                                flexShrink: 0,
-                                boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                                transition: 'all 0.15s ease'
-                              }}
-                            >
-                              <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: optSc.dot }} />
-                              <span>{st}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </>
-                  );
-                })()}
+                <StatusSelect
+                  value={formData.status}
+                  onChange={(newStatus) => setFormData(prev => ({ ...prev, status: newStatus }))}
+                  options={propertyStatuses}
+                  placeholder="Select Property Status..."
+                  variant="form"
+                />
               </div>
 
               <div className="responsive-grid-2">
@@ -1895,32 +1783,12 @@ export default function PropertiesPage() {
                         </td>
 
                         <td style={{ padding: '14px 18px' }} onClick={e => e.stopPropagation()}>
-                          <select
+                          <StatusSelect
                             value={prop.status}
-                            onChange={(e) => handleStatusChange(prop.id, e.target.value)}
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 700,
-                              padding: '5px 12px',
-                              borderRadius: 20,
-                              border: `1px solid ${sc.border}`,
-                              backgroundColor: sc.bg,
-                              color: sc.text,
-                              cursor: 'pointer',
-                              outline: 'none',
-                              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                              transition: 'all 0.15s ease'
-                            }}
-                          >
-                            {propertyStatuses.map(st => {
-                              const optSc = getStatusColorStyle(st);
-                              return (
-                                <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16', fontWeight: 600 }}>
-                                  {`● ${st}`}
-                                </option>
-                              );
-                            })}
-                          </select>
+                            onChange={(newStatus) => handleStatusChange(prop.id, newStatus)}
+                            options={propertyStatuses}
+                            variant="pill"
+                          />
                         </td>
 
                         <td style={{ padding: '14px 18px', textAlign: 'right' }} onClick={e => e.stopPropagation()}>

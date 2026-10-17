@@ -7,6 +7,7 @@ import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { DEFAULT_SITE_VISIT_STATUSES } from '@/lib/formatters';
 import { getStatusColorStyle } from '@/lib/theme';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
+import { StatusSelect } from '@/components/ui/StatusSelect';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
@@ -554,73 +555,13 @@ export default function SiteVisitsPage() {
                     Visit Status *
                     <InfoTooltip text="Current scheduling status: Scheduled, Confirmed, Completed, Rescheduled, or Cancelled." />
                   </label>
-                  {(() => {
-                    const sc = formData.status ? getStatusColorStyle(formData.status) : null;
-                    return (
-                      <>
-                        <select 
-                          value={formData.status} 
-                          onChange={e => setFormData({...formData, status: e.target.value})}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: sc ? `1.5px solid ${sc.border}` : '1.5px solid #cbd5e1',
-                            borderRadius: 8,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            outline: 'none',
-                            backgroundColor: sc ? sc.bg : '#f8fafc',
-                            color: sc ? sc.text : '#0f172a',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <option value="">Select Visit Status...</option>
-                          {siteVisitStatuses.map(st => {
-                            const optSc = getStatusColorStyle(st);
-                            return (
-                              <option key={st} value={st} style={{ backgroundColor: optSc.bg, color: optSc.text, fontWeight: 600 }}>
-                                {`● ${st}`}
-                              </option>
-                            );
-                          })}
-                        </select>
-                        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', padding: '6px 0 2px 0', width: '100%' }}>
-                          {siteVisitStatuses.map(st => {
-                            const isSelected = formData.status === st;
-                            const optSc = getStatusColorStyle(st);
-                            return (
-                              <button
-                                key={st}
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, status: st }))}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: 5,
-                                  padding: '4px 10px',
-                                  borderRadius: 16,
-                                  fontSize: 11.5,
-                                  fontWeight: isSelected ? 700 : 500,
-                                  backgroundColor: isSelected ? optSc.bg : '#ffffff',
-                                  color: isSelected ? optSc.text : '#64748b',
-                                  border: isSelected ? `1.5px solid ${optSc.border}` : '1px solid #e2e8f0',
-                                  cursor: 'pointer',
-                                  whiteSpace: 'nowrap',
-                                  flexShrink: 0,
-                                  boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: optSc.dot }} />
-                                <span>{st}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    );
-                  })()}
+                  <StatusSelect
+                    value={formData.status}
+                    onChange={(newStatus) => setFormData(prev => ({ ...prev, status: newStatus }))}
+                    options={siteVisitStatuses}
+                    placeholder="Select Visit Status..."
+                    variant="form"
+                  />
                 </div>
 
                 <div>
@@ -1216,35 +1157,14 @@ export default function SiteVisitsPage() {
                           <TrashIcon size={12} color="#dc2626" />
                           <span>Delete</span>
                         </button>
-                        {(() => {
-                          const sc = getStatusColorStyle(visit.status);
-                          return (
-                            <select
-                              value={visit.status}
-                              onChange={(e) => handleStatusChange(visit.id, e.target.value)}
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 700,
-                                padding: '4px 8px',
-                                borderRadius: 6,
-                                border: `1px solid ${sc.border}`,
-                                backgroundColor: sc.bg,
-                                color: sc.text,
-                                cursor: 'pointer',
-                                outline: 'none'
-                              }}
-                            >
-                              {siteVisitStatuses.map(s => {
-                                const optSc = getStatusColorStyle(s);
-                                return (
-                                  <option key={s} value={s} style={{ backgroundColor: optSc.bg, color: optSc.text }}>
-                                    {`● ${s}`}
-                                  </option>
-                                );
-                              })}
-                            </select>
-                          );
-                        })()}
+                        <StatusSelect
+                          value={visit.status}
+                          onChange={(newStatus) => handleStatusChange(visit.id, newStatus)}
+                          options={siteVisitStatuses}
+                          variant="pill"
+                          size="sm"
+                          align="right"
+                        />
                       </div>
                     </div>
 

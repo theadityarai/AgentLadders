@@ -16,6 +16,7 @@ import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
+import { StatusSelect } from '@/components/ui/StatusSelect';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
@@ -230,26 +231,14 @@ const InquiryCardItem = React.memo(function InquiryCardItem({
           </div>
 
           <div onClick={e => e.stopPropagation()}>
-            <select
+            <StatusSelect
               value={lead.status}
-              onChange={(e) => onStatusChange(e.target.value)}
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: 14,
-                backgroundColor: statusStyle.bg,
-                color: (statusStyle as any).text || statusStyle.color,
-                border: '1px solid ' + ((statusStyle as any).border || 'transparent'),
-                cursor: 'pointer',
-                outline: 'none',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-              }}
-            >
-              {leadStatuses.map(st => (
-                <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>{st}</option>
-              ))}
-            </select>
+              onChange={onStatusChange}
+              options={leadStatuses}
+              variant="pill"
+              size="sm"
+              align="right"
+            />
           </div>
         </div>
 
@@ -556,18 +545,16 @@ const InquiryListItem = React.memo(function InquiryListItem({
               {budgetFormatted}
               {isRent && <span style={{ fontSize: 11, fontWeight: 500, color: '#64748b' }}>/mo</span>}
             </span>
-            <span style={{
-              fontSize: 10.5,
-              fontWeight: 700,
-              backgroundColor: statusStyle.bg,
-              color: (statusStyle as any).text || statusStyle.color,
-              padding: '2px 7px',
-              borderRadius: 10,
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}>
-              {lead.status}
-            </span>
+            <div onClick={e => e.stopPropagation()}>
+              <StatusSelect
+                value={lead.status}
+                onChange={onStatusChange}
+                options={leadStatuses}
+                variant="pill"
+                size="sm"
+                align="right"
+              />
+            </div>
           </div>
 
           <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1420,73 +1407,13 @@ export default function LeadsPage() {
                     Inquiry Status *
                     <InfoTooltip text="Pipeline stage for this inquiry, from initial inbound to qualified, site visit, negotiation, or won." />
                   </label>
-                  {(() => {
-                    const sc = formData.status ? getStatusColorStyle(formData.status) : null;
-                    return (
-                      <>
-                        <select 
-                          value={formData.status} 
-                          onChange={e => setFormData({...formData, status: e.target.value})}
-                          style={{
-                            width: '100%',
-                            padding: '10px 12px',
-                            border: sc ? `1.5px solid ${sc.border}` : '1.5px solid #cbd5e1',
-                            borderRadius: 8,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            outline: 'none',
-                            backgroundColor: sc ? sc.bg : '#f8fafc',
-                            color: sc ? sc.text : '#0f172a',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          <option value="">Select Inquiry Status</option>
-                          {leadStatuses.map(st => {
-                            const optSc = getStatusColorStyle(st);
-                            return (
-                              <option key={st} value={st} style={{ backgroundColor: optSc.bg, color: optSc.text, fontWeight: 600 }}>
-                                {`● ${st}`}
-                              </option>
-                            );
-                          })}
-                        </select>
-                        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', padding: '6px 0 2px 0', width: '100%' }}>
-                          {leadStatuses.map(st => {
-                            const isSelected = formData.status === st;
-                            const optSc = getStatusColorStyle(st);
-                            return (
-                              <button
-                                key={st}
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, status: st }))}
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: 5,
-                                  padding: '4px 10px',
-                                  borderRadius: 16,
-                                  fontSize: 11.5,
-                                  fontWeight: isSelected ? 700 : 500,
-                                  backgroundColor: isSelected ? optSc.bg : '#ffffff',
-                                  color: isSelected ? optSc.text : '#64748b',
-                                  border: isSelected ? `1.5px solid ${optSc.border}` : '1px solid #e2e8f0',
-                                  cursor: 'pointer',
-                                  whiteSpace: 'nowrap',
-                                  flexShrink: 0,
-                                  boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                                  transition: 'all 0.15s ease'
-                                }}
-                              >
-                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: optSc.dot }} />
-                                <span>{st}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    );
-                  })()}
+                  <StatusSelect
+                    value={formData.status}
+                    onChange={(newStatus) => setFormData(prev => ({ ...prev, status: newStatus }))}
+                    options={leadStatuses}
+                    placeholder="Select Inquiry Status"
+                    variant="form"
+                  />
                 </div>
 
                 <div>
@@ -2130,32 +2057,12 @@ export default function LeadsPage() {
 
                   {/* Status Column - Unique dynamic status background & text per Item 5 */}
                   <td style={{ padding: '16px 20px' }} onClick={e => e.stopPropagation()}>
-                    {(() => {
-                      const sc = getStatusColorStyle(lead.status);
-                      return (
-                        <select
-                          value={lead.status}
-                          onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                          style={{
-                            fontSize: 12,
-                            fontWeight: 700,
-                            padding: '5px 12px',
-                            borderRadius: 20,
-                            border: `1px solid ${sc.border}`,
-                            backgroundColor: sc.bg,
-                            color: sc.text,
-                            cursor: 'pointer',
-                            outline: 'none',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
-                            transition: 'all 0.15s ease'
-                          }}
-                        >
-                          {leadStatuses.map(st => (
-                            <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>{st}</option>
-                          ))}
-                        </select>
-                      );
-                    })()}
+                    <StatusSelect
+                      value={lead.status}
+                      onChange={(newStatus) => handleStatusChange(lead.id, newStatus)}
+                      options={leadStatuses}
+                      variant="pill"
+                    />
                   </td>
 
                   <td style={{ padding: '16px 20px', textAlign: 'right' }}>
