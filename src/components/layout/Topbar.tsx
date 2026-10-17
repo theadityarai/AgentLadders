@@ -910,168 +910,213 @@ export function Topbar() {
           </button>
 
           {showNotifs && (
-            <div style={{
-              position: 'absolute',
-              top: '46px',
-              right: '-10px',
-              width: '360px',
-              maxWidth: 'calc(100vw - 32px)',
-              backgroundColor: '#fff',
-              borderRadius: '12px',
-              boxShadow: '0 16px 36px -4px rgba(15,23,42,0.16)',
-              border: '1px solid #e2e8f0',
-              overflow: 'hidden',
-              zIndex: 100,
-            }}>
-              {/* Header */}
-              <div style={{
-                padding: '13px 16px',
-                borderBottom: '1px solid #f1f5f9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                backgroundColor: '#ffffff'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a' }}>Notifications</span>
-                  {notifications.filter(n => !n.read).length > 0 && (
-                    <span style={{ fontSize: '10.5px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', backgroundColor: '#eff6ff', color: '#2563eb' }}>
-                      {notifications.filter(n => !n.read).length} new
-                    </span>
-                  )}
-                </div>
-                {notifications.filter(n => !n.read).length > 0 && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      await fetch('/api/notifications', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ markAllRead: true })
-                      });
-                      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#2563eb',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      padding: '2px 6px',
-                      borderRadius: '4px'
-                    }}
-                  >
-                    Mark all read
-                  </button>
-                )}
-              </div>
+            <>
+              {/* Mobile Backdrop for clean tap-outside */}
+              <div
+                className="notifications-popover-backdrop"
+                onClick={() => setShowNotifs(false)}
+              />
 
-              {/* Notifications List */}
-              <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
-                {notifications.length === 0 ? (
-                  <div style={{ padding: '36px 20px', textAlign: 'center', color: '#94a3b8' }}>
-                    <div style={{ display: 'inline-flex', padding: 10, borderRadius: '50%', backgroundColor: 'var(--primary-light, #f1f5f9)', marginBottom: 8, color: 'var(--primary, #059669)' }}>
-                      <CheckIcon size={22} color="var(--primary, #059669)" />
-                    </div>
-                    <div style={{ fontSize: '13.5px', fontWeight: 600, color: '#0f172a' }}>All caught up!</div>
-                    <div style={{ fontSize: '12px', marginTop: '2px' }}>No unread updates.</div>
+              <div className="notifications-popover-dropdown">
+                {/* Header */}
+                <div style={{
+                  padding: '12px 16px',
+                  borderBottom: '1px solid #f1f5f9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#ffffff'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <BellIcon size={16} color="#0f172a" />
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>Notifications</span>
+                    {notifications.filter(n => !n.read).length > 0 && (
+                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', backgroundColor: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
+                        {notifications.filter(n => !n.read).length} new
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  notifications.map(n => (
-                    <div
-                      key={n.id}
-                      onClick={async () => {
-                        if (!n.read) {
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {notifications.filter(n => !n.read).length > 0 && (
+                      <button
+                        type="button"
+                        onClick={async () => {
                           await fetch('/api/notifications', {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id: n.id })
+                            body: JSON.stringify({ markAllRead: true })
                           });
-                          setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
-                        }
-                      }}
-                      style={{
-                        padding: '12px 16px',
-                        borderBottom: '1px solid #f1f5f9',
-                        backgroundColor: n.read ? '#ffffff' : '#f8fafc',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        gap: '12px',
-                        alignItems: 'flex-start',
-                        transition: 'background-color 0.15s ease'
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
-                      onMouseLeave={e => (e.currentTarget.style.backgroundColor = n.read ? '#ffffff' : '#f8fafc')}
-                    >
-                      <div style={{ flexShrink: 0, marginTop: '2px', color: '#64748b' }}>
-                        {n.type === 'system' ? <SettingsIcon size={16} /> : n.type === 'warning' ? <AlertCircleIcon size={16} color="#d97706" /> : n.type === 'info' ? <InfoIcon size={16} color="#2563eb" /> : <BellIcon size={16} />}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: n.read ? 600 : 700, color: '#0f172a' }}>
-                            {n.title}
-                          </span>
-                          {!n.read && (
-                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#2563eb', flexShrink: 0 }} />
-                          )}
-                        </div>
-                        <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#64748b', lineHeight: 1.4 }}>
-                          {n.message}
-                        </p>
-                        <span style={{ display: 'block', fontSize: '10.5px', color: '#94a3b8', marginTop: '4px' }}>
-                          {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          await fetch(`/api/notifications?id=${n.id}`, { method: 'DELETE' });
-                          setNotifications(prev => prev.filter(item => item.id !== n.id));
+                          setNotifications(prev => prev.map(n => ({ ...n, read: true })));
                         }}
-                        title="Dismiss"
                         style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#94a3b8',
+                          background: '#eff6ff',
+                          border: '1px solid #bfdbfe',
+                          color: '#2563eb',
+                          fontSize: '11.5px',
+                          fontWeight: 700,
                           cursor: 'pointer',
-                          padding: '2px',
-                          display: 'flex',
-                          alignItems: 'center'
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          transition: 'all 0.15s ease'
                         }}
-                        onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
-                        onMouseLeave={e => (e.currentTarget.style.color = '#94a3b8')}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#dbeafe'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = '#eff6ff'}
                       >
-                        <XIcon size={13} />
+                        Mark all read
                       </button>
-                    </div>
-                  ))
-                )}
-              </div>
+                    )}
+                    {/* Close button for mobile */}
+                    <button
+                      type="button"
+                      onClick={() => setShowNotifs(false)}
+                      className="show-flex-on-mobile"
+                      title="Close"
+                      style={{
+                        background: '#f1f5f9',
+                        border: 'none',
+                        color: '#64748b',
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '7px',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <XIcon size={14} />
+                    </button>
+                  </div>
+                </div>
 
-              {/* Footer */}
-              <div style={{
-                padding: '10px 16px',
-                backgroundColor: '#f8fafc',
-                borderTop: '1px solid #f1f5f9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <Link
-                  href="/dashboard/settings"
-                  onClick={() => setShowNotifs(false)}
-                  style={{ fontSize: '11.5px', color: '#475569', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}
-                >
-                  <SettingsIcon size={13} color="#475569" />
-                  Preferences
-                </Link>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                  Live Sync
-                </span>
+                {/* Notifications List */}
+                <div className="notifications-popover-list">
+                  {notifications.length === 0 ? (
+                    <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <div style={{ display: 'inline-flex', padding: 12, borderRadius: '50%', backgroundColor: 'var(--primary-light, #ecfdf5)', marginBottom: 10, color: 'var(--primary, #059669)' }}>
+                        <CheckIcon size={24} color="var(--primary, #059669)" />
+                      </div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>All caught up!</div>
+                      <div style={{ fontSize: '12px', marginTop: '3px' }}>No unread updates right now.</div>
+                    </div>
+                  ) : (
+                    notifications.map(n => (
+                      <div
+                        key={n.id}
+                        onClick={async () => {
+                          if (!n.read) {
+                            await fetch('/api/notifications', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: n.id })
+                            });
+                            setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
+                          }
+                        }}
+                        style={{
+                          padding: '12px 16px',
+                          borderBottom: '1px solid #f1f5f9',
+                          backgroundColor: n.read ? '#ffffff' : '#f8fafc',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          gap: '12px',
+                          alignItems: 'flex-start',
+                          transition: 'background-color 0.15s ease'
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = n.read ? '#ffffff' : '#f8fafc')}
+                      >
+                        {/* Type Icon Badge */}
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          backgroundColor: n.type === 'warning' ? '#fef3c7' : n.type === 'system' ? '#e0e7ff' : n.type === 'info' ? '#dbeafe' : '#ecfdf5',
+                          color: n.type === 'warning' ? '#d97706' : n.type === 'system' ? '#4f46e5' : n.type === 'info' ? '#2563eb' : '#059669',
+                          border: `1px solid ${n.type === 'warning' ? '#fde68a' : n.type === 'system' ? '#c7d2fe' : n.type === 'info' ? '#bfdbfe' : '#a7f3d0'}`
+                        }}>
+                          {n.type === 'system' ? <SettingsIcon size={15} /> : n.type === 'warning' ? <AlertCircleIcon size={15} color="#d97706" /> : n.type === 'info' ? <InfoIcon size={15} color="#2563eb" /> : <BellIcon size={15} />}
+                        </div>
+
+                        {/* Title and Message */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: n.read ? 600 : 700, color: '#0f172a', lineHeight: 1.3 }}>
+                              {n.title}
+                            </span>
+                            {!n.read && (
+                              <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#2563eb', flexShrink: 0 }} />
+                            )}
+                          </div>
+                          <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#475569', lineHeight: 1.45 }}>
+                            {n.message}
+                          </p>
+                          <span style={{ display: 'block', fontSize: '10.5px', color: '#94a3b8', marginTop: '4px', fontWeight: 500 }}>
+                            {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                          </span>
+                        </div>
+
+                        {/* Dismiss button */}
+                        <button
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await fetch(`/api/notifications?id=${n.id}`, { method: 'DELETE' });
+                            setNotifications(prev => prev.filter(item => item.id !== n.id));
+                          }}
+                          title="Dismiss"
+                          style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '6px',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            transition: 'all 0.15s ease'
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#fee2e2'; e.currentTarget.style.color = '#dc2626'; }}
+                          onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}
+                        >
+                          <XIcon size={14} />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div style={{
+                  padding: '10px 16px',
+                  backgroundColor: '#f8fafc',
+                  borderTop: '1px solid #f1f5f9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <Link
+                    href="/dashboard/settings"
+                    onClick={() => setShowNotifs(false)}
+                    style={{ fontSize: '12px', color: '#475569', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <SettingsIcon size={13} color="#64748b" />
+                    <span>Preferences</span>
+                  </Link>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '11px', color: '#059669', fontWeight: 600 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#10b981' }} />
+                    <span>Live Sync</span>
+                  </div>
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
 

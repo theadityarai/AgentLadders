@@ -2024,6 +2024,95 @@ div[style*="position: 'fixed'"][style*="inset: 0"] {
   }
 }
 
+/* Topbar Notifications Popover: Pixel-Perfect Desktop & Mobile Responsive */
+.notifications-popover-backdrop {
+  display: none;
+}
+
+.notifications-popover-dropdown {
+  position: absolute;
+  top: 46px;
+  right: -10px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px -4px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: notifDropdownFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notifications-popover-list {
+  max-height: 360px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes notifDropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .notifications-popover-backdrop {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.42) !important;
+    backdrop-filter: blur(2px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    z-index: 998 !important;
+    animation: notifBackdropFade 0.2s ease !important;
+  }
+
+  @keyframes notifBackdropFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .notifications-popover-dropdown {
+    position: fixed !important;
+    top: 60px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 84px) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 24px 50px -8px rgba(15, 23, 42, 0.38), 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+    z-index: 999 !important;
+    margin: 0 auto !important;
+    animation: notifMobileSlide 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  @keyframes notifMobileSlide {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .notifications-popover-list {
+    max-height: calc(100dvh - 180px) !important;
+    flex: 1 1 auto;
+  }
+}
+
+
 
 
 
