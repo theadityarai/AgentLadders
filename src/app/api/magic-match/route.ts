@@ -11,7 +11,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const sessionUser = session.user as any;
   const user = db.users.find(u => u.id === sessionUser.id || (sessionUser.email && u.email?.toLowerCase() === sessionUser.email.toLowerCase()));
   if (!user) {

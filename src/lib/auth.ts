@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error(`Too many login attempts. Please try again in ${limitCheck.resetSeconds}s.`);
         }
 
-        const db = getDb();
+        const db = await getDb();
         const user = db.users.find(u => u.email.toLowerCase() === normalizedEmail);
 
         if (!user) {
@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
               createdAt: new Date().toISOString()
             });
 
-            saveDb(db);
+            await saveDb(db);
           } else {
             // Validate Gmail OTP or standard 6-digit rolling TOTP code
             const emailOtp = (user as any).emailOtp;
@@ -101,7 +101,7 @@ export const authOptions: NextAuthOptions = {
 
             if (isEmailOtpValid) {
               delete (user as any).emailOtp;
-              saveDb(db);
+              await saveDb(db);
             } else if (!isValidTotp) {
               throw new Error('Invalid or expired 2FA code. Please check your Gmail or authenticator app.');
             }

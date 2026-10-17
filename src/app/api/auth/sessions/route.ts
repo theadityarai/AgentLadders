@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const sessionUserEmail = session.user.email?.toLowerCase().trim();
   const sessionUserId = (session.user as any).id;
   const user = db.users.find(u => (sessionUserId && u.id === sessionUserId) || (sessionUserEmail && u.email?.toLowerCase().trim() === sessionUserEmail));
@@ -147,10 +147,10 @@ export async function GET(req: NextRequest) {
         lastActive: new Date().toISOString()
       };
       db.activeSessions.push(activeSession);
-      saveDb(db);
+      await saveDb(db);
     } else {
       activeSession.lastActive = new Date().toISOString();
-      saveDb(db);
+      await saveDb(db);
     }
     return NextResponse.json({ valid: true, revoked: false });
   }
@@ -208,7 +208,7 @@ export async function GET(req: NextRequest) {
     s.browser !== 'Apple Safari Mobile'
   );
 
-  saveDb(db);
+  await saveDb(db);
 
   // Return all real active sessions belonging to this user
   const userSessions = db.activeSessions
@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const sessionUserEmail = session.user.email?.toLowerCase().trim();
   const sessionUserId = (session.user as any).id;
   const user = db.users.find(u => (sessionUserId && u.id === sessionUserId) || (sessionUserEmail && u.email?.toLowerCase().trim() === sessionUserEmail));
@@ -288,7 +288,7 @@ export async function POST(req: NextRequest) {
       };
       db.activeSessions.push(newSession);
     }
-    saveDb(db);
+    await saveDb(db);
     return NextResponse.json({ success: true });
   }
 
@@ -301,7 +301,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const sessionUserEmail = session.user.email?.toLowerCase().trim();
   const sessionUserId = (session.user as any).id;
   const user = db.users.find(u => (sessionUserId && u.id === sessionUserId) || (sessionUserEmail && u.email?.toLowerCase().trim() === sessionUserEmail));
@@ -347,7 +347,7 @@ export async function DELETE(req: NextRequest) {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
     return NextResponse.json({
       success: true,
       message: `Successfully terminated ${removedCount} other session(s).`,
@@ -383,7 +383,7 @@ export async function DELETE(req: NextRequest) {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
     return NextResponse.json({
       success: true,
       message: `Session on ${sessionToRevoke?.browser || 'device'} terminated successfully.`

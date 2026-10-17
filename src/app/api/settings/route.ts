@@ -32,7 +32,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const sessionUserEmail = session.user.email?.toLowerCase().trim();
   const sessionUserId = (session.user as any).id;
   const user = db.users.find(u => (sessionUserId && u.id === sessionUserId) || (sessionUserEmail && u.email?.toLowerCase().trim() === sessionUserEmail));
@@ -156,7 +156,7 @@ export async function GET() {
       };
       modified = true;
     }
-    if (modified) saveDb(db);
+    if (modified) await saveDb(db);
   }
 
   const safeUser = {
@@ -183,7 +183,7 @@ export async function PUT(req: Request) {
   }
 
   const data = await req.json();
-  const db = getDb();
+  const db = await getDb();
   const sessionUserEmail = session.user.email?.toLowerCase().trim();
   const sessionUserId = (session.user as any).id;
   const user = db.users.find(u => (sessionUserId && u.id === sessionUserId) || (sessionUserEmail && u.email?.toLowerCase().trim() === sessionUserEmail));
@@ -267,7 +267,7 @@ export async function PUT(req: Request) {
         ...(db.agencies[agencyIndex].statusColors || {}),
         ...data.statusColors
       };
-      saveDb(db);
+      await saveDb(db);
       return NextResponse.json({
         success: true,
         statusColors: db.agencies[agencyIndex].statusColors
@@ -296,7 +296,7 @@ export async function PUT(req: Request) {
       defaultNotes: sanitizeString(inv.defaultNotes ?? ''),
       enableGstTaxation: Boolean(inv.enableGstTaxation)
     };
-    saveDb(db);
+    await saveDb(db);
     return NextResponse.json({ success: true, invoiceSettings: db.agencies[agencyIndex].invoiceSettings });
   }
   else if (action === 'updateNotifications') {
@@ -511,7 +511,7 @@ export async function PUT(req: Request) {
     });
   }
 
-  saveDb(db);
+  await saveDb(db);
   const updatedAgencyUsers = db.users.filter(u => u.agencyId === user.agencyId).map(u => ({
     id: u.id, name: u.name, email: u.email, role: u.role
   }));

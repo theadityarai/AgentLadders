@@ -10,7 +10,7 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 
   if (!db.tasks) db.tasks = [];
   db.tasks.push(newTask);
-  saveDb(db);
+  await saveDb(db);
 
   return NextResponse.json({ success: true, task: newTask });
 }
@@ -72,7 +72,7 @@ export async function PUT(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -93,7 +93,7 @@ export async function PUT(req: Request) {
   if (data.relatedTo !== undefined) task.relatedTo = sanitizeString(data.relatedTo, 200);
   if (data.description !== undefined) task.description = sanitizeString(data.description, 1000);
 
-  saveDb(db);
+  await saveDb(db);
   return NextResponse.json({ success: true, task });
 }
 
@@ -101,7 +101,7 @@ export async function DELETE(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -115,7 +115,7 @@ export async function DELETE(req: Request) {
 
   if (db.tasks) {
     db.tasks = db.tasks.filter(t => !(t.id === id && t.agencyId === user.agencyId));
-    saveDb(db);
+    await saveDb(db);
   }
 
   return NextResponse.json({ success: true });

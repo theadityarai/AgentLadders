@@ -9,7 +9,7 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
   if (!db.documents) db.documents = [];
   db.documents.unshift(newDoc);
-  saveDb(db);
+  await saveDb(db);
 
   return NextResponse.json({ success: true, document: newDoc });
 }
@@ -64,7 +64,7 @@ export async function DELETE(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -84,7 +84,7 @@ export async function DELETE(req: Request) {
 
   if (db.documents) {
     db.documents = db.documents.filter(d => !(d.id === id && d.agencyId === user.agencyId));
-    saveDb(db);
+    await saveDb(db);
   }
 
   return NextResponse.json({ success: true });
@@ -94,7 +94,7 @@ export async function PUT(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -121,7 +121,7 @@ export async function PUT(req: Request) {
   };
 
   db.documents[index] = updatedDoc;
-  saveDb(db);
+  await saveDb(db);
 
   return NextResponse.json({ success: true, document: updatedDoc });
 }

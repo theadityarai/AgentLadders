@@ -7,7 +7,7 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ notifications: [] });
 
-  const db = getDb();
+  const db = await getDb();
   const userId = (session.user as any).id;
   const userAgencyId = (session.user as any).agencyId;
   db.notifications = db.notifications || [];
@@ -39,7 +39,7 @@ export async function GET() {
       }
     ];
     db.notifications.unshift(...welcomeNotifs);
-    saveDb(db);
+    await saveDb(db);
     userNotifs = welcomeNotifs;
   }
 
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { title, message, type } = await req.json();
-  const db = getDb();
+  const db = await getDb();
   const user = session.user as any;
 
   db.notifications = db.notifications || [];
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
   };
 
   db.notifications.unshift(newNotif);
-  saveDb(db);
+  await saveDb(db);
 
   return NextResponse.json({ success: true, notification: newNotif });
 }
@@ -79,21 +79,21 @@ export async function PUT(req: Request) {
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id, markAllRead } = await req.json();
-  const db = getDb();
+  const db = await getDb();
   const userId = (session.user as any).id;
 
   if (markAllRead) {
     (db.notifications || []).forEach(n => {
       if (n.userId === userId) n.read = true;
     });
-    saveDb(db);
+    await saveDb(db);
     return NextResponse.json({ success: true });
   }
 
   const notif = (db.notifications || []).find(n => n.id === id && n.userId === userId);
   if (notif) {
     notif.read = true;
-    saveDb(db);
+    await saveDb(db);
   }
   
   return NextResponse.json({ success: true });
@@ -106,11 +106,11 @@ export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   const userId = (session.user as any).id;
-  const db = getDb();
+  const db = await getDb();
 
   if (id && db.notifications) {
     db.notifications = db.notifications.filter(n => !(n.id === id && n.userId === userId));
-    saveDb(db);
+    await saveDb(db);
   }
 
   return NextResponse.json({ success: true });

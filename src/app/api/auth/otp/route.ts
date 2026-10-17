@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email address is required for 2FA OTP.' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const user = db.users.find(u => u.email.toLowerCase() === targetEmail);
 
     if (!user) {
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         expiresAt
       };
 
-      saveDb(db);
+      await saveDb(db);
 
       console.log(`[Gmail 2FA Service] Dispatched OTP code ${generatedOtp} to ${targetEmail} (Expires in 10 minutes)`);
 
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
         createdAt: new Date().toISOString()
       });
 
-      saveDb(db);
+      await saveDb(db);
 
       return NextResponse.json({
         success: true,

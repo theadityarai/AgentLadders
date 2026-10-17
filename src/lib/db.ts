@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { Redis } from '@upstash/redis';
 import { AgencyInvoiceSettings, DEFAULT_INVOICE_SETTINGS } from './formatters';
 
 const STATIC_DB_PATH = path.join(process.cwd(), 'data', 'db.json');
@@ -10,6 +11,28 @@ const SERVERLESS_TMP_PATH = '/tmp/agentladders_db.json';
 // In serverless environments (e.g. Vercel), /var/task is read-only.
 // /tmp is the writable storage directory available.
 const DB_PATH = IS_SERVERLESS ? SERVERLESS_TMP_PATH : STATIC_DB_PATH;
+
+// Cloud Database configuration (Upstash Redis / Vercel KV)
+const REDIS_DB_KEY = 'agentladders_db';
+let _redisClient: Redis | null = null;
+
+function getRedis(): Redis | null {
+  if (_redisClient) return _redisClient;
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  if (url && token) {
+    try {
+      _redisClient = new Redis({ url, token });
+    } catch (err) {
+      console.error('[Cloud DB] Failed to initialize Upstash Redis client:', err);
+    }
+  }
+  return _redisClient;
+}
+
+export function isCloudDbActive(): boolean {
+  return !!getRedis();
+}
 
 export interface User {
   id: string;
@@ -562,75 +585,7 @@ if (!IS_SERVERLESS && !fs.existsSync(path.dirname(STATIC_DB_PATH))) {
   } catch {}
 }
 
-// High-performance in-memory DB cache singleton
-let _cachedDb: DB | null = null;
-let _cachedMtime: number = 0;
-
-export function getDb(): DB {
-  // If in serverless (e.g. Vercel), copy seed DB to writable /tmp if it doesn't exist yet
-  if (IS_SERVERLESS && !fs.existsSync(SERVERLESS_TMP_PATH)) {
-    try {
-      if (fs.existsSync(STATIC_DB_PATH)) {
-        fs.copyFileSync(STATIC_DB_PATH, SERVERLESS_TMP_PATH);
-      } else if (fs.existsSync(LEGACY_MOCK_PATH)) {
-        fs.copyFileSync(LEGACY_MOCK_PATH, SERVERLESS_TMP_PATH);
-      }
-    } catch (e) {
-      console.error('Error copying db to serverless /tmp:', e);
-    }
-  }
-
-  // Fast path: if cache exists and file hasn't changed on disk, return cache immediately
-  if (_cachedDb && fs.existsSync(DB_PATH)) {
-    try {
-      const currentMtime = fs.statSync(DB_PATH).mtimeMs;
-      if (currentMtime === _cachedMtime) {
-        return _cachedDb;
-      }
-    } catch {
-      // Fall through if stat fails
-    }
-  }
-
-  let db: Partial<DB> = {};
-
-  if (fs.existsSync(DB_PATH)) {
-    try {
-      db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
-      try {
-        _cachedMtime = fs.statSync(DB_PATH).mtimeMs;
-      } catch {
-        _cachedMtime = Date.now();
-      }
-    } catch {
-      db = {};
-    }
-  } else if (fs.existsSync(STATIC_DB_PATH)) {
-    try {
-      db = JSON.parse(fs.readFileSync(STATIC_DB_PATH, 'utf8'));
-    } catch {
-      db = {};
-    }
-  }
-
-  // If DB was empty or missing users, check if mock-db.json exists and import from it
-  if (!db.users || db.users.length === 0) {
-    if (fs.existsSync(LEGACY_MOCK_PATH)) {
-      try {
-        const legacy = JSON.parse(fs.readFileSync(LEGACY_MOCK_PATH, 'utf8'));
-        if (legacy.users && legacy.users.length > 0) {
-          db.users = legacy.users;
-          db.agencies = legacy.agencies || [];
-          db.notifications = legacy.notifications || [];
-          db.documents = legacy.documents || [];
-        }
-      } catch (e) {
-        console.error('Error importing legacy mock DB:', e);
-      }
-    }
-  }
-
-  // Ensure all collections are guaranteed arrays
+export function ensureDbDefaults(db: Partial<DB>): DB {
   db.users = db.users || [];
   db.agencies = db.agencies || [];
   db.notifications = db.notifications || [];
@@ -657,6 +612,8 @@ export function getDb(): DB {
   db.supportTickets = db.supportTickets || [];
   db.activeSessions = db.activeSessions || [];
   db.revokedSessions = db.revokedSessions || [];
+  db.sharedLinks = db.sharedLinks || [];
+
   if (db.supportTickets.length === 0) {
     const firstAgency = (db.agencies && db.agencies[0]) ? db.agencies[0] : { id: 'agency_1', name: 'Vance Luxury Realty' };
     db.supportTickets = [
@@ -697,14 +654,61 @@ export function getDb(): DB {
       }
     ];
   }
-  db.sharedLinks = db.sharedLinks || [];
 
-  _cachedDb = db as DB;
-  return _cachedDb;
+  return db as DB;
 }
 
-export function saveDb(db: DB) {
-  _cachedDb = db;
+function readDbFromFile(): DB {
+  // If in serverless (e.g. Vercel), copy seed DB to writable /tmp if it doesn't exist yet
+  if (IS_SERVERLESS && !fs.existsSync(SERVERLESS_TMP_PATH)) {
+    try {
+      if (fs.existsSync(STATIC_DB_PATH)) {
+        fs.copyFileSync(STATIC_DB_PATH, SERVERLESS_TMP_PATH);
+      } else if (fs.existsSync(LEGACY_MOCK_PATH)) {
+        fs.copyFileSync(LEGACY_MOCK_PATH, SERVERLESS_TMP_PATH);
+      }
+    } catch (e) {
+      console.error('Error copying db to serverless /tmp:', e);
+    }
+  }
+
+  let db: Partial<DB> = {};
+
+  if (fs.existsSync(DB_PATH)) {
+    try {
+      db = JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
+    } catch {
+      db = {};
+    }
+  } else if (fs.existsSync(STATIC_DB_PATH)) {
+    try {
+      db = JSON.parse(fs.readFileSync(STATIC_DB_PATH, 'utf8'));
+    } catch {
+      db = {};
+    }
+  }
+
+  // If DB was empty or missing users, check if mock-db.json exists and import from it
+  if (!db.users || db.users.length === 0) {
+    if (fs.existsSync(LEGACY_MOCK_PATH)) {
+      try {
+        const legacy = JSON.parse(fs.readFileSync(LEGACY_MOCK_PATH, 'utf8'));
+        if (legacy.users && legacy.users.length > 0) {
+          db.users = legacy.users;
+          db.agencies = legacy.agencies || [];
+          db.notifications = legacy.notifications || [];
+          db.documents = legacy.documents || [];
+        }
+      } catch (e) {
+        console.error('Error importing legacy mock DB:', e);
+      }
+    }
+  }
+
+  return ensureDbDefaults(db);
+}
+
+function saveDbToFile(db: DB): void {
   try {
     const serialized = JSON.stringify(db, null, 2);
     const tmpPath = `${DB_PATH}.${Date.now()}.${Math.random().toString(36).substring(2, 6)}.tmp`;
@@ -730,7 +734,87 @@ export function saveDb(db: DB) {
       } catch {}
     }
   } catch (err) {
-    console.error('Failed to save DB:', err);
+    console.error('Failed to save DB to file:', err);
+  }
+}
+
+// High-performance in-memory DB cache singleton
+let _cachedDb: DB | null = null;
+let _cachedMtime: number = 0;
+let _cachedRedisTime: number = 0;
+const REDIS_CACHE_TTL_MS = 1000;
+
+export async function getDb(): Promise<DB> {
+  const redis = getRedis();
+
+  if (redis) {
+    const now = Date.now();
+    if (_cachedDb && (now - _cachedRedisTime < REDIS_CACHE_TTL_MS)) {
+      return _cachedDb;
+    }
+
+    try {
+      const remoteData = await redis.get<DB>(REDIS_DB_KEY);
+      if (remoteData && typeof remoteData === 'object' && Array.isArray((remoteData as any).users)) {
+        _cachedDb = ensureDbDefaults(remoteData);
+        _cachedRedisTime = now;
+        return _cachedDb;
+      }
+
+      // If Redis key does not exist yet (first boot with new DB), seed from local file!
+      const initialDb = readDbFromFile();
+      await redis.set(REDIS_DB_KEY, initialDb);
+      _cachedDb = initialDb;
+      _cachedRedisTime = now;
+      return _cachedDb;
+    } catch (err) {
+      console.error('[Cloud DB] Error reading from Upstash Redis, falling back to local storage:', err);
+      if (_cachedDb) return _cachedDb;
+    }
+  }
+
+  return getDbSync();
+}
+
+export async function saveDb(db: DB): Promise<void> {
+  ensureDbDefaults(db);
+  _cachedDb = db;
+  _cachedRedisTime = Date.now();
+
+  saveDbToFile(db);
+
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.set(REDIS_DB_KEY, db);
+    } catch (err) {
+      console.error('[Cloud DB] Error persisting to Upstash Redis:', err);
+    }
+  }
+}
+
+export function getDbSync(): DB {
+  if (_cachedDb && fs.existsSync(DB_PATH)) {
+    try {
+      const currentMtime = fs.statSync(DB_PATH).mtimeMs;
+      if (currentMtime === _cachedMtime) {
+        return _cachedDb;
+      }
+    } catch {}
+  }
+  _cachedDb = readDbFromFile();
+  return _cachedDb;
+}
+
+export function saveDbSync(db: DB): void {
+  ensureDbDefaults(db);
+  _cachedDb = db;
+  saveDbToFile(db);
+  const redis = getRedis();
+  if (redis) {
+    redis.set(REDIS_DB_KEY, db).catch(err => {
+      console.error('[Cloud DB] Async background save failed:', err);
+    });
   }
 }
 
@@ -1416,11 +1500,12 @@ export function generateDummyDataForAgency(agencyId: string, db: DB) {
     );
   }
 
-  saveDb(db);
+  saveDbSync(db);
 }
 
-export function seedAgencyData(agencyId: string) {
-  const db = getDb();
+export async function seedAgencyData(agencyId: string): Promise<void> {
+  const db = await getDb();
   generateDummyDataForAgency(agencyId, db);
-  saveDb(db);
+  await saveDb(db);
 }
+

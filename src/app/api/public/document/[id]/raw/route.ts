@@ -71,7 +71,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const db = getDb();
+  const db = await getDb();
 
   const doc = (db.documents || []).find(d => d.id === id);
   if (!doc) {

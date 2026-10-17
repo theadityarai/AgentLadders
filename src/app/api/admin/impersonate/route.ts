@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   }
 
   const { targetAgencyId } = await req.json();
-  const db = getDb();
+  const db = await getDb();
 
   const targetAgency = db.agencies.find((a: any) => a.id === targetAgencyId);
   if (!targetAgency && targetAgencyId !== 'ag_ql21vxnd') {
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
   }
 
   return NextResponse.json({

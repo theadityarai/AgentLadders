@@ -9,7 +9,7 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
   if (!db.deals) db.deals = [];
   db.deals.push(newDeal);
-  saveDb(db);
+  await saveDb(db);
 
   return NextResponse.json({ success: true, deal: newDeal });
 }
@@ -81,7 +81,7 @@ export async function PUT(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -114,7 +114,7 @@ export async function PUT(req: Request) {
   };
 
   db.deals[index] = updatedDeal;
-  saveDb(db);
+  await saveDb(db);
 
   return NextResponse.json({ success: true, deal: updatedDeal });
 }
@@ -123,7 +123,7 @@ export async function DELETE(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.id === (session.user as any).id);
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
@@ -137,7 +137,7 @@ export async function DELETE(req: Request) {
 
   if (db.deals) {
     db.deals = db.deals.filter(d => !(d.id === id && d.agencyId === user.agencyId));
-    saveDb(db);
+    await saveDb(db);
   }
 
   return NextResponse.json({ success: true });

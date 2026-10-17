@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   if (!rawEmail) return NextResponse.json({ twoFactorEnabled: false });
 
   const email = normalizeEmail(rawEmail);
-  const db = getDb();
+  const db = await getDb();
   const user = db.users.find(u => u.email.toLowerCase() === email);
   return NextResponse.json({
     twoFactorEnabled: !!user?.twoFactorEnabled

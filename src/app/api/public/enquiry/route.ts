@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Name and either email or phone number are required.' }, { status: 400 });
     }
 
-    const db = getDb();
+    const db = await getDb();
     // Find property to identify target agency
     const prop = db.properties.find(p => p.id === propertyId || p.publicToken === propertyId);
     const agencyId = prop ? prop.agencyId : (db.agencies[0]?.id || 'ag_default');
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       createdAt: now
     });
 
-    saveDb(db);
+    await saveDb(db);
 
     return NextResponse.json({
       success: true,

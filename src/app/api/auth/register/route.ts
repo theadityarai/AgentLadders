@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     const cleanName = sanitizeString(name || 'Agency Owner', 120);
     const cleanPhone = sanitizeString(phone || '', 25);
 
-    const db = getDb();
+    const db = await getDb();
     const existingUser = db.users.find(u => u.email.toLowerCase() === cleanEmail);
     
     if (existingUser) {
@@ -96,10 +96,10 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     });
 
-    saveDb(db);
+    await saveDb(db);
 
     // Automatically seed full suite of real estate data for new agency
-    seedAgencyData(agencyId);
+    await seedAgencyData(agencyId);
 
     return NextResponse.json({ success: true, agencyId });
   } catch (error: any) {

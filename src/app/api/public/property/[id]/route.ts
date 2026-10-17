@@ -13,7 +13,7 @@ export async function GET(
   }
 
   const { id } = await params;
-  const db = getDb();
+  const db = await getDb();
 
   // Find property by ID or publicToken
   const prop = db.properties.find(p => p.id === id || p.publicToken === id);
@@ -28,7 +28,7 @@ export async function GET(
 
   // Increment view counter
   prop.viewsCount = (prop.viewsCount || 0) + 1;
-  saveDb(db);
+  await saveDb(db);
 
   // Retrieve agency info for branding
   const agency = db.agencies.find(a => a.id === prop.agencyId);

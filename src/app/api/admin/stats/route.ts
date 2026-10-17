@@ -15,7 +15,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden: Super Admin privileges required' }, { status: 403 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const agencies = db.agencies || [];
   const users = db.users || [];
   const properties = db.properties || [];

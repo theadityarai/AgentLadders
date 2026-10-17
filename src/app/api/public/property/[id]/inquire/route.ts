@@ -17,7 +17,7 @@ export async function POST(
 
   const { id } = await params;
   const data = await req.json();
-  const db = getDb();
+  const db = await getDb();
 
   // Find property
   const prop = db.properties.find(p => p.id === id || p.publicToken === id);
@@ -135,7 +135,7 @@ export async function POST(
     createdAt: now
   });
 
-  saveDb(db);
+  await saveDb(db);
 
   return NextResponse.json({ 
     success: true, 

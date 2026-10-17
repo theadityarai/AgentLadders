@@ -18,7 +18,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden: Super Admin access required' }, { status: 403 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const agencies = db.agencies || [];
   const users = db.users || [];
   const properties = db.properties || [];
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     const cleanAgencyName = sanitizeString(name, 120);
     const cleanOwnerName = sanitizeString(ownerName || 'Agency Principal', 100);
 
-    const db = getDb();
+    const db = await getDb();
     const existing = db.users.find((u: any) => u.email.toLowerCase() === cleanEmail);
     if (existing) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
@@ -167,11 +167,11 @@ export async function POST(req: Request) {
       status: isInvite ? 'Pending Invite' : 'Active'
     });
 
-    saveDb(db);
+    await saveDb(db);
 
     // Optionally seed starter inventory and pipeline
     if (seedDemoData && !isInvite) {
-      seedAgencyData(agencyId);
+      await seedAgencyData(agencyId);
     }
 
     const protocol = req.headers.get('x-forwarded-proto') || 'http';
@@ -200,7 +200,7 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Agency ID required' }, { status: 400 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   const index = (db.agencies || []).findIndex((a: any) => a.id === data.id);
   if (index === -1) {
     return NextResponse.json({ error: 'Agency not found' }, { status: 404 });
@@ -229,7 +229,7 @@ export async function PUT(req: Request) {
     });
   }
 
-  saveDb(db);
+  await saveDb(db);
   return NextResponse.json({ success: true, agency: db.agencies[index] });
 }
 
@@ -245,7 +245,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: 'Agency ID required' }, { status: 400 });
   }
 
-  const db = getDb();
+  const db = await getDb();
   // Protect default agency if needed
   if (id === 'ag_ql21vxnd_protected') {
     return NextResponse.json({ error: 'Cannot delete primary root agency' }, { status: 400 });
@@ -261,6 +261,6 @@ export async function DELETE(req: Request) {
   if (db.siteVisits) db.siteVisits = db.siteVisits.filter((s: any) => s.agencyId !== id);
   if (db.supportTickets) db.supportTickets = db.supportTickets.filter((tk: any) => tk.agencyId !== id);
 
-  saveDb(db);
+  await saveDb(db);
   return NextResponse.json({ success: true, deletedId: id });
 }

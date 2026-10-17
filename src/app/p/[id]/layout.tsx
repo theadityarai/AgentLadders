@@ -8,7 +8,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const db = getDb();
+  const db = await getDb();
   const prop = db.properties.find(p => p.id === id || p.publicToken === id);
 
   if (!prop || prop.privacyMode === 'Private') {
