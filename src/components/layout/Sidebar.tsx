@@ -96,7 +96,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="app-sidebar hide-on-mobile"
+      className="app-sidebar hide-on-tablet hide-on-mobile"
       style={{
         width: isCollapsed ? 68 : 240,
         height: '100vh',

@@ -147,6 +147,12 @@
   }
 }
 
+@media (max-width: 380px) {
+  .statsRow {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 360px) {
   .mainContent {
     padding: 10px 8px calc(92px + env(safe-area-inset-bottom, 16px)) !important;

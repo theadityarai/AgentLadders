@@ -1430,8 +1430,8 @@ export default function SupportPage() {
 
       {/* NEW TICKET MODAL */}
       {showNewTicketModal && (
-        <div onClick={() => setShowNewTicketModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '580px', backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+        <div onClick={() => setShowNewTicketModal(false)} className="responsive-modal-overlay" style={{ zIndex: 100 }}>
+          <div onClick={e => e.stopPropagation()} className="responsive-modal animate-enter" style={{ width: '100%', maxWidth: '580px', backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', backgroundColor: '#f8fafc' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -1559,8 +1559,8 @@ export default function SupportPage() {
 
       {/* CONTRACT PREVIEW MODAL */}
       {previewContract && (
-        <div onClick={() => setPreviewContract(null)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '720px', maxHeight: '85vh', backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }}>
+        <div onClick={() => setPreviewContract(null)} className="responsive-modal-overlay" style={{ zIndex: 110 }}>
+          <div onClick={e => e.stopPropagation()} className="responsive-modal animate-enter" style={{ width: '100%', maxWidth: '720px', maxHeight: '85vh', backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }}>
             <div style={{ padding: '18px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
               <div>
                 <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 10, backgroundColor: '#ecfdf5', color: '#047857' }}>

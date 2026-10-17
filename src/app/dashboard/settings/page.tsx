@@ -3454,15 +3454,8 @@ export default function SettingsPage() {
 
       {/* Custom Invite User Modal */}
       {showInviteModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999, padding: '16px'
-        }} onClick={() => setShowInviteModal(false)}>
-          <div style={{
+        <div className="responsive-modal-overlay" style={{ zIndex: 9999 }} onClick={() => setShowInviteModal(false)}>
+          <div className="responsive-modal animate-enter" style={{
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             width: '100%', maxWidth: '440px',
@@ -3523,15 +3516,8 @@ export default function SettingsPage() {
 
       {/* Custom Change Password Modal */}
       {showPasswordModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999, padding: '16px'
-        }} onClick={() => setShowPasswordModal(false)}>
-          <div style={{
+        <div className="responsive-modal-overlay" style={{ zIndex: 9999 }} onClick={() => setShowPasswordModal(false)}>
+          <div className="responsive-modal animate-enter" style={{
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             width: '100%', maxWidth: '440px',
@@ -3831,15 +3817,8 @@ export default function SettingsPage() {
 
       {/* Invited User Credentials Display Modal */}
       {invitedUserResult && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999, padding: '16px'
-        }} onClick={() => setInvitedUserResult(null)}>
-          <div style={{
+        <div className="responsive-modal-overlay" style={{ zIndex: 9999 }} onClick={() => setInvitedUserResult(null)}>
+          <div className="responsive-modal animate-enter" style={{
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             width: '100%', maxWidth: '440px',
@@ -3884,15 +3863,8 @@ export default function SettingsPage() {
 
       {/* Gmail Two-Factor Authentication Setup Modal */}
       {showTwoFactorModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999, padding: '16px'
-        }} onClick={() => setShowTwoFactorModal(false)}>
-          <div style={{
+        <div className="responsive-modal-overlay" style={{ zIndex: 9999 }} onClick={() => setShowTwoFactorModal(false)}>
+          <div className="responsive-modal animate-enter" style={{
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             width: '100%', maxWidth: '480px',
@@ -3993,15 +3965,8 @@ export default function SettingsPage() {
 
       {/* View Backup Codes Modal */}
       {showBackupCodesModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999, padding: '16px'
-        }} onClick={() => setShowBackupCodesModal(false)}>
-          <div style={{
+        <div className="responsive-modal-overlay" style={{ zIndex: 9999 }} onClick={() => setShowBackupCodesModal(false)}>
+          <div className="responsive-modal animate-enter" style={{
             backgroundColor: '#ffffff',
             borderRadius: '16px',
             width: '100%', maxWidth: '400px',

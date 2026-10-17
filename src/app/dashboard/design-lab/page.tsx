@@ -626,13 +626,14 @@ export default function DesignLabPage() {
         {/* SLIDE-OVER INSPECTOR DRAWER (Appears when any item is clicked) */}
         {selectedDoc && (
           <div
+            className="responsive-drawer"
             style={{
               position: 'fixed',
               top: 0,
               right: 0,
               bottom: 0,
-              width: 420,
-              maxWidth: '90vw',
+              width: '100%',
+              maxWidth: 'min(420px, 100vw)',
               backgroundColor: selectedVariant === 'midnight' ? '#0F172A' : '#ffffff',
               color: selectedVariant === 'midnight' ? '#F8FAFC' : '#0F172A',
               boxShadow: '-10px 0 40px rgba(0,0,0,0.15)',

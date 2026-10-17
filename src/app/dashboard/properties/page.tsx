@@ -1684,7 +1684,7 @@ export default function PropertiesPage() {
                 👉 Swipe horizontally across the table to inspect all property columns.
               </div>
             )}
-            <div style={{ overflowX: 'auto' }}>
+            <div className="responsive-table-scroll touch-scroll-container" style={{ width: '100%' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }}>

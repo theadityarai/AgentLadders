@@ -274,10 +274,12 @@ export default function TimelinePage() {
       {showModal && (
         <div 
           onClick={() => setShowModal(false)}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}
+          className="responsive-modal-overlay"
+          style={{ zIndex: 1000 }}
         >
           <div 
             onClick={e => e.stopPropagation()}
+            className="responsive-modal animate-enter"
             style={{ backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '520px', border: '1px solid #e2e8f0', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', overflow: 'hidden' }}
           >
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>

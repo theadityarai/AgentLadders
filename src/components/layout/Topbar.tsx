@@ -310,7 +310,7 @@ export function Topbar() {
       </div>
 
       {/* Search Bar - Interactive Live Command Bar */}
-      <div ref={searchRef} className="hide-on-mobile" style={{ flex: 1, maxWidth: '440px', position: 'relative' }}>
+      <div ref={searchRef} className="hide-on-tablet" style={{ flex: 1, maxWidth: '440px', position: 'relative' }}>
         <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', color: '#94a3b8' }}>
           {isSearching ? <SpinnerIcon size={16} color="var(--primary, #059669)" /> : <SearchIcon size={16} color="#94a3b8" />}
         </span>
