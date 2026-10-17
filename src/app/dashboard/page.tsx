@@ -1239,28 +1239,25 @@ export default function DashboardPage() {
           Allows picking any property from inventory to send immediately on WhatsApp.
       ───────────────────────────────────────────────────────────────────────── */}
       {selectedClientForFlyer && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: 16
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: 18,
-            maxWidth: 620,
-            width: '100%',
-            maxHeight: '85vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
-            overflow: 'hidden'
-          }}>
+        <div 
+          onClick={() => setSelectedClientForFlyer(null)}
+          className="responsive-modal-overlay"
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: 18,
+              maxWidth: 620,
+              width: '100%',
+              maxHeight: '85vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
+              overflow: 'hidden'
+            }}
+          >
             {/* Modal Header */}
             <div style={{ padding: '18px 22px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>

@@ -1142,7 +1142,7 @@ export default function SiteVisitsPage() {
                       </div>
                       
                       {/* Actions: Edit + Delete + Quick Status */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} onClick={e => e.stopPropagation()}>
+                      <div className="site-visit-action-row" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(visit)}
@@ -1211,7 +1211,7 @@ export default function SiteVisitsPage() {
                       </div>
                     )}
                     
-                      <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div className="site-visit-bottom-row" style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 5 }}>
                           {visit.clientPhone ? (
                             <>

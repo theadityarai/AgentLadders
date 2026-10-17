@@ -711,17 +711,7 @@ export default function ClientsPage() {
       {showModal && (
         <div 
           onClick={() => setShowModal(false)}
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '16px'
-          }}
+          className="responsive-modal-overlay"
         >
           <div 
             onClick={e => e.stopPropagation()}
@@ -731,10 +721,13 @@ export default function ClientsPage() {
               borderRadius: '16px',
               boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
               border: '1px solid #e2e8f0',
-              padding: 0
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '90vh'
             }}
           >
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', flexShrink: 0 }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Add Client</h3>
                 <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Record verified real estate client and investment capacity</p>
@@ -742,109 +735,111 @@ export default function ClientsPage() {
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-              <div className="responsive-grid-2" style={{ gap: '14px', marginBottom: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Vikram Singhania"
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+                <div className="responsive-grid-2" style={{ gap: '14px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Name *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Vikram Singhania"
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
-                  <PhoneInput
-                    required
-                    value={form.phone}
-                    onChange={(full) => setForm({ ...form, phone: full })}
-                    placeholder="98200 45678"
-                  />
-                </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
+                    <PhoneInput
+                      required
+                      value={form.phone}
+                      onChange={(full) => setForm({ ...form, phone: full })}
+                      placeholder="98200 45678"
+                    />
+                  </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Email Address</label>
-                  <input
-                    type="email"
-                    placeholder="e.g. vikram@investments.com"
-                    value={form.email}
-                    onChange={e => setForm({ ...form, email: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="e.g. vikram@investments.com"
+                      value={form.email}
+                      onChange={e => setForm({ ...form, email: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Category</label>
-                  <select
-                    value={form.type}
-                    onChange={e => setForm({ ...form, type: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Category</label>
+                    <select
+                      value={form.type}
+                      onChange={e => setForm({ ...form, type: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    >
+                      {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
-                  <select
-                    value={form.status}
-                    onChange={e => setForm({ ...form, status: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
+                    <select
+                      value={form.status}
+                      onChange={e => setForm({ ...form, status: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    >
+                      {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Budget / Net Worth</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. $2,500,000"
-                    value={form.budget}
-                    onChange={e => setForm({ ...form, budget: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Budget / Net Worth</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. $2,500,000"
+                      value={form.budget}
+                      onChange={e => setForm({ ...form, budget: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
-                  <select
-                    value={form.source || 'WhatsApp Inbound'}
-                    onChange={e => setForm({ ...form, source: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
-                  >
-                    {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
+                    <select
+                      value={form.source || 'WhatsApp Inbound'}
+                      onChange={e => setForm({ ...form, source: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
+                    >
+                      {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Specific Requirements & Preferred Locations</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Looking for sea-view 4 BHK or penthouse in Jumeirah"
-                    value={form.requirement}
-                    onChange={e => setForm({ ...form, requirement: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Specific Requirements & Preferred Locations</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Looking for sea-view 4 BHK or penthouse in Jumeirah"
+                      value={form.requirement}
+                      onChange={e => setForm({ ...form, requirement: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Preferences & Notes</label>
-                  <textarea
-                    rows={3}
-                    placeholder="e.g. Prefers viewings on weekends. Cash purchase, no mortgage required."
-                    value={form.notes}
-                    onChange={e => setForm({ ...form, notes: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Preferences & Notes</label>
+                    <textarea
+                      rows={3}
+                      placeholder="e.g. Prefers viewings on weekends. Cash purchase, no mortgage required."
+                      value={form.notes}
+                      onChange={e => setForm({ ...form, notes: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div className="responsive-modal-footer form-sticky-footer">
                 <Button variant="outline" type="button" onClick={() => setShowModal(false)}>Cancel</Button>
                 <Button variant="primary" type="submit">Save Client</Button>
               </div>
@@ -857,17 +852,7 @@ export default function ClientsPage() {
       {editingClient && (
         <div 
           onClick={() => setEditingClient(null)}
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: '16px'
-          }}
+          className="responsive-modal-overlay"
         >
           <div 
             onClick={e => e.stopPropagation()}
@@ -877,10 +862,13 @@ export default function ClientsPage() {
               borderRadius: '16px',
               boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
               border: '1px solid #e2e8f0',
-              padding: 0
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '90vh'
             }}
           >
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', flexShrink: 0 }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>Edit Client: {editingClient.name}</h3>
                 <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Update contact information, search criteria, and status</p>
@@ -888,84 +876,86 @@ export default function ClientsPage() {
               <button onClick={() => setEditingClient(null)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
             </div>
 
-            <form onSubmit={handleUpdateClient} style={{ padding: '24px' }}>
-              <div className="responsive-grid-2" style={{ gap: '14px', marginBottom: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingClient.name}
-                    onChange={e => setEditingClient({ ...editingClient, name: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
+            <form onSubmit={handleUpdateClient} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
+                <div className="responsive-grid-2" style={{ gap: '14px', marginBottom: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingClient.name}
+                      onChange={e => setEditingClient({ ...editingClient, name: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
-                  <PhoneInput
-                    required
-                    value={editingClient.phone}
-                    onChange={(full) => setEditingClient({ ...editingClient, phone: full })}
-                    placeholder="98200 45678"
-                  />
-                </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Phone / WhatsApp (10 Digits) *</label>
+                    <PhoneInput
+                      required
+                      value={editingClient.phone}
+                      onChange={(full) => setEditingClient({ ...editingClient, phone: full })}
+                      placeholder="98200 45678"
+                    />
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Category</label>
-                  <select
-                    value={editingClient.type}
-                    onChange={e => setEditingClient({ ...editingClient, type: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Category</label>
+                    <select
+                      value={editingClient.type}
+                      onChange={e => setEditingClient({ ...editingClient, type: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    >
+                      {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
-                  <select
-                    value={editingClient.status || 'Active Search'}
-                    onChange={e => setEditingClient({ ...editingClient, status: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  >
-                    {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
+                    <select
+                      value={editingClient.status || 'Active Search'}
+                      onChange={e => setEditingClient({ ...editingClient, status: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    >
+                      {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
-                  <select
-                    value={editingClient.source || 'WhatsApp Inbound'}
-                    onChange={e => setEditingClient({ ...editingClient, source: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
-                  >
-                    {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
+                    <select
+                      value={editingClient.source || 'WhatsApp Inbound'}
+                      onChange={e => setEditingClient({ ...editingClient, source: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
+                    >
+                      {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Requirements & Locations</label>
-                  <input
-                    type="text"
-                    value={editingClient.requirement || ''}
-                    onChange={e => setEditingClient({ ...editingClient, requirement: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
-                </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Requirements & Locations</label>
+                    <input
+                      type="text"
+                      value={editingClient.requirement || ''}
+                      onChange={e => setEditingClient({ ...editingClient, requirement: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Notes</label>
-                  <textarea
-                    rows={3}
-                    value={editingClient.notes || ''}
-                    onChange={e => setEditingClient({ ...editingClient, notes: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                  />
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Notes</label>
+                    <textarea
+                      rows={3}
+                      value={editingClient.notes || ''}
+                      onChange={e => setEditingClient({ ...editingClient, notes: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div className="responsive-modal-footer form-sticky-footer">
                 <Button variant="outline" type="button" onClick={() => setEditingClient(null)}>Cancel</Button>
                 <Button variant="primary" type="submit">Save Changes</Button>
               </div>

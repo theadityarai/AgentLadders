@@ -310,119 +310,261 @@ export default function ExpensesPage() {
         ]}
       />
 
-      <div style={{ paddingBottom: '24px' }}>
+      {/* DESKTOP TABLE VIEW */}
+      <div className="desktop-only-table" style={{ paddingBottom: '24px' }}>
         <DataTable columns={columns} data={filteredData} />
+      </div>
+
+      {/* MOBILE ONLY CARDS VIEW */}
+      <div className="mobile-only-cards" style={{ paddingBottom: '24px' }}>
+        {filteredData.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 16px', background: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', color: '#64748b' }}>
+            No expenses found matching the selected criteria.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {filteredData.map(exp => (
+              <div
+                key={exp.id}
+                style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '14px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>
+                      📅 {exp.date} {exp.receiptRef ? `• ${exp.receiptRef}` : ''}
+                    </span>
+                    <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>
+                      {exp.description}
+                    </h4>
+                  </div>
+                  <span style={{
+                    fontSize: '16px',
+                    fontWeight: 800,
+                    color: '#0f172a',
+                    flexShrink: 0
+                  }}>
+                    ${exp.amount.toLocaleString()}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{
+                    padding: '3px 8px',
+                    borderRadius: '9999px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    backgroundColor: '#f1f5f9',
+                    color: '#475569'
+                  }}>
+                    📁 {exp.category}
+                  </span>
+                  {exp.vendor && (
+                    <span style={{
+                      padding: '3px 8px',
+                      borderRadius: '9999px',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                      backgroundColor: '#eff6ff',
+                      color: '#2563eb'
+                    }}>
+                      🏢 {exp.vendor}
+                    </span>
+                  )}
+                  {exp.paymentMethod && (
+                    <span style={{
+                      padding: '3px 8px',
+                      borderRadius: '9999px',
+                      fontSize: '11px',
+                      fontWeight: 500,
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      color: '#64748b'
+                    }}>
+                      💳 {exp.paymentMethod}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 44px', gap: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadVoucher(exp)}
+                    style={{
+                      padding: '8px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      color: '#334155',
+                      cursor: 'pointer',
+                      textAlign: 'center'
+                    }}
+                  >
+                    📥 Voucher
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(exp)}
+                    style={{
+                      padding: '8px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      backgroundColor: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: '8px',
+                      color: '#1d4ed8',
+                      cursor: 'pointer',
+                      textAlign: 'center'
+                    }}
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(exp.id, exp.description)}
+                    style={{
+                      padding: '8px',
+                      fontSize: '13px',
+                      backgroundColor: '#fff1f2',
+                      border: '1px solid #fecdd3',
+                      borderRadius: '8px',
+                      color: '#e11d48',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    title="Delete Expense"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* CREATE EXPENSE MODAL */}
       {showModal && (
         <div 
           onClick={() => setShowModal(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
+          className="responsive-modal-overlay"
         >
           <div 
             onClick={e => e.stopPropagation()}
             className="responsive-modal"
             style={{
               backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '24px'
+              borderRadius: '16px',
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '90vh'
             }}
           >
-            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Record Operating Expense</h3>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', flexShrink: 0 }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expense Description *</label>
-                <input
-                  required
-                  placeholder="e.g. Property Finder Premier Syndication Tier"
-                  value={form.description}
-                  onChange={e => setForm({ ...form, description: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>Record Operating Expense</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Add spend for portals, travel, or office overhead</p>
               </div>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+            </div>
 
-              <div className="responsive-grid-2" style={{ gap: '12px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
-                  <select
-                    value={form.category}
-                    onChange={e => setForm({ ...form, category: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expense Description *</label>
                   <input
                     required
-                    type="number"
-                    placeholder="3400"
-                    value={form.amount}
-                    onChange={e => setForm({ ...form, amount: e.target.value })}
+                    placeholder="e.g. Property Finder Premier Syndication Tier"
+                    value={form.description}
+                    onChange={e => setForm({ ...form, description: e.target.value })}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
+                </div>
+
+                <div className="responsive-grid-2" style={{ gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
+                    <select
+                      value={form.category}
+                      onChange={e => setForm({ ...form, category: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                    <input
+                      required
+                      type="number"
+                      placeholder="3400"
+                      value={form.amount}
+                      onChange={e => setForm({ ...form, amount: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="responsive-grid-2" style={{ gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
+                    <input
+                      placeholder="e.g. Property Finder Group"
+                      value={form.vendor}
+                      onChange={e => setForm({ ...form, vendor: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
+                    <input
+                      required
+                      type="date"
+                      value={form.date}
+                      onChange={e => setForm({ ...form, date: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="responsive-grid-2" style={{ gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
+                    <select
+                      value={form.paymentMethod}
+                      onChange={e => setForm({ ...form, paymentMethod: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>
+                    <input
+                      placeholder="RCPT-883492"
+                      value={form.receiptRef}
+                      onChange={e => setForm({ ...form, receiptRef: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="responsive-grid-2" style={{ gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
-                  <input
-                    placeholder="e.g. Property Finder Group"
-                    value={form.vendor}
-                    onChange={e => setForm({ ...form, vendor: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
-                  <input
-                    required
-                    type="date"
-                    value={form.date}
-                    onChange={e => setForm({ ...form, date: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div className="responsive-grid-2" style={{ gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
-                  <select
-                    value={form.paymentMethod}
-                    onChange={e => setForm({ ...form, paymentMethod: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>
-                  <input
-                    placeholder="RCPT-883492"
-                    value={form.receiptRef}
-                    onChange={e => setForm({ ...form, receiptRef: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
+              <div className="responsive-modal-footer form-sticky-footer">
+                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
                 <Button type="submit" variant="primary">Record Expense</Button>
               </div>
             </form>
@@ -434,107 +576,108 @@ export default function ExpensesPage() {
       {editingExpense && (
         <div 
           onClick={() => setEditingExpense(null)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-          }}
+          className="responsive-modal-overlay"
         >
           <div 
             onClick={e => e.stopPropagation()}
             className="responsive-modal"
             style={{
               backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '24px'
+              borderRadius: '16px',
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '90vh'
             }}
           >
-            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '16px' }}>Edit Expense: {editingExpense.description}</h3>
-            <form onSubmit={handleUpdateExpense} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', flexShrink: 0 }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expense Description *</label>
-                <input
-                  required
-                  value={editingExpense.description || ''}
-                  onChange={e => setEditingExpense({ ...editingExpense, description: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>Edit Expense: {editingExpense.description}</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#64748b' }}>Modify amount or payee details</p>
               </div>
+              <button onClick={() => setEditingExpense(null)} style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', color: '#94a3b8' }}>&times;</button>
+            </div>
 
-              <div className="responsive-grid-2" style={{ gap: '12px' }}>
+            <form onSubmit={handleUpdateExpense} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
-                  <select
-                    value={editingExpense.category}
-                    onChange={e => setEditingExpense({ ...editingExpense, category: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Expense Description *</label>
                   <input
                     required
-                    type="number"
-                    value={editingExpense.amount || ''}
-                    onChange={e => setEditingExpense({ ...editingExpense, amount: Number(e.target.value) })}
+                    value={editingExpense.description || ''}
+                    onChange={e => setEditingExpense({ ...editingExpense, description: e.target.value })}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                   />
+                </div>
+
+                <div className="responsive-grid-2" style={{ gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
+                    <select
+                      value={editingExpense.category}
+                      onChange={e => setEditingExpense({ ...editingExpense, category: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
+                    <input
+                      required
+                      type="number"
+                      value={editingExpense.amount || ''}
+                      onChange={e => setEditingExpense({ ...editingExpense, amount: Number(e.target.value) })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="responsive-grid-2" style={{ gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
+                    <input
+                      value={editingExpense.vendor || ''}
+                      onChange={e => setEditingExpense({ ...editingExpense, vendor: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
+                    <input
+                      required
+                      type="date"
+                      value={editingExpense.date || ''}
+                      onChange={e => setEditingExpense({ ...editingExpense, date: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="responsive-grid-2" style={{ gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
+                    <select
+                      value={editingExpense.paymentMethod || 'Corporate Card'}
+                      onChange={e => setEditingExpense({ ...editingExpense, paymentMethod: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    >
+                      {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>
+                    <input
+                      value={editingExpense.receiptRef || ''}
+                      onChange={e => setEditingExpense({ ...editingExpense, receiptRef: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="responsive-grid-2" style={{ gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Vendor / Payee</label>
-                  <input
-                    value={editingExpense.vendor || ''}
-                    onChange={e => setEditingExpense({ ...editingExpense, vendor: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Date *</label>
-                  <input
-                    required
-                    type="date"
-                    value={editingExpense.date || ''}
-                    onChange={e => setEditingExpense({ ...editingExpense, date: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div className="responsive-grid-2" style={{ gap: '12px' }}>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
-                  <select
-                    value={editingExpense.paymentMethod || 'Corporate Card'}
-                    onChange={e => setEditingExpense({ ...editingExpense, paymentMethod: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>
-                  <input
-                    value={editingExpense.receiptRef || ''}
-                    onChange={e => setEditingExpense({ ...editingExpense, receiptRef: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <Button type="button" variant="ghost" onClick={() => setEditingExpense(null)}>Cancel</Button>
+              <div className="responsive-modal-footer form-sticky-footer">
+                <Button type="button" variant="outline" onClick={() => setEditingExpense(null)}>Cancel</Button>
                 <Button type="submit" variant="primary">Save Changes</Button>
               </div>
             </form>

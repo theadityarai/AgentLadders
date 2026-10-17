@@ -1154,7 +1154,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
           </div>
         ) : viewMode === 'list' ? (
           <>
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20, width: '100%' }}>
+            <div className="desktop-only-table" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20, width: '100%' }}>
               <div className="responsive-table-scroll" style={{ width: '100%' }}>
                 <table style={{ minWidth: 720, width: '100%', borderCollapse: 'collapse', textAlign: 'left', tableLayout: 'fixed' }}>
                   <colgroup>
@@ -1673,6 +1673,20 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 </table>
               </div>
             </div>
+
+            {/* MOBILE ONLY CARDS VIEW FOR LIST MODE */}
+            <div className="mobile-only-cards" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12, marginBottom: 20 }}>
+              {paginatedData.map(doc => (
+                <DocumentCardItem
+                  key={doc.id}
+                  doc={doc}
+                  onOpenPreview={handleOpenPreview}
+                  onOpenEdit={handleOpenEdit}
+                  onDelete={setDocToDelete}
+                  onWhatsAppShare={handleWhatsAppShare}
+                />
+              ))}
+            </div>
           </>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: 16, marginBottom: 20 }}>
@@ -1713,7 +1727,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
       {showUpload && (
         <div
           onClick={() => { setShowUpload(false); setSelectedFile(null); }}
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+          className="responsive-modal-overlay"
         >
           <div
             onClick={e => e.stopPropagation()}
@@ -2077,7 +2091,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
       {editingDoc && (
         <div
           onClick={() => setEditingDoc(null)}
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+          className="responsive-modal-overlay"
         >
           <div
             onClick={e => e.stopPropagation()}
@@ -2440,17 +2454,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
         return (
           <div
             onClick={() => setPreviewDoc(null)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              backgroundColor: 'rgba(15,23,42,0.75)',
-              backdropFilter: 'blur(6px)',
-              zIndex: 100,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '16px'
-            }}
+            className="responsive-modal-overlay"
           >
             <div
               onClick={e => e.stopPropagation()}

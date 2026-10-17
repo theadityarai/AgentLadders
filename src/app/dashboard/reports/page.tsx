@@ -790,154 +790,274 @@ export default function ReportsPage() {
               </Button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }} className="touch-scroll-container">
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '720px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
-                    <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>REPORT TITLE & SCOPE</th>
-                    <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>CATEGORY</th>
-                    <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>WINDOW</th>
-                    <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>CADENCE</th>
-                    <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>GENERATED</th>
-                    <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b', textAlign: 'right' }}>ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredReports.map(rep => (
-                    <tr
-                      key={rep.id}
-                      style={{
-                        borderBottom: '1px solid #f1f5f9',
-                        transition: 'background 0.15s'
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <td style={{ padding: '14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '8px',
-                            backgroundColor: '#eff6ff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '18px'
-                          }}>
-                            📊
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '14px' }}>{rep.name}</div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>Scope: {rep.scope || 'Agency-Wide Operations'}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '14px' }}>
-                        <span style={{
-                          padding: '4px 10px',
-                          borderRadius: '9999px',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          backgroundColor: '#f1f5f9',
-                          color: '#334155'
-                        }}>
-                          {rep.type}
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px', fontSize: '13px', color: '#334155' }}>
-                        {rep.dateRange || 'Current Quarter (Q3)'}
-                      </td>
-                      <td style={{ padding: '14px', fontSize: '13px', color: '#64748b' }}>
-                        {rep.frequency || 'Monthly'}
-                      </td>
-                      <td style={{ padding: '14px', fontSize: '12px', color: '#64748b' }}>
-                        {new Date(rep.createdAt).toLocaleDateString()}
-                      </td>
-                      <td style={{ padding: '14px', textAlign: 'right' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                          <button
-                            onClick={() => {
-                              setActiveReportPreview({
-                                id: rep.id,
-                                title: rep.name,
-                                type: rep.type,
-                                scope: rep.scope || 'Agency-Wide Operations',
-                                dateRange: rep.dateRange || 'Current Quarter',
-                                generatedAt: rep.createdAt
-                              });
-                            }}
-                            style={{
-                              padding: '6px 12px',
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              backgroundColor: '#eff6ff',
-                              border: '1px solid #bfdbfe',
-                              borderRadius: '6px',
-                              cursor: 'pointer',
-                              color: '#2563eb',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                            title="View Interactive Statement"
-                          >
-                            👁️ View Audit
-                          </button>
-                          <button
-                            onClick={() => setReportToDelete({ id: rep.id, name: rep.name })}
-                            style={{
-                              padding: '6px 10px',
-                              fontSize: '12px',
-                              backgroundColor: '#fff1f2',
-                              border: '1px solid #fecdd3',
-                              borderRadius: '6px',
-                              cursor: 'pointer',
-                              color: '#e11d48'
-                            }}
-                            title="Delete Report"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </td>
+            <>
+              {/* DESKTOP TABLE VIEW */}
+              <div style={{ overflowX: 'auto' }} className="desktop-only-table touch-scroll-container">
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '720px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #f1f5f9' }}>
+                      <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>REPORT TITLE & SCOPE</th>
+                      <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>CATEGORY</th>
+                      <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>WINDOW</th>
+                      <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>CADENCE</th>
+                      <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b' }}>GENERATED</th>
+                      <th style={{ padding: '12px 14px', fontSize: '12px', fontWeight: 600, color: '#64748b', textAlign: 'right' }}>ACTIONS</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredReports.map(rep => (
+                      <tr
+                        key={rep.id}
+                        style={{
+                          borderBottom: '1px solid #f1f5f9',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td style={{ padding: '14px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '8px',
+                              backgroundColor: '#eff6ff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '18px'
+                            }}>
+                              📊
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '14px' }}>{rep.name}</div>
+                              <div style={{ fontSize: '12px', color: '#64748b' }}>Scope: {rep.scope || 'Agency-Wide Operations'}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '14px' }}>
+                          <span style={{
+                            padding: '4px 10px',
+                            borderRadius: '9999px',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            backgroundColor: '#f1f5f9',
+                            color: '#334155'
+                          }}>
+                            {rep.type}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px', fontSize: '13px', color: '#334155' }}>
+                          {rep.dateRange || 'Current Quarter (Q3)'}
+                        </td>
+                        <td style={{ padding: '14px', fontSize: '13px', color: '#64748b' }}>
+                          {rep.frequency || 'Monthly'}
+                        </td>
+                        <td style={{ padding: '14px', fontSize: '12px', color: '#64748b' }}>
+                          {new Date(rep.createdAt).toLocaleDateString()}
+                        </td>
+                        <td style={{ padding: '14px', textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button
+                              onClick={() => {
+                                setActiveReportPreview({
+                                  id: rep.id,
+                                  title: rep.name,
+                                  type: rep.type,
+                                  scope: rep.scope || 'Agency-Wide Operations',
+                                  dateRange: rep.dateRange || 'Current Quarter',
+                                  generatedAt: rep.createdAt
+                                });
+                              }}
+                              style={{
+                                padding: '6px 12px',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                backgroundColor: '#eff6ff',
+                                border: '1px solid #bfdbfe',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                color: '#2563eb',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}
+                              title="View Interactive Statement"
+                            >
+                              👁️ View Audit
+                            </button>
+                            <button
+                              onClick={() => setReportToDelete({ id: rep.id, name: rep.name })}
+                              style={{
+                                padding: '6px 10px',
+                                fontSize: '12px',
+                                backgroundColor: '#fff1f2',
+                                border: '1px solid #fecdd3',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                color: '#e11d48'
+                              }}
+                              title="Delete Report"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* MOBILE ONLY CARDS VIEW */}
+              <div className="mobile-only-cards" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '8px 0' }}>
+                {filteredReports.map(rep => (
+                  <div
+                    key={rep.id}
+                    style={{
+                      backgroundColor: '#ffffff',
+                      borderRadius: '14px',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>
+                          {rep.name}
+                        </h4>
+                        <span style={{ fontSize: '12px', color: '#64748b' }}>
+                          Scope: {rep.scope || 'Agency-Wide Operations'}
+                        </span>
+                      </div>
+                      <span style={{
+                        padding: '3px 8px',
+                        borderRadius: '9999px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        backgroundColor: '#f1f5f9',
+                        color: '#334155',
+                        flexShrink: 0
+                      }}>
+                        {rep.type}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      <span style={{
+                        padding: '3px 8px',
+                        borderRadius: '9999px',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        backgroundColor: '#eff6ff',
+                        color: '#2563eb'
+                      }}>
+                        📅 {rep.dateRange || 'Current Quarter'}
+                      </span>
+                      <span style={{
+                        padding: '3px 8px',
+                        borderRadius: '9999px',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        color: '#64748b'
+                      }}>
+                        ⏱️ {rep.frequency || 'Monthly'}
+                      </span>
+                      <span style={{
+                        padding: '3px 8px',
+                        borderRadius: '9999px',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        backgroundColor: '#f8fafc',
+                        color: '#94a3b8'
+                      }}>
+                        {new Date(rep.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 44px', gap: '8px', paddingTop: '8px', borderTop: '1px solid #f1f5f9' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveReportPreview({
+                            id: rep.id,
+                            title: rep.name,
+                            type: rep.type,
+                            scope: rep.scope || 'Agency-Wide Operations',
+                            dateRange: rep.dateRange || 'Current Quarter',
+                            generatedAt: rep.createdAt
+                          });
+                        }}
+                        style={{
+                          padding: '8px',
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          backgroundColor: '#eff6ff',
+                          border: '1px solid #bfdbfe',
+                          borderRadius: '8px',
+                          color: '#2563eb',
+                          cursor: 'pointer',
+                          textAlign: 'center'
+                        }}
+                      >
+                        👁️ View Audit Sheet
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReportToDelete({ id: rep.id, name: rep.name })}
+                        style={{
+                          padding: '8px',
+                          fontSize: '13px',
+                          backgroundColor: '#fff1f2',
+                          border: '1px solid #fecdd3',
+                          borderRadius: '8px',
+                          color: '#e11d48',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        title="Delete Report"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
 
       {/* 4. Full Executive Report Viewer & Print Sheet Modal */}
       {activeReportPreview && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '16px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%',
-            maxWidth: '960px',
-            maxHeight: '92vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            border: '1px solid #e2e8f0',
-            overflow: 'hidden'
-          }}>
+        <div 
+          onClick={() => setActiveReportPreview(null)}
+          className="responsive-modal-overlay"
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            className="responsive-modal"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '960px',
+              maxHeight: '92vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden'
+            }}
+          >
             {/* Modal Action Header (no-print) */}
             <div className="no-print" style={{
               padding: '16px 24px',
@@ -1237,140 +1357,132 @@ export default function ReportsPage() {
 
       {/* 5. Create Custom Report Modal */}
       {showCreateModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(3px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '16px'
-        }}>
+        <div 
+          onClick={() => setShowCreateModal(false)}
+          className="responsive-modal-overlay"
+        >
           <div
+            onClick={e => e.stopPropagation()}
             className="responsive-modal"
             style={{
               backgroundColor: '#ffffff',
               borderRadius: '16px',
               width: '100%',
               maxWidth: '560px',
-              padding: '24px',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '90vh',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
               border: '1px solid #e2e8f0'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '20px' }}>✨</span>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>
-                  Generate Custom Executive Statement
-                </h3>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#0f172a' }}>
+                    Generate Custom Executive Statement
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: '12.5px', color: '#64748b' }}>Configure parameters for a tailored CRM financial and pipeline audit</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
-                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748b' }}
+                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#64748b' }}
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateSubmit}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Report Title
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Q3 Commercial Deals & Commission Audit"
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  />
-                </div>
+            <form onSubmit={handleCreateSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
+                      Report Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Q3 Commercial Deals & Commission Audit"
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                    />
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Report Type
-                  </label>
-                  <select
-                    value={form.type}
-                    onChange={e => setForm({ ...form, type: e.target.value })}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                  >
-                    <option value="Financial Summary">Financial & Commission Summary</option>
-                    <option value="Deal Pipeline Velocity">Deal Pipeline Velocity</option>
-                    <option value="Lead Acquisition & ROI">Lead Acquisition & Channel ROI</option>
-                    <option value="Property Inventory Health">Property Inventory Health</option>
-                    <option value="Site Visit Operations">Site Visit Operations</option>
-                    <option value="Accounts Receivable & GST">Accounts Receivable & GST</option>
-                  </select>
-                </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
+                      Report Type
+                    </label>
+                    <select
+                      value={form.type}
+                      onChange={e => setForm({ ...form, type: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    >
+                      <option value="Financial Summary">Financial & Commission Summary</option>
+                      <option value="Deal Pipeline Velocity">Deal Pipeline Velocity</option>
+                      <option value="Lead Acquisition & ROI">Lead Acquisition & Channel ROI</option>
+                      <option value="Property Inventory Health">Property Inventory Health</option>
+                      <option value="Site Visit Operations">Site Visit Operations</option>
+                      <option value="Accounts Receivable & GST">Accounts Receivable & GST</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Cadence / Frequency
-                  </label>
-                  <select
-                    value={form.frequency}
-                    onChange={e => setForm({ ...form, frequency: e.target.value })}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                  >
-                    <option value="On Demand">On Demand (One-time)</option>
-                    <option value="Weekly">Weekly Digest</option>
-                    <option value="Monthly">Monthly Executive Review</option>
-                    <option value="Quarterly">Quarterly Board Statement</option>
-                  </select>
-                </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
+                      Cadence / Frequency
+                    </label>
+                    <select
+                      value={form.frequency}
+                      onChange={e => setForm({ ...form, frequency: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    >
+                      <option value="On Demand">On Demand (One-time)</option>
+                      <option value="Weekly">Weekly Digest</option>
+                      <option value="Monthly">Monthly Executive Review</option>
+                      <option value="Quarterly">Quarterly Board Statement</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Time Window
-                  </label>
-                  <select
-                    value={form.dateRange}
-                    onChange={e => setForm({ ...form, dateRange: e.target.value })}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                  >
-                    <option value="Last 30 Days">Last 30 Days</option>
-                    <option value="Current Quarter (Q3)">Current Quarter (Q3)</option>
-                    <option value="Year-to-Date (YTD)">Year-to-Date (YTD)</option>
-                    <option value="Previous Fiscal Year">Previous Fiscal Year</option>
-                    <option value="All Time">All Time Historical</option>
-                  </select>
-                </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
+                      Time Window
+                    </label>
+                    <select
+                      value={form.dateRange}
+                      onChange={e => setForm({ ...form, dateRange: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    >
+                      <option value="Last 30 Days">Last 30 Days</option>
+                      <option value="Current Quarter (Q3)">Current Quarter (Q3)</option>
+                      <option value="Year-to-Date (YTD)">Year-to-Date (YTD)</option>
+                      <option value="Previous Fiscal Year">Previous Fiscal Year</option>
+                      <option value="All Time">All Time Historical</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
-                    Operational Scope
-                  </label>
-                  <select
-                    value={form.scope}
-                    onChange={e => setForm({ ...form, scope: e.target.value })}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                  >
-                    <option value="Agency-Wide Operations">Agency-Wide Full Operations</option>
-                    <option value="Prime Residential Division">Prime Residential Division</option>
-                    <option value="Luxury Commercial Division">Luxury Commercial Division</option>
-                    <option value="Property Management Portfolio">Property Management Portfolio</option>
-                  </select>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
+                      Operational Scope
+                    </label>
+                    <select
+                      value={form.scope}
+                      onChange={e => setForm({ ...form, scope: e.target.value })}
+                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
+                    >
+                      <option value="Agency-Wide Operations">Agency-Wide Full Operations</option>
+                      <option value="Prime Residential Division">Prime Residential Division</option>
+                      <option value="Luxury Commercial Division">Luxury Commercial Division</option>
+                      <option value="Property Management Portfolio">Property Management Portfolio</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px',
-                marginTop: '24px',
-                paddingTop: '18px',
-                borderTop: '1px solid #e2e8f0'
-              }}>
-                <Button type="button" variant="ghost" onClick={() => setShowCreateModal(false)}>
+              <div className="responsive-modal-footer form-sticky-footer">
+                <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" variant="primary">
