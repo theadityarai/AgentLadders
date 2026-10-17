@@ -325,10 +325,56 @@ label {
 /* Slide-over Drawers (fits any screen width without horizontal overflow) */
 .responsive-drawer {
   width: 100% !important;
-  max-width: min(540px, 100vw) !important;
+  max-width: min(560px, 100vw) !important;
   height: 100% !important;
   box-sizing: border-box !important;
 }
+
+@media (max-width: 640px) {
+  .responsive-drawer {
+    max-width: 100vw !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* Sticky Form Footer for Drawers & Full-Height Modals */
+.form-sticky-footer {
+  position: sticky !important;
+  bottom: 0 !important;
+  background-color: #ffffff !important;
+  padding: 14px 20px max(16px, env(safe-area-inset-bottom, 16px)) !important;
+  border-top: 1px solid #e2e8f0 !important;
+  z-index: 40 !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+  display: flex !important;
+  gap: 12px !important;
+  margin-top: auto !important;
+}
+
+/* Ensure Bottom Navigation is HIDDEN when any modal, drawer or dialog is active */
+body.mobile-drawer-open .mobile-bottom-nav,
+body.modal-open .mobile-bottom-nav,
+body:has(.responsive-drawer) .mobile-bottom-nav,
+body:has(.responsive-modal) .mobile-bottom-nav,
+body:has([role="dialog"]) .mobile-bottom-nav,
+body:has([aria-modal="true"]) .mobile-bottom-nav,
+body:has(.animate-slide-left) .mobile-bottom-nav {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Modal Backdrops must sit above any headers and bottom bars */
+.modal-backdrop,
+div[style*="position: fixed"][style*="inset: 0"],
+div[style*="position: 'fixed'"][style*="inset: 0"] {
+  z-index: 9999 !important;
+}
+
 
 /* Centered Modals & Native Mobile Bottom Sheets */
 .responsive-modal {
@@ -1010,11 +1056,12 @@ label {
 @media (max-width: 640px) {
   .unified-filter-card {
     padding: 10px 12px;
-    gap: 8px;
+    gap: 10px;
   }
   .unified-filter-row-top {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
   .unified-filter-controls {
     display: grid;
@@ -1024,6 +1071,81 @@ label {
   }
   .unified-filter-controls > *:first-child {
     grid-column: 1 / -1;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .unified-filter-select {
+    width: 100% !important;
+    min-width: 0 !important;
+    text-overflow: ellipsis;
+  }
+  .unified-filter-row-bottom {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Filter Tabs mobile layout */
+  .filter-tabs-wrapper {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+  }
+  .filter-tabs-label {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin-bottom: 2px !important;
+  }
+  .filter-tabs-segmented {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .filter-tabs-segmented .filter-tabs-btn {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 7px 4px !important;
+    font-size: 12px !important;
+    gap: 4px !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+  .filter-tabs-segmented .filter-tabs-btn > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .filter-tabs-pills,
+  .filter-tabs-soft,
+  .filter-tabs-underline {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 2px 28px 6px 0 !important;
+    scrollbar-width: none !important;
+  }
+  .filter-tabs-container::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Kanban snap container on mobile: don't stretch empty voids */
+  .kanban-snap-container {
+    min-height: auto !important;
+  }
+  .kanban-snap-lane {
+    min-height: auto !important;
+    max-height: none !important;
   }
 }
 
@@ -1048,16 +1170,26 @@ label {
 
 @media (max-width: 640px) {
   .responsive-modal-footer {
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom, 14px)) !important;
+    gap: 10px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .responsive-modal-footer > div {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
     gap: 8px !important;
   }
-  .responsive-modal-footer > button,
-  .responsive-modal-footer > a {
-    flex: 1 1 calc(50% - 8px) !important;
-    min-width: 120px !important;
+  .responsive-modal-footer button,
+  .responsive-modal-footer a {
+    flex: 1 1 calc(50% - 4px) !important;
+    min-width: 100px !important;
     justify-content: center !important;
-    padding: 9px 8px !important;
-    font-size: 12.5px !important;
+    padding: 11px 12px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
     text-align: center !important;
   }
 }

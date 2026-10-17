@@ -58,6 +58,7 @@ export default function DealsPage() {
   const [stageFilter, setStageFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
 
   const [clientsList, setClientsList] = useState<{name: string; phone?: string; email?: string; type?: string}[]>([]);
   const [propertiesList, setPropertiesList] = useState<{title: string; locality?: string; city?: string; bhk?: string; price?: number; purpose?: string; listingType?: string}[]>([]);
@@ -429,8 +430,8 @@ export default function DealsPage() {
     <>
       {/* Slide-over Drawer for Creating / Editing Deal */}
       {showModal && (
-        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}>
-          <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
+        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'flex-end' }}>
+          <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100dvh', maxHeight: '100dvh', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
                 {editingDeal ? 'Edit Deal' : 'Create Deal'} <InfoTooltip text="Log a new transaction or edit deal stages." />
@@ -545,7 +546,7 @@ export default function DealsPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 12, marginTop: 'auto', position: 'sticky', bottom: '-24px', backgroundColor: '#fff', padding: '16px 0', borderTop: '1px solid var(--border)', zIndex: 10 }}>
+              <div className="form-sticky-footer" style={{ position: 'sticky', bottom: 0, backgroundColor: '#fff', padding: '14px 20px max(20px, env(safe-area-inset-bottom, 20px))', borderTop: '1px solid var(--border)', zIndex: 40, boxShadow: '0 -4px 16px rgba(0,0,0,0.08)', margin: 'auto -24px -24px -24px' }}>
                 {editingDeal && (
                   <button
                     type="button"
@@ -571,7 +572,7 @@ export default function DealsPage() {
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                   Cancel
                 </button>
-                <button type="submit" disabled={isSubmitting} style={{ flex: 2, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                <button type="submit" disabled={isSubmitting} style={{ flex: 2, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                   {isSubmitting ? (editingDeal ? 'Updating...' : 'Saving...') : (editingDeal ? 'Update Deal' : 'Save Deal')}
                 </button>
               </div>
@@ -638,8 +639,8 @@ export default function DealsPage() {
             size="sm"
             tabs={[
               { id: 'All', label: 'All Deals', count: dealTypeCounts.all, icon: <ListIcon size={13} /> },
-              { id: 'Buy', label: 'Sale / Buy Deals', count: dealTypeCounts.buy, icon: <HomeIcon size={13} /> },
-              { id: 'Rent', label: 'Rental / Lease Deals', count: dealTypeCounts.rent, icon: <KeyIcon size={13} /> }
+              { id: 'Buy', label: 'Buy / Sale', count: dealTypeCounts.buy, icon: <HomeIcon size={13} /> },
+              { id: 'Rent', label: 'Rent / Lease', count: dealTypeCounts.rent, icon: <KeyIcon size={13} /> }
             ]}
             activeTab={dealTypeFilter}
             onChange={(tabId) => setDealTypeFilter(tabId as any)}
@@ -690,185 +691,388 @@ export default function DealsPage() {
         </div>
       </div>
 
-      {/* Kanban Board */}
-      <div className="touch-scroll-container kanban-snap-container" style={{ display: 'flex', gap: 20, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24, minHeight: 'calc(100vh - 180px)' }}>
-        {columnsToDisplay.map(stage => {
-          const stageDeals = filteredDeals.filter(d => d.stage === stage);
-          const colors = getStageColor(stage);
-          
-          return (
-            <div 
-              key={stage} 
-              className="kanban-snap-lane"
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                const dealId = e.dataTransfer.getData('text/plain');
-                if (dealId) {
-                  handleMoveStage(dealId, stage);
-                }
-              }}
-              style={{
-                flex: '0 0 min(300px, 85vw)',
-                backgroundColor: '#f8fafc',
-                border: `1px solid ${colors.border}`,
-                borderRadius: 12,
-                display: 'flex', flexDirection: 'column',
-                maxHeight: '100%',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.01)',
-                transition: 'background-color 0.2s ease'
-              }}
-            >
-              
-              {/* Stage Header */}
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', backgroundColor: '#fff', borderRadius: '12px 12px 0 0', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, backgroundColor: colors.bar }} />
+      {/* View Toggle Bar (Compact & Responsive) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#64748b' }}>
+          Showing <span style={{ color: '#0f172a' }}>{filteredDeals.length}</span> {filteredDeals.length === 1 ? 'deal' : 'deals'}
+        </div>
+        <div style={{ display: 'inline-flex', backgroundColor: '#e2e8f0', padding: 3, borderRadius: 8, gap: 3 }}>
+          <button
+            type="button"
+            onClick={() => setViewMode('board')}
+            style={{
+              padding: '5px 14px',
+              fontSize: 12,
+              fontWeight: 700,
+              borderRadius: 6,
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: viewMode === 'board' ? '#ffffff' : 'transparent',
+              color: viewMode === 'board' ? 'var(--primary, #059669)' : '#64748b',
+              boxShadow: viewMode === 'board' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5
+            }}
+          >
+            <span>Kanban Board</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            style={{
+              padding: '5px 14px',
+              fontSize: 12,
+              fontWeight: 700,
+              borderRadius: 6,
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: viewMode === 'list' ? '#ffffff' : 'transparent',
+              color: viewMode === 'list' ? 'var(--primary, #059669)' : '#64748b',
+              boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5
+            }}
+          >
+            <span>List Feed</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Kanban Board View */}
+      {viewMode === 'board' && (
+        <div className="touch-scroll-container kanban-snap-container" style={{ display: 'flex', gap: 16, overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: 24 }}>
+          {columnsToDisplay.map(stage => {
+            const stageDeals = filteredDeals.filter(d => d.stage === stage);
+            const colors = getStageColor(stage);
+            
+            return (
+              <div 
+                key={stage} 
+                className="kanban-snap-lane"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const dealId = e.dataTransfer.getData('text/plain');
+                  if (dealId) {
+                    handleMoveStage(dealId, stage);
+                  }
+                }}
+                style={{
+                  flex: '0 0 min(310px, 86vw)',
+                  backgroundColor: '#f8fafc',
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: 12,
+                  display: 'flex', flexDirection: 'column',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  transition: 'background-color 0.2s ease'
+                }}
+              >
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, marginTop: 4 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stage}</h3>
-                  <span style={{ backgroundColor: colors.badgeBg, color: colors.badge, fontSize: 12, fontWeight: 700, padding: '2px 8px', borderRadius: 12 }}>
-                    {stageDeals.length}
+                {/* Stage Header */}
+                <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', backgroundColor: '#fff', borderRadius: '12px 12px 0 0', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 4, backgroundColor: colors.bar }} />
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, marginTop: 2 }}>
+                    <h3 style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{stage}</h3>
+                    <span style={{ backgroundColor: colors.badgeBg, color: colors.badge, fontSize: 11.5, fontWeight: 700, padding: '2px 8px', borderRadius: 12 }}>
+                      {stageDeals.length}
+                    </span>
+                  </div>
+                  
+                  <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.4px' }}>
+                    {formatINR(stageTotals[stage])}
+                  </div>
+                </div>
+
+                {/* Stage Body */}
+                <div style={{ padding: '12px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {stageDeals.map(deal => (
+                    <div 
+                      key={deal.id} 
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', deal.id);
+                        e.currentTarget.style.opacity = '0.5';
+                      }}
+                      onDragEnd={(e) => {
+                        e.currentTarget.style.opacity = '1';
+                      }}
+                      onClick={() => handleOpenEdit(deal)}
+                      style={{
+                        backgroundColor: '#fff',
+                        border: '1px solid var(--border)',
+                        borderRadius: 10,
+                        padding: '14px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                        userSelect: 'none'
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0,0,0,0.06)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.03)'; }}
+                    >
+                      {/* Top Row: Deal Title & Type Tag */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0f172a', lineHeight: 1.35, flex: 1, minWidth: 0, wordBreak: 'break-word' }}>
+                          {deal.title}
+                        </div>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '2px 7px',
+                          borderRadius: 6,
+                          fontSize: 10.5,
+                          fontWeight: 700,
+                          backgroundColor: isDealRent(deal) ? '#f3e8ff' : '#eff6ff',
+                          color: isDealRent(deal) ? '#7e22ce' : '#1d4ed8',
+                          border: `1px solid ${isDealRent(deal) ? '#d8b4fe' : '#bfdbfe'}`,
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0
+                        }}>
+                          {isDealRent(deal) ? <KeyIcon size={11} color="currentColor" /> : <HomeIcon size={11} color="currentColor" />}
+                          <span>{isDealRent(deal) ? 'Rental' : 'Sale'}</span>
+                        </span>
+                      </div>
+                      
+                      {/* Big Deal Value */}
+                      <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary, #059669)', marginBottom: 10, letterSpacing: '-0.4px' }}>
+                        {formatINR(deal.amount)}
+                      </div>
+                      
+                      {/* Client & Property Details */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#475569', fontWeight: 600 }}>
+                          <UserIcon size={13} color="#94a3b8" />
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.clientName || 'Unnamed Client'}</span>
+                        </div>
+                        {deal.properties && deal.properties.length > 1 ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#475569', fontWeight: 700 }}>
+                              <BuildingIcon size={13} color="var(--primary, #059669)" />
+                              <span>{deal.properties.length} Properties in Deal:</span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingLeft: 18 }}>
+                              {deal.properties.map((prop, idx) => (
+                                <div key={idx} style={{ fontSize: 11.5, color: '#0f172a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
+                                  <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: 'var(--primary, #059669)', flexShrink: 0 }} />
+                                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prop}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#475569', fontWeight: 600 }}>
+                            <BuildingIcon size={13} color="#94a3b8" />
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {deal.propertyName || (deal.properties && deal.properties[0]) || 'No Property Assigned'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card Footer: Expected Close & Action Buttons */}
+                      <div style={{ paddingTop: 10, borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11 }}>
+                          <span style={{ fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>Expected Close:</span>
+                          <span style={{ fontWeight: 700, color: '#334155' }}>
+                            {new Date(deal.expectedCloseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }} onClick={e => e.stopPropagation()}>
+                          <select
+                            value={deal.stage}
+                            onChange={(e) => handleMoveStage(deal.id, e.target.value)}
+                            style={{
+                              flex: 1,
+                              fontSize: 11.5,
+                              fontWeight: 700,
+                              padding: '5px 8px',
+                              borderRadius: 6,
+                              border: '1px solid #cbd5e1',
+                              backgroundColor: '#f8fafc',
+                              color: '#1e293b',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              minWidth: 0,
+                              textOverflow: 'ellipsis'
+                            }}
+                          >
+                            {stages.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+
+                          <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEdit(deal)}
+                              style={{ fontSize: 11.5, fontWeight: 600, padding: '4px 8px', borderRadius: 6, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 3 }}
+                            >
+                              <EditIcon size={11} color="#1d4ed8" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeletingDeal(deal)}
+                              style={{ fontSize: 11.5, fontWeight: 600, padding: '4px 8px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 3 }}
+                            >
+                              <TrashIcon size={11} color="#dc2626" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {stageDeals.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '24px 10px', color: '#94a3b8', fontSize: 12.5, border: '1px dashed #cbd5e1', borderRadius: 8, backgroundColor: 'transparent' }}>
+                      No deals in {stage}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* List Feed View (Mobile & Desktop Ergonomic List) */}
+      {viewMode === 'list' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14, paddingBottom: 24 }}>
+          {filteredDeals.map(deal => {
+            const colors = getStageColor(deal.stage);
+            return (
+              <div
+                key={deal.id}
+                onClick={() => handleOpenEdit(deal)}
+                style={{
+                  backgroundColor: '#ffffff',
+                  border: '1px solid var(--border)',
+                  borderLeft: `4px solid ${colors.bar}`,
+                  borderRadius: 12,
+                  padding: '16px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10
+                }}
+              >
+                {/* Header: Stage badge + Type pill */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ backgroundColor: colors.badgeBg, color: colors.badge, fontSize: 11.5, fontWeight: 800, padding: '3px 8px', borderRadius: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {deal.stage}
+                  </span>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    padding: '2px 8px',
+                    borderRadius: 6,
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    backgroundColor: isDealRent(deal) ? '#f3e8ff' : '#eff6ff',
+                    color: isDealRent(deal) ? '#7e22ce' : '#1d4ed8',
+                    border: `1px solid ${isDealRent(deal) ? '#d8b4fe' : '#bfdbfe'}`
+                  }}>
+                    {isDealRent(deal) ? <KeyIcon size={11} color="currentColor" /> : <HomeIcon size={11} color="currentColor" />}
+                    <span>{isDealRent(deal) ? 'Rental' : 'Sale'}</span>
                   </span>
                 </div>
-                
-                <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>
-                  {formatINR(stageTotals[stage])}
+
+                {/* Deal Title & Amount */}
+                <div>
+                  <h4 style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0', lineHeight: 1.35 }}>
+                    {deal.title}
+                  </h4>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--primary, #059669)' }}>
+                    {formatINR(deal.amount)}
+                  </div>
+                </div>
+
+                {/* Client & Property Details */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5, fontSize: 12.5, color: '#475569', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <UserIcon size={13} color="#94a3b8" />
+                    <span>{deal.clientName || 'Unnamed Client'}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <BuildingIcon size={13} color="#94a3b8" />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {deal.propertyName || (deal.properties && deal.properties[0]) || 'No Property Assigned'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Footer Bar: Close Date & Actions */}
+                <div style={{ paddingTop: 10, borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 11.5 }}>
+                    <span style={{ fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase' }}>Expected Close:</span>
+                    <span style={{ fontWeight: 700, color: '#0f172a' }}>
+                      {new Date(deal.expectedCloseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }} onClick={e => e.stopPropagation()}>
+                    <select
+                      value={deal.stage}
+                      onChange={(e) => handleMoveStage(deal.id, e.target.value)}
+                      style={{
+                        flex: 1,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        padding: '6px 8px',
+                        borderRadius: 6,
+                        border: '1px solid #cbd5e1',
+                        backgroundColor: '#f8fafc',
+                        color: '#1e293b',
+                        cursor: 'pointer',
+                        outline: 'none',
+                        minWidth: 0
+                      }}
+                    >
+                      {stages.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(deal)}
+                        style={{ fontSize: 12, fontWeight: 600, padding: '5px 10px', borderRadius: 6, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <EditIcon size={12} color="#1d4ed8" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeletingDeal(deal)}
+                        style={{ fontSize: 12, fontWeight: 600, padding: '5px 10px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <TrashIcon size={12} color="#dc2626" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
+            );
+          })}
 
-              {/* Stage Body */}
-              <div style={{ padding: '16px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {stageDeals.map(deal => (
-                  <div 
-                    key={deal.id} 
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData('text/plain', deal.id);
-                      e.currentTarget.style.opacity = '0.5';
-                    }}
-                    onDragEnd={(e) => {
-                      e.currentTarget.style.opacity = '1';
-                    }}
-                    onClick={() => handleOpenEdit(deal)}
-                    style={{
-                      backgroundColor: '#fff',
-                      border: '1px solid var(--border)',
-                      borderRadius: 10,
-                      padding: '16px',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                      cursor: 'pointer',
-                      transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                      userSelect: 'none'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)'; }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, gap: 8 }}>
-                      <div 
-                        style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', flex: 1 }}
-                      >
-                        {deal.title}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={e => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(deal)}
-                          style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', color: '#1d4ed8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                        >
-                          <EditIcon size={11} color="#1d4ed8" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeletingDeal(deal)}
-                          style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 6, border: '1px solid #fecaca', backgroundColor: '#fee2e2', color: '#dc2626', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                        >
-                          <TrashIcon size={11} color="#dc2626" />
-                          <span>Delete</span>
-                        </button>
-                        <select
-                          value={deal.stage}
-                          onChange={(e) => {
-                            handleMoveStage(deal.id, e.target.value);
-                          }}
-                          style={{ fontSize: 11, fontWeight: 600, padding: '3px 6px', borderRadius: 6, border: '1px solid #cbd5e1', backgroundColor: '#fff', color: '#475569', cursor: 'pointer', outline: 'none' }}
-                        >
-                          {stages.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div style={{ marginBottom: 12 }}>
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        padding: '2px 7px',
-                        borderRadius: 4,
-                        fontSize: 10.5,
-                        fontWeight: 700,
-                        backgroundColor: isDealRent(deal) ? '#f3e8ff' : '#eff6ff',
-                        color: isDealRent(deal) ? '#7e22ce' : '#1d4ed8',
-                        border: `1px solid ${isDealRent(deal) ? '#d8b4fe' : '#bfdbfe'}`
-                      }}>
-                        {isDealRent(deal) ? <KeyIcon size={11} color="currentColor" /> : <HomeIcon size={11} color="currentColor" />}
-                        <span>{isDealRent(deal) ? 'Rental Lease' : 'Outright Sale'}</span>
-                      </span>
-                    </div>
-                    
-                    <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--primary)', marginBottom: 16, letterSpacing: '-0.5px' }}>
-                      {formatINR(deal.amount)}
-                    </div>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                        <UserIcon size={13} color="#94a3b8" />
-                        <span>{deal.clientName}</span>
-                      </div>
-                      {deal.properties && deal.properties.length > 1 ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 700 }}>
-                            <BuildingIcon size={13} color="var(--primary)" />
-                            <span>{deal.properties.length} Properties in Deal:</span>
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 18 }}>
-                            {deal.properties.map((prop, idx) => (
-                              <div key={idx} style={{ fontSize: 11.5, color: '#0f172a', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: 'var(--primary)', flexShrink: 0 }} />
-                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prop}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', fontWeight: 600 }}>
-                          <BuildingIcon size={13} color="#94a3b8" />
-                          <span>{deal.propertyName || (deal.properties && deal.properties[0]) || 'No Property Assigned'}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px dashed var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>Expected Close</span>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#0f172a' }}>{new Date(deal.expectedCloseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
-                    </div>
-                  </div>
-                ))}
-                
-                {stageDeals.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '30px 10px', color: '#94a3b8', fontSize: 13, border: '1px dashed var(--border)', borderRadius: 8, backgroundColor: 'transparent' }}>
-                    Drop deals here
-                  </div>
-                )}
-              </div>
-
+          {filteredDeals.length === 0 && (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px 20px', backgroundColor: '#ffffff', borderRadius: 12, border: '1px dashed #cbd5e1', color: '#64748b' }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>No deals found</div>
+              <p style={{ margin: 0, fontSize: 13 }}>Try adjusting your filters or search query.</p>
             </div>
-          );
-        })}
-      </div>
+          )}
+        </div>
+      )}
     </div>
 
       {/* Delete Confirmation Modal */}

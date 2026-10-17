@@ -2266,7 +2266,7 @@ export default function InvoicesPage() {
             </form>
 
             {/* Modal Actions Footer (Fixed at Bottom) */}
-            <div style={{ padding: '14px 24px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', flexShrink: 0 }}>
+            <div className="responsive-modal-footer form-sticky-footer" style={{ borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#64748b' }}>
                 <span style={{ fontWeight: 700, color: '#0f172a' }}>Total Payable:</span>
                 <span style={{ fontWeight: 800, color: '#059669' }}>{formatINRFull(formCalculations.totalAmount)}</span>

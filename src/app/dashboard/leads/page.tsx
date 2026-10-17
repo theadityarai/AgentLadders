@@ -881,8 +881,8 @@ export default function LeadsPage() {
     <>
       {/* Slide-over Modal for Adding Lead */}
       {showModal && (
-        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', justifyContent: 'flex-end' }}>
-          <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
+        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'flex-end' }}>
+          <div onClick={e => e.stopPropagation()} className="responsive-drawer animate-enter" style={{ backgroundColor: '#fff', overflowY: 'auto', display: 'flex', flexDirection: 'column', height: '100dvh', maxHeight: '100dvh', boxShadow: '-4px 0 15px rgba(0,0,0,0.1)' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 10 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: '#0f172a', display: 'flex', alignItems: 'center', gap: 8 }}>
                 {editingLead ? 'Edit Inquiry' : 'Add New Inquiry'}
@@ -1202,7 +1202,7 @@ export default function LeadsPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: 12, marginTop: 'auto', position: 'sticky', bottom: '-24px', backgroundColor: '#fff', padding: '16px 0', borderTop: '1px solid var(--border)', zIndex: 10 }}>
+              <div className="form-sticky-footer" style={{ position: 'sticky', bottom: 0, backgroundColor: '#fff', padding: '14px 20px max(20px, env(safe-area-inset-bottom, 20px))', borderTop: '1px solid var(--border)', zIndex: 40, boxShadow: '0 -4px 16px rgba(0,0,0,0.08)', margin: 'auto -24px -24px -24px' }}>
                 {editingLead && (
                   <button
                     type="button"
@@ -1228,7 +1228,7 @@ export default function LeadsPage() {
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                   Cancel
                 </button>
-                <button type="submit" disabled={isSubmitting} style={{ flex: 2, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                <button type="submit" disabled={isSubmitting} style={{ flex: 2, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                   {isSubmitting ? 'Saving...' : editingLead ? 'Update Inquiry' : 'Save Inquiry'}
                 </button>
               </div>

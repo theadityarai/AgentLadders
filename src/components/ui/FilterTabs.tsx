@@ -258,6 +258,7 @@ export function FilterTabs<T extends string = string>({
     >
       {label && (
         <span
+          className="filter-tabs-label"
           style={{
             fontSize: '11px',
             fontWeight: 700,
@@ -272,7 +273,10 @@ export function FilterTabs<T extends string = string>({
         </span>
       )}
 
-      <div style={{ ...getContainerStyle(), minWidth: 0, flex: '1 1 auto' }}>
+      <div
+        className={`filter-tabs-container filter-tabs-${variant}`}
+        style={{ ...getContainerStyle(), minWidth: 0, flex: '1 1 auto' }}
+      >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const isAll = tab.id.toLowerCase() === 'all' || tab.id.toLowerCase().startsWith('all ');
@@ -284,6 +288,7 @@ export function FilterTabs<T extends string = string>({
               type="button"
               disabled={tab.disabled}
               onClick={() => onChange(tab.id)}
+              className={`filter-tabs-btn ${isActive ? 'filter-tabs-btn-active' : ''}`}
               style={getButtonStyle(isActive, tab.disabled, tab)}
               aria-selected={isActive}
               role="tab"

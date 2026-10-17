@@ -971,7 +971,7 @@ export default function PropertiesPage() {
             right: 0, 
             bottom: 0, 
             backgroundColor: 'rgba(0,0,0,0.55)', 
-            zIndex: 100, 
+            zIndex: 9999, 
             display: 'flex', 
             justifyContent: 'flex-end' 
           }}
@@ -983,9 +983,10 @@ export default function PropertiesPage() {
               backgroundColor: '#fff', 
               overflowY: 'auto', 
               display: 'flex', 
+              height: '100dvh',
+              maxHeight: '100dvh',
               flexDirection: 'column', 
               boxShadow: '-6px 0 30px rgba(0,0,0,0.2)',
-              height: '100vh',
               width: '100%',
               maxWidth: '540px'
             }}
@@ -1292,7 +1293,7 @@ export default function PropertiesPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 10, marginTop: 'auto', position: 'sticky', bottom: '-24px', backgroundColor: '#fff', padding: '16px 0', borderTop: '1px solid var(--border)', zIndex: 10, alignItems: 'center' }}>
+              <div className="form-sticky-footer" style={{ position: 'sticky', bottom: 0, backgroundColor: '#fff', padding: '14px 20px max(20px, env(safe-area-inset-bottom, 20px))', borderTop: '1px solid var(--border)', zIndex: 40, boxShadow: '0 -4px 16px rgba(0,0,0,0.08)', margin: 'auto -24px -24px -24px', display: 'flex', gap: 10, alignItems: 'center' }}>
                 {editingProperty && (
                   <button 
                     type="button" 
@@ -1306,7 +1307,7 @@ export default function PropertiesPage() {
                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
                   Cancel
                 </button>
-                <button type="submit" disabled={isSubmitting} style={{ flex: 2, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                <button type="submit" disabled={isSubmitting} style={{ flex: 2, padding: '12px', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                   {isSubmitting ? 'Saving...' : (editingProperty ? 'Update Property' : 'Save Property')}
                 </button>
               </div>

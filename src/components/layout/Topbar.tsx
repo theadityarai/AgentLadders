@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -80,6 +81,22 @@ export function Topbar() {
     window.addEventListener('open-mobile-drawer', handleOpenDrawer);
     return () => window.removeEventListener('open-mobile-drawer', handleOpenDrawer);
   }, []);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (mobileMenuOpen) {
+      document.body.classList.add('mobile-drawer-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('mobile-drawer-open');
+      document.body.style.overflow = '';
+      window.dispatchEvent(new CustomEvent('close-mobile-drawer'));
+    }
+    return () => {
+      document.body.classList.remove('mobile-drawer-open');
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const handleSignOut = async () => {
     try {
@@ -508,9 +525,9 @@ export function Topbar() {
       )}
 
       {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 100, display: 'flex' }}>
-          <div onClick={e => e.stopPropagation()} className="animate-slide-left" style={{ width: '100%', maxWidth: 'min(320px, 86vw)', backgroundColor: '#fff', height: '100%', display: 'flex', flexDirection: 'column', padding: '18px 16px', overflowY: 'auto', WebkitOverflowScrolling: 'touch', boxShadow: '4px 0 24px rgba(0,0,0,0.15)' }}>
+      {mobileMenuOpen && typeof document !== 'undefined' && createPortal(
+        <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 99999, display: 'flex' }}>
+          <div onClick={e => e.stopPropagation()} className="animate-slide-left" style={{ width: '100%', maxWidth: 'min(320px, 86vw)', backgroundColor: '#fff', height: '100dvh', maxHeight: '100dvh', display: 'flex', flexDirection: 'column', padding: '18px 16px 0', overflowY: 'auto', WebkitOverflowScrolling: 'touch', boxShadow: '4px 0 24px rgba(0,0,0,0.15)' }}>
             
             {/* Drawer Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
@@ -706,33 +723,35 @@ export function Topbar() {
               )}
             </nav>
 
-            <div style={{ marginTop: 'auto', paddingTop: 14, paddingBottom: 'max(14px, env(safe-area-inset-bottom, 14px))', borderTop: '1px solid #e2e8f0' }}>
+            <div style={{ position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 20, marginTop: 'auto', paddingTop: 14, paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))', borderTop: '1px solid #e2e8f0', boxShadow: '0 -4px 16px rgba(0,0,0,0.06)' }}>
               <button 
                 type="button"
                 onClick={handleSignOut}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  backgroundColor: '#fee2e2',
-                  color: '#991b1b',
+                  padding: '12px 16px',
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
                   border: 'none',
-                  borderRadius: 8,
-                  fontSize: 13.5,
-                  fontWeight: 600,
+                  borderRadius: 10,
+                  fontSize: 14,
+                  fontWeight: 700,
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
+                  boxShadow: '0 2px 10px rgba(220, 38, 38, 0.25)',
                   transition: 'background 0.15s ease'
                 }}
               >
-                <LogOutIcon size={16} color="#991b1b" />
+                <LogOutIcon size={16} color="#ffffff" />
                 Sign Out
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )} 
 
       {/* Right Side Actions */}

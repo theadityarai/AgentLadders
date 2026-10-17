@@ -1092,51 +1092,43 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
           </div>
         </div>
 
-        {/* Filter Tabs & Search Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
-          <FilterTabs
-            tabs={DOCUMENT_CATEGORIES.map(cat => ({
-              id: cat,
-              label: cat,
-              count: categoryCounts[cat] ?? 0
-            }))}
-            activeTab={activeCategory}
-            onChange={(tabId) => setActiveCategory(tabId as DocCategory)}
-          />
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
+        {/* Unified Compact Filter Bar Card */}
+        <div className="unified-filter-card">
+          <div className="unified-filter-row-top">
             <SearchBar
               value={search}
               onChange={setSearch}
-              placeholder="Search by file name, client, property, note..."
-              maxWidth={300}
+              placeholder="Search file name, client, property..."
+              maxWidth={360}
             />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}>
-                Sort:
-              </label>
+
+            <div className="unified-filter-controls">
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 8,
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: '#0f172a',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
+                className="unified-filter-select"
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="name_asc">Document Name (A - Z)</option>
-                <option value="name_desc">Document Name (Z - A)</option>
+                <option value="newest">Sort: Newest First</option>
+                <option value="oldest">Sort: Oldest First</option>
+                <option value="name_asc">Name (A → Z)</option>
+                <option value="name_desc">Name (Z → A)</option>
                 <option value="category">Category</option>
               </select>
             </div>
+          </div>
+
+          <div className="unified-filter-row-bottom">
+            <FilterTabs
+              label="Category:"
+              size="sm"
+              tabs={DOCUMENT_CATEGORIES.map(cat => ({
+                id: cat,
+                label: cat,
+                count: categoryCounts[cat] ?? 0
+              }))}
+              activeTab={activeCategory}
+              onChange={(tabId) => setActiveCategory(tabId as DocCategory)}
+            />
           </div>
         </div>
 
@@ -2046,7 +2038,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
               </div>
 
               {/* Upload Actions */}
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 16 }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 16, position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 10 }}>
                 <button
                   type="button"
                   onClick={() => { setShowUpload(false); setSelectedFile(null); }}
@@ -2400,7 +2392,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
               </div>
 
               {/* Edit Actions */}
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 16 }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: 16, position: 'sticky', bottom: 0, backgroundColor: '#ffffff', zIndex: 10 }}>
                 <button
                   type="button"
                   onClick={() => setEditingDoc(null)}

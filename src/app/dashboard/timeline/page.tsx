@@ -340,7 +340,7 @@ export default function TimelinePage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '10px' }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', borderTop: '1px solid #e2e8f0', marginTop: '16px', backgroundColor: '#ffffff' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
                 <Button type="submit" variant="primary">Record to Timeline</Button>
               </div>

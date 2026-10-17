@@ -71,7 +71,7 @@ export function ConfirmModal({
       onClick={onCancel}
     >
       <div
-        className="confirm-modal-box"
+        className="confirm-modal-box responsive-modal"
         style={{
           backgroundColor: '#ffffff',
           borderRadius: '16px',
@@ -136,7 +136,7 @@ export function ConfirmModal({
 
         {/* Footer Actions */}
         <div
-          className="confirm-modal-actions"
+          className="confirm-modal-actions responsive-modal-footer"
           style={{
             padding: '14px 24px',
             backgroundColor: '#f8fafc',

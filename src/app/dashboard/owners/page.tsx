@@ -572,7 +572,7 @@ export default function OwnersPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px', backgroundColor: '#ffffff' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
                 <Button type="submit" variant="primary">Add Owner</Button>
               </div>
@@ -683,7 +683,7 @@ export default function OwnersPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px', backgroundColor: '#ffffff' }}>
                 <Button type="button" variant="ghost" onClick={() => setEditingOwner(null)}>Cancel</Button>
                 <Button type="submit" variant="primary">Save Changes</Button>
               </div>

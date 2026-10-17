@@ -26,9 +26,40 @@ export function MobileBottomNav() {
     return pathname.startsWith(href);
   };
 
+  const [isHidden, setIsHidden] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleDrawerOpen = () => setIsHidden(true);
+    const handleDrawerClose = () => setIsHidden(false);
+
+    window.addEventListener('open-mobile-drawer', handleDrawerOpen);
+    window.addEventListener('close-mobile-drawer', handleDrawerClose);
+
+    // Watch for class changes on document.body for modal or drawer
+    const observer = new MutationObserver(() => {
+      const isModalOrDrawer =
+        document.body.classList.contains('mobile-drawer-open') ||
+        document.body.classList.contains('modal-open') ||
+        !!document.querySelector('.responsive-drawer') ||
+        !!document.querySelector('.responsive-modal') ||
+        !!document.querySelector('[aria-modal="true"]');
+      setIsHidden(isModalOrDrawer);
+    });
+
+    observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+
+    return () => {
+      window.removeEventListener('open-mobile-drawer', handleDrawerOpen);
+      window.removeEventListener('close-mobile-drawer', handleDrawerClose);
+      observer.disconnect();
+    };
+  }, []);
+
   const openDrawer = () => {
     window.dispatchEvent(new CustomEvent('open-mobile-drawer'));
   };
+
+  if (isHidden) return null;
 
   return (
     <>
@@ -77,7 +108,7 @@ export function MobileBottomNav() {
       <style>{`
         .modern-android-nav {
           position: fixed;
-          z-index: 50;
+          z-index: 40;
           background-color: rgba(255, 255, 255, 0.94);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);

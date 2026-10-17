@@ -448,7 +448,7 @@ export default function PaymentsPage() {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px', backgroundColor: '#ffffff' }}>
                 <Button type="button" variant="ghost" onClick={() => setShowModal(false)}>Cancel</Button>
                 <Button type="submit" variant="primary">Record Transaction</Button>
               </div>
@@ -550,7 +550,7 @@ export default function PaymentsPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px', backgroundColor: '#ffffff' }}>
                 <Button type="button" variant="ghost" onClick={() => setEditingPayment(null)}>Cancel</Button>
                 <Button type="submit" variant="primary">Save Changes</Button>
               </div>

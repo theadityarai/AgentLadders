@@ -1290,7 +1290,7 @@ export default function TasksPage() {
               </div>
 
               {/* Form Actions */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, borderTop: '1px solid #e2e8f0', paddingTop: 16 }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, borderTop: '1px solid #e2e8f0', marginTop: 16, backgroundColor: '#ffffff' }}>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
