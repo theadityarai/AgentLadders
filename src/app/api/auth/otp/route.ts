@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { getDb, saveDb } from '@/lib/db';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
-import { normalizeEmail, sanitizeString } from '@/lib/sanitize';
+import { normalizeEmail, sanitizeString, generateSecureId } from '@/lib/sanitize';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
@@ -47,8 +48,8 @@ export async function POST(req: Request) {
     }
 
     if (action === 'send') {
-      // Generate a secure 6-digit numeric OTP
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      // Generate a cryptographically secure 6-digit numeric OTP
+      const generatedOtp = crypto.randomInt(100000, 1000000).toString();
       const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
 
       (user as any).emailOtp = {
@@ -58,7 +59,11 @@ export async function POST(req: Request) {
 
       await saveDb(db);
 
-      console.log(`[Gmail 2FA Service] Dispatched OTP code ${generatedOtp} to ${targetEmail} (Expires in 10 minutes)`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[Gmail 2FA Service] Dispatched OTP code ${generatedOtp} to ${targetEmail} (Expires in 10 minutes)`);
+      } else {
+        console.log(`[Gmail 2FA Service] Dispatched 2FA OTP verification code to ${targetEmail}`);
+      }
 
       return NextResponse.json({
         success: true,
@@ -87,7 +92,7 @@ export async function POST(req: Request) {
 
       db.auditLogs = db.auditLogs || [];
       db.auditLogs.unshift({
-        id: 'aud_' + Math.random().toString(36).substring(2, 9),
+        id: generateSecureId('aud_'),
         agencyId: user.agencyId,
         userId: user.id,
         userName: user.name || 'User',

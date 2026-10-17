@@ -88,8 +88,26 @@ const COMMON_SAC_CODES = [
   { code: '997212', label: '997212 - Rental Property Leasing / Tenancy Brokerage Service' }
 ];
 
+function getClientRandomId(prefix = 'item_'): string {
+  if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+    const bytes = new Uint8Array(4);
+    window.crypto.getRandomValues(bytes);
+    return prefix + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return prefix + Date.now().toString(36);
+}
+
+function getClientRandomNumber(min: number, max: number): number {
+  if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+    const arr = new Uint32Array(1);
+    window.crypto.getRandomValues(arr);
+    return min + (arr[0] % (max - min));
+  }
+  return min + Math.floor((Date.now() % (max - min)));
+}
+
 const DEFAULT_LINE_ITEM = () => ({
-  id: 'item_' + Math.random().toString(36).substring(2, 8),
+  id: getClientRandomId('item_'),
   description: 'Real Estate Acquisition & Brokerage Advisory Mandate',
   sacCode: '997221',
   amount: ''
@@ -97,7 +115,7 @@ const DEFAULT_LINE_ITEM = () => ({
 
 const generateInvoiceNumber = () => {
   const year = new Date().getFullYear();
-  const rand = Math.floor(1000 + Math.random() * 9000);
+  const rand = getClientRandomNumber(1000, 10000);
   return `INV-${year}-${rand}`;
 };
 
@@ -306,7 +324,7 @@ export default function InvoicesPage() {
     // Normalize line items
     let existingItems = (inv.items && inv.items.length > 0)
       ? inv.items.map(it => ({
-          id: it.id || ('item_' + Math.random().toString(36).substring(2, 8)),
+          id: it.id || getClientRandomId('item_'),
           description: it.description || 'Real Estate Advisory Service',
           sacCode: it.sacCode || invoiceSettings.sacCode || '997221',
           amount: it.amount?.toString() || ''
@@ -357,7 +375,7 @@ export default function InvoicesPage() {
       items: [
         ...prev.items,
         {
-          id: 'item_' + Math.random().toString(36).substring(2, 8),
+          id: getClientRandomId('item_'),
           description: '',
           sacCode: invoiceSettings.sacCode || '997221',
           amount: ''

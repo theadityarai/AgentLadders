@@ -3,7 +3,7 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { canMutateCRMRecords } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
   const data = await req.json();
   const newEvent = {
     ...data,
-    id: 'evt_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('evt_'),
     agencyId: user.agencyId,
     title: sanitizeString(data.title || 'New Event', 150),
     date: sanitizeString(data.date || new Date().toISOString().split('T')[0], 50),

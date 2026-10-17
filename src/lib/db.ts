@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { Redis } from '@upstash/redis';
 import { AgencyInvoiceSettings, DEFAULT_INVOICE_SETTINGS } from './formatters';
 
@@ -691,7 +692,7 @@ function readDbFromFile(): DB {
 function saveDbToFile(db: DB): void {
   try {
     const serialized = JSON.stringify(db, null, 2);
-    const tmpPath = `${DB_PATH}.${Date.now()}.${Math.random().toString(36).substring(2, 6)}.tmp`;
+    const tmpPath = `${DB_PATH}.${Date.now()}.${crypto.randomBytes(4).toString('hex')}.tmp`;
     fs.writeFileSync(tmpPath, serialized, 'utf8');
     try {
       fs.renameSync(tmpPath, DB_PATH);

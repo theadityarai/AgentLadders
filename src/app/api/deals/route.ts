@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 import { canMutateCRMRecords } from '@/lib/rbac';
 
 export async function GET() {
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
   const newDeal = {
     ...data,
-    id: 'deal_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('deal_'),
     agencyId: user.agencyId,
     title: sanitizeString(data.title.trim(), 200),
     propertyId: sanitizeString(data.propertyId || '', 100),

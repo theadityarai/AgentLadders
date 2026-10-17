@@ -3,7 +3,8 @@ import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { sendSupportEmail } from '@/lib/mail';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
+import crypto from 'crypto';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -34,10 +35,10 @@ export async function POST(req: Request) {
   const cleanContract = sanitizeString(data.contractType || '', 100);
 
   const newTicket = {
-    id: 'tic_' + Math.random().toString(36).substring(2, 9),
+    id: generateSecureId('tic_'),
     agencyId: user.agencyId,
     agencyName: agency?.name || 'AgentLadders Agency',
-    ticketNumber: 'TICK-' + Math.floor(1000 + Math.random() * 9000),
+    ticketNumber: 'TICK-' + crypto.randomInt(1000, 10000),
     subject: cleanSubject,
     category: data.category || 'General',
     priority: data.priority || 'Medium',
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
     createdByEmail: user.email,
     messages: [
       {
-        id: 'msg_' + Math.random().toString(36).substring(2, 9),
+        id: generateSecureId('msg_'),
         sender: user.name || 'Agency Admin',
         isStaff: false,
         text: cleanMessage,
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
   // Add in-app notification
   db.notifications = db.notifications || [];
   db.notifications.unshift({
-    id: 'notif_' + Math.random().toString(36).substring(2, 9),
+    id: generateSecureId('notif_'),
     agencyId: user.agencyId,
     userId: user.id,
     title: 'Support Ticket Submitted',
@@ -124,7 +125,7 @@ export async function PUT(req: Request) {
   const cleanMessage = sanitizeString(message, 2000);
 
   ticket.messages.push({
-    id: 'msg_' + Math.random().toString(36).substring(2, 9),
+    id: generateSecureId('msg_'),
     sender: user.name || 'Agency User',
     isStaff: false,
     text: cleanMessage,

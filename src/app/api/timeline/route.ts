@@ -3,7 +3,7 @@ import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { canMutateCRMRecords } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   const data = await req.json();
   const newActivity = {
-    id: 'act_' + Math.random().toString(36).substring(2, 9),
+    id: generateSecureId('act_'),
     agencyId: user.agencyId,
     actor: sanitizeString(user.name || 'Agent', 100),
     type: sanitizeString(data.type || 'Call', 50),

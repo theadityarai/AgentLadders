@@ -79,9 +79,11 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com https://avatar.vercel.sh https://api.qrserver.com https://via.placeholder.com",
-              "connect-src 'self' https://api.qrserver.com",
+              "connect-src 'self' https://api.qrserver.com https://*.upstash.io",
               "frame-src 'self' blob: data: https://www.youtube.com https://my.matterport.com",
               "object-src 'self' blob: data:",
+              "base-uri 'self'",
+              "form-action 'self'",
               "frame-ancestors 'self'"
             ].join('; ')
           }

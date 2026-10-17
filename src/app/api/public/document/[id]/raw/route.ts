@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 function createSamplePdfBuffer(title: string, category: string, description: string): Buffer {
   // Generates a valid minimal binary PDF (PDF-1.4 standard)
@@ -70,6 +71,12 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const ip = getClientIp(req);
+  const limitCheck = checkRateLimit(`public_raw_${ip}`, { limit: 60, windowMs: 60 * 1000 });
+  if (!limitCheck.allowed) {
+    return new NextResponse('Too many download requests. Please try again later.', { status: 429 });
+  }
+
   const { id } = await params;
   const db = await getDb();
 
@@ -77,6 +84,13 @@ export async function GET(
   if (!doc) {
     return new NextResponse('Document Not Found', { status: 404 });
   }
+
+  const securityHeaders = {
+    'X-Content-Type-Options': 'nosniff',
+    'Content-Security-Policy': "default-src 'none'",
+    'X-Frame-Options': 'SAMEORIGIN',
+    'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+  };
 
   // 1. If document has real fileData (data URI e.g. data:application/pdf;base64,...)
   if (doc.fileData && doc.fileData.startsWith('data:')) {
@@ -89,10 +103,10 @@ export async function GET(
       return new Response(new Uint8Array(buffer), {
         status: 200,
         headers: {
+          ...securityHeaders,
           'Content-Type': mime,
           'Content-Disposition': `inline; filename="${encodeURIComponent(doc.name)}"`,
           'Content-Length': buffer.length.toString(),
-          'Cache-Control': 'public, max-age=3600'
         }
       });
     } catch {
@@ -103,15 +117,14 @@ export async function GET(
   // 2. Synthesize real valid PDF file for seed documents so Google Docs & PDF viewers render properly
   const isImage = (doc.type + ' ' + doc.name).toLowerCase().match(/(image|png|jpg|jpeg|webp)/);
   if (isImage) {
-    // 1x1 transparent PNG fallback if no data
     const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     const buffer = Buffer.from(pngBase64, 'base64');
     return new Response(new Uint8Array(buffer), {
       status: 200,
       headers: {
+        ...securityHeaders,
         'Content-Type': 'image/png',
         'Content-Disposition': `inline; filename="${encodeURIComponent(doc.name)}"`,
-        'Cache-Control': 'public, max-age=3600'
       }
     });
   }
@@ -120,10 +133,11 @@ export async function GET(
   return new Response(new Uint8Array(pdfBuffer), {
     status: 200,
     headers: {
+      ...securityHeaders,
       'Content-Type': 'application/pdf',
       'Content-Disposition': `inline; filename="${encodeURIComponent(doc.name)}"`,
       'Content-Length': pdfBuffer.length.toString(),
-      'Cache-Control': 'public, max-age=3600'
     }
   });
 }
+

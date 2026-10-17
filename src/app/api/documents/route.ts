@@ -3,7 +3,7 @@ import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { canMutateCRMRecords } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, isValidUploadedMime, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -39,8 +39,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Payload too large (max 5MB)' }, { status: 413 });
   }
 
+  // Reject malicious or unsafe executable/script file uploads
+  if (rawFileData && rawFileData.startsWith('data:') && !isValidUploadedMime(rawFileData)) {
+    return NextResponse.json({ 
+      error: 'Unsupported or unsafe file format. Allowed formats: PDF, Images (PNG, JPG, WEBP), Word documents, Excel sheets, CSV, and Text files.' 
+    }, { status: 400 });
+  }
+
   const newDoc = {
-    id: 'doc_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+    id: generateSecureId('doc_'),
     agencyId: user.agencyId,
     name: sanitizeString(data.name || 'Document.pdf', 150),
     type: sanitizeString(data.type || 'PDF', 50),

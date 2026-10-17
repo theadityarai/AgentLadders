@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
 import { canMutateCRMRecords } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
   const newVisit = {
     ...data,
-    id: 'vis_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('vis_'),
     agencyId: user.agencyId,
     property: sanitizeString(data.property || 'Property Tour', 150),
     client: sanitizeString(data.client || 'Client', 100),

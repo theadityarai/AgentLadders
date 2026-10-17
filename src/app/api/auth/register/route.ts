@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, seedAgencyData } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { DEFAULT_BHK_OPTIONS, DEFAULT_PROPERTY_TYPES, DEFAULT_LEAD_SOURCES } from '@/lib/formatters';
-import { isValidEmail, isValidPassword, sanitizeString, normalizeEmail } from '@/lib/sanitize';
+import { isValidEmail, isValidPassword, sanitizeString, normalizeEmail, generateSecureId } from '@/lib/sanitize';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(req: Request) {
@@ -48,8 +48,8 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const agencyId = 'ag_' + Math.random().toString(36).substring(2, 10);
-    const userId = 'usr_' + Math.random().toString(36).substring(2, 10);
+    const agencyId = generateSecureId('ag_');
+    const userId = generateSecureId('usr_');
 
     db.agencies.push({
       id: agencyId,
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
 
     // Add a welcome notification
     db.notifications.push({
-      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      id: generateSecureId('notif_'),
       title: 'Welcome to AgentLadders',
       message: 'Your agency account has been created successfully.',
       type: 'info',

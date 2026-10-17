@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { isValidPassword, isValidEmail, sanitizeString, generateRandom12Digits } from '@/lib/sanitize';
+import { isValidPassword, isValidEmail, sanitizeString, generateRandom12Digits, generateSecureBackupCodes, generateSecureId } from '@/lib/sanitize';
 import { canUpdateUserRole, canRemoveUser, canInviteUsers, getAllowedInviteRoles, canManageBilling } from '@/lib/rbac';
 import { 
   DEFAULT_BHK_OPTIONS, 
@@ -169,8 +169,8 @@ export async function GET() {
     phone: user.phone || '',
     agencyId: user.agencyId,
     twoFactorEnabled: !!user.twoFactorEnabled,
-    twoFactorSecret: user.twoFactorSecret || 'AGLD-7734-K821-X992',
-    twoFactorBackupCodes: user.twoFactorBackupCodes || ['4829-1029', '7361-9921', '8302-4410', '1928-3392', '5512-8801']
+    twoFactorSecret: user.twoFactorSecret || (user.twoFactorEnabled ? `AGLD-${crypto.randomBytes(3).toString('hex').toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}` : ''),
+    twoFactorBackupCodes: user.twoFactorBackupCodes || (user.twoFactorEnabled ? generateSecureBackupCodes(5) : [])
   };
 
   return NextResponse.json({ user: safeUser, agency, users: agencyUsers });
@@ -323,7 +323,7 @@ export async function PUT(req: Request) {
     const temporaryPassword = generateRandom12Digits();
     const defaultPassword = await bcrypt.hash(temporaryPassword, 10);
     invitedTemporaryPassword = temporaryPassword;
-    const newUserId = 'usr_' + Math.random().toString(36).substring(2, 10);
+    const newUserId = generateSecureId('usr_');
     const newUser = {
       id: newUserId,
       agencyId: user.agencyId,
@@ -340,7 +340,7 @@ export async function PUT(req: Request) {
     // Add welcome notification for the agency
     db.notifications = db.notifications || [];
     db.notifications.unshift({
-      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      id: generateSecureId('notif_'),
       agencyId: user.agencyId,
       userId: user.id,
       title: 'New Team Member Invited 👥',
@@ -375,7 +375,7 @@ export async function PUT(req: Request) {
 
     db.notifications = db.notifications || [];
     db.notifications.unshift({
-      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      id: generateSecureId('notif_'),
       agencyId: user.agencyId,
       userId: user.id,
       title: 'Team Member Removed 🗑️',
@@ -405,7 +405,7 @@ export async function PUT(req: Request) {
 
     db.notifications = db.notifications || [];
     db.notifications.unshift({
-      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      id: generateSecureId('notif_'),
       agencyId: user.agencyId,
       userId: user.id,
       title: 'Role Updated 🛡️',
@@ -420,11 +420,11 @@ export async function PUT(req: Request) {
     user.twoFactorSecret = data.secret || user.twoFactorSecret || `AGLD-${crypto.randomBytes(3).toString('hex').toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     user.twoFactorBackupCodes = data.backupCodes && Array.isArray(data.backupCodes) && data.backupCodes.length > 0
       ? data.backupCodes
-      : Array.from({ length: 5 }, () => `${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`);
+      : generateSecureBackupCodes(5);
 
     db.auditLogs = db.auditLogs || [];
     db.auditLogs.unshift({
-      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('aud_'),
       agencyId: user.agencyId,
       userId: user.id,
       userName: user.name || 'User',
@@ -437,7 +437,7 @@ export async function PUT(req: Request) {
 
     db.notifications = db.notifications || [];
     db.notifications.unshift({
-      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      id: generateSecureId('notif_'),
       agencyId: user.agencyId,
       userId: user.id,
       title: 'Two-Factor Authentication Activated 🛡️',
@@ -452,7 +452,7 @@ export async function PUT(req: Request) {
 
     db.auditLogs = db.auditLogs || [];
     db.auditLogs.unshift({
-      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('aud_'),
       agencyId: user.agencyId,
       userId: user.id,
       userName: user.name || 'User',
@@ -465,7 +465,7 @@ export async function PUT(req: Request) {
 
     db.notifications = db.notifications || [];
     db.notifications.unshift({
-      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      id: generateSecureId('notif_'),
       agencyId: user.agencyId,
       userId: user.id,
       title: 'Two-Factor Authentication Disabled ⚠️',
@@ -500,7 +500,7 @@ export async function PUT(req: Request) {
 
     db.notifications = db.notifications || [];
     db.notifications.unshift({
-      id: 'notif_' + Math.random().toString(36).substring(2, 10),
+      id: generateSecureId('notif_'),
       agencyId: user.agencyId,
       userId: user.id,
       title: 'Password Changed 🔒',

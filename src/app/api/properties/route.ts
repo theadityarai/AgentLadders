@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId, generateSecureToken } from '@/lib/sanitize';
 import { canMutateCRMRecords } from '@/lib/rbac';
 
 export async function GET() {
@@ -57,11 +57,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Property listing status is required.' }, { status: 400 });
   }
 
-  const propId = 'prop_' + Math.random().toString(36).substring(2, 10);
+  const propId = generateSecureId('prop_');
   const newProperty = {
     ...data,
     id: propId,
-    publicToken: data.publicToken || ('tok_' + Math.random().toString(36).substring(2, 10)),
+    publicToken: data.publicToken || generateSecureId('tok_', 12),
     agencyId: user.agencyId,
     title: sanitizeString(data.title || 'New Property', 200),
     type: sanitizeString(data.type || 'Apartment', 100),
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     ownerName: sanitizeString(data.ownerName || data.sellerName || '', 100),
     description: sanitizeString(data.description || '', 2000),
     media: data.media || (data.images ? data.images.map((img: string, i: number) => ({
-      id: 'm_' + Math.random().toString(36).substring(2, 8),
+      id: generateSecureId('m_'),
       url: img,
       tag: i === 0 ? 'Exterior / Facade' : (i === 1 ? 'Hall / Living Area' : 'Property Photo'),
       isCover: i === 0

@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
 import { canManageFinancials } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   const data = await req.json();
   const newExpense = {
     ...data,
-    id: 'exp_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('exp_'),
     agencyId: user.agencyId,
     category: sanitizeString(data.category || 'Operations', 50),
     description: sanitizeString(data.description || 'Agency Operating Expense', 500),

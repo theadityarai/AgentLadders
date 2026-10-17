@@ -3,6 +3,7 @@ import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { sendSupportEmail } from '@/lib/mail';
+import { generateSecureId } from '@/lib/sanitize';
 
 function checkSuperAdmin(user: any) {
   if (!user) return false;
@@ -68,7 +69,7 @@ export async function PUT(req: Request) {
 
   if (replyMessage && replyMessage.trim()) {
     ticket.messages.push({
-      id: 'msg_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('msg_'),
       sender: user.name || 'AgentLadders Support HQ',
       isStaff: true,
       text: replyMessage.trim(),
@@ -84,7 +85,7 @@ export async function PUT(req: Request) {
       db.notifications = db.notifications || [];
       targetUserIds.forEach(tUserId => {
         db.notifications.unshift({
-          id: 'notif_' + Math.random().toString(36).substring(2, 9),
+          id: generateSecureId('notif_'),
           agencyId: ticket.agencyId,
           userId: tUserId,
           title: `Support Reply: ${ticket.ticketNumber} 💬`,
@@ -101,7 +102,7 @@ export async function PUT(req: Request) {
       db.notifications = db.notifications || [];
       targetUserIds.forEach(tUserId => {
         db.notifications.unshift({
-          id: 'notif_' + Math.random().toString(36).substring(2, 9),
+          id: generateSecureId('notif_'),
           agencyId: ticket.agencyId,
           userId: tUserId,
           title: `Ticket ${ticket.ticketNumber} ${status} 🎫`,

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 import { canMutateCRMRecords } from '@/lib/rbac';
 
 export async function GET() {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
   const newLead = {
     ...data,
-    id: 'lead_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('lead_'),
     agencyId: user.agencyId,
     name: sanitizeString(data.name.trim(), 100),
     email: sanitizeString(data.email || '', 100),

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { generateSecureId } from '@/lib/sanitize';
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
 
     db.auditLogs = db.auditLogs || [];
     db.auditLogs.unshift({
-      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('aud_'),
       agencyId: targetAgencyId,
       userId: user.id,
       userName: user.name || 'Super Admin',

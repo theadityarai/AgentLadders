@@ -4,7 +4,8 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
 import { canManageFinancials } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
+import crypto from 'crypto';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -37,9 +38,9 @@ export async function POST(req: Request) {
   const data = await req.json();
   const newPayment = {
     ...data,
-    id: 'pay_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('pay_'),
     agencyId: user.agencyId,
-    reference: sanitizeString(data.reference || `TXN-${Math.floor(100000 + Math.random() * 900000)}`, 100),
+    reference: sanitizeString(data.reference || `TXN-${crypto.randomInt(100000, 1000000)}`, 100),
     invoiceNumber: sanitizeString(data.invoiceNumber || 'INV-GENERAL', 50),
     amount: Math.max(0, parseFloat(data.amount) || 0),
     method: sanitizeString(data.method || 'Bank Transfer', 50),

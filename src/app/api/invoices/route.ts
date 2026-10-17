@@ -3,7 +3,7 @@ import { getDb, saveDb, generateDummyDataForAgency } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { canManageFinancials } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
   const newInvoice = {
     ...data,
-    id: 'inv_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('inv_'),
     agencyId: user.agencyId,
     number: data.number || `INV-${Date.now().toString().slice(-4)}`,
     clientName,

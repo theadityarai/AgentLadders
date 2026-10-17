@@ -3,7 +3,7 @@ import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { canMutateCRMRecords } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   const data = await req.json();
   const newCampaign = {
-    id: 'mkt_' + Math.random().toString(36).substring(2, 9),
+    id: generateSecureId('mkt_'),
     agencyId: user.agencyId,
     name: sanitizeString(data.name || 'New Marketing Campaign', 150),
     platform: sanitizeString(data.platform || 'Property Finder', 80),
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     spend: Math.max(0, Number(data.spend) || 0),
     leadsGenerated: Math.max(0, Number(data.leadsGenerated) || 0),
     dealsClosed: Math.max(0, Number(data.dealsClosed) || 0),
-    utmSource: sanitizeString(data.utmSource || 'campaign_' + Math.random().toString(36).substring(2, 6), 100),
+    utmSource: sanitizeString(data.utmSource || generateSecureId('campaign_', 4), 100),
     startDate: sanitizeString(data.startDate || new Date().toISOString().split('T')[0], 50),
     createdAt: new Date().toISOString()
   };
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
   // Add audit log
   db.auditLogs = db.auditLogs || [];
   db.auditLogs.unshift({
-    id: 'aud_' + Math.random().toString(36).substring(2, 9),
+    id: generateSecureId('aud_'),
     agencyId: user.agencyId,
     userId: user.id,
     userName: user.name || 'Agent',

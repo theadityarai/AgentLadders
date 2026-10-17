@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import { DEFAULT_BHK_OPTIONS, DEFAULT_PROPERTY_TYPES, DEFAULT_LEAD_SOURCES } from '@/lib/formatters';
-import { isValidEmail, isValidPassword, sanitizeString, normalizeEmail, generateRandom12Digits } from '@/lib/sanitize';
+import { isValidEmail, isValidPassword, sanitizeString, normalizeEmail, generateRandom12Digits, generateSecureId, generateSecureToken } from '@/lib/sanitize';
 
 function isSuperAdminUser(session: any) {
   if (!session?.user) return false;
@@ -115,11 +115,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User with this email already exists' }, { status: 400 });
     }
 
-    const agencyId = 'ag_' + Math.random().toString(36).substring(2, 10);
-    const userId = 'usr_' + Math.random().toString(36).substring(2, 10);
+    const agencyId = generateSecureId('ag_');
+    const userId = generateSecureId('usr_');
     const isInvite = mode === 'invite';
     const finalStatus = inputStatus || (isInvite ? 'Pending Invite' : 'Active');
-    const inviteToken = 'inv_' + Math.random().toString(36).substring(2, 12);
+    const inviteToken = generateSecureId('inv_', 16);
     const rawPassword = ownerPassword || generateRandom12Digits();
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 

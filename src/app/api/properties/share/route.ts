@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { generateSecureId } from '@/lib/sanitize';
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
 
     // Ensure public token exists
     if (!prop.publicToken) {
-      prop.publicToken = 'tok_' + Math.random().toString(36).substring(2, 12);
+      prop.publicToken = generateSecureId('tok_', 12);
     }
     if (privacyMode) {
       prop.privacyMode = privacyMode;
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
     // Record share audit log
     db.sharedLinks = db.sharedLinks || [];
     db.sharedLinks.unshift({
-      id: 'sh_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('sh_'),
       agencyId: user.agencyId,
       propertyId: prop.id,
       propertyTitle: prop.title,
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
     // Record activity timeline entry
     db.activities = db.activities || [];
     db.activities.unshift({
-      id: 'act_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('act_'),
       agencyId: user.agencyId,
       actor: user.name || 'Agent',
       type: 'Property Share',
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
     // Record audit log entry
     db.auditLogs = db.auditLogs || [];
     db.auditLogs.unshift({
-      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('aud_'),
       agencyId: user.agencyId,
       userId: user.id,
       userName: user.name || 'Agent',

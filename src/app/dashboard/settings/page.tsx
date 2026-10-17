@@ -267,7 +267,10 @@ export default function SettingsPage() {
     if (!devId && typeof window !== 'undefined') {
       devId = localStorage.getItem('agentladders_device_id') || '';
       if (!devId) {
-        devId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+        const randHex = typeof window.crypto !== 'undefined' && window.crypto.getRandomValues
+          ? Array.from(window.crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, '0')).join('')
+          : Date.now().toString(36);
+        devId = 'sess_' + randHex + '_' + Date.now().toString(36);
         localStorage.setItem('agentladders_device_id', devId);
       }
       setCurrentDeviceId(devId);
@@ -344,7 +347,10 @@ export default function SettingsPage() {
     if (typeof window !== 'undefined') {
       devId = localStorage.getItem('agentladders_device_id') || '';
       if (!devId) {
-        devId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+        const randHex = typeof window.crypto !== 'undefined' && window.crypto.getRandomValues
+          ? Array.from(window.crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, '0')).join('')
+          : Date.now().toString(36);
+        devId = 'sess_' + randHex + '_' + Date.now().toString(36);
         localStorage.setItem('agentladders_device_id', devId);
       }
       setCurrentDeviceId(devId);

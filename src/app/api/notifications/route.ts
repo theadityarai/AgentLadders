@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { generateSecureId, sanitizeString } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -58,12 +59,12 @@ export async function POST(req: Request) {
 
   db.notifications = db.notifications || [];
   const newNotif = {
-    id: 'notif_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('notif_'),
     agencyId: user.agencyId,
     userId: user.id,
-    title: title || 'Test Notification 🔔',
-    message: message || 'This is a real-time notification alert from AgentLadders.',
-    type: type || 'info',
+    title: sanitizeString(title || 'Test Notification 🔔', 200),
+    message: sanitizeString(message || 'This is a real-time notification alert from AgentLadders.', 1000),
+    type: sanitizeString(type || 'info', 50),
     read: false,
     createdAt: new Date().toISOString(),
   };

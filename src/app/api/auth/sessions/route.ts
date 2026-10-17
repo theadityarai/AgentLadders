@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { getDb, saveDb, UserSession } from '@/lib/db';
+import { generateSecureId } from '@/lib/sanitize';
 
 function parseUserAgent(ua: string) {
   let browser = 'Google Chrome';
@@ -336,7 +337,7 @@ export async function DELETE(req: NextRequest) {
 
     db.auditLogs = db.auditLogs || [];
     db.auditLogs.unshift({
-      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('aud_'),
       agencyId: user.agencyId,
       userId: user.id,
       userName: user.name || 'User',
@@ -370,7 +371,7 @@ export async function DELETE(req: NextRequest) {
 
     db.auditLogs = db.auditLogs || [];
     db.auditLogs.unshift({
-      id: 'aud_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('aud_'),
       agencyId: user.agencyId,
       userId: user.id,
       userName: user.name || 'User',

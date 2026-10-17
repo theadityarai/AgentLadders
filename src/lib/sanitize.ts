@@ -83,3 +83,62 @@ export function generateRandom12Digits(): string {
 export function normalizeEmail(email: string): string {
   return (email || '').trim().toLowerCase();
 }
+
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/avif',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain',
+  'text/csv'
+]);
+
+/**
+ * Validates uploaded file MIME type to prevent arbitrary file upload or stored XSS attacks.
+ */
+export function isValidUploadedMime(fileDataOrMime: unknown): boolean {
+  if (typeof fileDataOrMime !== 'string' || !fileDataOrMime.trim()) return false;
+  
+  // If it's a data URI (e.g. data:application/pdf;base64,...)
+  const match = fileDataOrMime.match(/^data:([^;]+);base64,/i);
+  if (match) {
+    const mime = match[1].toLowerCase().trim();
+    return ALLOWED_DOCUMENT_MIME_TYPES.has(mime);
+  }
+
+  // Pure MIME string
+  return ALLOWED_DOCUMENT_MIME_TYPES.has(fileDataOrMime.toLowerCase().trim());
+}
+
+/**
+ * Generates an array of cryptographically secure emergency 2FA backup codes.
+ */
+export function generateSecureBackupCodes(count: number = 5): string[] {
+  const codes: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const part1 = crypto.randomBytes(2).toString('hex').toUpperCase();
+    const part2 = crypto.randomBytes(2).toString('hex').toUpperCase();
+    codes.push(`${part1}-${part2}`);
+  }
+  return codes;
+}
+
+/**
+ * Generates a cryptographically secure random token (e.g. for public property links).
+ */
+export function generateSecureToken(byteLength: number = 16): string {
+  return crypto.randomBytes(byteLength).toString('hex');
+}
+
+/**
+ * Generates a cryptographically secure unique ID with a specified prefix.
+ */
+export function generateSecureId(prefix: string = 'id_', byteLength: number = 6): string {
+  return `${prefix}${crypto.randomBytes(byteLength).toString('hex')}`;
+}
+

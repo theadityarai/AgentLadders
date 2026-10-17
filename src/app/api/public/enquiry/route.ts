@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/lib/db';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function POST(req: Request) {
   try {
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     const now = new Date().toISOString();
 
     // 1. Create a new qualified Lead in the CRM
-    const newLeadId = 'lead_' + Math.random().toString(36).substring(2, 9);
+    const newLeadId = generateSecureId('lead_');
     const newLead = {
       id: newLeadId,
       agencyId,
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     if (cleanPreferredDate) {
       db.siteVisits = db.siteVisits || [];
       db.siteVisits.unshift({
-        id: 'vis_' + Math.random().toString(36).substring(2, 9),
+        id: generateSecureId('vis_'),
         agencyId,
         property: prop ? prop.title : 'Property Showcase',
         client: cleanName,
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     // 3. Log activity in communication timeline
     db.activities = db.activities || [];
     db.activities.unshift({
-      id: 'act_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('act_'),
       agencyId,
       actor: 'Public Client',
       type: cleanPreferredDate ? 'Site Visit' : 'WhatsApp',
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     // 4. Create in-app agency notification
     db.notifications = db.notifications || [];
     db.notifications.unshift({
-      id: 'notif_' + Math.random().toString(36).substring(2, 9),
+      id: generateSecureId('notif_'),
       agencyId,
       userId: 'all',
       title: '🚨 New Property Inquiry & Lead Captured',

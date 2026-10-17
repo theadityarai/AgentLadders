@@ -1,3 +1,5 @@
+import { generateSecureId } from '@/lib/sanitize';
+
 // Production Email Service for AgentLadders CRM & Legal Helpdesk
 // Supports automated transactional emails, support notifications, and email audit logging.
 
@@ -42,7 +44,7 @@ export async function sendSupportEmail(params: {
 }): Promise<{ success: boolean; dispatchId: string }> {
   const { to, subject, template, ticket, messageText, recipientRole = 'broker' } = params;
   const now = new Date().toISOString();
-  const dispatchId = 'mail_' + Math.random().toString(36).substring(2, 9);
+  const dispatchId = generateSecureId('mail_');
 
   const isContractInquiry = ticket.category === 'Contract Inquiry' || Boolean(ticket.contractType);
 

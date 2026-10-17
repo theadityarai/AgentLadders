@@ -43,7 +43,10 @@ export default function LoginPage() {
   const handleSuccessRedirect = (targetEmail: string) => {
     // Generate fresh device ID on successful login
     if (typeof window !== 'undefined') {
-      const newDevId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now().toString(36);
+      const randHex = typeof window.crypto !== 'undefined' && window.crypto.getRandomValues
+        ? Array.from(window.crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, '0')).join('')
+        : Date.now().toString(36);
+      const newDevId = 'sess_' + randHex + '_' + Date.now().toString(36);
       localStorage.setItem('agentladders_device_id', newDevId);
       const screenRes = `${window.screen.width} × ${window.screen.height}`;
       const tz = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'Asia/Kolkata';
@@ -111,7 +114,7 @@ export default function LoginPage() {
           // ignore network check error and proceed to normal signIn
         }
 
-        if (has2FA && password !== 'admin123') {
+        if (has2FA) {
           setStep('2fa');
           setLoading(false);
           fetch('/api/auth/otp', {

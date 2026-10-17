@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
 import { canMutateCRMRecords } from '@/lib/rbac';
-import { sanitizeString } from '@/lib/sanitize';
+import { sanitizeString, generateSecureId } from '@/lib/sanitize';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
   const data = await req.json();
   const newBroker = {
     ...data,
-    id: 'broker_' + Math.random().toString(36).substring(2, 10),
+    id: generateSecureId('broker_'),
     agencyId: user.agencyId,
     name: sanitizeString(data.name || 'New Broker', 100),
     agency: sanitizeString(data.agency || 'External Agency', 100),

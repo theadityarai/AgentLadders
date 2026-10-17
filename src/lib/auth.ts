@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { verifyTOTP } from '@/lib/totp';
+import { generateSecureId } from '@/lib/sanitize';
 
 const FALLBACK_SECRET = 'agentladders-secret-production-key-998877665544332211';
 
@@ -80,7 +81,7 @@ export const authOptions: NextAuthOptions = {
 
             db.auditLogs = db.auditLogs || [];
             db.auditLogs.unshift({
-              id: 'aud_' + Math.random().toString(36).substring(2, 9),
+              id: generateSecureId('aud_'),
               agencyId: user.agencyId,
               userId: user.id,
               userName: user.name || 'User',
@@ -124,8 +125,19 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: 'jwt',
+    maxAge: 7 * 24 * 60 * 60, // 7 days session lifetime
   },
+  useSecureCookies: process.env.NODE_ENV === 'production' || (process.env.NEXTAUTH_URL ? process.env.NEXTAUTH_URL.startsWith('https://') : false),
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Prevent Open Redirect phishing attacks
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      try {
+        const parsed = new URL(url);
+        if (parsed.origin === baseUrl) return url;
+      } catch {}
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -147,3 +159,4 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || FALLBACK_SECRET,
 };
+
