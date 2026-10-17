@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { getStatusColorStyle } from '@/lib/theme';
 
 export interface StatusSelectProps {
@@ -29,26 +30,86 @@ export function StatusSelect({
   style
 }: StatusSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [menuCoords, setMenuCoords] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width?: number;
+  } | null>(null);
 
-  // Close dropdown on click outside or escape
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const menuWidth = variant === 'form' ? rect.width : 190;
+    const estMenuHeight = Math.min(options.length * 36 + 12, 260);
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUp = spaceBelow < estMenuHeight && rect.top > estMenuHeight;
+
+    let left = align === 'right' ? rect.right - menuWidth : rect.left;
+    if (left < 8) left = 8;
+    if (left + menuWidth > window.innerWidth - 8) {
+      left = Math.max(8, window.innerWidth - menuWidth - 8);
+    }
+
+    if (openUp) {
+      setMenuCoords({
+        bottom: window.innerHeight - rect.top + 5,
+        left,
+        width: variant === 'form' ? rect.width : undefined
+      });
+    } else {
+      setMenuCoords({
+        top: rect.bottom + 5,
+        left,
+        width: variant === 'form' ? rect.width : undefined
+      });
+    }
+  }, [variant, align, options.length]);
+
+  // Open/close and position synchronization
   useEffect(() => {
     if (!isOpen) return;
+    updatePosition();
+
+    const handleScrollOrResize = () => {
+      setIsOpen(false);
+    };
+
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        menuRef.current && !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsOpen(false);
     };
+
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
+
     return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   const sc = value ? getStatusColorStyle(value) : null;
 
@@ -56,6 +117,16 @@ export function StatusSelect({
     if (disabled) return;
     onChange(opt);
     setIsOpen(false);
+  };
+
+  const toggleOpen = () => {
+    if (disabled) return;
+    if (!isOpen) {
+      updatePosition();
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -73,9 +144,10 @@ export function StatusSelect({
       {/* Trigger Button */}
       {variant === 'form' ? (
         <button
+          ref={triggerRef}
           type="button"
           disabled={disabled}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           style={{
@@ -130,9 +202,10 @@ export function StatusSelect({
         </button>
       ) : (
         <button
+          ref={triggerRef}
           type="button"
           disabled={disabled}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           style={{
@@ -181,25 +254,29 @@ export function StatusSelect({
         </button>
       )}
 
-      {/* Floating Dropdown Menu */}
-      {isOpen && (
+      {/* Floating Dropdown Menu rendered via Portal to prevent any parent clipping */}
+      {mounted && isOpen && menuCoords && typeof document !== 'undefined' && createPortal(
         <div
+          ref={menuRef}
           role="listbox"
+          onClick={(e) => e.stopPropagation()}
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 5px)',
-            [align === 'right' ? 'right' : 'left']: 0,
-            zIndex: 99999,
-            minWidth: variant === 'form' ? '100%' : '185px',
+            position: 'fixed',
+            top: menuCoords.top !== undefined ? `${menuCoords.top}px` : undefined,
+            bottom: menuCoords.bottom !== undefined ? `${menuCoords.bottom}px` : undefined,
+            left: `${menuCoords.left}px`,
+            width: menuCoords.width ? `${menuCoords.width}px` : undefined,
+            minWidth: variant === 'form' ? (menuCoords.width ? `${menuCoords.width}px` : '100%') : '185px',
             maxWidth: '300px',
+            zIndex: 999999,
             backgroundColor: '#ffffff',
             borderRadius: '10px',
             border: '1px solid #e2e8f0',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.22), 0 8px 10px -6px rgba(0, 0, 0, 0.12)',
             padding: '5px',
             maxHeight: '260px',
             overflowY: 'auto',
-            animation: 'enter 0.15s ease-out'
+            animation: 'enter 0.12s ease-out'
           }}
         >
           {options.map((opt) => {
@@ -266,7 +343,8 @@ export function StatusSelect({
               </div>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
