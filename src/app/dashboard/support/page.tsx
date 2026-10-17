@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { PlusIcon } from '@/components/icons/NavIcons';
 import { SearchBar } from '@/components/ui/SearchBar';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 interface SupportMessage {
   id: string;
@@ -1509,31 +1510,31 @@ export default function SupportPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Category</label>
-                  <select
+                  <CustomSelect
                     value={ticketForm.category}
-                    onChange={e => updateFormField('category', e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 13.5, outline: 'none', backgroundColor: '#fff' }}
-                  >
-                    <option value="General">General Inquiry</option>
-                    <option value="Contract Inquiry">Contract / Legal Template</option>
-                    <option value="CRM Feature">CRM Feature Assistance</option>
-                    <option value="Billing">Subscription & Billing</option>
-                    <option value="Integrations">WhatsApp & Domain DNS</option>
-                    <option value="Bug Report">Issue / Bug Report</option>
-                  </select>
+                    onChange={val => updateFormField('category', val)}
+                    options={[
+                      { value: 'General', label: 'General Inquiry' },
+                      { value: 'Contract Inquiry', label: 'Contract / Legal Template' },
+                      { value: 'CRM Feature', label: 'CRM Feature Assistance' },
+                      { value: 'Billing', label: 'Subscription & Billing' },
+                      { value: 'Integrations', label: 'WhatsApp & Domain DNS' },
+                      { value: 'Bug Report', label: 'Issue / Bug Report' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Priority SLA</label>
-                  <select
+                  <CustomSelect
                     value={ticketForm.priority}
-                    onChange={e => updateFormField('priority', e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 13.5, outline: 'none', backgroundColor: '#fff' }}
-                  >
-                    <option value="Low">Low (General guidance)</option>
-                    <option value="Medium">Medium (Within 8h)</option>
-                    <option value="High">High (Within 4h)</option>
-                    <option value="Urgent">Urgent (Deal closing)</option>
-                  </select>
+                    onChange={val => updateFormField('priority', val)}
+                    options={[
+                      { value: 'Low', label: 'Low', sublabel: 'General guidance' },
+                      { value: 'Medium', label: 'Medium', sublabel: 'Within 8h' },
+                      { value: 'High', label: 'High', sublabel: 'Within 4h', badge: 'Fast' },
+                      { value: 'Urgent', label: 'Urgent', sublabel: 'Deal closing', badge: 'Critical' }
+                    ]}
+                  />
                 </div>
               </div>
 

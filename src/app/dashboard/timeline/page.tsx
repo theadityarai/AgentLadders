@@ -17,6 +17,7 @@ import {
   BuildingIcon,
   PlusIcon 
 } from '@/components/icons/NavIcons';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 interface ActivityItem {
   id: string;
@@ -291,31 +292,19 @@ export default function TimelinePage() {
               <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Interaction Channel</label>
-                  <select
+                  <CustomSelect
                     value={form.type}
-                    onChange={e => setForm({ ...form, type: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  >
-                    <option>Call</option>
-                    <option>WhatsApp</option>
-                    <option>Email</option>
-                    <option>Site Visit</option>
-                    <option>Note</option>
-                  </select>
+                    onChange={val => setForm({ ...form, type: val })}
+                    options={['Call', 'WhatsApp', 'Email', 'Site Visit', 'Note']}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Associated Entity</label>
-                  <select
+                  <CustomSelect
                     value={form.relatedEntity}
-                    onChange={e => setForm({ ...form, relatedEntity: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-                  >
-                    <option>Lead</option>
-                    <option>Client</option>
-                    <option>Property</option>
-                    <option>Deal</option>
-                    <option>Owner</option>
-                  </select>
+                    onChange={val => setForm({ ...form, relatedEntity: val })}
+                    options={['Lead', 'Client', 'Property', 'Deal', 'Owner']}
+                  />
                 </div>
               </div>
 

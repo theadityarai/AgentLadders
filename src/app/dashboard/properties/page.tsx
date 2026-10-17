@@ -38,6 +38,7 @@ import {
 } from '@/components/icons/NavIcons';
 import { getStatusColorStyle } from '@/lib/theme';
 import { StatusSelect } from '@/components/ui/StatusSelect';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 export interface PropertyMedia {
   id: string;
@@ -1277,24 +1278,30 @@ export default function PropertiesPage() {
               <div className="responsive-grid-3">
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>BHK</label>
-                  <select value={formData.bhk} onChange={e => setFormData({...formData, bhk: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
-                    <option value="">Select BHK</option>
-                    {bhkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
+                  <CustomSelect 
+                    value={formData.bhk} 
+                    onChange={val => setFormData({...formData, bhk: val})} 
+                    options={bhkOptions} 
+                    placeholder="Select BHK" 
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Type</label>
-                  <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
-                    <option value="">Select Type</option>
-                    {propertyTypes.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
+                  <CustomSelect 
+                    value={formData.type} 
+                    onChange={val => setFormData({...formData, type: val})} 
+                    options={propertyTypes} 
+                    placeholder="Select Type" 
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Purpose / Listing Type</label>
-                  <select value={formData.purpose} onChange={e => setFormData({...formData, purpose: e.target.value as any})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
-                    <option value="">Select Purpose</option>
-                    {['For Sale', 'For Rent'].map(opt => <option key={opt}>{opt}</option>)}
-                  </select>
+                  <CustomSelect 
+                    value={formData.purpose} 
+                    onChange={val => setFormData({...formData, purpose: val as any})} 
+                    options={['For Sale', 'For Rent']} 
+                    placeholder="Select Purpose" 
+                  />
                 </div>
               </div>
 
@@ -1324,27 +1331,23 @@ export default function PropertiesPage() {
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Furnishing / Specs <InfoTooltip text="Configured in Settings > System Configuration" />
                     </label>
-                    <select 
+                    <CustomSelect 
                       value={formData.furnishing} 
-                      onChange={e => setFormData({...formData, furnishing: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Furnishing</option>
-                      {propertySpecs.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                      onChange={val => setFormData({...formData, furnishing: val})} 
+                      options={propertySpecs} 
+                      placeholder="Select Furnishing" 
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Construction Stage <InfoTooltip text="Ready to Move vs Under Construction status" />
                     </label>
-                    <select 
+                    <CustomSelect 
                       value={formData.possessionStatus} 
-                      onChange={e => setFormData({...formData, possessionStatus: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Construction Stage</option>
-                      {constructionStages.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                      onChange={val => setFormData({...formData, possessionStatus: val})} 
+                      options={constructionStages} 
+                      placeholder="Select Construction Stage" 
+                    />
                   </div>
                 </div>
 
@@ -1353,27 +1356,23 @@ export default function PropertiesPage() {
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Vastu & Orientation <InfoTooltip text="Entry/Balcony facing for Indian buyer matching" />
                     </label>
-                    <select 
+                    <CustomSelect 
                       value={formData.vastuFacing} 
-                      onChange={e => setFormData({...formData, vastuFacing: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Vastu Facing</option>
-                      {vastuOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                      onChange={val => setFormData({...formData, vastuFacing: val})} 
+                      options={vastuOptions} 
+                      placeholder="Select Vastu Facing" 
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Parking Allocation <InfoTooltip text="Dedicated car parking bays allocation" />
                     </label>
-                    <select 
+                    <CustomSelect 
                       value={formData.parking} 
-                      onChange={e => setFormData({...formData, parking: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Parking</option>
-                      {parkingOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                      onChange={val => setFormData({...formData, parking: val})} 
+                      options={parkingOptions} 
+                      placeholder="Select Parking" 
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
@@ -1621,18 +1620,21 @@ export default function PropertiesPage() {
               maxWidth={240}
             />
 
-            <select
+            <CustomSelect
               value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="unified-filter-select"
-            >
-              <option value="newest">Sort: Newest Added</option>
-              <option value="oldest">Sort: Oldest Added</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="title_asc">Title (A → Z)</option>
-              <option value="area_desc">Area: Largest First</option>
-            </select>
+              onChange={setSortBy}
+              variant="filter"
+              size="sm"
+              align="right"
+              options={[
+                { value: 'newest', label: 'Sort: Newest Added' },
+                { value: 'oldest', label: 'Sort: Oldest Added' },
+                { value: 'price_desc', label: 'Price: High to Low' },
+                { value: 'price_asc', label: 'Price: Low to High' },
+                { value: 'title_asc', label: 'Title (A → Z)' },
+                { value: 'area_desc', label: 'Area: Largest First' }
+              ]}
+            />
           </div>
         </div>
 

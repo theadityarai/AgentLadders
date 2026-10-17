@@ -43,6 +43,7 @@ import {
 } from '@/lib/formatters';
 import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import styles from './settings.module.css';
 
 const tabs = [
@@ -1190,42 +1191,36 @@ export default function SettingsPage() {
                     </div>
                     <div className={styles.inputGroup}>
                       <label>Country</label>
-                      <select className={styles.input} value={agencyData.country} onChange={e => setAgencyData({...agencyData, country: e.target.value})}>
-                        <option>India</option>
-                        <option>United States</option>
-                        <option>United Kingdom</option>
-                        <option>UAE</option>
-                        <option>Australia</option>
-                        <option>Canada</option>
-                      </select>
+                      <CustomSelect
+                        value={agencyData.country}
+                        onChange={val => setAgencyData({...agencyData, country: val})}
+                        options={['India', 'United States', 'United Kingdom', 'UAE', 'Australia', 'Canada']}
+                      />
                     </div>
                     <div className={styles.inputGroup}>
                       <label>Primary Currency</label>
-                      <select className={styles.input} value={agencyData.currency} onChange={e => setAgencyData({...agencyData, currency: e.target.value})}>
-                        <option>USD</option>
-                        <option>INR</option>
-                        <option>GBP</option>
-                        <option>AED</option>
-                        <option>AUD</option>
-                        <option>CAD</option>
-                      </select>
+                      <CustomSelect
+                        value={agencyData.currency}
+                        onChange={val => setAgencyData({...agencyData, currency: val})}
+                        options={['USD', 'INR', 'GBP', 'AED', 'AUD', 'CAD']}
+                      />
                     </div>
                     <div className={styles.inputGroup}>
                       <label>Timezone</label>
-                      <select 
-                        className={styles.input} 
+                      <CustomSelect 
                         value={agencyData.timezone || 'Asia/Kolkata'}
-                        onChange={e => setAgencyData({ ...agencyData, timezone: e.target.value })}
-                      >
-                        <option value="Asia/Kolkata">Asia/Kolkata (IST +5:30)</option>
-                        <option value="Asia/Dubai">Asia/Dubai (GST +4:00)</option>
-                        <option value="Europe/London">Europe/London (GMT / BST)</option>
-                        <option value="America/New_York">America/New_York (EST / EDT)</option>
-                        <option value="America/Chicago">America/Chicago (CST / CDT)</option>
-                        <option value="America/Los_Angeles">America/Los_Angeles (PST / PDT)</option>
-                        <option value="Asia/Singapore">Asia/Singapore (SGT +8:00)</option>
-                        <option value="Australia/Sydney">Australia/Sydney (AEST +10:00)</option>
-                      </select>
+                        onChange={val => setAgencyData({ ...agencyData, timezone: val })}
+                        options={[
+                          { value: 'Asia/Kolkata', label: 'Asia/Kolkata (IST +5:30)' },
+                          { value: 'Asia/Dubai', label: 'Asia/Dubai (GST +4:00)' },
+                          { value: 'Europe/London', label: 'Europe/London (GMT / BST)' },
+                          { value: 'America/New_York', label: 'America/New_York (EST / EDT)' },
+                          { value: 'America/Chicago', label: 'America/Chicago (CST / CDT)' },
+                          { value: 'America/Los_Angeles', label: 'America/Los_Angeles (PST / PDT)' },
+                          { value: 'Asia/Singapore', label: 'Asia/Singapore (SGT +8:00)' },
+                          { value: 'Australia/Sydney', label: 'Australia/Sydney (AEST +10:00)' }
+                        ]}
+                      />
                     </div>
                     <div className={`${styles.inputGroup} ${styles.fullSpan}`}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1815,14 +1810,14 @@ export default function SettingsPage() {
                       Account Type
                       <InfoTooltip text="Select whether this is a Current or Savings business account" />
                     </label>
-                    <select
+                    <CustomSelect
                       value={invoiceSettings.accountType || 'Current'}
-                      onChange={e => setInvoiceSettings({ ...invoiceSettings, accountType: e.target.value })}
-                      className={styles.input}
-                    >
-                      <option value="Current">Current Account</option>
-                      <option value="Savings">Savings Account</option>
-                    </select>
+                      onChange={val => setInvoiceSettings({ ...invoiceSettings, accountType: val })}
+                      options={[
+                        { value: 'Current', label: 'Current Account' },
+                        { value: 'Savings', label: 'Savings Account' }
+                      ]}
+                    />
                   </div>
 
                   <div className={styles.inputGroup}>
@@ -3513,18 +3508,18 @@ export default function SettingsPage() {
               </div>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#334155', marginBottom: '6px' }}>Role Permission</label>
-                <select
+                <CustomSelect
                   value={inviteForm.role}
-                  onChange={e => setInviteForm({ ...inviteForm, role: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', boxSizing: 'border-box' }}
-                >
-                  {['OWNER', 'SUPER_ADMIN'].includes((currentUser?.role || '').toUpperCase()) && (
-                    <option value="MANAGER">Manager (Full Agency Access)</option>
-                  )}
-                  <option value="ADMIN">Admin (Billing & Operations Access)</option>
-                  <option value="AGENT">Agent (Standard Broker Access)</option>
-                  <option value="READONLY">Read-Only Agent</option>
-                </select>
+                  onChange={val => setInviteForm({ ...inviteForm, role: val })}
+                  options={[
+                    ...(['OWNER', 'SUPER_ADMIN'].includes((currentUser?.role || '').toUpperCase()) 
+                      ? [{ value: 'MANAGER', label: 'Manager (Full Agency Access)' }] 
+                      : []),
+                    { value: 'ADMIN', label: 'Admin (Billing & Operations Access)' },
+                    { value: 'AGENT', label: 'Agent (Standard Broker Access)' },
+                    { value: 'READONLY', label: 'Read-Only Agent' }
+                  ]}
+                />
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <Button variant="outline" type="button" onClick={() => setShowInviteModal(false)}>Cancel</Button>

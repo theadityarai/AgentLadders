@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 interface Expense {
   [key: string]: unknown;
@@ -497,13 +498,11 @@ export default function ExpensesPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
-                    <select
+                    <CustomSelect
                       value={form.category}
-                      onChange={e => setForm({ ...form, category: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, category: val })}
+                      options={CATEGORIES}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
@@ -543,13 +542,11 @@ export default function ExpensesPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
-                    <select
+                    <CustomSelect
                       value={form.paymentMethod}
-                      onChange={e => setForm({ ...form, paymentMethod: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, paymentMethod: val })}
+                      options={PAYMENT_METHODS}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>
@@ -613,13 +610,11 @@ export default function ExpensesPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Category</label>
-                    <select
+                    <CustomSelect
                       value={editingExpense.category}
-                      onChange={e => setEditingExpense({ ...editingExpense, category: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                      onChange={val => setEditingExpense({ ...editingExpense, category: val })}
+                      options={CATEGORIES}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Amount ($) *</label>
@@ -657,13 +652,11 @@ export default function ExpensesPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
-                    <select
+                    <CustomSelect
                       value={editingExpense.paymentMethod || 'Corporate Card'}
-                      onChange={e => setEditingExpense({ ...editingExpense, paymentMethod: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
+                      onChange={val => setEditingExpense({ ...editingExpense, paymentMethod: val })}
+                      options={PAYMENT_METHODS}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Receipt Reference #</label>

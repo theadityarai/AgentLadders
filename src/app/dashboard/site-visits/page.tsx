@@ -8,6 +8,7 @@ import { DEFAULT_SITE_VISIT_STATUSES } from '@/lib/formatters';
 import { getStatusColorStyle } from '@/lib/theme';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { StatusSelect } from '@/components/ui/StatusSelect';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
@@ -569,17 +570,17 @@ export default function SiteVisitsPage() {
                     Visit Priority / Urgency *
                     <InfoTooltip text="Priority level of this tour based on buyer readiness, property exclusivity, and deal velocity." />
                   </label>
-                  <select 
+                  <CustomSelect 
                     value={formData.priority} 
-                    onChange={e => setFormData({...formData, priority: e.target.value})}
-                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
-                  >
-                    <option value="">Select Priority / Urgency...</option>
-                    <option value="High Priority">High Priority (Decision Maker / Ready to Close)</option>
-                    <option value="Medium Priority">Medium Priority (Qualified Buyer)</option>
-                    <option value="Standard">Standard Priority (First Screening)</option>
-                    <option value="Low Priority">Low Priority (Browsing / Preliminary)</option>
-                  </select>
+                    onChange={val => setFormData({...formData, priority: val})}
+                    placeholder="Select Priority / Urgency..."
+                    options={[
+                      { value: 'High Priority', label: 'High Priority', sublabel: 'Decision Maker / Ready to Close', badge: 'Hot' },
+                      { value: 'Medium Priority', label: 'Medium Priority', sublabel: 'Qualified Buyer' },
+                      { value: 'Standard', label: 'Standard Priority', sublabel: 'First Screening' },
+                      { value: 'Low Priority', label: 'Low Priority', sublabel: 'Browsing / Preliminary' }
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -653,15 +654,15 @@ export default function SiteVisitsPage() {
               <div className="responsive-grid-3">
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Showing Type</label>
-                  <select 
+                  <CustomSelect 
                     value={formData.purpose} 
-                    onChange={e => setFormData({...formData, purpose: e.target.value as any})}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                  >
-                    <option value="">Select Showing Type (Buy / Rent)...</option>
-                    <option value="Buy">Buy / Sale Showing</option>
-                    <option value="Rent">Rent / Lease Showing</option>
-                  </select>
+                    onChange={val => setFormData({...formData, purpose: val as any})}
+                    placeholder="Select Showing Type..."
+                    options={[
+                      { value: 'Buy', label: 'Buy / Sale Showing' },
+                      { value: 'Rent', label: 'Rent / Lease Showing' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Date *</label>
@@ -832,18 +833,21 @@ export default function SiteVisitsPage() {
               maxWidth={240}
             />
 
-            <select
+            <CustomSelect
               value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="unified-filter-select"
-            >
-              <option value="date_asc">Date: Earliest First</option>
-              <option value="date_desc">Date: Latest First</option>
-              <option value="client_asc">Client Name (A → Z)</option>
-              <option value="client_desc">Client Name (Z → A)</option>
-              <option value="priority_desc">Priority (High → Low)</option>
-              <option value="status">Visit Status</option>
-            </select>
+              onChange={setSortBy}
+              variant="filter"
+              size="sm"
+              align="right"
+              options={[
+                { value: 'date_asc', label: 'Date: Earliest First' },
+                { value: 'date_desc', label: 'Date: Latest First' },
+                { value: 'client_asc', label: 'Client Name (A → Z)' },
+                { value: 'client_desc', label: 'Client Name (Z → A)' },
+                { value: 'priority_desc', label: 'Priority (High → Low)' },
+                { value: 'status', label: 'Visit Status' }
+              ]}
+            />
           </div>
         </div>
 

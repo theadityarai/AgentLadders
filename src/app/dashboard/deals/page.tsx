@@ -8,6 +8,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { StatusSelect } from '@/components/ui/StatusSelect';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
@@ -529,15 +530,16 @@ export default function DealsPage() {
               <div className="responsive-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Deal Type</label>
-                  <select 
+                  <CustomSelect 
                     value={formData.dealType} 
-                    onChange={e => setFormData({...formData, dealType: e.target.value})}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff', cursor: 'pointer' }}
-                  >
-                    <option value="Outright Sale">Outright Sale (Buy)</option>
-                    <option value="Rental Lease">Rental / Lease</option>
-                    <option value="Builder CP Booking">Builder CP Booking</option>
-                  </select>
+                    onChange={val => setFormData({...formData, dealType: val})}
+                    placeholder="Select Deal Type..."
+                    options={[
+                      { value: 'Outright Sale', label: 'Outright Sale (Buy)' },
+                      { value: 'Rental Lease', label: 'Rental / Lease' },
+                      { value: 'Builder CP Booking', label: 'Builder CP Booking' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Deal Value (₹) *</label>
@@ -653,19 +655,22 @@ export default function DealsPage() {
               maxWidth={240}
             />
 
-            <select
+            <CustomSelect
               value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="unified-filter-select"
-            >
-              <option value="newest">Sort: Newest First</option>
-              <option value="oldest">Sort: Oldest First</option>
-              <option value="amount_desc">Deal Value: High → Low</option>
-              <option value="amount_asc">Deal Value: Low → High</option>
-              <option value="title_asc">Deal Name (A → Z)</option>
-              <option value="client_asc">Client Name (A → Z)</option>
-              <option value="close_date">Expected Close Date</option>
-            </select>
+              onChange={setSortBy}
+              variant="filter"
+              size="sm"
+              align="right"
+              options={[
+                { value: 'newest', label: 'Sort: Newest First' },
+                { value: 'oldest', label: 'Sort: Oldest First' },
+                { value: 'amount_desc', label: 'Deal Value: High → Low' },
+                { value: 'amount_asc', label: 'Deal Value: Low → High' },
+                { value: 'title_asc', label: 'Deal Name (A → Z)' },
+                { value: 'client_asc', label: 'Client Name (A → Z)' },
+                { value: 'close_date', label: 'Expected Close Date' }
+              ]}
+            />
           </div>
         </div>
 

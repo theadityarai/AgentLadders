@@ -9,6 +9,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { isValid10DigitPhone, formatForWhatsApp } from '@/lib/phone-validation';
 import { PhoneIcon, WhatsAppIcon, EditIcon, TrashIcon } from '@/components/icons/NavIcons';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 interface Owner {
   [key: string]: unknown;
@@ -531,13 +532,12 @@ export default function OwnersPage() {
               <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Owner Type</label>
-                  <select
+                  <CustomSelect
                     value={form.ownerType}
-                    onChange={e => setForm({ ...form, ownerType: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    {OWNER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
+                    onChange={val => setForm({ ...form, ownerType: val })}
+                    placeholder="Select Owner Type..."
+                    options={OWNER_TYPES}
+                  />
                 </div>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Properties Count</label>
@@ -644,13 +644,12 @@ export default function OwnersPage() {
               <div className="responsive-grid-2" style={{ gap: '12px' }}>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Owner Type</label>
-                  <select
+                  <CustomSelect
                     value={editingOwner.ownerType || 'Individual Owner'}
-                    onChange={e => setEditingOwner({ ...editingOwner, ownerType: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                  >
-                    {OWNER_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
+                    onChange={val => setEditingOwner({ ...editingOwner, ownerType: val })}
+                    placeholder="Select Owner Type..."
+                    options={OWNER_TYPES}
+                  />
                 </div>
                 <div>
                   <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Properties Count</label>

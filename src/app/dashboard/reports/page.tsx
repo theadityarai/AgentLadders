@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 interface SavedReport {
   id: string;
@@ -717,24 +718,19 @@ export default function ReportsPage() {
               </div>
 
               {/* Cadence filter */}
-              <select
+              <CustomSelect
                 value={frequencyFilter}
-                onChange={e => setFrequencyFilter(e.target.value)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  outline: 'none'
-                }}
-              >
-                <option value="All">All Cadences</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Quarterly">Quarterly</option>
-                <option value="Weekly">Weekly</option>
-                <option value="On Demand">On Demand</option>
-              </select>
+                onChange={setFrequencyFilter}
+                variant="filter"
+                size="sm"
+                options={[
+                  { value: 'All', label: 'All Cadences' },
+                  { value: 'Monthly', label: 'Monthly' },
+                  { value: 'Quarterly', label: 'Quarterly' },
+                  { value: 'Weekly', label: 'Weekly' },
+                  { value: 'On Demand', label: 'On Demand' }
+                ]}
+              />
             </div>
           </div>
 
@@ -1416,67 +1412,67 @@ export default function ReportsPage() {
                     <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
                       Report Type
                     </label>
-                    <select
+                    <CustomSelect
                       value={form.type}
-                      onChange={e => setForm({ ...form, type: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                    >
-                      <option value="Financial Summary">Financial & Commission Summary</option>
-                      <option value="Deal Pipeline Velocity">Deal Pipeline Velocity</option>
-                      <option value="Lead Acquisition & ROI">Lead Acquisition & Channel ROI</option>
-                      <option value="Property Inventory Health">Property Inventory Health</option>
-                      <option value="Site Visit Operations">Site Visit Operations</option>
-                      <option value="Accounts Receivable & GST">Accounts Receivable & GST</option>
-                    </select>
+                      onChange={val => setForm({ ...form, type: val })}
+                      options={[
+                        { value: 'Financial Summary', label: 'Financial & Commission Summary' },
+                        { value: 'Deal Pipeline Velocity', label: 'Deal Pipeline Velocity' },
+                        { value: 'Lead Acquisition & ROI', label: 'Lead Acquisition & Channel ROI' },
+                        { value: 'Property Inventory Health', label: 'Property Inventory Health' },
+                        { value: 'Site Visit Operations', label: 'Site Visit Operations' },
+                        { value: 'Accounts Receivable & GST', label: 'Accounts Receivable & GST' }
+                      ]}
+                    />
                   </div>
 
                   <div>
                     <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
                       Cadence / Frequency
                     </label>
-                    <select
+                    <CustomSelect
                       value={form.frequency}
-                      onChange={e => setForm({ ...form, frequency: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                    >
-                      <option value="On Demand">On Demand (One-time)</option>
-                      <option value="Weekly">Weekly Digest</option>
-                      <option value="Monthly">Monthly Executive Review</option>
-                      <option value="Quarterly">Quarterly Board Statement</option>
-                    </select>
+                      onChange={val => setForm({ ...form, frequency: val })}
+                      options={[
+                        { value: 'On Demand', label: 'On Demand (One-time)' },
+                        { value: 'Weekly', label: 'Weekly Digest' },
+                        { value: 'Monthly', label: 'Monthly Executive Review' },
+                        { value: 'Quarterly', label: 'Quarterly Board Statement' }
+                      ]}
+                    />
                   </div>
 
                   <div>
                     <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
                       Time Window
                     </label>
-                    <select
+                    <CustomSelect
                       value={form.dateRange}
-                      onChange={e => setForm({ ...form, dateRange: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                    >
-                      <option value="Last 30 Days">Last 30 Days</option>
-                      <option value="Current Quarter (Q3)">Current Quarter (Q3)</option>
-                      <option value="Year-to-Date (YTD)">Year-to-Date (YTD)</option>
-                      <option value="Previous Fiscal Year">Previous Fiscal Year</option>
-                      <option value="All Time">All Time Historical</option>
-                    </select>
+                      onChange={val => setForm({ ...form, dateRange: val })}
+                      options={[
+                        { value: 'Last 30 Days', label: 'Last 30 Days' },
+                        { value: 'Current Quarter (Q3)', label: 'Current Quarter (Q3)' },
+                        { value: 'Year-to-Date (YTD)', label: 'Year-to-Date (YTD)' },
+                        { value: 'Previous Fiscal Year', label: 'Previous Fiscal Year' },
+                        { value: 'All Time', label: 'All Time Historical' }
+                      ]}
+                    />
                   </div>
 
                   <div>
                     <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', fontWeight: 600, color: '#334155' }}>
                       Operational Scope
                     </label>
-                    <select
+                    <CustomSelect
                       value={form.scope}
-                      onChange={e => setForm({ ...form, scope: e.target.value })}
-                      style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}
-                    >
-                      <option value="Agency-Wide Operations">Agency-Wide Full Operations</option>
-                      <option value="Prime Residential Division">Prime Residential Division</option>
-                      <option value="Luxury Commercial Division">Luxury Commercial Division</option>
-                      <option value="Property Management Portfolio">Property Management Portfolio</option>
-                    </select>
+                      onChange={val => setForm({ ...form, scope: val })}
+                      options={[
+                        { value: 'Agency-Wide Operations', label: 'Agency-Wide Full Operations' },
+                        { value: 'Prime Residential Division', label: 'Prime Residential Division' },
+                        { value: 'Luxury Commercial Division', label: 'Luxury Commercial Division' },
+                        { value: 'Property Management Portfolio', label: 'Property Management Portfolio' }
+                      ]}
+                    />
                   </div>
                 </div>
               </div>

@@ -8,6 +8,8 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DEFAULT_PAYMENT_STATUSES } from '@/lib/formatters';
+import { CustomSelect } from '@/components/ui/CustomSelect';
+import { StatusSelect } from '@/components/ui/StatusSelect';
 
 interface Payment {
   [key: string]: unknown;
@@ -550,23 +552,20 @@ export default function PaymentsPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
-                    <select
+                    <CustomSelect
                       value={form.method}
-                      onChange={e => setForm({ ...form, method: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, method: val })}
+                      options={METHODS}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Clearance Status</label>
-                    <select
+                    <StatusSelect
                       value={form.status}
-                      onChange={e => setForm({ ...form, status: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {paymentStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, status: val })}
+                      options={paymentStatuses}
+                      variant="form"
+                    />
                   </div>
                 </div>
 
@@ -664,23 +663,20 @@ export default function PaymentsPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Payment Method</label>
-                    <select
+                    <CustomSelect
                       value={editingPayment.method}
-                      onChange={e => setEditingPayment({ ...editingPayment, method: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
+                      onChange={val => setEditingPayment({ ...editingPayment, method: val })}
+                      options={METHODS}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Clearance Status</label>
-                    <select
+                    <StatusSelect
                       value={editingPayment.status}
-                      onChange={e => setEditingPayment({ ...editingPayment, status: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {paymentStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      onChange={val => setEditingPayment({ ...editingPayment, status: val })}
+                      options={paymentStatuses}
+                      variant="form"
+                    />
                   </div>
                 </div>
               </div>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { TableFilterBar } from '@/components/ui/TableFilterBar';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 
 interface CalendarEvent {
   [key: string]: unknown;
@@ -446,13 +447,11 @@ export default function CalendarPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Type</label>
-                    <select
+                    <CustomSelect
                       value={form.type}
-                      onChange={e => setForm({ ...form, type: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, type: val })}
+                      options={EVENT_TYPES}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Location / Venue</label>
@@ -559,13 +558,11 @@ export default function CalendarPage() {
                 <div className="responsive-grid-2" style={{ gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Event Type</label>
-                    <select
+                    <CustomSelect
                       value={editingEvent.type}
-                      onChange={e => setEditingEvent({ ...editingEvent, type: e.target.value })}
-                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                    >
-                      {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                      onChange={val => setEditingEvent({ ...editingEvent, type: val })}
+                      options={EVENT_TYPES}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: '13px', fontWeight: 500, display: 'block', marginBottom: '4px' }}>Location / Venue</label>

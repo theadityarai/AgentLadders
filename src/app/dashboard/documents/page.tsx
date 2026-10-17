@@ -8,6 +8,7 @@ import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
 import { Pagination } from '@/components/ui/Pagination';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import {
   FileTextIcon,
   DownloadIcon,
@@ -1288,17 +1289,20 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
             />
 
             <div className="unified-filter-controls">
-              <select
+              <CustomSelect
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className="unified-filter-select"
-              >
-                <option value="newest">Sort: Newest First</option>
-                <option value="oldest">Sort: Oldest First</option>
-                <option value="name_asc">Name (A → Z)</option>
-                <option value="name_desc">Name (Z → A)</option>
-                <option value="category">Category</option>
-              </select>
+                onChange={setSortBy}
+                variant="filter"
+                size="sm"
+                align="right"
+                options={[
+                  { value: 'newest', label: 'Sort: Newest First' },
+                  { value: 'oldest', label: 'Sort: Oldest First' },
+                  { value: 'name_asc', label: 'Name (A → Z)' },
+                  { value: 'name_desc', label: 'Name (Z → A)' },
+                  { value: 'category', label: 'Category' }
+                ]}
+              />
             </div>
           </div>
 
@@ -2066,29 +2070,19 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
                   Document Category *
                 </label>
-                <select
-                  required
+                <CustomSelect
                   value={uploadCategory}
-                  onChange={e => setUploadCategory(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: 8,
-                    fontSize: 13.5,
-                    outline: 'none',
-                    backgroundColor: '#ffffff',
-                    color: uploadCategory ? '#0f172a' : '#64748b'
-                  }}
-                >
-                  <option value="" disabled>-- Select Document Category --</option>
-                  <option value="Contracts & MOUs">Contracts &amp; MOUs (Sale Agreement, Rental Lease)</option>
-                  <option value="Client KYC & Identity">Client KYC &amp; Identity (PAN, Aadhaar, Passport)</option>
-                  <option value="Brochures & Floor Plans">Brochures &amp; Floor Plans</option>
-                  <option value="Title Deeds & OC">Title Deeds &amp; OC (7/12 extract, Index II, OC)</option>
-                  <option value="Payment Receipts">Payment Receipts (Token Advance, Cheques)</option>
-                  <option value="Others">Others / Miscellaneous Documents</option>
-                </select>
+                  onChange={setUploadCategory}
+                  placeholder="-- Select Document Category --"
+                  options={[
+                    { value: 'Contracts & MOUs', label: 'Contracts & MOUs', sublabel: 'Sale Agreement, Rental Lease' },
+                    { value: 'Client KYC & Identity', label: 'Client KYC & Identity', sublabel: 'PAN, Aadhaar, Passport' },
+                    { value: 'Brochures & Floor Plans', label: 'Brochures & Floor Plans', sublabel: 'Project PDF, Layouts' },
+                    { value: 'Title Deeds & OC', label: 'Title Deeds & OC', sublabel: '7/12 extract, Index II, OC' },
+                    { value: 'Payment Receipts', label: 'Payment Receipts', sublabel: 'Token Advance, Cheques' },
+                    { value: 'Others', label: 'Others / Miscellaneous Documents' }
+                  ]}
+                />
               </div>
 
               {/* 2. Text Box Field for Description / Note */}
@@ -2420,29 +2414,19 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
                   Document Category *
                 </label>
-                <select
-                  required
+                <CustomSelect
                   value={editCategory}
-                  onChange={e => setEditCategory(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: 8,
-                    fontSize: 13.5,
-                    outline: 'none',
-                    backgroundColor: '#ffffff',
-                    color: editCategory ? '#0f172a' : '#64748b'
-                  }}
-                >
-                  <option value="" disabled>-- Select Document Category --</option>
-                  <option value="Contracts & MOUs">Contracts &amp; MOUs (Sale Agreement, Rental Lease)</option>
-                  <option value="Client KYC & Identity">Client KYC &amp; Identity (PAN, Aadhaar, Passport)</option>
-                  <option value="Brochures & Floor Plans">Brochures &amp; Floor Plans</option>
-                  <option value="Title Deeds & OC">Title Deeds &amp; OC (7/12 extract, Index II, OC)</option>
-                  <option value="Payment Receipts">Payment Receipts (Token Advance, Cheques)</option>
-                  <option value="Others">Others / Miscellaneous Documents</option>
-                </select>
+                  onChange={setEditCategory}
+                  placeholder="-- Select Document Category --"
+                  options={[
+                    { value: 'Contracts & MOUs', label: 'Contracts & MOUs', sublabel: 'Sale Agreement, Rental Lease' },
+                    { value: 'Client KYC & Identity', label: 'Client KYC & Identity', sublabel: 'PAN, Aadhaar, Passport' },
+                    { value: 'Brochures & Floor Plans', label: 'Brochures & Floor Plans', sublabel: 'Project PDF, Layouts' },
+                    { value: 'Title Deeds & OC', label: 'Title Deeds & OC', sublabel: '7/12 extract, Index II, OC' },
+                    { value: 'Payment Receipts', label: 'Payment Receipts', sublabel: 'Token Advance, Cheques' },
+                    { value: 'Others', label: 'Others / Miscellaneous Documents' }
+                  ]}
+                />
               </div>
 
               {/* 3. Description / Notes */}
@@ -2711,44 +2695,47 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
               {/* Modal Top Bar */}
               <div
                 style={{
-                  padding: '12px 20px',
+                  padding: '10px 14px',
                   borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   backgroundColor: '#ffffff',
-                  gap: 12
+                  gap: 8,
+                  position: 'relative',
+                  zIndex: 15
                 }}
               >
                 {/* File Title and Category */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 200, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
                   <div
                     style={{
-                      width: 36,
-                      height: 36,
+                      width: 34,
+                      height: 34,
                       borderRadius: 8,
                       backgroundColor: '#f1f5f9',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 18,
+                      fontSize: 16,
                       flexShrink: 0
                     }}
                   >
                     {getFileIcon(previewDoc.type, previewDoc.name)}
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                       <h2
                         style={{
                           margin: 0,
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: 700,
                           color: '#0f172a',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          maxWidth: 480
+                          minWidth: 0,
+                          flex: '0 1 auto'
                         }}
                         title={previewDoc.name}
                       >
@@ -2756,26 +2743,27 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                       </h2>
                       <span
                         style={{
-                          fontSize: 11,
-                          padding: '2px 8px',
+                          fontSize: 10.5,
+                          padding: '2px 7px',
                           borderRadius: 12,
                           backgroundColor: '#ecfdf5',
                           color: '#047857',
                           fontWeight: 600,
-                          flexShrink: 0
+                          flexShrink: 0,
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         {previewDoc.category || previewDoc.type}
                       </span>
                     </div>
-                    <p style={{ margin: 0, fontSize: 11.5, color: '#64748b' }}>
-                      {previewDoc.size} • Uploaded by {previewDoc.uploadedBy || 'Agent'}
+                    <p style={{ margin: 0, fontSize: 11, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {previewDoc.size} • {previewDoc.uploadedBy || 'Agent'}
                     </p>
                   </div>
                 </div>
 
                 {/* Right controls: Zoom/Rotate (for images) & Close */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                   {isImage && (
                     <div
                       style={{
@@ -2785,24 +2773,25 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                         border: '1px solid #e2e8f0',
                         borderRadius: 6,
                         padding: '2px 4px',
-                        gap: 4
+                        gap: 2,
+                        flexShrink: 0
                       }}
                     >
                       <button
                         type="button"
                         onClick={() => setPreviewZoom(z => Math.max(0.5, +(z - 0.25).toFixed(2)))}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', fontSize: 13, fontWeight: 700, color: '#334155' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 5px', fontSize: 12, fontWeight: 700, color: '#334155' }}
                         title="Zoom Out"
                       >
                         -
                       </button>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#475569', minWidth: 38, textAlign: 'center' }}>
+                      <span style={{ fontSize: 10.5, fontWeight: 600, color: '#475569', minWidth: 32, textAlign: 'center' }}>
                         {Math.round(previewZoom * 100)}%
                       </span>
                       <button
                         type="button"
                         onClick={() => setPreviewZoom(z => Math.min(3, +(z + 0.25).toFixed(2)))}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', fontSize: 13, fontWeight: 700, color: '#334155' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 5px', fontSize: 12, fontWeight: 700, color: '#334155' }}
                         title="Zoom In"
                       >
                         +
@@ -2810,7 +2799,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                       <button
                         type="button"
                         onClick={() => setPreviewRotation(r => (r + 90) % 360)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px', fontSize: 12, color: '#334155' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 5px', fontSize: 11, color: '#334155' }}
                         title="Rotate 90°"
                       >
                         ⟳
@@ -2818,25 +2807,28 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                     </div>
                   )}
 
-                  {/* Close modal */}
+                  {/* Close modal button - High visibility and permanently pinned */}
                   <button
                     type="button"
                     onClick={() => setPreviewDoc(null)}
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 6,
-                      backgroundColor: '#f1f5f9',
-                      border: '1px solid #e2e8f0',
+                      width: 34,
+                      height: 34,
+                      borderRadius: 8,
+                      backgroundColor: '#0f172a',
+                      border: 'none',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#64748b'
+                      color: '#ffffff',
+                      flexShrink: 0,
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                      transition: 'background-color 0.15s ease'
                     }}
                     title="Close Preview (Esc)"
                   >
-                    <XIcon size={16} color="currentColor" />
+                    <XIcon size={18} color="#ffffff" strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -2853,6 +2845,32 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   position: 'relative'
                 }}
               >
+                {/* Secondary Floating Close Icon on canvas for mobile convenience */}
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc(null)}
+                  style={{
+                    position: 'absolute',
+                    top: 12,
+                    right: 12,
+                    zIndex: 25,
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+                    color: '#ffffff',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    backdropFilter: 'blur(6px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+                  }}
+                  title="Close Preview"
+                >
+                  <XIcon size={16} color="#ffffff" strokeWidth={2.5} />
+                </button>
                 {isImage ? (
                   /* Image Viewer */
                   <div

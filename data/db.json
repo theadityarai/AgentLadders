@@ -2681,6 +2681,17 @@
   ],
   "auditLogs": [
     {
+      "id": "aud_ed7073a58082",
+      "agencyId": "ag_vance_01",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "action": "DELETE",
+      "entity": "ActiveSession",
+      "entityId": "sess_iet3u68_mvajdw13",
+      "details": "User signed out from Google Chrome (103.21.124.58 (Localhost • Vance Realty Gateway)).",
+      "createdAt": "2026-10-17T17:58:36.877Z"
+    },
+    {
       "id": "aud_zmb16r4",
       "agencyId": "ag_vance_01",
       "userId": "usr_ag_vance_01",
@@ -2974,24 +2985,6 @@
       "lastActive": "2026-10-16T05:38:04.612Z"
     },
     {
-      "id": "sess_iet3u68_mvajdw13",
-      "userId": "usr_ag_vance_01",
-      "userName": "Marcus Vance",
-      "userEmail": "marcus@vancerealty.com",
-      "browser": "Google Chrome",
-      "browserVersion": "155.0.0.0",
-      "os": "Windows 11 PC",
-      "deviceType": "desktop",
-      "deviceModel": "Windows PC",
-      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
-      "location": "Mumbai, Maharashtra, India",
-      "screen": "1536 × 864",
-      "timezone": "Asia/Calcutta",
-      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
-      "createdAt": "2026-10-16T05:38:05.125Z",
-      "lastActive": "2026-10-17T04:04:51.120Z"
-    },
-    {
       "id": "sess_at6u6db_mvalr38f",
       "userId": "usr_ag_vance_01",
       "userName": "Marcus Vance",
@@ -3008,7 +3001,31 @@
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
       "createdAt": "2026-10-16T06:44:20.250Z",
       "lastActive": "2026-10-16T06:44:24.051Z"
+    },
+    {
+      "id": "sess_5bb5f5dfc8e9e10d_mvcpotoa",
+      "userId": "usr_super_admin_alt",
+      "userName": "Super Admin HQ",
+      "userEmail": "aditya@agentladders.com",
+      "browser": "Google Chrome",
+      "browserVersion": "155.0.0.0",
+      "os": "Windows 11 PC",
+      "deviceType": "desktop",
+      "deviceModel": "Windows PC",
+      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
+      "location": "Mumbai, Maharashtra, India",
+      "screen": "1536 × 864",
+      "timezone": "Asia/Calcutta",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "createdAt": "2026-10-17T18:10:11.582Z",
+      "lastActive": "2026-10-17T18:10:11.582Z"
     }
   ],
-  "revokedSessions": []
+  "revokedSessions": [
+    {
+      "id": "sess_iet3u68_mvajdw13",
+      "userId": "usr_ag_vance_01",
+      "revokedAt": "2026-10-17T17:58:36.876Z"
+    }
+  ]
 }

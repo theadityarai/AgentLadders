@@ -12,6 +12,8 @@ import { isValid10DigitPhone, extract10DigitPhone, formatForWhatsApp } from '@/l
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { getStatusColorStyle } from '@/lib/theme';
 import { PhoneIcon, WhatsAppIcon, EditIcon, TrashIcon } from '@/components/icons/NavIcons';
+import { CustomSelect } from '@/components/ui/CustomSelect';
+import { StatusSelect } from '@/components/ui/StatusSelect';
 
 interface Client {
   [key: string]: unknown;
@@ -773,24 +775,23 @@ export default function ClientsPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Client Category</label>
-                    <select
+                    <CustomSelect
                       value={form.type}
-                      onChange={e => setForm({ ...form, type: e.target.value })}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                    >
-                      {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, type: val })}
+                      placeholder="Select Category..."
+                      options={CLIENT_TYPES}
+                    />
                   </div>
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
-                    <select
+                    <StatusSelect
                       value={form.status}
-                      onChange={e => setForm({ ...form, status: e.target.value })}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                    >
-                      {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, status: val })}
+                      options={clientStatuses}
+                      placeholder="Select Status..."
+                      variant="form"
+                    />
                   </div>
 
                   <div>
@@ -806,13 +807,12 @@ export default function ClientsPage() {
 
                   <div style={{ gridColumn: '1 / -1' }}>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
-                    <select
+                    <CustomSelect
                       value={form.source || 'WhatsApp Inbound'}
-                      onChange={e => setForm({ ...form, source: e.target.value })}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
-                    >
-                      {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      onChange={val => setForm({ ...form, source: val })}
+                      placeholder="Select Inbound Source..."
+                      options={leadSources}
+                    />
                   </div>
 
                   <div style={{ gridColumn: '1 / -1' }}>
@@ -902,35 +902,33 @@ export default function ClientsPage() {
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Category</label>
-                    <select
+                    <CustomSelect
                       value={editingClient.type}
-                      onChange={e => setEditingClient({ ...editingClient, type: e.target.value })}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                    >
-                      {CLIENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                      onChange={val => setEditingClient({ ...editingClient, type: val })}
+                      placeholder="Select Category..."
+                      options={CLIENT_TYPES}
+                    />
                   </div>
 
                   <div>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Status</label>
-                    <select
+                    <StatusSelect
                       value={editingClient.status || 'Active Search'}
-                      onChange={e => setEditingClient({ ...editingClient, status: e.target.value })}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px' }}
-                    >
-                      {clientStatuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      onChange={val => setEditingClient({ ...editingClient, status: val })}
+                      options={clientStatuses}
+                      placeholder="Select Status..."
+                      variant="form"
+                    />
                   </div>
 
                   <div style={{ gridColumn: '1 / -1' }}>
                     <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>Lead & Inbound Source</label>
-                    <select
+                    <CustomSelect
                       value={editingClient.source || 'WhatsApp Inbound'}
-                      onChange={e => setEditingClient({ ...editingClient, source: e.target.value })}
-                      style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', backgroundColor: '#fff' }}
-                    >
-                      {leadSources.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                      onChange={val => setEditingClient({ ...editingClient, source: val })}
+                      placeholder="Select Inbound Source..."
+                      options={leadSources}
+                    />
                   </div>
 
                   <div style={{ gridColumn: '1 / -1' }}>

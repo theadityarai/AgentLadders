@@ -25,6 +25,8 @@ import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { ShareModal } from '@/components/ui/ShareModal';
 import { isValid10DigitPhone, extract10DigitPhone } from '@/lib/phone-validation';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { StatusSelect } from '@/components/ui/StatusSelect';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import {
   WhatsAppIcon,
   DownloadIcon,
@@ -1090,32 +1092,16 @@ export default function InvoicesPage() {
     {
       key: 'status',
       label: 'Status',
-      render: (r) => {
-        const style = getStatusColorStyle(r.status);
-        return (
-          <select
+      render: (r) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <StatusSelect
             value={r.status}
-            onChange={(e) => handleStatusChange(r, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: style.bg,
-              color: style.text,
-              border: `1.5px solid ${style.border}`,
-              padding: '4px 8px',
-              borderRadius: 6,
-              fontSize: '12px',
-              fontWeight: 700,
-              cursor: 'pointer',
-              outline: 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            {invoiceStatuses.map(st => (
-              <option key={st} value={st}>{st}</option>
-            ))}
-          </select>
-        );
-      }
+            onChange={(newStatus) => handleStatusChange(r, newStatus)}
+            options={invoiceStatuses}
+            size="sm"
+          />
+        </div>
+      )
     },
     {
       key: 'actions',
@@ -1269,19 +1255,22 @@ export default function InvoicesPage() {
             </div>
 
             <div className="unified-filter-controls">
-              <select
+              <CustomSelect
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className="unified-filter-select"
-              >
-                <option value="newest">Sort: Newest First</option>
-                <option value="oldest">Sort: Oldest First</option>
-                <option value="amount_desc">Amount: High → Low</option>
-                <option value="amount_asc">Amount: Low → High</option>
-                <option value="client_asc">Client Name (A → Z)</option>
-                <option value="due_date_asc">Due Date: Earliest</option>
-                <option value="due_date_desc">Due Date: Latest</option>
-              </select>
+                onChange={setSortBy}
+                variant="filter"
+                size="sm"
+                align="right"
+                options={[
+                  { value: 'newest', label: 'Sort: Newest First' },
+                  { value: 'oldest', label: 'Sort: Oldest First' },
+                  { value: 'amount_desc', label: 'Amount: High → Low' },
+                  { value: 'amount_asc', label: 'Amount: Low → High' },
+                  { value: 'client_asc', label: 'Client Name (A → Z)' },
+                  { value: 'due_date_asc', label: 'Due Date: Earliest' },
+                  { value: 'due_date_desc', label: 'Due Date: Latest' }
+                ]}
+              />
 
               {(searchQuery.trim() !== '' || statusFilter !== 'All') && (
                 <button
@@ -1381,25 +1370,12 @@ export default function InvoicesPage() {
                         </span>
                       </div>
                       <div onClick={e => e.stopPropagation()}>
-                        <select
+                        <StatusSelect
                           value={inv.status}
-                          onChange={(e) => handleStatusChange(inv, e.target.value)}
-                          style={{
-                            backgroundColor: statusStyle.bg,
-                            color: statusStyle.text,
-                            border: `1.5px solid ${statusStyle.border}`,
-                            padding: '4px 8px',
-                            borderRadius: 6,
-                            fontSize: '11.5px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            outline: 'none'
-                          }}
-                        >
-                          {invoiceStatuses.map(st => (
-                            <option key={st} value={st}>{st}</option>
-                          ))}
-                        </select>
+                          onChange={(newStatus) => handleStatusChange(inv, newStatus)}
+                          options={invoiceStatuses}
+                          size="sm"
+                        />
                       </div>
                     </div>
 
@@ -1815,17 +1791,14 @@ export default function InvoicesPage() {
                       <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>
                         Apply Brokerage To Line Item
                       </label>
-                      <select
-                        value={targetLineItemIndex}
-                        onChange={e => setTargetLineItemIndex(parseInt(e.target.value) || 0)}
-                        style={{ width: '100%', padding: '7px 10px', border: '1px solid #86efac', borderRadius: 6, fontSize: 12.5, backgroundColor: '#ffffff', fontWeight: 700, color: '#166534', outline: 'none' }}
-                      >
-                        {form.items.map((it, idx) => (
-                          <option key={it.id || idx} value={idx}>
-                            Line Item #{idx + 1}{it.description ? ` (${it.description.slice(0, 24)}${it.description.length > 24 ? '...' : ''})` : ''}
-                          </option>
-                        ))}
-                      </select>
+                      <CustomSelect
+                        value={String(targetLineItemIndex)}
+                        onChange={val => setTargetLineItemIndex(parseInt(val) || 0)}
+                        options={form.items.map((it, idx) => ({
+                          value: String(idx),
+                          label: `Line Item #${idx + 1}${it.description ? ` (${it.description.slice(0, 24)}${it.description.length > 24 ? '...' : ''})` : ''}`
+                        }))}
+                      />
                     </div>
                   </div>
 
@@ -2144,16 +2117,16 @@ export default function InvoicesPage() {
                           </div>
                           <div>
                             <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#166534', marginBottom: 2 }}>Payment Mode</label>
-                            <select
+                            <CustomSelect
                               value={form.paymentMode}
-                              onChange={e => setForm({ ...form, paymentMode: e.target.value })}
-                              style={{ width: '100%', padding: '5px 8px', border: '1px solid #86efac', borderRadius: 6, fontSize: 11.5, backgroundColor: '#fff' }}
-                            >
-                              <option value="NEFT / RTGS">NEFT / RTGS Transfer</option>
-                              <option value="UPI">UPI / QR Remittance</option>
-                              <option value="Cheque">Corporate Cheque</option>
-                              <option value="Escrow Transfer">Direct Escrow Transfer</option>
-                            </select>
+                              onChange={val => setForm({ ...form, paymentMode: val })}
+                              options={[
+                                { value: 'NEFT / RTGS', label: 'NEFT / RTGS Transfer' },
+                                { value: 'UPI', label: 'UPI / QR Remittance' },
+                                { value: 'Cheque', label: 'Corporate Cheque' },
+                                { value: 'Escrow Transfer', label: 'Direct Escrow Transfer' }
+                              ]}
+                            />
                           </div>
                         </div>
                         <div>
@@ -2224,39 +2197,38 @@ export default function InvoicesPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
                       <div>
                         <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Supply Type</label>
-                        <select
+                        <CustomSelect
                           value={form.taxType}
-                          onChange={e => {
-                            const val = e.target.value as any;
+                          onChange={val => {
                             setForm(prev => ({
                               ...prev,
-                              taxType: val,
+                              taxType: val as any,
                               taxRate: val === 'exempt' ? '0' : prev.taxRate
                             }));
                           }}
-                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, backgroundColor: '#ffffff', outline: 'none' }}
-                        >
-                          <option value="none">None</option>
-                          <option value="inter">Inter State (IGST)</option>
-                          <option value="intra">Intra State (CGST + SGST)</option>
-                          <option value="exempt">Exempt</option>
-                          <option value="not_applicable">Not Applicable</option>
-                        </select>
+                          options={[
+                            { value: 'none', label: 'None' },
+                            { value: 'inter', label: 'Inter State (IGST)' },
+                            { value: 'intra', label: 'Intra State (CGST + SGST)' },
+                            { value: 'exempt', label: 'Exempt' },
+                            { value: 'not_applicable', label: 'Not Applicable' }
+                          ]}
+                        />
                       </div>
 
                       <div>
                         <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Tax Rate</label>
-                        <select
+                        <CustomSelect
                           disabled={form.taxType === 'exempt' || form.taxType === 'not_applicable' || form.taxType === 'none'}
                           value={form.taxRate}
-                          onChange={e => setForm({ ...form, taxRate: e.target.value })}
-                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, backgroundColor: (form.taxType === 'exempt' || form.taxType === 'not_applicable' || form.taxType === 'none') ? '#f1f5f9' : '#ffffff', outline: 'none' }}
-                        >
-                          <option value="none">None</option>
-                          <option value="18">18% Standard GST</option>
-                          <option value="6">6% Composition Scheme</option>
-                          <option value="0">0% Exempt</option>
-                        </select>
+                          onChange={val => setForm({ ...form, taxRate: val })}
+                          options={[
+                            { value: 'none', label: 'None' },
+                            { value: '18', label: '18% Standard GST' },
+                            { value: '6', label: '6% Composition Scheme' },
+                            { value: '0', label: '0% Exempt' }
+                          ]}
+                        />
                       </div>
                     </div>
                   )}

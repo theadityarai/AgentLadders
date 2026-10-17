@@ -11,6 +11,7 @@ import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { FilterTabs } from '@/components/ui/FilterTabs';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { StatusSelect } from '@/components/ui/StatusSelect';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import { getStatusColorStyle } from '@/lib/theme';
 import { DEFAULT_TASK_STATUSES } from '@/lib/formatters';
 import {
@@ -694,30 +695,20 @@ export default function TasksPage() {
               />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, color: '#64748b', whiteSpace: 'nowrap' }}>
-                Sort:
-              </label>
-              <select
+              <CustomSelect
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                style={{
-                  padding: '7px 12px',
-                  borderRadius: 8,
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: '#0f172a',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="due_date_asc">Due Date: Earliest First</option>
-                <option value="due_date_desc">Due Date: Latest First</option>
-                <option value="priority_desc">Priority: Urgent &amp; High First</option>
-                <option value="title_asc">Task Title (A - Z)</option>
-                <option value="newest">Newest First</option>
-              </select>
+                onChange={setSortBy}
+                variant="filter"
+                size="sm"
+                align="right"
+                options={[
+                  { value: 'due_date_asc', label: 'Due Date: Earliest First' },
+                  { value: 'due_date_desc', label: 'Due Date: Latest First' },
+                  { value: 'priority_desc', label: 'Priority: Urgent & High First' },
+                  { value: 'title_asc', label: 'Task Title (A - Z)' },
+                  { value: 'newest', label: 'Newest First' }
+                ]}
+              />
             </div>
           </div>
         </div>
@@ -1144,25 +1135,30 @@ export default function TasksPage() {
               <div className="responsive-grid-3" style={{ gap: 14, marginBottom: 14 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Category</label>
-                  <select
+                  <CustomSelect
                     value={form.category}
-                    onChange={e => setForm({ ...form, category: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13.5, backgroundColor: '#ffffff' }}
-                  >
-                    <option value="">Select Category...</option>
-                    {TASK_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                    onChange={val => setForm(prev => ({ ...prev, category: val }))}
+                    placeholder="Select Category..."
+                    options={TASK_CATEGORIES.map(c => ({
+                      value: c,
+                      label: c,
+                      icon: <span>{getCategoryIcon(c)}</span>
+                    }))}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Priority</label>
-                  <select
+                  <CustomSelect
                     value={form.priority}
-                    onChange={e => setForm({ ...form, priority: e.target.value })}
-                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #cbd5e1', borderRadius: 8, fontSize: 13.5, backgroundColor: '#ffffff' }}
-                  >
-                    <option value="">Select Priority...</option>
-                    {TASK_PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                  </select>
+                    onChange={val => setForm(prev => ({ ...prev, priority: val }))}
+                    placeholder="Select Priority..."
+                    options={[
+                      { value: 'Urgent', label: 'Urgent', badge: 'Critical' },
+                      { value: 'High', label: 'High Priority', badge: 'Hot' },
+                      { value: 'Medium', label: 'Medium Priority' },
+                      { value: 'Low', label: 'Low Priority' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <StatusSelect

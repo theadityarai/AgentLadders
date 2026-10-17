@@ -17,6 +17,7 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
 import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 import { StatusSelect } from '@/components/ui/StatusSelect';
+import { CustomSelect } from '@/components/ui/CustomSelect';
 import { MultiPropertySelector } from '@/components/ui/MultiPropertySelector';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { FilterTabs } from '@/components/ui/FilterTabs';
@@ -1421,18 +1422,18 @@ export default function LeadsPage() {
                     Priority / Urgency *
                     <InfoTooltip text="Urgency or timeline readiness of this client (Hot buyer ready now vs exploring), helping agents prioritize fast follow-ups." />
                   </label>
-                  <select 
-                    value={formData.urgency} 
-                    onChange={e => setFormData({...formData, urgency: e.target.value})}
-                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
-                  >
-                    <option value="">Select Priority / Urgency</option>
-                    <option value="Immediate (Hot Buyer)">Immediate (Hot Buyer - Ready Now)</option>
-                    <option value="Within 15 Days">High Urgency (Within 15 Days)</option>
-                    <option value="Within 1 Month">Moderate (Within 1 Month)</option>
-                    <option value="1-3 Months">Standard (1-3 Months)</option>
-                    <option value="Exploring / Low">Low / Long-term Exploring</option>
-                  </select>
+                  <CustomSelect
+                    value={formData.urgency}
+                    onChange={val => setFormData({ ...formData, urgency: val })}
+                    placeholder="Select Priority / Urgency..."
+                    options={[
+                      { value: 'Immediate (Hot Buyer)', label: 'Immediate (Hot Buyer - Ready Now)', badge: 'Hot' },
+                      { value: 'Within 15 Days', label: 'High Urgency (Within 15 Days)', badge: 'High' },
+                      { value: 'Within 1 Month', label: 'Moderate (Within 1 Month)' },
+                      { value: '1-3 Months', label: 'Standard (1-3 Months)' },
+                      { value: 'Exploring / Low', label: 'Low / Long-term Exploring' }
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -1497,14 +1498,12 @@ export default function LeadsPage() {
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                     Lead & Inbound Source <InfoTooltip text="Channel where inquiry originated: WhatsApp, 99acres, MagicBricks, Referral, Website, etc." />
                   </label>
-                  <select 
-                    value={formData.source} 
-                    onChange={e => setFormData({...formData, source: e.target.value})} 
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                  >
-                    <option value="">Select Inbound Source</option>
-                    {leadSources.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={formData.source}
+                    onChange={val => setFormData({ ...formData, source: val })}
+                    placeholder="Select Inbound Source..."
+                    options={leadSources}
+                  />
                 </div>
               </div>
 
@@ -1562,27 +1561,33 @@ export default function LeadsPage() {
               <div className="responsive-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Purpose</label>
-                  <select value={formData.leadPurpose} onChange={e => setFormData({...formData, leadPurpose: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
-                    <option value="">Select Purpose</option>
-                    {['Buy', 'Rent'].map(opt => <option key={opt}>{opt}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={formData.leadPurpose}
+                    onChange={val => setFormData({ ...formData, leadPurpose: val })}
+                    placeholder="Select Purpose..."
+                    options={['Buy', 'Rent']}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Property Type</label>
-                  <select value={formData.propertyTypeNeeded} onChange={e => setFormData({...formData, propertyTypeNeeded: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
-                    <option value="">Select Property Type</option>
-                    {propertyTypes.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={formData.propertyTypeNeeded}
+                    onChange={val => setFormData({ ...formData, propertyTypeNeeded: val })}
+                    placeholder="Select Property Type..."
+                    options={propertyTypes}
+                  />
                 </div>
               </div>
 
               <div className="responsive-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>BHK Needed</label>
-                  <select value={formData.bhkNeeded} onChange={e => setFormData({...formData, bhkNeeded: e.target.value})} style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}>
-                    <option value="">Select BHK</option>
-                    {bhkOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
+                  <CustomSelect
+                    value={Array.isArray(formData.bhkNeeded) ? formData.bhkNeeded.join(', ') : (formData.bhkNeeded || '')}
+                    onChange={val => setFormData({ ...formData, bhkNeeded: val })}
+                    placeholder="Select BHK..."
+                    options={bhkOptions}
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>Max Budget (₹)</label>
@@ -1613,27 +1618,23 @@ export default function LeadsPage() {
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Furnishing / Specs <InfoTooltip text="Client furnishing expectation" />
                     </label>
-                    <select 
-                      value={formData.furnishingPreference} 
-                      onChange={e => setFormData({...formData, furnishingPreference: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Furnishing</option>
-                      {['Any', ...propertySpecs].map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                    <CustomSelect
+                      value={formData.furnishingPreference}
+                      onChange={val => setFormData({ ...formData, furnishingPreference: val })}
+                      placeholder="Select Furnishing..."
+                      options={['Any', ...propertySpecs]}
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Construction Stage <InfoTooltip text="Possession timeline required by client" />
                     </label>
-                    <select 
-                      value={formData.constructionStagePreference} 
-                      onChange={e => setFormData({...formData, constructionStagePreference: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Construction Stage</option>
-                      {['Any', ...constructionStages].map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                    <CustomSelect
+                      value={formData.constructionStagePreference}
+                      onChange={val => setFormData({ ...formData, constructionStagePreference: val })}
+                      placeholder="Select Construction Stage..."
+                      options={['Any', ...constructionStages]}
+                    />
                   </div>
                 </div>
 
@@ -1642,27 +1643,23 @@ export default function LeadsPage() {
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Vastu Preference <InfoTooltip text="Mandatory orientation for spiritual alignment" />
                     </label>
-                    <select 
-                      value={formData.vastuPreference} 
-                      onChange={e => setFormData({...formData, vastuPreference: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Vastu Facing</option>
-                      {['Any', ...vastuOptions].map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                    <CustomSelect
+                      value={formData.vastuPreference}
+                      onChange={val => setFormData({ ...formData, vastuPreference: val })}
+                      placeholder="Select Vastu Facing..."
+                      options={['Any', ...vastuOptions]}
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6 }}>
                       Parking Needed <InfoTooltip text="Car parking requirement" />
                     </label>
-                    <select 
-                      value={formData.parkingPreference} 
-                      onChange={e => setFormData({...formData, parkingPreference: e.target.value})} 
-                      style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 14, outline: 'none', backgroundColor: '#fff' }}
-                    >
-                      <option value="">Select Parking</option>
-                      {['Any', ...parkingOptions].map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
+                    <CustomSelect
+                      value={formData.parkingPreference}
+                      onChange={val => setFormData({ ...formData, parkingPreference: val })}
+                      placeholder="Select Parking..."
+                      options={['Any', ...parkingOptions]}
+                    />
                   </div>
                 </div>
               </div>
@@ -1860,33 +1857,28 @@ export default function LeadsPage() {
               maxWidth={220}
             />
 
-            <select
+            <CustomSelect
               value={sourceFilter}
-              onChange={e => setSourceFilter(e.target.value)}
-              className="unified-filter-select"
-              style={{
-                backgroundColor: sourceFilter === 'All' ? '#ffffff' : '#eff6ff',
-                color: sourceFilter === 'All' ? '#334155' : '#1d4ed8'
-              }}
-            >
-              <option value="All">All Sources</option>
-              {leadSources.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
+              onChange={setSourceFilter}
+              variant="filter"
+              size="sm"
+              options={['All', ...leadSources].map(s => ({ value: s, label: s === 'All' ? 'All Sources' : s }))}
+            />
 
-            <select
+            <CustomSelect
               value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="unified-filter-select"
-            >
-              <option value="newest">Sort: Newest</option>
-              <option value="oldest">Sort: Oldest</option>
-              <option value="name_asc">Name (A → Z)</option>
-              <option value="name_desc">Name (Z → A)</option>
-              <option value="budget_desc">Budget: High → Low</option>
-              <option value="budget_asc">Budget: Low → High</option>
-            </select>
+              onChange={setSortBy}
+              variant="filter"
+              size="sm"
+              options={[
+                { value: 'newest', label: 'Sort: Newest' },
+                { value: 'oldest', label: 'Sort: Oldest' },
+                { value: 'name_asc', label: 'Name (A → Z)' },
+                { value: 'name_desc', label: 'Name (Z → A)' },
+                { value: 'budget_desc', label: 'Budget: High → Low' },
+                { value: 'budget_asc', label: 'Budget: Low → High' }
+              ]}
+            />
           </div>
         </div>
 
