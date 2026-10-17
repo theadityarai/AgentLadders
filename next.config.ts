@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import crypto from "crypto";
 
 // Ensure NEXTAUTH_URL is never empty string or invalid during Vercel static build
 const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;

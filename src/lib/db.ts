@@ -4,7 +4,6 @@ import { Redis } from '@upstash/redis';
 import { AgencyInvoiceSettings, DEFAULT_INVOICE_SETTINGS } from './formatters';
 
 const STATIC_DB_PATH = path.join(process.cwd(), 'data', 'db.json');
-const LEGACY_MOCK_PATH = path.join(process.cwd(), 'mock-db.json');
 const IS_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 const SERVERLESS_TMP_PATH = '/tmp/agentladders_db.json';
 
@@ -664,8 +663,6 @@ function readDbFromFile(): DB {
     try {
       if (fs.existsSync(STATIC_DB_PATH)) {
         fs.copyFileSync(STATIC_DB_PATH, SERVERLESS_TMP_PATH);
-      } else if (fs.existsSync(LEGACY_MOCK_PATH)) {
-        fs.copyFileSync(LEGACY_MOCK_PATH, SERVERLESS_TMP_PATH);
       }
     } catch (e) {
       console.error('Error copying db to serverless /tmp:', e);
@@ -685,23 +682,6 @@ function readDbFromFile(): DB {
       db = JSON.parse(fs.readFileSync(STATIC_DB_PATH, 'utf8'));
     } catch {
       db = {};
-    }
-  }
-
-  // If DB was empty or missing users, check if mock-db.json exists and import from it
-  if (!db.users || db.users.length === 0) {
-    if (fs.existsSync(LEGACY_MOCK_PATH)) {
-      try {
-        const legacy = JSON.parse(fs.readFileSync(LEGACY_MOCK_PATH, 'utf8'));
-        if (legacy.users && legacy.users.length > 0) {
-          db.users = legacy.users;
-          db.agencies = legacy.agencies || [];
-          db.notifications = legacy.notifications || [];
-          db.documents = legacy.documents || [];
-        }
-      } catch (e) {
-        console.error('Error importing legacy mock DB:', e);
-      }
     }
   }
 
@@ -726,12 +706,6 @@ function saveDbToFile(db: DB): void {
       _cachedMtime = fs.statSync(DB_PATH).mtimeMs;
     } catch {
       _cachedMtime = Date.now();
-    }
-    // Also keep legacy file in sync if it exists to avoid desync
-    if (fs.existsSync(LEGACY_MOCK_PATH)) {
-      try {
-        fs.writeFileSync(LEGACY_MOCK_PATH, serialized, 'utf8');
-      } catch {}
     }
   } catch (err) {
     console.error('Failed to save DB to file:', err);
