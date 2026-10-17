@@ -727,6 +727,15 @@ div[style*="position: 'fixed'"][style*="inset: 0"] {
 .mobile-only-cards {
   display: none;
 }
+.mobile-only-compact-list {
+  display: none;
+}
+.mobile-list-selector {
+  display: none;
+}
+.responsive-touch-table-active {
+  display: block;
+}
 
 @media (max-width: 768px) {
   .desktop-only-table {
@@ -736,6 +745,17 @@ div[style*="position: 'fixed'"][style*="inset: 0"] {
     display: flex !important;
     flex-direction: column;
     gap: 12px;
+  }
+  .mobile-only-compact-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mobile-list-selector {
+    display: flex !important;
+  }
+  .responsive-touch-table-active {
+    display: block !important;
   }
 }
 

@@ -885,12 +885,12 @@ export default function DealsPage() {
                           </span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
                           <select
                             value={deal.stage}
                             onChange={(e) => handleMoveStage(deal.id, e.target.value)}
                             style={{
-                              flex: 1,
+                              flex: '1 1 140px',
                               fontSize: 11.5,
                               fontWeight: 700,
                               padding: '5px 8px',
@@ -901,6 +901,7 @@ export default function DealsPage() {
                               cursor: 'pointer',
                               outline: 'none',
                               minWidth: 0,
+                              maxWidth: '100%',
                               textOverflow: 'ellipsis'
                             }}
                           >
@@ -1020,12 +1021,12 @@ export default function DealsPage() {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }} onClick={e => e.stopPropagation()}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
                     <select
                       value={deal.stage}
                       onChange={(e) => handleMoveStage(deal.id, e.target.value)}
                       style={{
-                        flex: 1,
+                        flex: '1 1 140px',
                         fontSize: 12,
                         fontWeight: 700,
                         padding: '6px 8px',
@@ -1035,7 +1036,8 @@ export default function DealsPage() {
                         color: '#1e293b',
                         cursor: 'pointer',
                         outline: 'none',
-                        minWidth: 0
+                        minWidth: 0,
+                        maxWidth: '100%'
                       }}
                     >
                       {stages.map(s => <option key={s} value={s}>{s}</option>)}

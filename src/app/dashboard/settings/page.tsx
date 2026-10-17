@@ -1098,7 +1098,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" subtitle="Agency configuration, team management, security, and billing" />
+      <PageHeader title="Settings" subtitle="Agency profile, team permissions, security & billing" />
 
       <div className={styles.settingsLayout}>
         <nav className={styles.settingsTabs}>
@@ -1678,16 +1678,16 @@ export default function SettingsPage() {
 
           {activeTab === 'invoice' && (
             <div className={styles.formSection} style={{ maxWidth: 960 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 24 }}>
-                <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, borderBottom: '1px solid var(--border-color)', paddingBottom: 16, marginBottom: 24 }}>
+                <div style={{ flex: '1 1 auto', minWidth: 0 }}>
                   <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>
                     Invoice &amp; Tax Settings
                   </h2>
-                  <p style={{ color: '#64748b', fontSize: 13.5, margin: '6px 0 0' }}>
+                  <p style={{ color: '#64748b', fontSize: 13.5, margin: '6px 0 0', lineHeight: 1.5 }}>
                     Configure legal entity name, GSTIN, RERA registration, bank remittance account, place of supply, and SAC code printed on official client invoices and tax receipts.
                   </p>
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
+                <div className={styles.invoiceHeaderActions}>
                   <Button variant="outline" size="sm" type="button" onClick={handleResetInvoiceSettings}>
                     Reset Defaults
                   </Button>
@@ -1698,14 +1698,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Section 1: Agency Legal & RERA Identifiers */}
-              <div style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid var(--border-color)',
-                borderRadius: 14,
-                padding: '22px 24px',
-                marginBottom: 20,
-                boxShadow: 'var(--shadow-sm)'
-              }}>
+              <div className={styles.invoiceSectionCard}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                   <span style={{ fontSize: 22 }}>🏢</span>
                   <div>
@@ -1777,14 +1770,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Section 2: Remittance & Bank Account Details */}
-              <div style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid var(--border-color)',
-                borderRadius: 14,
-                padding: '22px 24px',
-                marginBottom: 20,
-                boxShadow: 'var(--shadow-sm)'
-              }}>
+              <div className={styles.invoiceSectionCard}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                   <span style={{ fontSize: 22 }}>💳</span>
                   <div>
@@ -1884,14 +1870,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Section 3: Tax Jurisdiction & SAC Code */}
-              <div style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid var(--border-color)',
-                borderRadius: 14,
-                padding: '22px 24px',
-                marginBottom: 20,
-                boxShadow: 'var(--shadow-sm)'
-              }}>
+              <div className={styles.invoiceSectionCard}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                   <span style={{ fontSize: 22 }}>⚖️</span>
                   <div>
@@ -1915,8 +1894,8 @@ export default function SettingsPage() {
                   gap: 16,
                   flexWrap: 'wrap'
                 }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: '1 1 auto', minWidth: 200 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a' }}>
                         GST Taxation &amp; Place of Supply Module
                       </span>
@@ -1936,7 +1915,7 @@ export default function SettingsPage() {
                     </p>
                   </div>
 
-                  <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', gap: 8 }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', gap: 8, flexShrink: 0 }}>
                     <input
                       type="checkbox"
                       checked={!!invoiceSettings.enableGstTaxation}
@@ -1978,7 +1957,7 @@ export default function SettingsPage() {
                     />
                   </div>
 
-                  <div className={styles.inputGroup} style={{ gridColumn: 'span 2' }}>
+                  <div className={`${styles.inputGroup} ${styles.fullSpan}`}>
                     <label>
                       Default Payment Terms &amp; Remittance Notes
                       <InfoTooltip text="Standard terms and payment conditions printed on invoices (e.g. Brokerage advisory fees payable upon formal title verification and registration.)" />
@@ -2000,10 +1979,10 @@ export default function SettingsPage() {
                 backgroundColor: '#f8fafc',
                 border: '1.5px dashed #cbd5e1',
                 borderRadius: 14,
-                padding: '20px 24px',
+                padding: 'clamp(14px, 3.5vw, 24px)',
                 marginBottom: 24
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
                   <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>
                     Live Tax Invoice Header &amp; Remittance Preview
                   </span>
@@ -2016,12 +1995,12 @@ export default function SettingsPage() {
                   backgroundColor: '#ffffff',
                   border: '1px solid #e2e8f0',
                   borderRadius: 10,
-                  padding: '20px',
+                  padding: 'clamp(14px, 3vw, 20px)',
                   boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
                 }}>
                   {/* Header */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #0f172a', paddingBottom: 14, marginBottom: 14, flexWrap: 'wrap', gap: 12 }}>
-                    <div>
+                    <div style={{ minWidth: 200, flex: '1 1 auto' }}>
                       <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
                         {invoiceSettings.agencyName || 'Your Agency Legal Name'}
                       </div>
@@ -2032,7 +2011,7 @@ export default function SettingsPage() {
                         GSTIN: <strong>{invoiceSettings.gstin || '27AABCA1234F1Z5'}</strong> • RERA Reg: <strong>{invoiceSettings.reraReg || 'A51800029384'}</strong>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
+                    <div style={{ textAlign: 'left', minWidth: 160 }}>
                       <div style={{ fontSize: 16, fontWeight: 800, color: '#059669' }}>TAX INVOICE</div>
                       <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>
                         Place of Supply: <strong>{invoiceSettings.placeOfSupply || 'Maharashtra (27)'}</strong>
@@ -2050,11 +2029,12 @@ export default function SettingsPage() {
                     borderRadius: 8,
                     padding: '12px 14px',
                     fontSize: 12,
-                    color: '#475569'
+                    color: '#475569',
+                    wordBreak: 'break-word'
                   }}>
                     <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 3 }}>Remittance &amp; Bank Account Details:</div>
                     <div>Account Name: <strong>{invoiceSettings.accountName || `${invoiceSettings.agencyName} Escrow Advisory`}</strong></div>
-                    <div>Bank: <strong>{invoiceSettings.bankName || 'Bank Name'} • Current A/c No: {invoiceSettings.accountNumber || 'Account No'}</strong> • IFSC: <strong>{invoiceSettings.ifscCode || 'IFSC'}</strong></div>
+                    <div style={{ marginTop: 2 }}>Bank: <strong>{invoiceSettings.bankName || 'Bank Name'} • Current A/c No: {invoiceSettings.accountNumber || 'Account No'}</strong> • IFSC: <strong>{invoiceSettings.ifscCode || 'IFSC'}</strong></div>
                     {invoiceSettings.upiId && <div style={{ marginTop: 2 }}>UPI / QR Remittance ID: <strong>{invoiceSettings.upiId}</strong></div>}
                   </div>
 
@@ -2066,7 +2046,8 @@ export default function SettingsPage() {
                     padding: '12px 14px',
                     fontSize: 12,
                     color: '#475569',
-                    marginTop: 10
+                    marginTop: 10,
+                    wordBreak: 'break-word'
                   }}>
                     <div style={{ fontWeight: 700, color: '#0f172a', marginBottom: 3 }}>Payment Terms &amp; Remittance Notes:</div>
                     <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, color: '#334155' }}>
@@ -2076,7 +2057,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+              <div className={styles.invoiceFooterActions} style={{ justifyContent: 'flex-end' }}>
                 <Button variant="outline" type="button" onClick={handleResetInvoiceSettings}>
                   Reset Defaults
                 </Button>
@@ -2146,44 +2127,30 @@ export default function SettingsPage() {
                   );
 
                   return (
-                    <div key={user.id} className={styles.userRow} style={{ justifyContent: 'space-between', gap: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div key={user.id} className={styles.userRow}>
+                      <div className={styles.userRowMain}>
                         <div className={styles.userAvatar}>
                           {user.name ? user.name.substring(0, 2).toUpperCase() : 'AG'}
                         </div>
                         <div className={styles.userInfo}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                             <strong>{user.name}</strong>
                             {isCurrent && (
                               <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 10, backgroundColor: '#dcfce7', color: '#15803d' }}>
                                 You
                               </span>
                             )}
-                            {isOwner && (
-                              <span style={{ fontSize: 10.5, fontWeight: 800, padding: '2px 7px', borderRadius: 6, backgroundColor: '#fef3c7', color: '#92400e', letterSpacing: '0.05em' }}>
-                                OWNER
-                              </span>
-                            )}
                           </div>
-                          <span style={{ fontSize: 13, color: '#64748b' }}>{user.email}</span>
+                          <span>{user.email}</span>
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div className={styles.userRowActions}>
                         {canEditThisUser ? (
                           <select
                             value={user.role}
                             onChange={(e) => handleUpdateUserRole(user, e.target.value)}
-                            style={{
-                              padding: '6px 10px',
-                              borderRadius: 8,
-                              border: '1px solid #cbd5e1',
-                              fontSize: 12.5,
-                              fontWeight: 600,
-                              backgroundColor: '#fff',
-                              color: '#334155',
-                              cursor: 'pointer'
-                            }}
+                            className={styles.userRoleSelect}
                           >
                             {/* Manager can only assign Admin, Agent, Read-Only */}
                             {['OWNER', 'SUPER_ADMIN'].includes(currentRole) && (
@@ -2208,21 +2175,7 @@ export default function SettingsPage() {
                             type="button"
                             onClick={() => setUserToDelete({ id: user.id, name: user.name, email: user.email })}
                             title="Remove from agency"
-                            style={{
-                              border: '1px solid #fecaca',
-                              backgroundColor: '#fff',
-                              color: '#ef4444',
-                              borderRadius: 8,
-                              padding: '6px 12px',
-                              fontSize: 12,
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 4
-                            }}
-                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fef2f2')}
-                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fff')}
+                            className={styles.userRemoveBtn}
                           >
                             Remove
                           </button>

@@ -382,6 +382,220 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
   );
 });
 
+const DocumentListItem = React.memo(function DocumentListItem({
+  doc,
+  isExpanded,
+  onToggleExpand,
+  onOpenPreview,
+  onOpenEdit,
+  onDelete,
+  onWhatsAppShare,
+  onCopyDirectLink
+}: {
+  doc: DocumentItem;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onOpenPreview: (doc: DocumentItem) => void;
+  onOpenEdit: (doc: DocumentItem) => void;
+  onDelete: (doc: DocumentItem) => void;
+  onWhatsAppShare: (doc: DocumentItem) => void;
+  onCopyDirectLink: (doc: DocumentItem) => void;
+}) {
+  const fileIcon = getFileIcon(doc.type, doc.name);
+  const catStyle = getCategoryBadgeStyle(doc.category);
+  const relatedList = doc.relatedTo ? doc.relatedTo.split(', ').filter(Boolean) : [];
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: 12,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+        overflow: 'hidden',
+        transition: 'all 0.15s ease'
+      }}
+    >
+      {/* Compact List Row */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 14px',
+          gap: 10,
+          cursor: 'pointer'
+        }}
+        onClick={onToggleExpand}
+      >
+        {/* Left: Icon + File details */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+          <span style={{ fontSize: 26, flexShrink: 0 }}>{fileIcon}</span>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  color: '#0f172a',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+                title={doc.name}
+              >
+                {doc.name}
+              </span>
+            </div>
+            <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2, display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'nowrap', overflow: 'hidden' }}>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  color: catStyle.color,
+                  backgroundColor: catStyle.bg,
+                  border: `1px solid ${catStyle.border}`,
+                  padding: '1px 5px',
+                  borderRadius: 4,
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0
+                }}
+              >
+                {doc.category || 'General'}
+              </span>
+              <span>•</span>
+              <span style={{ whiteSpace: 'nowrap' }}>{doc.size}</span>
+              <span>•</span>
+              <span style={{ whiteSpace: 'nowrap' }}>{new Date(doc.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Action Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => onOpenPreview(doc)}
+            title="Preview"
+            style={{
+              padding: '6px 9px',
+              border: '1px solid #e2e8f0',
+              borderRadius: 6,
+              backgroundColor: '#fff',
+              color: '#334155',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 12
+            }}
+          >
+            <EyeIcon size={13} color="#475569" />
+          </button>
+          <a
+            href={doc.fileData || `/api/public/document/${doc.id}/raw`}
+            download={doc.name}
+            title="Download"
+            style={{
+              padding: '6px 8px',
+              border: '1px solid #e2e8f0',
+              borderRadius: 6,
+              backgroundColor: '#fff',
+              color: '#475569',
+              display: 'flex',
+              alignItems: 'center',
+              textDecoration: 'none'
+            }}
+          >
+            <DownloadIcon size={13} color="#475569" />
+          </a>
+          <button
+            type="button"
+            onClick={onToggleExpand}
+            title={isExpanded ? 'Collapse' : 'Expand'}
+            style={{
+              padding: '6px 7px',
+              border: '1px solid #e2e8f0',
+              borderRadius: 6,
+              backgroundColor: isExpanded ? '#f1f5f9' : '#fff',
+              color: '#64748b',
+              cursor: 'pointer'
+            }}
+          >
+            <ChevronDownIcon size={13} color="#64748b" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded Details Drawer */}
+      {isExpanded && (
+        <div style={{ backgroundColor: '#f8fafc', borderTop: '1px solid #f1f5f9', padding: '12px 14px', fontSize: 12 }}>
+          {doc.description && (
+            <div style={{ marginBottom: 10, color: '#334155', lineHeight: 1.45 }}>
+              <strong style={{ color: '#0f172a' }}>Notes: </strong>{doc.description}
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#64748b' }}>
+              Format: <strong>{doc.type}</strong>
+            </span>
+            <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#64748b' }}>
+              By: <strong>{doc.uploadedBy || 'Agent'}</strong>
+            </span>
+            <span style={{ backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: 4, color: '#065f46', fontWeight: 600 }}>
+              ✓ Verified
+            </span>
+          </div>
+          {relatedList.length > 0 && (
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>LINKED CRM RECORDS:</div>
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                {relatedList.map((rel, i) => (
+                  <span key={i} style={{ backgroundColor: '#e2e8f0', padding: '2px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600, color: '#334155' }}>
+                    {rel}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <button
+              type="button"
+              onClick={() => onWhatsAppShare(doc)}
+              style={{ flex: 1, padding: '7px 10px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+            >
+              <WhatsAppIcon size={13} color="#fff" /> Share
+            </button>
+            <button
+              type="button"
+              onClick={() => onCopyDirectLink(doc)}
+              style={{ flex: 1, padding: '7px 10px', backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#334155' }}
+            >
+              <CopyIcon size={13} color="#475569" /> Copy Link
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenEdit(doc)}
+              title="Edit Details"
+              style={{ padding: '7px 10px', backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#0284c7' }}
+            >
+              <EditIcon size={13} color="#0284c7" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete(doc)}
+              title="Delete Document"
+              style={{ padding: '7px 10px', backgroundColor: '#fee2e2', border: '1px solid #fecaca', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#dc2626' }}
+            >
+              <TrashIcon size={13} color="#dc2626" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
 export default function DocumentsPage() {
   const [data, setData] = useState<DocumentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -389,6 +603,7 @@ export default function DocumentsPage() {
   const [activeCategory, setActiveCategory] = useState<DocCategory>('All');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [mobileListFormat, setMobileListFormat] = useState<'compact' | 'table'>('compact');
   const [expandedDocIds, setExpandedDocIds] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
@@ -1154,7 +1369,61 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
           </div>
         ) : viewMode === 'list' ? (
           <>
-            <div className="desktop-only-table" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20, width: '100%' }}>
+            {/* Mobile Format Switcher (Compact List vs Full Swipe Table) */}
+            <div className="mobile-list-selector" style={{ marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: '6px 12px', borderRadius: 10, border: '1px solid #e2e8f0', width: '100%' }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>
+                  List Format:
+                </span>
+                <div style={{ display: 'inline-flex', backgroundColor: '#e2e8f0', padding: 2, borderRadius: 8, gap: 2 }}>
+                  <button
+                    type="button"
+                    onClick={() => setMobileListFormat('compact')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      border: 'none',
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      backgroundColor: mobileListFormat === 'compact' ? '#ffffff' : 'transparent',
+                      color: mobileListFormat === 'compact' ? '#0f172a' : '#64748b',
+                      boxShadow: mobileListFormat === 'compact' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                    }}
+                  >
+                    Compact List
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileListFormat('table')}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      border: 'none',
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      backgroundColor: mobileListFormat === 'table' ? '#ffffff' : 'transparent',
+                      color: mobileListFormat === 'table' ? '#0f172a' : '#64748b',
+                      boxShadow: mobileListFormat === 'table' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                    }}
+                  >
+                    Full Table (Swipe)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Table or Mobile Swipe Table */}
+            <div
+              className={mobileListFormat === 'table' ? 'responsive-touch-table-active' : 'desktop-only-table'}
+              style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20, width: '100%' }}
+            >
+              {mobileListFormat === 'table' && (
+                <div className="mobile-list-selector" style={{ padding: '8px 14px', backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0', fontSize: 11.5, color: '#166534', fontWeight: 600 }}>
+                  👉 Swipe horizontally across the table to inspect all columns and actions.
+                </div>
+              )}
               <div className="responsive-table-scroll" style={{ width: '100%' }}>
                 <table style={{ minWidth: 720, width: '100%', borderCollapse: 'collapse', textAlign: 'left', tableLayout: 'fixed' }}>
                   <colgroup>
@@ -1674,16 +1943,25 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
               </div>
             </div>
 
-            {/* MOBILE ONLY CARDS VIEW FOR LIST MODE */}
-            <div className="mobile-only-cards" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12, marginBottom: 20 }}>
+            {/* MOBILE COMPACT LIST VIEW FOR LIST MODE */}
+            <div
+              className="mobile-only-compact-list"
+              style={{
+                display: mobileListFormat === 'compact' ? undefined : 'none',
+                marginBottom: 20
+              }}
+            >
               {paginatedData.map(doc => (
-                <DocumentCardItem
+                <DocumentListItem
                   key={doc.id}
                   doc={doc}
+                  isExpanded={!!expandedDocIds[doc.id]}
+                  onToggleExpand={() => setExpandedDocIds(prev => ({ ...prev, [doc.id]: !prev[doc.id] }))}
                   onOpenPreview={handleOpenPreview}
                   onOpenEdit={handleOpenEdit}
                   onDelete={setDocToDelete}
                   onWhatsAppShare={handleWhatsAppShare}
+                  onCopyDirectLink={handleCopyDirectLink}
                 />
               ))}
             </div>

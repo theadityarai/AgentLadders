@@ -465,6 +465,165 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
   );
 });
 
+const PropertyListItem = React.memo(function PropertyListItem({
+  prop,
+  statusStyle,
+  priceFormatted,
+  isExpanded,
+  onToggleExpand,
+  onCopyPitchLink,
+  onShare,
+  onEdit,
+  onDelete
+}: {
+  prop: Property;
+  statusStyle: { bg: string; color: string };
+  priceFormatted: string;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onCopyPitchLink?: (title: string) => void;
+  onShare?: (prop: Property) => void;
+  onEdit?: (prop: Property) => void;
+  onDelete?: (prop: Property) => void;
+}) {
+  const isRent = prop.purpose === 'For Rent' || prop.listingType === 'For Rent';
+  const mediaList = prop.media && prop.media.length > 0 ? prop.media : [{ url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80', tag: 'Exterior' }];
+  const thumbUrl = mediaList[0].url;
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid var(--border, #e2e8f0)',
+        borderRadius: 12,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+        overflow: 'hidden',
+        transition: 'all 0.15s ease'
+      }}
+    >
+      {/* Compact Row */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px 12px',
+          gap: 12,
+          cursor: 'pointer'
+        }}
+        onClick={onToggleExpand}
+      >
+        {/* Thumbnail */}
+        <div style={{ position: 'relative', width: 68, height: 68, borderRadius: 8, overflow: 'hidden', flexShrink: 0, backgroundColor: '#f1f5f9' }}>
+          <img src={thumbUrl} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <span style={{
+            position: 'absolute', bottom: 2, left: 2,
+            backgroundColor: isRent ? '#7e22ce' : '#0f172a', color: '#fff',
+            fontSize: 9, fontWeight: 800, padding: '1px 5px', borderRadius: 4
+          }}>
+            {isRent ? 'RENT' : 'SALE'}
+          </span>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+            <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+              {priceFormatted}
+              {isRent && <span style={{ fontSize: 11, fontWeight: 500, color: '#64748b' }}>/mo</span>}
+            </span>
+            <span style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              backgroundColor: statusStyle.bg,
+              color: statusStyle.color,
+              padding: '2px 7px',
+              borderRadius: 10,
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}>
+              {prop.status}
+            </span>
+          </div>
+
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {prop.bhk ? `${prop.bhk} • ` : ''}{prop.title}
+          </div>
+
+          <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <MapPinIcon size={11} color="#94a3b8" />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {prop.locality || prop.city || 'Prime Location'}
+            </span>
+          </div>
+        </div>
+
+        {/* Chevron */}
+        <div style={{ padding: '6px', color: '#94a3b8', flexShrink: 0 }}>
+          <ChevronDownIcon size={14} color="#64748b" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+        </div>
+      </div>
+
+      {/* Expanded Details on tap */}
+      {isExpanded && (
+        <div style={{ backgroundColor: '#f8fafc', borderTop: '1px solid #f1f5f9', padding: '12px 14px', fontSize: 12 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#475569' }}>
+              Type: <strong>{prop.type}</strong>
+            </span>
+            {prop.carpetAreaSqFt && (
+              <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#475569' }}>
+                Area: <strong>{prop.carpetAreaSqFt} sq.ft</strong>
+              </span>
+            )}
+            {prop.possessionStatus && (
+              <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#475569' }}>
+                {prop.possessionStatus}
+              </span>
+            )}
+          </div>
+
+          {prop.description && (
+            <div style={{ color: '#475569', lineHeight: 1.4, marginBottom: 10 }}>
+              {prop.description}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button
+              type="button"
+              onClick={() => onShare && onShare(prop)}
+              style={{ flex: 1, padding: '7px 10px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+            >
+              <WhatsAppIcon size={13} color="#fff" /> Pitch
+            </button>
+            <button
+              type="button"
+              onClick={() => onCopyPitchLink && onCopyPitchLink(prop.title)}
+              style={{ flex: 1, padding: '7px 10px', backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#334155' }}
+            >
+              <CopyIcon size={13} color="#475569" /> Link
+            </button>
+            <button
+              type="button"
+              onClick={() => onEdit && onEdit(prop)}
+              style={{ padding: '7px 10px', backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#0284c7' }}
+            >
+              <EditIcon size={13} color="#0284c7" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onDelete && onDelete(prop)}
+              style={{ padding: '7px 10px', backgroundColor: '#fee2e2', border: '1px solid #fecaca', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#dc2626' }}
+            >
+              <TrashIcon size={13} color="#dc2626" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
 export default function PropertiesPage() {
   const [data, setData] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -473,6 +632,7 @@ export default function PropertiesPage() {
   const [purposeFilter, setPurposeFilter] = useState<'All' | 'Buy' | 'Rent'>('All');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [mobileListFormat, setMobileListFormat] = useState<'compact' | 'table'>('compact');
   const [expandedPropertyIds, setExpandedPropertyIds] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
@@ -1470,7 +1630,60 @@ export default function PropertiesPage() {
       {/* Property Display: Expandable List View vs Card Grid */}
       {viewMode === 'list' ? (
         <>
-          <div className="desktop-only-table" style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}>
+          {/* Mobile Format Switcher (Compact List vs Full Swipe Table) */}
+          <div className="mobile-list-selector" style={{ marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: '6px 12px', borderRadius: 10, border: '1px solid #e2e8f0', width: '100%' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>
+                List Format:
+              </span>
+              <div style={{ display: 'inline-flex', backgroundColor: '#e2e8f0', padding: 2, borderRadius: 8, gap: 2 }}>
+                <button
+                  type="button"
+                  onClick={() => setMobileListFormat('compact')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: 'none',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    backgroundColor: mobileListFormat === 'compact' ? '#ffffff' : 'transparent',
+                    color: mobileListFormat === 'compact' ? '#0f172a' : '#64748b',
+                    boxShadow: mobileListFormat === 'compact' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  }}
+                >
+                  Compact Rows
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileListFormat('table')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: 'none',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    backgroundColor: mobileListFormat === 'table' ? '#ffffff' : 'transparent',
+                    color: mobileListFormat === 'table' ? '#0f172a' : '#64748b',
+                    boxShadow: mobileListFormat === 'table' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  }}
+                >
+                  Full Table (Swipe)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={mobileListFormat === 'table' ? 'responsive-touch-table-active' : 'desktop-only-table'}
+            style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
+          >
+            {mobileListFormat === 'table' && (
+              <div className="mobile-list-selector" style={{ padding: '8px 14px', backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0', fontSize: 11.5, color: '#166534', fontWeight: 600 }}>
+                👉 Swipe horizontally across the table to inspect all property columns.
+              </div>
+            )}
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
               <thead>
@@ -1673,13 +1886,22 @@ export default function PropertiesPage() {
           </div>
         </div>
 
-        <div className="mobile-only-cards properties-card-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14 }}>
+        {/* MOBILE COMPACT LIST VIEW FOR LIST MODE */}
+        <div
+          className="mobile-only-compact-list"
+          style={{
+            display: mobileListFormat === 'compact' ? undefined : 'none',
+            marginBottom: 20
+          }}
+        >
           {paginatedProperties.map(prop => (
-            <PropertyCardItem 
-              key={`m-prop-${prop.id}`} 
+            <PropertyListItem 
+              key={`m-list-prop-${prop.id}`} 
               prop={prop} 
               statusStyle={getStatusStyle(prop.status)} 
               priceFormatted={formatINR(prop.price)} 
+              isExpanded={!!expandedPropertyIds[prop.id]}
+              onToggleExpand={() => setExpandedPropertyIds(prev => ({ ...prev, [prop.id]: !prev[prop.id] }))}
               onCopyPitchLink={handleCopyPitchLink}
               onShare={setSharingProperty}
               onEdit={handleOpenEdit}
