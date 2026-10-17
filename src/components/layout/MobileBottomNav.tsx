@@ -7,7 +7,7 @@ import {
   HomeIcon,
   UsersIcon,
   BuildingIcon,
-  BriefcaseIcon,
+  MapPinIcon,
   MenuIcon
 } from '@/components/icons/NavIcons';
 
@@ -18,7 +18,7 @@ export function MobileBottomNav() {
     { href: '/dashboard', label: 'Today', icon: HomeIcon, exact: true },
     { href: '/dashboard/leads', label: 'Inquiries', icon: UsersIcon, exact: false },
     { href: '/dashboard/properties', label: 'Properties', icon: BuildingIcon, exact: false },
-    { href: '/dashboard/deals', label: 'Deals', icon: BriefcaseIcon, exact: false },
+    { href: '/dashboard/site-visits', label: 'Site Visit', icon: MapPinIcon, exact: false },
   ];
 
   const isActive = (href: string, exact: boolean) => {
