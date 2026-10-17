@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import {
   MenuIcon,
@@ -32,6 +33,7 @@ import {
 } from '@/components/icons/NavIcons';
 
 export function Topbar() {
+  const pathname = usePathname();
   const { data: session } = useSession();
   const [showDropdown, setShowDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -508,47 +510,70 @@ export function Topbar() {
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 100, display: 'flex' }}>
-          <div onClick={e => e.stopPropagation()} className="animate-slide-left" style={{ width: '100%', maxWidth: '320px', backgroundColor: '#fff', height: '100%', display: 'flex', flexDirection: 'column', padding: '18px 16px', overflowY: 'auto', boxShadow: '4px 0 24px rgba(0,0,0,0.15)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: 14 }}>
+          <div onClick={e => e.stopPropagation()} className="animate-slide-left" style={{ width: '100%', maxWidth: 'min(320px, 86vw)', backgroundColor: '#fff', height: '100%', display: 'flex', flexDirection: 'column', padding: '18px 16px', overflowY: 'auto', WebkitOverflowScrolling: 'touch', boxShadow: '4px 0 24px rgba(0,0,0,0.15)' }}>
+            
+            {/* Drawer Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f1f5f9', paddingBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: 'var(--primary, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: 'var(--primary, #059669)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: '0 2px 8px rgba(5,150,105,0.25)' }}>
                   <BuildingIcon size={18} color="#fff" />
                 </div>
                 <div>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', display: 'block', lineHeight: 1.2 }}>AgentLadders</span>
-                  <span style={{ fontSize: 11, color: '#64748b' }}>Broker Cockpit</span>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', display: 'block', lineHeight: 1.2, letterSpacing: '-0.3px' }}>AgentLadders</span>
+                  <span style={{ fontSize: 11, color: '#64748b', fontWeight: 500 }}>India Real Estate OS</span>
                 </div>
               </div>
-              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 6, borderRadius: 6 }}>
-                <XIcon size={20} color="#64748b" />
+              <button 
+                type="button"
+                onClick={() => setMobileMenuOpen(false)} 
+                style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#64748b', cursor: 'pointer', padding: 6, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Close menu"
+              >
+                <XIcon size={18} color="#64748b" />
               </button>
             </div>
 
-            {/* Mobile Drawer Quick Search */}
-            <div style={{ position: 'relative', marginTop: 14, marginBottom: 6 }}>
-              <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', color: '#94a3b8' }}>
-                <SearchIcon size={15} color="#94a3b8" />
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search leads, deals, properties..."
-                style={{
-                  width: '100%',
-                  padding: '8px 12px 8px 36px',
-                  borderRadius: 10,
-                  border: '1px solid #e2e8f0',
-                  fontSize: 13,
-                  backgroundColor: '#f8fafc',
-                  outline: 'none'
-                }}
-              />
+            {/* Profile Card in Drawer */}
+            <div style={{
+              marginTop: 12,
+              marginBottom: 8,
+              padding: '10px 12px',
+              backgroundColor: '#f8fafc',
+              borderRadius: 12,
+              border: '1px solid #e2e8f0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10
+            }}>
+              <div style={{
+                width: 38,
+                height: 38,
+                borderRadius: '50%',
+                backgroundColor: 'var(--primary, #059669)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: 14,
+                flexShrink: 0
+              }}>
+                {(session?.user?.name || 'A').slice(0, 2).toUpperCase()}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {session?.user?.name || 'Agency Member'}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {(session?.user as any)?.agencyName || (session?.user as any)?.role || 'Apex Real Estate'}
+                </div>
+              </div>
             </div>
 
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '10px 0' }}>
+            {/* Navigation Sections */}
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '4px 0', flex: 1 }}>
               {/* Section 1: Core Dealflow */}
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '8px 8px 4px' }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '10px 8px 4px' }}>
                 Core Dealflow
               </div>
               {[
@@ -559,70 +584,99 @@ export function Topbar() {
                 { href: '/dashboard/deals', label: 'Deals Pipeline', icon: BriefcaseIcon },
               ].map(item => {
                 const ItemIcon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link 
                     key={item.href} 
                     href={item.href} 
                     onClick={() => setMobileMenuOpen(false)} 
-                    style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 8, color: '#0f172a', fontSize: 13.5, fontWeight: 500, textDecoration: 'none' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 11,
+                      padding: '9px 10px',
+                      borderRadius: 8,
+                      color: isActive ? 'var(--primary-text, #065f46)' : '#1e293b',
+                      backgroundColor: isActive ? 'var(--primary-light, #ecfdf5)' : 'transparent',
+                      fontSize: 13.5,
+                      fontWeight: isActive ? 700 : 500,
+                      textDecoration: 'none',
+                      transition: 'background 0.15s ease'
+                    }}
                   >
-                    <ItemIcon size={17} color="var(--primary, #059669)" />
+                    <ItemIcon size={17} color={isActive ? 'var(--primary, #059669)' : '#64748b'} />
                     <span>{item.label}</span>
                   </Link>
                 );
               })}
 
-              {/* Section 2: Operations & Finance */}
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '12px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: 4 }}>
+              {/* Section 2: Operations */}
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '12px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: 6 }}>
                 Operations & Financials
               </div>
               {[
                 { href: '/dashboard/documents', label: 'Documents & Vault', icon: FileTextIcon },
                 { href: '/dashboard/invoices', label: 'Invoices & Billing', icon: ReceiptIcon },
                 { href: '/dashboard/tasks', label: 'Tasks & Follow-ups', icon: CheckSquareIcon },
-                { href: '/dashboard/calendar', label: 'Calendar Schedule', icon: MapPinIcon },
-                { href: '/dashboard/owners', label: 'Property Owners', icon: UsersIcon },
-                { href: '/dashboard/companies', label: 'Corporate Clients', icon: BuildingIcon },
-                { href: '/dashboard/brokerage', label: 'Brokerage Splits', icon: BriefcaseIcon },
               ].map(item => {
                 const ItemIcon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link 
                     key={item.href} 
                     href={item.href} 
                     onClick={() => setMobileMenuOpen(false)} 
-                    style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 8, color: '#334155', fontSize: 13.5, fontWeight: 500, textDecoration: 'none' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 11,
+                      padding: '9px 10px',
+                      borderRadius: 8,
+                      color: isActive ? 'var(--primary-text, #065f46)' : '#334155',
+                      backgroundColor: isActive ? 'var(--primary-light, #ecfdf5)' : 'transparent',
+                      fontSize: 13.5,
+                      fontWeight: isActive ? 700 : 500,
+                      textDecoration: 'none',
+                      transition: 'background 0.15s ease'
+                    }}
                   >
-                    <ItemIcon size={17} color="#64748b" />
+                    <ItemIcon size={17} color={isActive ? 'var(--primary, #059669)' : '#64748b'} />
                     <span>{item.label}</span>
                   </Link>
                 );
               })}
 
-              {/* Section 3: Mastery & Support */}
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '12px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: 4 }}>
-                Mastery & Support
+              {/* Section 3: Agency & Support */}
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '12px 8px 4px', borderTop: '1px solid #f1f5f9', marginTop: 6 }}>
+                Agency & Support
               </div>
               {[
-                { href: '/dashboard/tutorial', label: 'Playbook & Tutorial 📖', icon: CompassIcon },
-                { href: '/dashboard/support', label: 'Help & Support 💬', icon: MessageCircleIcon },
-                { href: '/dashboard/settings', label: 'Agency Settings ⚙️', icon: SettingsIcon },
+                { href: '/dashboard/settings', label: 'Agency Settings', icon: SettingsIcon },
+                { href: '/dashboard/tutorial', label: 'Playbook & Tutorial', icon: CompassIcon },
+                { href: '/dashboard/support', label: 'Help & Support', icon: MessageCircleIcon },
               ].map(item => {
                 const ItemIcon = item.icon;
+                const isActive = pathname === item.href;
                 return (
                   <Link 
                     key={item.href} 
                     href={item.href} 
                     onClick={() => setMobileMenuOpen(false)} 
-                    style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 8, color: '#334155', fontSize: 13.5, fontWeight: 500, textDecoration: 'none' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 11,
+                      padding: '9px 10px',
+                      borderRadius: 8,
+                      color: isActive ? 'var(--primary-text, #065f46)' : '#334155',
+                      backgroundColor: isActive ? 'var(--primary-light, #ecfdf5)' : 'transparent',
+                      fontSize: 13.5,
+                      fontWeight: isActive ? 700 : 500,
+                      textDecoration: 'none',
+                      transition: 'background 0.15s ease'
+                    }}
                   >
-                    <ItemIcon size={17} color="var(--primary, #059669)" />
+                    <ItemIcon size={17} color={isActive ? 'var(--primary, #059669)' : '#64748b'} />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -632,7 +686,19 @@ export function Topbar() {
                 <Link 
                   href="/admin" 
                   onClick={() => setMobileMenuOpen(false)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 10px', borderRadius: 8, backgroundColor: 'rgba(99,102,241,0.1)', color: '#4f46e5', fontSize: 13.5, fontWeight: 600, textDecoration: 'none', marginTop: 8 }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 11,
+                    padding: '10px 10px',
+                    borderRadius: 8,
+                    backgroundColor: 'rgba(99,102,241,0.1)',
+                    color: '#4f46e5',
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    marginTop: 8
+                  }}
                 >
                   <ShieldIcon size={17} color="#4f46e5" />
                   <span>Super Admin HQ</span>
@@ -640,10 +706,26 @@ export function Topbar() {
               )}
             </nav>
 
-            <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: '1px solid #e2e8f0' }}>
+            <div style={{ marginTop: 'auto', paddingTop: 14, paddingBottom: 'max(14px, env(safe-area-inset-bottom, 14px))', borderTop: '1px solid #e2e8f0' }}>
               <button 
+                type="button"
                 onClick={handleSignOut}
-                style={{ width: '100%', padding: '10px', backgroundColor: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 8, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  backgroundColor: '#fee2e2',
+                  color: '#991b1b',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  transition: 'background 0.15s ease'
+                }}
               >
                 <LogOutIcon size={16} color="#991b1b" />
                 Sign Out

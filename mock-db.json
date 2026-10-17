@@ -2971,59 +2971,44 @@
       "timezone": "Asia/Calcutta",
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
       "createdAt": "2026-10-15T19:06:14.268Z",
-      "lastActive": "2026-10-15T19:32:29.245Z"
+      "lastActive": "2026-10-16T05:38:04.612Z"
+    },
+    {
+      "id": "sess_iet3u68_mvajdw13",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "userEmail": "marcus@vancerealty.com",
+      "browser": "Google Chrome",
+      "browserVersion": "155.0.0.0",
+      "os": "Windows 11 PC",
+      "deviceType": "desktop",
+      "deviceModel": "Windows PC",
+      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
+      "location": "Mumbai, Maharashtra, India",
+      "screen": "1536 × 864",
+      "timezone": "Asia/Calcutta",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "createdAt": "2026-10-16T05:38:05.125Z",
+      "lastActive": "2026-10-17T04:04:51.120Z"
+    },
+    {
+      "id": "sess_at6u6db_mvalr38f",
+      "userId": "usr_ag_vance_01",
+      "userName": "Marcus Vance",
+      "userEmail": "marcus@vancerealty.com",
+      "browser": "Google Chrome",
+      "browserVersion": "155.0.0.0",
+      "os": "Windows 11 PC",
+      "deviceType": "desktop",
+      "deviceModel": "Windows PC",
+      "ipAddress": "103.21.124.58 (Localhost • Vance Realty Gateway)",
+      "location": "Mumbai, Maharashtra, India",
+      "screen": "1536 × 864",
+      "timezone": "Asia/Calcutta",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "createdAt": "2026-10-16T06:44:20.250Z",
+      "lastActive": "2026-10-16T06:44:24.051Z"
     }
   ],
-  "revokedSessions": [
-    {
-      "id": "sess_zv1pi7l_mv9nzcrw",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "sess_lrg86uo_mv94c1of",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "sess_idwe6xy_mv9oshpj",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "sess_995wmlw_mv9qmen6",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "sess_mbmumsc_mv9s43jn",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "test_agent_suite_device",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "sess_7r81lig_mv9sje2k",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "sess_5wlnjmg_mv9te8ry",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:34:42.436Z"
-    },
-    {
-      "id": "sess_208d7zp_mv9vvvco",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T18:40:36.579Z"
-    },
-    {
-      "id": "sess_xmldq8r_mv9sjppk",
-      "userId": "usr_ag_vance_01",
-      "revokedAt": "2026-10-15T19:06:01.606Z"
-    }
-  ]
+  "revokedSessions": []
 }

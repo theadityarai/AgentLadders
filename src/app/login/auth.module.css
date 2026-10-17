@@ -754,6 +754,53 @@
   text-decoration: underline;
 }
 
+/* Mobile Brand Header (Visible only on mobile/tablet) */
+.mobileBrandHeader {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-decoration: none;
+}
+
+.mobileBrandLogo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+  flex-shrink: 0;
+}
+
+.mobileBrandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileBrandName {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.15;
+  letter-spacing: -0.4px;
+}
+
+.mobileBrandTag {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary, #059669);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
 /* Trust Badges on Mobile */
 .mobileTrustBadges {
   display: none;
@@ -778,22 +825,97 @@
 @media (max-width: 900px) {
   .authPage {
     flex-direction: column;
+    min-height: 100vh;
   }
   .imagePanel {
     display: none;
   }
   .formPanel {
-    padding: 36px 20px;
+    padding: 28px 20px calc(32px + env(safe-area-inset-bottom, 16px));
     background-color: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
   }
   .formContainer {
     background-color: #ffffff;
-    padding: 32px 24px;
+    padding: 28px 24px;
     border-radius: 16px;
     border: 1px solid var(--border-color);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 460px;
+    box-sizing: border-box;
+  }
+  .mobileBrandHeader {
+    display: flex;
   }
   .mobileTrustBadges {
     display: block;
   }
 }
+
+@media (max-width: 600px) {
+  .formPanel {
+    padding: 20px 14px calc(24px + env(safe-area-inset-bottom, 16px)) !important;
+  }
+  .formContainer {
+    padding: 22px 16px !important;
+    border-radius: 14px !important;
+  }
+  .formTitle {
+    font-size: 21px !important;
+  }
+  .formSubtitle {
+    font-size: 13px !important;
+  }
+  .demoGrid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  .demoCard {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+  }
+  .demoEmail {
+    margin-top: 1px !important;
+  }
+  .demoHint {
+    margin-top: 0 !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+  }
+  .formRow2 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .formPanel {
+    padding: 12px 8px calc(20px + env(safe-area-inset-bottom, 12px)) !important;
+  }
+  .formContainer {
+    padding: 18px 12px !important;
+    border-radius: 12px !important;
+  }
+  .formTitle {
+    font-size: 19px !important;
+  }
+  .demoCard {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+  .optionsRow {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+}
+

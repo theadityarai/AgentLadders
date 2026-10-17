@@ -216,6 +216,15 @@ export default function SignupPage() {
       {/* ── RIGHT FORM PANEL ── */}
       <div className={styles.formPanel}>
         <div className={`${styles.formContainer} ${styles.signupContainer}`}>
+          {/* Mobile-Only Brand Header */}
+          <Link href="/" className={styles.mobileBrandHeader}>
+            <div className={styles.mobileBrandLogo}>⬡</div>
+            <div className={styles.mobileBrandText}>
+              <span className={styles.mobileBrandName}>AgentLadders</span>
+              <span className={styles.mobileBrandTag}>India Real Estate OS</span>
+            </div>
+          </Link>
+
           <div className={styles.formHeader}>
             <div className={styles.formTag}>
               <SparklesIcon size={13} color="#059669" /> 14-Day Free Agency Trial

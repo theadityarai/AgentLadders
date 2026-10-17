@@ -843,7 +843,7 @@ export default function LandingPage() {
             </div>
 
             {/* Sliders Grid */}
-            <div className="mobile-col mobile-gap-8" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'center' }}>
+            <div className="mobile-col mobile-grid-1 mobile-gap-8" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '48px', alignItems: 'center' }}>
               
               {/* Sliders Controls */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -1051,7 +1051,7 @@ export default function LandingPage() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
             gap: '24px',
             textAlign: 'left'
           }}>
@@ -1180,7 +1180,7 @@ export default function LandingPage() {
         {/* 3 Pricing Plans */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
           gap: '24px',
           textAlign: 'left',
           alignItems: 'stretch'

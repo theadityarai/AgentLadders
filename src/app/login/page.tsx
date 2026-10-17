@@ -295,6 +295,15 @@ export default function LoginPage() {
       {/* ── RIGHT FORM PANEL ── */}
       <div className={styles.formPanel}>
         <div className={styles.formContainer}>
+          {/* Mobile-Only Brand Header */}
+          <Link href="/" className={styles.mobileBrandHeader}>
+            <div className={styles.mobileBrandLogo}>⬡</div>
+            <div className={styles.mobileBrandText}>
+              <span className={styles.mobileBrandName}>AgentLadders</span>
+              <span className={styles.mobileBrandTag}>India Real Estate OS</span>
+            </div>
+          </Link>
+
           {step === 'credentials' ? (
             <>
               <div className={styles.formHeader}>
@@ -325,11 +334,13 @@ export default function LoginPage() {
                       backgroundColor: activeDemo === 'agency' ? '#f0fdf4' : '#ffffff'
                     }}
                   >
-                    <div className={styles.demoRole}>
-                      <BuildingIcon size={14} color="var(--primary)" /> Agency Owner
+                    <div>
+                      <div className={styles.demoRole}>
+                        <BuildingIcon size={14} color="var(--primary)" /> Agency Owner
+                      </div>
+                      <div className={styles.demoEmail}>marcus@vancerealty.com</div>
                     </div>
-                    <div className={styles.demoEmail}>marcus@vancerealty.com</div>
-                    <div className={styles.demoHint}>Click to autofill →</div>
+                    <div className={styles.demoHint}>Tap to fill →</div>
                   </button>
 
                   <button
@@ -341,11 +352,13 @@ export default function LoginPage() {
                       backgroundColor: activeDemo === 'admin' ? '#f0fdf4' : '#ffffff'
                     }}
                   >
-                    <div className={styles.demoRole}>
-                      <ShieldIcon size={14} color="var(--primary)" /> Super Admin
+                    <div>
+                      <div className={styles.demoRole}>
+                        <ShieldIcon size={14} color="var(--primary)" /> Super Admin
+                      </div>
+                      <div className={styles.demoEmail}>aditya@agentladders.com</div>
                     </div>
-                    <div className={styles.demoEmail}>aditya@agentladders.com</div>
-                    <div className={styles.demoHint}>Click to autofill →</div>
+                    <div className={styles.demoHint}>Tap to fill →</div>
                   </button>
                 </div>
               </div>

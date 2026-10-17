@@ -925,8 +925,11 @@ export default function SiteVisitsPage() {
             </div>
           </div>
 
-          {/* Weekday Header */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', backgroundColor: '#f1f5f9', borderBottom: '1px solid var(--border)' }}>
+          {/* Responsive Touch-Scrollable Calendar Container */}
+          <div className="responsive-table-scroll" style={{ width: '100%' }}>
+            <div style={{ minWidth: 640 }}>
+              {/* Weekday Header */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', backgroundColor: '#f1f5f9', borderBottom: '1px solid var(--border)' }}>
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
               <div key={day} style={{ padding: '10px 8px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: idx === 0 || idx === 6 ? '#dc2626' : '#475569', letterSpacing: '0.05em' }}>
                 {day.toUpperCase()}
@@ -1048,6 +1051,8 @@ export default function SiteVisitsPage() {
                 </div>
               );
             })}
+          </div>
+            </div>
           </div>
         </div>
       ) : (

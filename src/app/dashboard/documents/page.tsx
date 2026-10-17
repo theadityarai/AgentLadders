@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import Link from 'next/link';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Toast, ToastMessage } from '@/components/ui/Toast';
@@ -22,7 +23,11 @@ import {
   ExternalLinkIcon,
   PrinterIcon,
   ListIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  EyeIcon,
+  MoreHorizontalIcon,
+  CopyIcon,
+  CheckCircleIcon
 } from '@/components/icons/NavIcons';
 import { ShareModal } from '@/components/ui/ShareModal';
 
@@ -71,18 +76,18 @@ function getFileIcon(type: string, name: string = ''): string {
 function getCategoryBadgeStyle(cat?: string) {
   switch (cat) {
     case 'Contracts & MOUs':
-      return { bg: '#f3e8ff', color: '#7e22ce', border: '#d8b4fe' };
+      return { bg: '#faf5ff', color: '#6b21a8', border: '#f3e8ff' };
     case 'Client KYC & Identity':
-      return { bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' };
+      return { bg: '#f0f9ff', color: '#0369a1', border: '#e0f2fe' };
     case 'Brochures & Floor Plans':
-      return { bg: '#fef3c7', color: '#92400e', border: '#fde68a' };
+      return { bg: '#fffbeb', color: '#92400e', border: '#fef3c7' };
     case 'Title Deeds & OC':
-      return { bg: '#ccfbf1', color: '#0f766e', border: '#99f6e4' };
+      return { bg: '#f0fdfa', color: '#0f766e', border: '#ccfbf1' };
     case 'Payment Receipts':
-      return { bg: '#ecfdf5', color: '#065f46', border: '#a7f3d0' };
+      return { bg: '#f0fdf4', color: '#15803d', border: '#dcfce7' };
     case 'Others':
     default:
-      return { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' };
+      return { bg: '#f8fafc', color: '#475569', border: '#e2e8f0' };
   }
 }
 
@@ -152,21 +157,22 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
             title="Edit Document Details"
             style={{
               background: 'none',
-              border: 'none',
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#ffffff',
               color: '#64748b',
               cursor: 'pointer',
               padding: '5px 7px',
               borderRadius: 6,
-              fontSize: 13,
+              fontSize: 12,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.15s'
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#0284c7'; e.currentTarget.style.backgroundColor = '#e0f2fe'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#0284c7'; e.currentTarget.style.backgroundColor = '#f0f9ff'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.backgroundColor = '#ffffff'; }}
           >
-            ✏️
+            <EditIcon size={13} color="currentColor" />
           </button>
 
           {/* Delete Button */}
@@ -174,11 +180,11 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
             type="button"
             onClick={() => onDelete(doc)}
             title="Delete Document"
-            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 5, borderRadius: 6 }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#fee2e2'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+            style={{ background: 'none', border: '1px solid #e2e8f0', backgroundColor: '#ffffff', color: '#94a3b8', cursor: 'pointer', padding: 5, borderRadius: 6 }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.backgroundColor = '#fef2f2'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.backgroundColor = '#ffffff'; }}
           >
-            <TrashIcon size={16} color="currentColor" />
+            <TrashIcon size={14} color="currentColor" />
           </button>
         </div>
       </div>
@@ -222,7 +228,7 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
             }}
             title={doc.description}
           >
-            <span style={{ fontSize: 12 }}>📝</span>
+            <FileTextIcon size={12} color="#64748b" style={{ flexShrink: 0, marginTop: 2 }} />
             <span style={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -271,28 +277,30 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
       </div>
 
       {/* Footer Action Row: Preview, Edit Icon, WhatsApp Share, Download */}
-      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
         {/* View / Preview */}
         <button
           type="button"
           onClick={() => onOpenPreview(doc)}
-          title="Preview Document in Google Docs / Native Viewer"
+          title="Preview Document"
           style={{
-            padding: '6px 11px',
-            backgroundColor: '#f1f5f9',
-            color: '#0f172a',
+            padding: '6px 12px',
+            backgroundColor: '#ffffff',
+            color: '#334155',
             border: '1px solid #e2e8f0',
-            borderRadius: 6,
+            borderRadius: 7,
             fontSize: 12,
-            fontWeight: 700,
+            fontWeight: 600,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: 5,
             transition: 'all 0.15s ease'
           }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
         >
-          <span>👁️</span>
+          <EyeIcon size={13} color="#475569" />
           <span>Preview</span>
         </button>
 
@@ -305,18 +313,20 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
             style={{
               width: 30,
               height: 30,
-              backgroundColor: '#f0f9ff',
-              color: '#0284c7',
-              border: '1px solid #bae6fd',
-              borderRadius: 6,
+              backgroundColor: '#ffffff',
+              color: '#64748b',
+              border: '1px solid #e2e8f0',
+              borderRadius: 7,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.15s ease'
             }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.color = '#0284c7'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#64748b'; }}
           >
-            <EditIcon size={14} color="#0284c7" />
+            <EditIcon size={13} color="currentColor" />
           </button>
 
           {/* WhatsApp Share */}
@@ -327,18 +337,20 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
             style={{
               width: 30,
               height: 30,
-              backgroundColor: '#ecfdf5',
-              color: '#059669',
-              border: '1px solid #bbf7d0',
-              borderRadius: 6,
+              backgroundColor: '#ffffff',
+              color: '#16a34a',
+              border: '1px solid #e2e8f0',
+              borderRadius: 7,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'all 0.15s ease'
             }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f0fdf4'; e.currentTarget.style.borderColor = '#bbf7d0'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
           >
-            <WhatsAppIcon size={14} color="#059669" />
+            <WhatsAppIcon size={14} color="#16a34a" />
           </button>
 
           {/* Download */}
@@ -349,16 +361,20 @@ const DocumentCardItem = React.memo(function DocumentCardItem({
             style={{
               width: 30,
               height: 30,
-              backgroundColor: '#0f172a',
-              color: '#ffffff',
+              backgroundColor: '#ffffff',
+              color: '#334155',
+              border: '1px solid #e2e8f0',
               textDecoration: 'none',
-              borderRadius: 6,
+              borderRadius: 7,
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              transition: 'all 0.15s ease'
             }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
           >
-            <DownloadIcon size={13} color="#ffffff" />
+            <DownloadIcon size={13} color="#475569" />
           </a>
         </div>
       </div>
@@ -376,6 +392,13 @@ export default function DocumentsPage() {
   const [expandedDocIds, setExpandedDocIds] = useState<Record<string, boolean>>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleCloseMenu = () => setActiveActionMenuId(null);
+    window.addEventListener('click', handleCloseMenu);
+    return () => window.removeEventListener('click', handleCloseMenu);
+  }, []);
   
   // Modals & Feedback
   const [docToDelete, setDocToDelete] = useState<DocumentItem | null>(null);
@@ -1017,6 +1040,27 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
               </button>
             </div>
 
+            <Link
+              href="/dashboard/design-lab"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 14px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                textDecoration: 'none',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+              }}
+            >
+              <span>🎨</span>
+              <span>UI Variations Studio</span>
+            </Link>
+
             <button
               type="button"
               onClick={() => {
@@ -1118,16 +1162,16 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
           </div>
         ) : viewMode === 'list' ? (
           <>
-            <div style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20, width: '100%' }}>
-              <div style={{ width: '100%', overflowX: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', tableLayout: 'fixed' }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', boxShadow: '0 1px 3px rgba(0,0,0,0.03)', marginBottom: 20, width: '100%' }}>
+              <div className="responsive-table-scroll" style={{ width: '100%' }}>
+                <table style={{ minWidth: 720, width: '100%', borderCollapse: 'collapse', textAlign: 'left', tableLayout: 'fixed' }}>
                   <colgroup>
-                    <col style={{ width: '27%' }} />
-                    <col style={{ width: '14%' }} />
+                    <col style={{ width: '28%' }} />
+                    <col style={{ width: '15%' }} />
                     <col style={{ width: '18%' }} />
                     <col style={{ width: '13%' }} />
                     <col style={{ width: '11%' }} />
-                    <col style={{ width: '17%' }} />
+                    <col style={{ width: '15%' }} />
                   </colgroup>
                   <thead>
                     <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border, #e2e8f0)' }}>
@@ -1136,7 +1180,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                       <th style={{ padding: '12px 10px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Linked Record</th>
                       <th style={{ padding: '12px 10px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Date &amp; Size</th>
                       <th style={{ padding: '12px 10px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Uploaded By</th>
-                      <th style={{ padding: '12px 12px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
+                      <th style={{ padding: '12px 14px', fontSize: 11.5, fontWeight: 700, color: '#475569', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1277,77 +1321,34 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                             </td>
 
                             {/* Actions Column */}
-                            <td style={{ padding: '12px 12px', textAlign: 'right', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3, flexWrap: 'nowrap' }}>
-                                {/* Expand / Collapse */}
-                                <button
-                                  type="button"
-                                  onClick={() => setExpandedDocIds(prev => ({ ...prev, [doc.id]: !prev[doc.id] }))}
-                                  title={isExpanded ? 'Collapse Details' : 'Expand Details'}
-                                  style={{
-                                    width: 27,
-                                    height: 27,
-                                    borderRadius: 6,
-                                    border: '1px solid #bfdbfe',
-                                    backgroundColor: isExpanded ? 'var(--primary, #059669)' : '#eff6ff',
-                                    color: isExpanded ? '#fff' : 'var(--primary, #059669)',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    flexShrink: 0
-                                  }}
-                                >
-                                  <ChevronDownIcon size={12} color={isExpanded ? '#fff' : 'var(--primary, #059669)'} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
-                                </button>
-
+                            <td style={{ padding: '10px 14px', textAlign: 'right', overflow: 'visible', position: 'relative' }} onClick={e => e.stopPropagation()}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, flexWrap: 'nowrap' }}>
                                 {/* Preview Button */}
                                 <button
                                   type="button"
                                   onClick={() => handleOpenPreview(doc)}
                                   title="Preview Document"
                                   style={{
-                                    width: 27,
-                                    height: 27,
+                                    height: 30,
+                                    padding: '0 8px',
                                     borderRadius: 6,
                                     border: '1px solid #e2e8f0',
                                     backgroundColor: '#ffffff',
-                                    color: '#0f172a',
+                                    color: '#334155',
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
+                                    gap: 5,
                                     cursor: 'pointer',
                                     fontSize: 12,
+                                    fontWeight: 600,
+                                    transition: 'all 0.15s ease',
                                     flexShrink: 0
                                   }}
-                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
-                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
+                                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
                                 >
-                                  👁️
-                                </button>
-
-                                {/* WhatsApp Share */}
-                                <button
-                                  type="button"
-                                  onClick={() => handleWhatsAppShare(doc)}
-                                  title="Share Document on WhatsApp"
-                                  style={{
-                                    width: 27,
-                                    height: 27,
-                                    borderRadius: 6,
-                                    border: '1px solid #bbf7d0',
-                                    backgroundColor: '#dcfce7',
-                                    color: '#166534',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    flexShrink: 0
-                                  }}
-                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#bbf7d0')}
-                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#dcfce7')}
-                                >
-                                  <WhatsAppIcon size={12} color="#166534" />
+                                  <EyeIcon size={13} color="#475569" />
+                                  <span>Preview</span>
                                 </button>
 
                                 {/* Download */}
@@ -1356,71 +1357,215 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                   download={doc.name}
                                   title="Download File"
                                   style={{
-                                    width: 27,
-                                    height: 27,
+                                    width: 30,
+                                    height: 30,
                                     borderRadius: 6,
-                                    border: '1px solid #0f172a',
-                                    backgroundColor: '#0f172a',
-                                    color: '#ffffff',
+                                    border: '1px solid #e2e8f0',
+                                    backgroundColor: '#ffffff',
+                                    color: '#475569',
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     textDecoration: 'none',
                                     cursor: 'pointer',
+                                    transition: 'all 0.15s ease',
                                     flexShrink: 0
                                   }}
-                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#334155')}
-                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#0f172a')}
+                                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f8fafc'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
+                                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
                                 >
-                                  <DownloadIcon size={12} color="#ffffff" />
+                                  <DownloadIcon size={13} color="#475569" />
                                 </a>
 
-                                {/* Edit */}
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenEdit(doc)}
-                                  title="Edit Document"
-                                  style={{
-                                    width: 27,
-                                    height: 27,
-                                    borderRadius: 6,
-                                    border: '1px solid #bfdbfe',
-                                    backgroundColor: '#eff6ff',
-                                    color: '#1d4ed8',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    cursor: 'pointer',
-                                    flexShrink: 0
-                                  }}
-                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#dbeafe')}
-                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#eff6ff')}
-                                >
-                                  <EditIcon size={12} color="#1d4ed8" />
-                                </button>
+                                {/* More Dropdown Button */}
+                                <div style={{ position: 'relative', display: 'inline-block' }}>
+                                  <button
+                                    type="button"
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      setActiveActionMenuId(activeActionMenuId === doc.id ? null : doc.id);
+                                    }}
+                                    title="More Actions"
+                                    style={{
+                                      width: 30,
+                                      height: 30,
+                                      borderRadius: 6,
+                                      border: '1px solid #e2e8f0',
+                                      backgroundColor: activeActionMenuId === doc.id ? '#f1f5f9' : '#ffffff',
+                                      color: '#475569',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.15s ease',
+                                      flexShrink: 0
+                                    }}
+                                    onMouseEnter={e => { if (activeActionMenuId !== doc.id) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                                    onMouseLeave={e => { if (activeActionMenuId !== doc.id) e.currentTarget.style.backgroundColor = '#ffffff'; }}
+                                  >
+                                    <MoreHorizontalIcon size={14} color="#64748b" />
+                                  </button>
 
-                                {/* Delete */}
+                                  {activeActionMenuId === doc.id && (
+                                    <div
+                                      style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: 'calc(100% + 4px)',
+                                        backgroundColor: '#ffffff',
+                                        border: '1px solid #e2e8f0',
+                                        borderRadius: 8,
+                                        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
+                                        minWidth: 175,
+                                        zIndex: 60,
+                                        padding: '4px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 2,
+                                        textAlign: 'left'
+                                      }}
+                                      onClick={e => e.stopPropagation()}
+                                    >
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActiveActionMenuId(null);
+                                          handleWhatsAppShare(doc);
+                                        }}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 8,
+                                          padding: '7px 10px',
+                                          borderRadius: 6,
+                                          border: 'none',
+                                          backgroundColor: 'transparent',
+                                          color: '#15803d',
+                                          fontSize: 12,
+                                          fontWeight: 600,
+                                          cursor: 'pointer',
+                                          width: '100%',
+                                          textAlign: 'left'
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0fdf4')}
+                                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                      >
+                                        <WhatsAppIcon size={14} color="#15803d" />
+                                        <span>Share via WhatsApp</span>
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActiveActionMenuId(null);
+                                          handleCopyDirectLink(doc);
+                                        }}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 8,
+                                          padding: '7px 10px',
+                                          borderRadius: 6,
+                                          border: 'none',
+                                          backgroundColor: 'transparent',
+                                          color: '#334155',
+                                          fontSize: 12,
+                                          fontWeight: 500,
+                                          cursor: 'pointer',
+                                          width: '100%',
+                                          textAlign: 'left'
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                      >
+                                        <CopyIcon size={13} color="#64748b" />
+                                        <span>Copy Link</span>
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActiveActionMenuId(null);
+                                          handleOpenEdit(doc);
+                                        }}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 8,
+                                          padding: '7px 10px',
+                                          borderRadius: 6,
+                                          border: 'none',
+                                          backgroundColor: 'transparent',
+                                          color: '#0284c7',
+                                          fontSize: 12,
+                                          fontWeight: 500,
+                                          cursor: 'pointer',
+                                          width: '100%',
+                                          textAlign: 'left'
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0f9ff')}
+                                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                      >
+                                        <EditIcon size={13} color="#0284c7" />
+                                        <span>Edit Details</span>
+                                      </button>
+
+                                      <div style={{ height: 1, backgroundColor: '#f1f5f9', margin: '2px 0' }} />
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setActiveActionMenuId(null);
+                                          setDocToDelete(doc);
+                                        }}
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 8,
+                                          padding: '7px 10px',
+                                          borderRadius: 6,
+                                          border: 'none',
+                                          backgroundColor: 'transparent',
+                                          color: '#dc2626',
+                                          fontSize: 12,
+                                          fontWeight: 500,
+                                          cursor: 'pointer',
+                                          width: '100%',
+                                          textAlign: 'left'
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fef2f2')}
+                                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                      >
+                                        <TrashIcon size={13} color="#dc2626" />
+                                        <span>Delete Document</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Expand / Collapse */}
                                 <button
                                   type="button"
-                                  onClick={() => setDocToDelete(doc)}
-                                  title="Delete Document"
+                                  onClick={() => setExpandedDocIds(prev => ({ ...prev, [doc.id]: !prev[doc.id] }))}
+                                  title={isExpanded ? 'Collapse Details' : 'Expand Details'}
                                   style={{
-                                    width: 27,
-                                    height: 27,
+                                    width: 30,
+                                    height: 30,
                                     borderRadius: 6,
-                                    border: '1px solid #fecaca',
-                                    backgroundColor: '#fee2e2',
-                                    color: '#dc2626',
+                                    border: '1px solid #e2e8f0',
+                                    backgroundColor: isExpanded ? '#f1f5f9' : '#ffffff',
+                                    color: '#64748b',
                                     display: 'inline-flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    flexShrink: 0
+                                    flexShrink: 0,
+                                    transition: 'all 0.15s ease'
                                   }}
-                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fecaca')}
-                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fee2e2')}
+                                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = isExpanded ? '#f1f5f9' : '#ffffff')}
                                 >
-                                  <TrashIcon size={12} color="#dc2626" />
+                                  <ChevronDownIcon size={13} color="#64748b" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
                                 </button>
                               </div>
                             </td>
@@ -1432,8 +1577,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                               <td colSpan={6} style={{ padding: '0 20px 20px 20px' }}>
                                 <div style={{ backgroundColor: '#ffffff', borderRadius: 10, border: '1px solid #e2e8f0', padding: '16px 20px', marginTop: 6, display: 'flex', flexDirection: 'column', gap: 14 }}>
                                   <div>
-                                    <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6 }}>
-                                      📝 Document Notes &amp; Summary
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6 }}>
+                                      <FileTextIcon size={13} color="#64748b" />
+                                      <span>Document Notes &amp; Summary</span>
                                     </div>
                                     <div style={{ fontSize: 13.5, color: '#1e293b', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                                       {doc.description || 'No additional notes or description provided for this vault asset.'}
@@ -1455,14 +1601,17 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                     </div>
                                     <div style={{ backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0' }}>
                                       <span style={{ color: '#64748b', fontSize: 11, fontWeight: 700, display: 'block' }}>Vault Security</span>
-                                      <span style={{ fontWeight: 600, color: '#059669' }}>🔒 Certified Real Estate Record</span>
+                                      <span style={{ fontWeight: 600, color: '#059669', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                        <CheckCircleIcon size={13} color="#059669" /> Certified Real Estate Record
+                                      </span>
                                     </div>
                                   </div>
 
                                   {relatedList.length > 0 && (
                                     <div>
-                                      <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6 }}>
-                                        🔗 Linked CRM Records
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 6 }}>
+                                        <BriefcaseIcon size={13} color="#64748b" />
+                                        <span>Linked CRM Records</span>
                                       </div>
                                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                                         {relatedList.map((rel, i) => {
@@ -1501,23 +1650,23 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                                       <button
                                         type="button"
                                         onClick={() => handleCopyDirectLink(doc)}
-                                        style={{ padding: '5px 12px', fontSize: 12, fontWeight: 700, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                        style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, color: '#334155' }}
                                       >
-                                        <span>📋</span> Copy Link
+                                        <CopyIcon size={13} color="#475569" /> <span>Copy Link</span>
                                       </button>
                                       <button
                                         type="button"
                                         onClick={() => handleOpenPreview(doc)}
-                                        style={{ padding: '5px 12px', fontSize: 12, fontWeight: 700, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                                        style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, backgroundColor: '#fff', border: '1px solid #cbd5e1', borderRadius: 6, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, color: '#334155' }}
                                       >
-                                        <span>👁️</span> Preview
+                                        <EyeIcon size={13} color="#475569" /> <span>Preview</span>
                                       </button>
                                       <a
                                         href={doc.fileData || `/api/public/document/${doc.id}/raw`}
                                         download={doc.name}
-                                        style={{ padding: '5px 12px', fontSize: 12, fontWeight: 700, backgroundColor: '#0f172a', color: '#fff', border: '1px solid #0f172a', borderRadius: 6, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
+                                        style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, backgroundColor: '#0f172a', color: '#fff', border: '1px solid #0f172a', borderRadius: 6, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}
                                       >
-                                        <DownloadIcon size={12} color="#fff" /> Download
+                                        <DownloadIcon size={13} color="#fff" /> <span>Download</span>
                                       </a>
                                     </div>
                                   </div>
@@ -2520,12 +2669,14 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
 
               {/* Modal Bottom Bar */}
               <div
+                className="responsive-modal-footer"
                 style={{
-                  padding: '12px 20px',
+                  padding: '12px 18px',
                   borderTop: '1px solid #e2e8f0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'flex-end',
+                  flexWrap: 'wrap',
                   backgroundColor: '#ffffff',
                   gap: 8
                 }}

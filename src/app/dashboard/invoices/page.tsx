@@ -1238,7 +1238,7 @@ export default function InvoicesPage() {
         <div className="unified-filter-card" style={{ marginBottom: 20 }}>
           {/* Row 1: Search + Sort + Reset */}
           <div className="unified-filter-row-top">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 'min(280px, 100%)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 'min(280px, 100%)', flexWrap: 'wrap' }}>
               <SearchBar
                 value={searchQuery}
                 onChange={setSearchQuery}

@@ -13,3 +13,16 @@
 .padding {
   padding: var(--spacing-6);
 }
+
+@media (max-width: 640px) {
+  .padding {
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .padding {
+    padding: 12px 10px;
+  }
+}
+
