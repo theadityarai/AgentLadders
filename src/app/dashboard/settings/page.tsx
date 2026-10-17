@@ -3116,8 +3116,8 @@ export default function SettingsPage() {
             return (
               <div className={styles.formSection}>
                 {/* Header & Quick Search Bar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
-                  <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
+                  <div style={{ flex: '1 1 280px' }}>
                     <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
                       <span>⚙️</span> Agency Configuration
                     </h2>
@@ -3128,22 +3128,18 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Real-time search filter */}
-                  <SearchBar
-                    value={configSearch}
-                    onChange={setConfigSearch}
-                    placeholder="Quick search configs..."
-                    maxWidth={320}
-                  />
+                  <div style={{ flex: '1 1 240px', maxWidth: '100%', width: '100%' }}>
+                    <SearchBar
+                      value={configSearch}
+                      onChange={setConfigSearch}
+                      placeholder="Quick search configs..."
+                      width="100%"
+                    />
+                  </div>
                 </div>
 
                 {/* Organized Category Tabs / Switcher */}
-                <div className="responsive-pills-scroll" style={{
-                  alignItems: 'center',
-                  padding: '6px',
-                  backgroundColor: '#f1f5f9',
-                  borderRadius: 12,
-                  marginBottom: 20
-                }}>
+                <div className={styles.configCategoryTabs}>
                   {[
                     { id: 'statuses', label: 'Statuses & Pipelines', icon: '🎯', count: statusCount },
                     { id: 'property', label: 'Property Attributes', icon: '🏡', count: propertyCount },
@@ -3156,23 +3152,7 @@ export default function SettingsPage() {
                         key={tab.id}
                         type="button"
                         onClick={() => setConfigSubTab(tab.id as any)}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 6,
-                          padding: '8px 14px',
-                          borderRadius: 9,
-                          fontSize: 13,
-                          fontWeight: isActive ? 700 : 600,
-                          cursor: 'pointer',
-                          transition: 'all 0.15s ease',
-                          backgroundColor: isActive ? '#ffffff' : 'transparent',
-                          color: isActive ? '#0f172a' : '#64748b',
-                          boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                          border: 'none',
-                          whiteSpace: 'nowrap',
-                          flexShrink: 0
-                        }}
+                        className={`${styles.configCategoryTabBtn} ${isActive ? styles.configCategoryTabActive : ''}`}
                       >
                         <span>{tab.icon}</span>
                         <span>{tab.label}</span>
@@ -3223,98 +3203,51 @@ export default function SettingsPage() {
                     </button>
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {filteredSections.map(sec => {
                       const items: string[] = (configs as any)[sec.key] || [];
                       return (
                         <div
                           key={sec.key}
-                          className={styles.configItemCard}
-                          style={{
-                            backgroundColor: '#fff',
-                            borderRadius: 14,
-                            border: '1px solid var(--border-color)',
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 16,
-                            padding: '22px 24px',
-                            transition: 'border-color 0.15s ease'
-                          }}
+                          className={styles.configCard}
                         >
                           {/* Card Header */}
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                <div style={{
-                                  width: 32,
-                                  height: 32,
-                                  borderRadius: 8,
-                                  backgroundColor: '#f8fafc',
-                                  border: '1px solid #e2e8f0',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: 18,
-                                  flexShrink: 0
-                                }}>
+                          <div className={styles.configCardHeader}>
+                            <div className={styles.configCardTitleGroup}>
+                              <div className={styles.configCardIconTitle}>
+                                <div className={styles.configCardIcon}>
                                   {sec.icon}
                                 </div>
-                                <h3 style={{ fontSize: 15.5, fontWeight: 700, margin: 0, color: '#0f172a' }}>
-                                  {sec.title}
-                                </h3>
-                                <span style={{
-                                  fontSize: 11,
-                                  fontWeight: 700,
-                                  padding: '2px 8px',
-                                  borderRadius: 12,
-                                  backgroundColor: '#ecfdf5',
-                                  color: '#065f46',
-                                  border: '1px solid #a7f3d0'
-                                }}>
-                                  {items.length} {items.length === 1 ? 'Option' : 'Options'}
-                                </span>
-                                {sec.usageBadges.map(badge => (
-                                  <span
-                                    key={badge}
-                                    style={{
-                                      fontSize: 10.5,
-                                      fontWeight: 600,
-                                      padding: '2px 7px',
-                                      borderRadius: 6,
-                                      backgroundColor: '#f1f5f9',
-                                      color: '#475569',
-                                      border: '1px solid #e2e8f0'
-                                    }}
-                                  >
-                                    {badge}
-                                  </span>
-                                ))}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div className={styles.configCardTitleRow}>
+                                    <h3 className={styles.configCardTitle}>
+                                      {sec.title}
+                                    </h3>
+                                    <span className={styles.configCardCountBadge}>
+                                      {items.length} {items.length === 1 ? 'Option' : 'Options'}
+                                    </span>
+                                  </div>
+                                  <div className={styles.configCardBadges}>
+                                    {sec.usageBadges.map(badge => (
+                                      <span key={badge} className={styles.configCardBadge}>
+                                        {badge}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
                               </div>
-                              <p style={{ fontSize: 12.5, color: '#64748b', margin: '6px 0 0', lineHeight: 1.45 }}>
+                              <p className={styles.configCardDesc}>
                                 {sec.description}
                               </p>
                             </div>
 
                             {/* Actions: Reset Defaults & Add Option */}
-                            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+                            <div className={styles.configCardActions}>
                               <button
                                 type="button"
                                 onClick={() => handleResetConfigDefaults(sec.key)}
                                 title={`Reset ${sec.title} to standard defaults`}
-                                style={{
-                                  padding: '6px 11px',
-                                  borderRadius: 8,
-                                  border: '1px solid #e2e8f0',
-                                  backgroundColor: '#fff',
-                                  color: '#64748b',
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  transition: 'all 0.15s ease'
-                                }}
-                                onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                                onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fff')}
+                                className={styles.configBtnReset}
                               >
                                 ↺ Reset Defaults
                               </button>
@@ -3329,19 +3262,7 @@ export default function SettingsPage() {
                                     setSelectedStatusColor(unusedPalette.id);
                                   }
                                 }}
-                                style={{
-                                  padding: '6px 12px',
-                                  borderRadius: 8,
-                                  border: 'none',
-                                  backgroundColor: '#0f172a',
-                                  color: '#fff',
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: 5
-                                }}
+                                className={styles.configBtnAdd}
                               >
                                 <span>+</span> Add {getCategoryLabel(sec.key)}
                               </button>
@@ -3349,16 +3270,7 @@ export default function SettingsPage() {
                           </div>
 
                           {/* Options Container Chips */}
-                          <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 8,
-                            padding: '12px 14px',
-                            backgroundColor: '#f8fafc',
-                            borderRadius: 10,
-                            border: '1px solid #e2e8f0',
-                            minHeight: 46
-                          }}>
+                          <div className={styles.configChipsContainer}>
                             {items.length === 0 ? (
                               <div style={{ fontSize: 12.5, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
                                 <span>No options configured yet.</span>
@@ -3725,14 +3637,18 @@ export default function SettingsPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 9999, padding: '16px'
         }} onClick={() => setConfigModal(null)}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            width: '100%', maxWidth: '440px',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-            border: '1px solid #e2e8f0',
-            overflow: 'hidden'
-          }} onClick={e => e.stopPropagation()}>
+          <div
+            className="responsive-modal animate-enter"
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              width: '100%', maxWidth: '460px',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+              border: '1px solid #e2e8f0',
+              overflow: 'hidden'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 18 }}>{configModal.mode === 'add' ? '✨' : '✏️'}</span>
@@ -3909,7 +3825,7 @@ export default function SettingsPage() {
                 );
               })()}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <div className="responsive-modal-footer form-sticky-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', backgroundColor: '#ffffff' }}>
                 <Button variant="outline" type="button" onClick={() => setConfigModal(null)}>Cancel</Button>
                 <Button variant="primary" type="submit">
                   {configModal.mode === 'add' ? 'Add Option' : 'Save Changes'}
