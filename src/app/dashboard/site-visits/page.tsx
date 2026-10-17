@@ -811,8 +811,8 @@ export default function SiteVisitsPage() {
 
       {/* Unified Compact Filter Bar Card */}
       <div className="unified-filter-card">
-        {/* Row 1: Segmented Showing Type Switch + Search + Sort */}
-        <div className="unified-filter-row-top">
+        {/* Row 1: Segmented Showing Type Switch */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
           <FilterTabs
             variant="segmented"
             size="sm"
@@ -824,13 +824,46 @@ export default function SiteVisitsPage() {
             activeTab={purposeFilter}
             onChange={(tabId) => setPurposeFilter(tabId as any)}
           />
+        </div>
 
-          <div className="unified-filter-controls">
+        {/* Row 2: Schedule + Search Bar + Sorting in ONE line */}
+        <div 
+          className="unified-filter-row-schedule-search" 
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between', 
+            flexWrap: 'wrap', 
+            gap: 12, 
+            borderTop: '1px solid #f1f5f9', 
+            paddingTop: 8,
+            width: '100%',
+            minWidth: 0
+          }}
+        >
+          {/* Schedule Filter Tabs */}
+          <div style={{ minWidth: 0, flexShrink: 0 }}>
+            <FilterTabs
+              label="Schedule:"
+              size="sm"
+              tabs={[
+                { id: 'Upcoming', label: 'Upcoming', count: scheduleCounts.upcoming },
+                { id: 'Past', label: 'Past', count: scheduleCounts.past },
+                { id: 'Cancelled', label: 'Cancelled', count: scheduleCounts.cancelled },
+                { id: 'All Dates', label: 'All Dates', count: scheduleCounts.all }
+              ]}
+              activeTab={filter}
+              onChange={(tabId) => setFilter(tabId as any)}
+            />
+          </div>
+
+          {/* Search Bar + Sorting in the same line */}
+          <div className="unified-filter-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <SearchBar
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder="Search client, property..."
-              maxWidth={240}
+              maxWidth={220}
             />
 
             <CustomSelect
@@ -851,40 +884,23 @@ export default function SiteVisitsPage() {
           </div>
         </div>
 
-        {/* Row 2: Schedule & Status in Compact Horizontal Strips */}
-        <div className="unified-filter-row-bottom" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8, width: '100%', minWidth: 0 }}>
-          <div style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
-            <FilterTabs
-              label="Schedule:"
-              size="sm"
-              tabs={[
-                { id: 'Upcoming', label: 'Upcoming', count: scheduleCounts.upcoming },
-                { id: 'Past', label: 'Past', count: scheduleCounts.past },
-                { id: 'Cancelled', label: 'Cancelled', count: scheduleCounts.cancelled },
-                { id: 'All Dates', label: 'All Dates', count: scheduleCounts.all }
-              ]}
-              activeTab={filter}
-              onChange={(tabId) => setFilter(tabId as any)}
-            />
-          </div>
-
-          <div style={{ width: '100%', minWidth: 0, overflow: 'hidden', borderTop: '1px solid #f1f5f9', paddingTop: 6 }}>
-            <FilterTabs
-              label="Status:"
-              size="sm"
-              useStatusColors={true}
-              tabs={[
-                { id: 'All', label: 'All Statuses', count: statusCounts.all },
-                ...siteVisitStatuses.map(s => ({
-                  id: s,
-                  label: s,
-                  count: statusCounts[s] ?? 0
-                }))
-              ]}
-              activeTab={statusFilter}
-              onChange={(tabId) => setStatusFilter(tabId)}
-            />
-          </div>
+        {/* Row 3: Status in Compact Horizontal Strip */}
+        <div style={{ width: '100%', minWidth: 0, overflow: 'hidden', borderTop: '1px solid #f1f5f9', paddingTop: 6 }}>
+          <FilterTabs
+            label="Status:"
+            size="sm"
+            useStatusColors={true}
+            tabs={[
+              { id: 'All', label: 'All Statuses', count: statusCounts.all },
+              ...siteVisitStatuses.map(s => ({
+                id: s,
+                label: s,
+                count: statusCounts[s] ?? 0
+              }))
+            ]}
+            activeTab={statusFilter}
+            onChange={(tabId) => setStatusFilter(tabId)}
+          />
         </div>
       </div>
 
