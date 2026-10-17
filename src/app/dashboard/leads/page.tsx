@@ -139,6 +139,524 @@ function getSourceBadge(src?: string) {
   );
 }
 
+const InquiryCardItem = React.memo(function InquiryCardItem({
+  lead,
+  statusStyle,
+  budgetFormatted,
+  isExpanded,
+  onToggleExpand,
+  onEdit,
+  onDelete,
+  onShare,
+  onStatusChange,
+  leadStatuses,
+  isLeadRent,
+  propertiesList
+}: {
+  lead: Lead;
+  statusStyle: { bg: string; color: string; border?: string; text?: string };
+  budgetFormatted: string;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onShare: () => void;
+  onStatusChange: (status: string) => void;
+  leadStatuses: string[];
+  isLeadRent: boolean;
+  propertiesList?: { title: string; locality?: string }[];
+}) {
+  const isRent = isLeadRent;
+  const initial = lead.name ? lead.name.charAt(0).toUpperCase() : 'I';
+  const bhkStr = Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any BHK');
+  const typeStr = lead.propertyTypeNeeded || 'Apartment';
+
+  return (
+    <div
+      onClick={onEdit}
+      title="Click to view or edit inquiry"
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: 14,
+        overflow: 'hidden',
+        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-3px)';
+        e.currentTarget.style.boxShadow = '0 10px 24px -4px rgba(15,23,42,0.1)';
+        e.currentTarget.style.borderColor = 'var(--primary, #059669)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+        e.currentTarget.style.borderColor = '#e2e8f0';
+      }}
+    >
+      {/* Top Banner area (Sleek dark gradient matching Property Card) */}
+      <div style={{
+        position: 'relative',
+        padding: '14px 16px',
+        background: isRent
+          ? 'linear-gradient(135deg, #2e1065 0%, #4c1d95 65%, #3b0764 100%)'
+          : 'linear-gradient(135deg, #091e17 0%, #0f2e24 55%, #051f18 100%)',
+        color: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10
+      }}>
+        {/* Row 1: Purpose & Status Badge */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            backgroundColor: isRent ? 'rgba(255, 255, 255, 0.2)' : 'rgba(16, 185, 129, 0.25)',
+            border: isRent ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid rgba(16, 185, 129, 0.4)',
+            color: '#ffffff',
+            padding: '3px 9px',
+            borderRadius: 20,
+            fontSize: 10.5,
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            letterSpacing: '0.03em'
+          }}>
+            {isRent ? <KeyIcon size={11} color="#ffffff" /> : <HomeIcon size={11} color="#ffffff" />}
+            <span>{isRent ? 'RENT / LEASE' : 'BUY / SALE'}</span>
+          </div>
+
+          <div onClick={e => e.stopPropagation()}>
+            <select
+              value={lead.status}
+              onChange={(e) => onStatusChange(e.target.value)}
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                padding: '3px 8px',
+                borderRadius: 14,
+                backgroundColor: statusStyle.bg,
+                color: (statusStyle as any).text || statusStyle.color,
+                border: '1px solid ' + ((statusStyle as any).border || 'transparent'),
+                cursor: 'pointer',
+                outline: 'none',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              }}
+            >
+              {leadStatuses.map(st => (
+                <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>{st}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Big Budget */}
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginTop: 2 }}>
+          <div>
+            <span style={{ fontSize: 10, textTransform: 'uppercase', color: isRent ? '#e9d5ff' : '#a7f3d0', fontWeight: 700, letterSpacing: '0.05em' }}>
+              Target Budget
+            </span>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#ffffff', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+              {budgetFormatted}
+              {isRent && <span style={{ fontSize: 12, fontWeight: 500, color: '#e9d5ff' }}> / mo</span>}
+            </div>
+          </div>
+          {lead.urgency && (
+            <span style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              color: '#ffffff',
+              padding: '2px 8px',
+              borderRadius: 6,
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              whiteSpace: 'nowrap'
+            }}>
+              ⏱️ {lead.urgency.split('(')[0].trim()}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Client details row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            backgroundColor: isRent ? '#f3e8ff' : '#ecfdf5',
+            color: isRent ? '#7e22ce' : '#047857',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 15,
+            fontWeight: 800,
+            flexShrink: 0,
+            border: isRent ? '1px solid #d8b4fe' : '1px solid #a7f3d0'
+          }}>
+            {initial}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {lead.name}
+            </div>
+            <div style={{ fontSize: 12.5, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <PhoneIcon size={11} color="#94a3b8" />
+              <span>{lead.phone}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Property requirement */}
+        <div>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: '#1e293b' }}>
+            {bhkStr} • {typeStr}
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+            <MapPinIcon size={12} color="#94a3b8" />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {lead.preferredLocalities || lead.city || 'Any Prime Locality'}
+            </span>
+          </div>
+        </div>
+
+        {/* Specs Badges Row */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {lead.furnishingPreference && (
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 6, backgroundColor: '#faf5ff', color: '#6b21a8', border: '1px solid #e9d5ff' }}>
+              {lead.furnishingPreference}
+            </span>
+          )}
+          {lead.constructionStagePreference && (
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 6, backgroundColor: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0' }}>
+              {lead.constructionStagePreference}
+            </span>
+          )}
+          {lead.vastuPreference && lead.vastuPreference !== 'Any' && (
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 6, backgroundColor: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe' }}>
+              {lead.vastuPreference}
+            </span>
+          )}
+          {getSourceBadge(lead.source)}
+        </div>
+
+        {/* Private Notes snippet */}
+        {lead.notes && (
+          <div style={{
+            backgroundColor: '#fefce8',
+            border: '1px solid #fef08a',
+            borderRadius: 6,
+            padding: '6px 10px',
+            fontSize: 11.5,
+            color: '#713f12',
+            lineHeight: 1.4,
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical'
+          }}>
+            <span style={{ fontWeight: 700 }}>Note: </span>
+            {lead.notes}
+          </div>
+        )}
+
+        {/* Action Buttons Row */}
+        <div style={{ marginTop: 'auto', display: 'flex', gap: 6, alignItems: 'center', paddingTop: 8 }} onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={onShare}
+            title="Chat or Pitch via WhatsApp"
+            style={{
+              flex: 1,
+              minWidth: 0,
+              backgroundColor: '#25D366',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: 8,
+              padding: '8px 10px',
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              boxShadow: '0 2px 6px rgba(37, 211, 102, 0.2)'
+            }}
+          >
+            <WhatsAppIcon size={14} color="#ffffff" style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>WhatsApp Pitch</span>
+          </button>
+
+          <a
+            href={`tel:${lead.phone}`}
+            title="Call Client"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              color: '#1d4ed8',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textDecoration: 'none',
+              flexShrink: 0
+            }}
+          >
+            <PhoneIcon size={13} color="#1d4ed8" />
+          </a>
+
+          <button
+            type="button"
+            onClick={onEdit}
+            title="Edit Inquiry"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              color: '#334155',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <EditIcon size={13} color="#334155" />
+          </button>
+
+          <button
+            type="button"
+            onClick={onDelete}
+            title="Delete Inquiry"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              backgroundColor: '#fee2e2',
+              border: '1px solid #fecaca',
+              color: '#dc2626',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}
+          >
+            <TrashIcon size={13} color="#dc2626" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const InquiryListItem = React.memo(function InquiryListItem({
+  lead,
+  statusStyle,
+  budgetFormatted,
+  isExpanded,
+  onToggleExpand,
+  onEdit,
+  onDelete,
+  onShare,
+  onStatusChange,
+  leadStatuses,
+  isLeadRent,
+  renderInquiryDetails
+}: {
+  lead: Lead;
+  statusStyle: { bg: string; color: string; border?: string; text?: string };
+  budgetFormatted: string;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onShare: () => void;
+  onStatusChange: (status: string) => void;
+  leadStatuses: string[];
+  isLeadRent: boolean;
+  renderInquiryDetails?: (lead: Lead) => React.ReactNode;
+}) {
+  const isRent = isLeadRent;
+  const initial = lead.name ? lead.name.charAt(0).toUpperCase() : 'I';
+  const bhkStr = Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any BHK');
+  const typeStr = lead.propertyTypeNeeded || 'Apartment';
+
+  return (
+    <div
+      style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid var(--border, #e2e8f0)',
+        borderRadius: 12,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+        overflow: 'hidden',
+        transition: 'all 0.15s ease'
+      }}
+    >
+      {/* Compact Row (Identical to PropertyListItem) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px 12px',
+          gap: 12,
+          cursor: 'pointer'
+        }}
+        onClick={onToggleExpand}
+      >
+        {/* Left Avatar / Tag */}
+        <div style={{
+          position: 'relative',
+          width: 52,
+          height: 52,
+          borderRadius: 10,
+          backgroundColor: isRent ? '#f3e8ff' : '#ecfdf5',
+          border: isRent ? '1px solid #d8b4fe' : '1px solid #a7f3d0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: isRent ? '#7e22ce' : '#047857',
+          fontWeight: 800,
+          fontSize: 18,
+          flexShrink: 0
+        }}>
+          <span>{initial}</span>
+          <span style={{
+            position: 'absolute',
+            bottom: 2,
+            left: 2,
+            right: 2,
+            backgroundColor: isRent ? '#7e22ce' : '#0f172a',
+            color: '#fff',
+            fontSize: 8.5,
+            fontWeight: 800,
+            padding: '1px 3px',
+            borderRadius: 3,
+            textAlign: 'center',
+            letterSpacing: '0.04em'
+          }}>
+            {isRent ? 'RENT' : 'BUY'}
+          </span>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+            <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+              {budgetFormatted}
+              {isRent && <span style={{ fontSize: 11, fontWeight: 500, color: '#64748b' }}>/mo</span>}
+            </span>
+            <span style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              backgroundColor: statusStyle.bg,
+              color: (statusStyle as any).text || statusStyle.color,
+              padding: '2px 7px',
+              borderRadius: 10,
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}>
+              {lead.status}
+            </span>
+          </div>
+
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {lead.name} • <span style={{ fontWeight: 600, color: '#475569' }}>{bhkStr}</span>
+          </div>
+
+          <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <MapPinIcon size={11} color="#94a3b8" />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {lead.city || lead.preferredLocalities || 'Prime Location'}
+            </span>
+            <span>•</span>
+            <span>{lead.phone}</span>
+          </div>
+        </div>
+
+        {/* Chevron */}
+        <div style={{ padding: '6px', color: '#94a3b8', flexShrink: 0 }}>
+          <ChevronDownIcon size={14} color="#64748b" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+        </div>
+      </div>
+
+      {/* Expanded Details on tap */}
+      {isExpanded && (
+        <div style={{ backgroundColor: '#f8fafc', borderTop: '1px solid #f1f5f9', padding: '12px 14px', fontSize: 12 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+            <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#475569' }}>
+              Type: <strong>{typeStr}</strong>
+            </span>
+            {lead.furnishingPreference && (
+              <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#475569' }}>
+                {lead.furnishingPreference}
+              </span>
+            )}
+            {lead.constructionStagePreference && (
+              <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#475569' }}>
+                {lead.constructionStagePreference}
+              </span>
+            )}
+            {lead.urgency && (
+              <span style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '2px 8px', borderRadius: 4, color: '#475569' }}>
+                ⏱️ {lead.urgency}
+              </span>
+            )}
+            {getSourceBadge(lead.source)}
+          </div>
+
+          {lead.notes && (
+            <div style={{ backgroundColor: '#fefce8', border: '1px solid #fef08a', padding: '6px 10px', borderRadius: 6, color: '#713f12', lineHeight: 1.4, marginBottom: 10 }}>
+              <strong>Broker Note:</strong> {lead.notes}
+            </div>
+          )}
+
+          {/* Quick Action buttons */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button
+              type="button"
+              onClick={onShare}
+              style={{ flex: 1, padding: '7px 10px', backgroundColor: '#25D366', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+            >
+              <WhatsAppIcon size={13} color="#fff" /> Pitch
+            </button>
+            <a
+              href={`tel:${lead.phone}`}
+              style={{ padding: '7px 12px', backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', borderRadius: 6, fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}
+            >
+              <PhoneIcon size={13} color="#1d4ed8" /> Call
+            </a>
+            <button
+              type="button"
+              onClick={onEdit}
+              style={{ padding: '7px 12px', backgroundColor: '#fff', color: '#475569', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+            >
+              <EditIcon size={13} color="#475569" /> Edit
+            </button>
+            <button
+              type="button"
+              onClick={onDelete}
+              style={{ padding: '7px 10px', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+            >
+              <TrashIcon size={13} color="#dc2626" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
 export default function LeadsPage() {
   const [data, setData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,6 +668,8 @@ export default function LeadsPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [mobileListFormat, setMobileListFormat] = useState<'compact' | 'table'>('compact');
   const [expandedLeadIds, setExpandedLeadIds] = useState<Record<string, boolean>>({});
 
   const toggleExpandLead = (leadId: string) => {
@@ -1269,19 +1789,67 @@ export default function LeadsPage() {
             )}
           </p>
         </div>
-        <button 
-          onClick={handleOpenAdd}
-          style={{
-            backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
-            fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
-            boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.15s ease',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
-          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
-        >
-          <PlusIcon size={16} color="#fff" strokeWidth={2.5} />
-          <span>Add Inquiry</span>
-        </button>
+        <div className="responsive-header-action-row">
+          {/* View Mode Switcher: List Table vs Grid Cards */}
+          <div className="segmented-view-control">
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '12.5px',
+                fontWeight: viewMode === 'list' ? 700 : 500,
+                backgroundColor: viewMode === 'list' ? 'var(--primary)' : 'transparent',
+                color: viewMode === 'list' ? '#ffffff' : '#64748b',
+                boxShadow: viewMode === 'list' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <ListIcon size={14} color="currentColor" />
+              <span>List View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                border: 'none',
+                fontSize: '12.5px',
+                fontWeight: viewMode === 'grid' ? 700 : 500,
+                backgroundColor: viewMode === 'grid' ? 'var(--primary)' : 'transparent',
+                color: viewMode === 'grid' ? '#ffffff' : '#64748b',
+                boxShadow: viewMode === 'grid' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5
+              }}
+            >
+              <BuildingIcon size={14} color="currentColor" />
+              <span>Cards View</span>
+            </button>
+          </div>
+
+          <button 
+            onClick={handleOpenAdd}
+            style={{
+              backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 18px',
+              fontSize: 13.5, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
+              boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.25)', transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'var(--primary-dark)')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'var(--primary)')}
+          >
+            <PlusIcon size={16} color="#fff" strokeWidth={2.5} />
+            <span>Add Inquiry</span>
+          </button>
+        </div>
       </div>
 
       {/* Unified Compact Filter Bar Card */}
@@ -1359,11 +1927,65 @@ export default function LeadsPage() {
         </div>
       </div>
 
-      {/* Desktop Table View */}
-      <div className="desktop-only-table">
-        <div style={{ backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
-          <div className="responsive-table-scroll">
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 880 }}>
+      {/* Inquiry Display: Expandable List View vs Card Grid (identical to Properties) */}
+      {viewMode === 'list' ? (
+        <>
+          {/* Mobile Format Switcher (Compact List vs Full Swipe Table) */}
+          <div className="mobile-list-selector" style={{ marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: '6px 12px', borderRadius: 10, border: '1px solid #e2e8f0', width: '100%' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#475569' }}>
+                List Format:
+              </span>
+              <div style={{ display: 'inline-flex', backgroundColor: '#e2e8f0', padding: 2, borderRadius: 8, gap: 2 }}>
+                <button
+                  type="button"
+                  onClick={() => setMobileListFormat('compact')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: 'none',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    backgroundColor: mobileListFormat === 'compact' ? '#ffffff' : 'transparent',
+                    color: mobileListFormat === 'compact' ? '#0f172a' : '#64748b',
+                    boxShadow: mobileListFormat === 'compact' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  }}
+                >
+                  Compact Rows
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileListFormat('table')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: 'none',
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    backgroundColor: mobileListFormat === 'table' ? '#ffffff' : 'transparent',
+                    color: mobileListFormat === 'table' ? '#0f172a' : '#64748b',
+                    boxShadow: mobileListFormat === 'table' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  }}
+                >
+                  Full Table (Swipe)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={mobileListFormat === 'table' ? 'responsive-touch-table-active' : 'desktop-only-table'}
+            style={{ backgroundColor: '#fff', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}
+          >
+            {mobileListFormat === 'table' && (
+              <div className="mobile-list-selector" style={{ padding: '8px 14px', backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0', fontSize: 11.5, color: '#166534', fontWeight: 600 }}>
+                👉 Swipe horizontally across the table to inspect all inquiry columns.
+              </div>
+            )}
+            <div className="responsive-table-scroll touch-scroll-container">
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 880 }}>
           <thead>
             <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
               <th style={{ padding: '16px 20px', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client Details</th>
@@ -1650,314 +2272,72 @@ export default function LeadsPage() {
             </table>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Card List View (Touch-First, Zero Horizontal Scroll) */}
-      <div className="mobile-only-cards">
-        {filteredData.length === 0 ? (
-          <div style={{ backgroundColor: '#fff', borderRadius: 12, border: '1px solid var(--border)', padding: '48px 20px', textAlign: 'center', color: '#94a3b8' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-              <SearchIcon size={32} color="#cbd5e1" />
+        {/* MOBILE COMPACT LIST VIEW FOR LIST MODE */}
+        {mobileListFormat === "compact" && (
+          <div className="mobile-only-compact-list" style={{ marginBottom: 20 }}>
+            {filteredData.length === 0 ? (
+              <div style={{ backgroundColor: "#fff", borderRadius: 12, border: "1px solid var(--border)", padding: "48px 20px", textAlign: "center", color: "#94a3b8" }}>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+                  <SearchIcon size={32} color="#cbd5e1" />
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>No inquiries found</div>
+                <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
+              </div>
+            ) : (
+              paginatedLeads.map(lead => (
+                <InquiryListItem
+                  key={`m-list-lead-${lead.id}`}
+                  lead={lead}
+                  statusStyle={STATUS_BADGE_MAP[lead.status] || { bg: "#f1f5f9", color: "#475569" }}
+                  budgetFormatted={lead.budget || (lead.budgetMax ? formatINR(lead.budgetMax) : "Budget TBA")}
+                  isExpanded={!!expandedLeadIds[lead.id]}
+                  onToggleExpand={() => toggleExpandLead(lead.id)}
+                  onEdit={() => handleOpenEdit(lead)}
+                  onDelete={() => setDeletingLead(lead)}
+                  onShare={() => setSharingLead(lead)}
+                  onStatusChange={(newStatus) => handleStatusChange(lead.id, newStatus)}
+                  leadStatuses={leadStatuses}
+                  isLeadRent={isLeadRent(lead)}
+                  renderInquiryDetails={renderInquiryDetails}
+                />
+              ))
+            )}
+          </div>
+        )}
+      </>
+    ) : (
+        /* Cards View (Grid View) */
+        filteredData.length === 0 ? (
+          <div style={{ backgroundColor: "#fff", borderRadius: 12, border: "1px solid var(--border)", padding: "60px 20px", textAlign: "center", color: "#94a3b8" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+              <SearchIcon size={36} color="#cbd5e1" />
             </div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>No inquiries found</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>No inquiries found</div>
             <div style={{ fontSize: 13, marginTop: 4 }}>Try adjusting your filters or search query.</div>
           </div>
         ) : (
-          paginatedLeads.map(lead => (
-            <div
-              key={`m-${lead.id}`}
-              onClick={() => handleOpenEdit(lead)}
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: 12,
-                border: '1px solid var(--border)',
-                padding: '14px 16px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                cursor: 'pointer'
-              }}
-            >
-              {/* Card Header: Client Info & Budget */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
-                  <div style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--primary-light, #d1fae5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    fontWeight: 700,
-                    color: 'var(--primary-text, #065f46)',
-                    flexShrink: 0
-                  }}>
-                    {lead.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {lead.name}
-                    </div>
-                    <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 1, fontWeight: 500 }}>
-                      {lead.phone}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <span style={{
-                    display: 'inline-block',
-                    fontSize: 12.5,
-                    fontWeight: 800,
-                    color: 'var(--primary, #059669)',
-                    backgroundColor: '#ecfdf5',
-                    padding: '3px 8px',
-                    borderRadius: 6,
-                    border: '1px solid #a7f3d0'
-                  }}>
-                    {lead.budgetMax ? formatINR(lead.budgetMax) : (lead.budget || 'Budget TBA')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Status & Badges */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
-                <select
-                  value={lead.status}
-                  onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                  style={{
-                    fontSize: 11.5,
-                    fontWeight: 600,
-                    padding: '4px 8px',
-                    borderRadius: 6,
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#fff',
-                    color: '#334155',
-                    cursor: 'pointer',
-                    outline: 'none'
-                  }}
-                >
-                  {leadStatuses.map(st => (
-                    <option key={st} value={st}>{st}</option>
-                  ))}
-                </select>
-                {getSourceBadge(lead.source)}
-                {((lead as any).isSelfCreated || (lead.source || '').toLowerCase().includes('self-created') || (lead.source || '').toLowerCase().includes('public listing')) && (
-                  <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, backgroundColor: '#fdf4ff', color: '#a21caf', border: '1px solid #f0abfc', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                    <SparklesIcon size={10} color="#a21caf" />
-                    <span>Self-Interest</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Requirement & Budget */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '9px 12px',
-                backgroundColor: '#f8fafc',
-                borderRadius: 8,
-                fontSize: 12.5
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: '2px 6px',
-                    borderRadius: 4,
-                    fontSize: 10.5,
-                    fontWeight: 700,
-                    backgroundColor: isLeadRent(lead) ? '#f3e8ff' : '#eff6ff',
-                    color: isLeadRent(lead) ? '#7e22ce' : '#1d4ed8'
-                  }}>
-                    {isLeadRent(lead) ? <KeyIcon size={10} color="currentColor" /> : <HomeIcon size={10} color="currentColor" />}
-                    <span>{isLeadRent(lead) ? 'Rent' : 'Buy'}</span>
-                  </span>
-                  <span style={{ fontWeight: 700, color: '#0f172a' }}>
-                    {Array.isArray(lead.bhkNeeded) ? lead.bhkNeeded.join(', ') : (lead.bhkNeeded || 'Any')}
-                  </span>
-                  <span style={{ color: '#64748b' }}>• {lead.city || 'Any Location'}</span>
-                </div>
-                <div style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 13, whiteSpace: 'nowrap' }}>
-                  {lead.budgetMax ? formatINR(lead.budgetMax) : (lead.budget || 'Unspecified')}
-                </div>
-              </div>
-
-              {/* Private Notes in Mobile Card */}
-              {lead.notes && (
-                <div 
-                  title={`Internal Note: ${lead.notes}`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 6,
-                    padding: '8px 10px',
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 6,
-                    fontSize: 11.5,
-                    color: '#475569',
-                    lineHeight: 1.4
-                  }}
-                >
-                  <FileTextIcon size={13} color="#64748b" style={{ flexShrink: 0, marginTop: 1 }} />
-                  <span style={{
-                    overflow: 'hidden',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    wordBreak: 'break-word'
-                  }}>
-                    {lead.notes}
-                  </span>
-                </div>
-              )}
-
-              {/* Mobile Quick Action Buttons Bar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 4 }} onClick={e => e.stopPropagation()}>
-                {/* 1-Tap Call */}
-                <button
-                  type="button"
-                  onClick={() => window.location.href = `tel:${lead.phone}`}
-                  title="Call Client"
-                  style={{
-                    flex: 1,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 6,
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    backgroundColor: '#eff6ff',
-                    color: '#1d4ed8',
-                    border: '1px solid #bfdbfe',
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <PhoneIcon size={14} color="#1d4ed8" />
-                  <span>Call</span>
-                </button>
-
-                {/* 1-Tap WhatsApp / Share */}
-                <button
-                  type="button"
-                  onClick={() => setSharingLead(lead)}
-                  title="Share / WhatsApp with Client or Anyone"
-                  style={{
-                    flex: 1,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 6,
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    backgroundColor: '#dcfce7',
-                    color: '#15803d',
-                    border: '1px solid #bbf7d0',
-                    fontSize: 12.5,
-                    fontWeight: 700,
-                    cursor: 'pointer'
-                  }}
-                >
-                  <WhatsAppIcon size={14} color="#15803d" />
-                  <span>WhatsApp</span>
-                </button>
-
-                {/* Edit */}
-                <button
-                  type="button"
-                  onClick={() => handleOpenEdit(lead)}
-                  title="Edit Inquiry"
-                  style={{
-                    width: 34,
-                    height: 34,
-                    padding: 0,
-                    borderRadius: 8,
-                    backgroundColor: '#f8fafc',
-                    color: '#334155',
-                    border: '1px solid #cbd5e1',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                >
-                  <EditIcon size={14} color="#334155" />
-                </button>
-
-                {/* Delete */}
-                <button
-                  type="button"
-                  onClick={() => setDeletingLead(lead)}
-                  title="Delete Inquiry"
-                  style={{
-                    width: 34,
-                    height: 34,
-                    padding: 0,
-                    borderRadius: 8,
-                    backgroundColor: '#fee2e2',
-                    color: '#dc2626',
-                    border: '1px solid #fecaca',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                >
-                  <TrashIcon size={14} color="#dc2626" />
-                </button>
-
-                {/* Toggle Details Expand */}
-                <button
-                  type="button"
-                  onClick={() => toggleExpandLead(lead.id)}
-                  title={expandedLeadIds[lead.id] ? "Collapse Details" : "View All Details"}
-                  style={{
-                    width: 34,
-                    height: 34,
-                    padding: 0,
-                    borderRadius: 8,
-                    backgroundColor: expandedLeadIds[lead.id] ? 'var(--primary)' : '#f1f5f9',
-                    color: expandedLeadIds[lead.id] ? '#ffffff' : '#475569',
-                    border: `1px solid ${expandedLeadIds[lead.id] ? 'var(--primary)' : '#e2e8f0'}`,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <ChevronDownIcon
-                    size={15}
-                    color={expandedLeadIds[lead.id] ? '#ffffff' : '#475569'}
-                    style={{
-                      transform: expandedLeadIds[lead.id] ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}
-                  />
-                </button>
-              </div>
-
-              {/* Collapsible Full Details (Mobile View) */}
-              {expandedLeadIds[lead.id] && (
-                <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #e2e8f0' }} onClick={e => e.stopPropagation()}>
-                  {renderInquiryDetails(lead)}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+          <div className="inquiries-card-grid properties-card-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))", gap: 20 }}>
+            {paginatedLeads.map(lead => (
+              <InquiryCardItem
+                key={`grid-lead-${lead.id}`}
+                lead={lead}
+                statusStyle={STATUS_BADGE_MAP[lead.status] || { bg: "#f1f5f9", color: "#475569" }}
+                budgetFormatted={lead.budget || (lead.budgetMax ? formatINR(lead.budgetMax) : "Budget TBA")}
+                isExpanded={!!expandedLeadIds[lead.id]}
+                onToggleExpand={() => toggleExpandLead(lead.id)}
+                onEdit={() => handleOpenEdit(lead)}
+                onDelete={() => setDeletingLead(lead)}
+                onShare={() => setSharingLead(lead)}
+                onStatusChange={(newStatus) => handleStatusChange(lead.id, newStatus)}
+                leadStatuses={leadStatuses}
+                isLeadRent={isLeadRent(lead)}
+                propertiesList={propertiesList}
+              />
+            ))}
+          </div>
+        )
+      )}
 
       {/* Pagination Controls */}
       {filteredData.length > 0 && (
