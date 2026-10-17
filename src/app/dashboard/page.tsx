@@ -841,7 +841,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Desktop Time Slot */}
-                    <div className="hide-on-mobile" style={{ fontSize: 12.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap', flexShrink: 0, width: 72, textAlign: 'right' }}>
+                    <div className="hide-on-mobile" style={{ fontSize: 12.5, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap', flexShrink: 0, textAlign: 'right', minWidth: 64 }}>
                       {item.time}
                     </div>
 
@@ -1022,7 +1022,7 @@ export default function DashboardPage() {
                 return (
                   <div key={item.id} style={{ display: 'flex', gap: 14, minHeight: 56, position: 'relative' }}>
                     {/* Time Column */}
-                    <div style={{ width: 68, fontSize: 12, fontWeight: 700, color: '#64748b', textAlign: 'right', flexShrink: 0, paddingTop: 2 }}>
+                    <div style={{ width: 78, fontSize: 11.5, fontWeight: 700, color: '#64748b', textAlign: 'right', flexShrink: 0, paddingTop: 2, lineHeight: 1.3 }}>
                       {item.time}
                     </div>
 
