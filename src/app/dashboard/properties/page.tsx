@@ -74,13 +74,8 @@ interface Property {
 }
 
 const getStatusStyle = (s: string) => {
-  switch(s) {
-    case 'Available': return { bg: '#d1fae5', color: '#065f46' };
-    case 'Under Offer': return { bg: '#fef3c7', color: '#92400e' };
-    case 'Sold': return { bg: '#e2e8f0', color: '#475569' };
-    case 'Rented': return { bg: '#e2e8f0', color: '#475569' };
-    default: return { bg: '#f1f5f9', color: '#475569' };
-  }
+  const sc = getStatusColorStyle(s);
+  return { bg: sc.bg, color: sc.text, border: sc.border };
 };
 
 const PropertyCardItem = React.memo(function PropertyCardItem({ 
@@ -90,15 +85,19 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
   onCopyPitchLink,
   onShare,
   onEdit,
-  onDelete
+  onDelete,
+  onStatusChange,
+  propertyStatuses
 }: { 
   prop: Property; 
-  statusStyle: { bg: string; color: string }; 
+  statusStyle: { bg: string; color: string; border?: string }; 
   priceFormatted: string; 
   onCopyPitchLink?: (title: string) => void;
   onShare?: (prop: Property) => void;
   onEdit?: (prop: Property) => void;
   onDelete?: (prop: Property) => void;
+  onStatusChange?: (id: string, newStatus: string) => void;
+  propertyStatuses?: string[];
 }) {
   const mediaList = prop.media && prop.media.length > 0 
     ? prop.media 
@@ -165,16 +164,41 @@ const PropertyCardItem = React.memo(function PropertyCardItem({
           <span>{isRent ? 'FOR RENT' : 'FOR SALE'}</span>
         </div>
 
-        {/* Top-Right: Status Badge */}
-        <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 6 }}>
-          <div style={{
-            backgroundColor: statusStyle.bg, color: statusStyle.color,
-            padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
-            boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
-            letterSpacing: '0.02em'
-          }}>
-            {prop.status}
-          </div>
+        {/* Top-Right: Status Badge / Select Dropdown */}
+        <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 6 }} onClick={e => e.stopPropagation()}>
+          {onStatusChange ? (
+            <select
+              value={prop.status}
+              onChange={(e) => onStatusChange(prop.id, e.target.value)}
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                padding: '3px 8px',
+                borderRadius: 14,
+                backgroundColor: statusStyle.bg,
+                color: statusStyle.color,
+                border: `1px solid ${statusStyle.border || 'transparent'}`,
+                cursor: 'pointer',
+                outline: 'none',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.18)'
+              }}
+            >
+              {(propertyStatuses || DEFAULT_PROPERTY_STATUSES).map(st => (
+                <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>
+                  {`● ${st}`}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div style={{
+              backgroundColor: statusStyle.bg, color: statusStyle.color,
+              padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+              letterSpacing: '0.02em'
+            }}>
+              {prop.status}
+            </div>
+          )}
         </div>
 
         {/* Media Tag if available */}
@@ -474,10 +498,12 @@ const PropertyListItem = React.memo(function PropertyListItem({
   onCopyPitchLink,
   onShare,
   onEdit,
-  onDelete
+  onDelete,
+  onStatusChange,
+  propertyStatuses
 }: {
   prop: Property;
-  statusStyle: { bg: string; color: string };
+  statusStyle: { bg: string; color: string; border?: string };
   priceFormatted: string;
   isExpanded: boolean;
   onToggleExpand: () => void;
@@ -485,6 +511,8 @@ const PropertyListItem = React.memo(function PropertyListItem({
   onShare?: (prop: Property) => void;
   onEdit?: (prop: Property) => void;
   onDelete?: (prop: Property) => void;
+  onStatusChange?: (id: string, newStatus: string) => void;
+  propertyStatuses?: string[];
 }) {
   const isRent = prop.purpose === 'For Rent' || prop.listingType === 'For Rent';
   const mediaList = prop.media && prop.media.length > 0 ? prop.media : [{ url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&auto=format&fit=crop&q=80', tag: 'Exterior' }];
@@ -531,18 +559,44 @@ const PropertyListItem = React.memo(function PropertyListItem({
               {priceFormatted}
               {isRent && <span style={{ fontSize: 11, fontWeight: 500, color: '#64748b' }}>/mo</span>}
             </span>
-            <span style={{
-              fontSize: 10.5,
-              fontWeight: 700,
-              backgroundColor: statusStyle.bg,
-              color: statusStyle.color,
-              padding: '2px 7px',
-              borderRadius: 10,
-              whiteSpace: 'nowrap',
-              flexShrink: 0
-            }}>
-              {prop.status}
-            </span>
+            {onStatusChange ? (
+              <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
+                <select
+                  value={prop.status}
+                  onChange={(e) => onStatusChange(prop.id, e.target.value)}
+                  style={{
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    backgroundColor: statusStyle.bg,
+                    color: statusStyle.color,
+                    border: `1px solid ${statusStyle.border || '#cbd5e1'}`,
+                    padding: '2px 6px',
+                    borderRadius: 10,
+                    cursor: 'pointer',
+                    outline: 'none'
+                  }}
+                >
+                  {(propertyStatuses || DEFAULT_PROPERTY_STATUSES).map(st => (
+                    <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16' }}>
+                      {`● ${st}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <span style={{
+                fontSize: 10.5,
+                fontWeight: 700,
+                backgroundColor: statusStyle.bg,
+                color: statusStyle.color,
+                padding: '2px 7px',
+                borderRadius: 10,
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}>
+                {prop.status}
+              </span>
+            )}
           </div>
 
           <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -662,6 +716,40 @@ export default function PropertiesPage() {
       title: 'Pitch Link Copied! 📋',
       message: `Ready to send: Public showcase link for "${title}" copied to clipboard.`
     });
+  }, []);
+
+  const handleStatusChange = useCallback(async (propertyId: string, newStatus: string) => {
+    setData(prev => prev.map(p => p.id === propertyId ? { ...p, status: newStatus } : p));
+    try {
+      const res = await fetch('/api/properties', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: propertyId, status: newStatus })
+      });
+      if (res.ok) {
+        setToast({
+          id: Date.now().toString(),
+          type: 'success',
+          title: 'Status Updated',
+          message: `Property status updated to "${newStatus}".`
+        });
+      } else {
+        setToast({
+          id: Date.now().toString(),
+          type: 'error',
+          title: 'Update Failed',
+          message: 'Failed to update property status on server.'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to update status', err);
+      setToast({
+        id: Date.now().toString(),
+        type: 'error',
+        title: 'Network Error',
+        message: 'Network error while updating property status.'
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -1807,18 +1895,32 @@ export default function PropertiesPage() {
                         </td>
 
                         <td style={{ padding: '14px 18px' }} onClick={e => e.stopPropagation()}>
-                          <span style={{
-                            fontSize: 11.5,
-                            fontWeight: 700,
-                            padding: '3px 10px',
-                            borderRadius: 14,
-                            backgroundColor: sc.bg,
-                            color: sc.text,
-                            border: `1px solid ${sc.border}`,
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {prop.status}
-                          </span>
+                          <select
+                            value={prop.status}
+                            onChange={(e) => handleStatusChange(prop.id, e.target.value)}
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 700,
+                              padding: '5px 12px',
+                              borderRadius: 20,
+                              border: `1px solid ${sc.border}`,
+                              backgroundColor: sc.bg,
+                              color: sc.text,
+                              cursor: 'pointer',
+                              outline: 'none',
+                              boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {propertyStatuses.map(st => {
+                              const optSc = getStatusColorStyle(st);
+                              return (
+                                <option key={st} value={st} style={{ backgroundColor: '#ffffff', color: '#090d16', fontWeight: 600 }}>
+                                  {`● ${st}`}
+                                </option>
+                              );
+                            })}
+                          </select>
                         </td>
 
                         <td style={{ padding: '14px 18px', textAlign: 'right' }} onClick={e => e.stopPropagation()}>
@@ -1959,6 +2061,8 @@ export default function PropertiesPage() {
               onShare={setSharingProperty}
               onEdit={handleOpenEdit}
               onDelete={setDeletingProperty}
+              onStatusChange={handleStatusChange}
+              propertyStatuses={propertyStatuses}
             />
           ))}
         </div>
@@ -1975,6 +2079,8 @@ export default function PropertiesPage() {
               onShare={setSharingProperty}
               onEdit={handleOpenEdit}
               onDelete={setDeletingProperty}
+              onStatusChange={handleStatusChange}
+              propertyStatuses={propertyStatuses}
             />
           ))}
         </div>
