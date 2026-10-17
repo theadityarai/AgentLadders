@@ -446,15 +446,73 @@ export default function DealsPage() {
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
                   Deal Status / Pipeline Stage *
                 </label>
-                <select 
-                  value={formData.stage} 
-                  onChange={e => setFormData({...formData, stage: e.target.value})}
-                  style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
-                >
-                  {stages.map(s => <option key={s} value={s}>{s}</option>)}
-                  <option value="Closed Won">Closed Won</option>
-                  <option value="Lost">Lost / Cancelled</option>
-                </select>
+                {(() => {
+                  const allStages = Array.from(new Set([...stages, 'Closed Won', 'Lost']));
+                  const sc = formData.stage ? getStatusColorStyle(formData.stage) : null;
+                  return (
+                    <>
+                      <select 
+                        value={formData.stage} 
+                        onChange={e => setFormData({...formData, stage: e.target.value})}
+                        style={{
+                          width: '100%',
+                          padding: '10px 12px',
+                          border: sc ? `1.5px solid ${sc.border}` : '1.5px solid #cbd5e1',
+                          borderRadius: 8,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          outline: 'none',
+                          backgroundColor: sc ? sc.bg : '#f8fafc',
+                          color: sc ? sc.text : '#0f172a',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {allStages.map(s => {
+                          const optSc = getStatusColorStyle(s);
+                          return (
+                            <option key={s} value={s} style={{ backgroundColor: optSc.bg, color: optSc.text, fontWeight: 600 }}>
+                              {`● ${s}`}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', padding: '6px 0 2px 0', width: '100%' }}>
+                        {allStages.map(s => {
+                          const isSelected = formData.stage === s;
+                          const optSc = getStatusColorStyle(s);
+                          return (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, stage: s }))}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 5,
+                                padding: '4px 10px',
+                                borderRadius: 16,
+                                fontSize: 11.5,
+                                fontWeight: isSelected ? 700 : 500,
+                                backgroundColor: isSelected ? optSc.bg : '#ffffff',
+                                color: isSelected ? optSc.text : '#64748b',
+                                border: isSelected ? `1.5px solid ${optSc.border}` : '1px solid #e2e8f0',
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                                transition: 'all 0.15s ease'
+                              }}
+                            >
+                              <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: optSc.dot }} />
+                              <span>{s}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
               
               <div>
@@ -895,9 +953,9 @@ export default function DealsPage() {
                               fontWeight: 700,
                               padding: '5px 8px',
                               borderRadius: 6,
-                              border: '1px solid #cbd5e1',
-                              backgroundColor: '#f8fafc',
-                              color: '#1e293b',
+                              border: `1px solid ${colors.border || '#cbd5e1'}`,
+                              backgroundColor: colors.bg || '#f8fafc',
+                              color: colors.badge || '#1e293b',
                               cursor: 'pointer',
                               outline: 'none',
                               minWidth: 0,
@@ -905,7 +963,14 @@ export default function DealsPage() {
                               textOverflow: 'ellipsis'
                             }}
                           >
-                            {stages.map(s => <option key={s} value={s}>{s}</option>)}
+                            {stages.map(s => {
+                              const optSc = getStatusColorStyle(s);
+                              return (
+                                <option key={s} value={s} style={{ backgroundColor: optSc.bg, color: optSc.text }}>
+                                  {`● ${s}`}
+                                </option>
+                              );
+                            })}
                           </select>
 
                           <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>

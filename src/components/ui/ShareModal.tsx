@@ -23,6 +23,7 @@ import {
   format10DigitDisplay
 } from '@/lib/phone-validation';
 import { PhoneInput } from '@/components/ui/PhoneInput';
+import { SearchableCombobox } from '@/components/ui/SearchableCombobox';
 
 function safeOpenUrl(url: string, targetBlank = true) {
   try {
@@ -717,35 +718,37 @@ export function ShareModal({
                 </span>
               </div>
 
-              {/* Client Selector Dropdown (Allows switching to any saved CRM contact) */}
+              {/* Client Selector (Searchable Combobox matching Inquiries, Properties & Site Visits) */}
               {crmClients.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 700, color: '#14532d', marginBottom: '4px' }}>
-                    Select / Switch Client from CRM Directory:
-                  </label>
-                  <select
-                    value={selectedClientId}
-                    onChange={e => handleSelectClient(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #86efac',
-                      backgroundColor: '#ffffff',
-                      color: '#0f172a',
-                      fontSize: '12.5px',
-                      fontWeight: 600,
-                      outline: 'none',
-                      cursor: 'pointer'
+                  <SearchableCombobox
+                    label="Select / Switch Client from CRM Directory:"
+                    value={crmClients.find(c => c.id === selectedClientId)?.name || (selectedClientId === 'custom' ? '-- Custom Client Contact --' : '')}
+                    placeholder="Search existing client by name or phone..."
+                    searchPlaceholder="Type client name or phone (e.g. 98200...)"
+                    options={[
+                      ...crmClients.map(c => ({
+                        value: c.id,
+                        label: c.name,
+                        sublabel: c.phone ? `${c.phone}${c.email ? ` • ${c.email}` : ''}` : (c.email || 'No Phone'),
+                        badge: (c as any).leadPurpose || (c as any).type || 'Client'
+                      })),
+                      {
+                        value: 'custom',
+                        label: '-- Custom Client Contact --',
+                        sublabel: 'Manually enter recipient phone & name'
+                      }
+                    ]}
+                    onChange={(val) => {
+                      if (!val || val === 'custom') {
+                        handleSelectClient('custom');
+                      } else {
+                        handleSelectClient(val);
+                      }
                     }}
-                  >
-                    {crmClients.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} {c.phone ? `(${c.phone})` : ''} {c.email ? `• ${c.email}` : ''}
-                      </option>
-                    ))}
-                    <option value="custom">-- Custom Client Contact --</option>
-                  </select>
+                    onAddNew={() => handleSelectClient('custom')}
+                    addNewLabel="+ Use Custom Client Contact"
+                  />
                 </div>
               )}
 

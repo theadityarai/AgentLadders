@@ -2706,18 +2706,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
           >
             <div
               onClick={e => e.stopPropagation()}
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: 14,
-                width: '95vw',
-                maxWidth: 1150,
-                height: '92vh',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
-                border: '1px solid #e2e8f0'
-              }}
+              className="document-preview-modal"
             >
               {/* Modal Top Bar */}
               <div
@@ -2911,20 +2900,8 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 )}
               </div>
 
-              {/* Modal Bottom Bar */}
-              <div
-                className="responsive-modal-footer"
-                style={{
-                  padding: '12px 18px',
-                  borderTop: '1px solid #e2e8f0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  flexWrap: 'wrap',
-                  backgroundColor: '#ffffff',
-                  gap: 8
-                }}
-              >
+              {/* Modal Bottom Bar (Compact 3-Action Strip for Desktop & Mobile) */}
+              <div className="document-preview-footer">
                 {/* WhatsApp Share */}
                 <button
                   type="button"
@@ -2932,19 +2909,20 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   style={{
                     padding: '8px 14px',
                     borderRadius: 8,
-                    border: '1px solid #bbf7d0',
+                    border: '1px solid #86efac',
                     backgroundColor: '#ecfdf5',
-                    color: '#059669',
-                    fontSize: 13,
+                    color: '#15803d',
+                    fontSize: 12.5,
                     fontWeight: 700,
                     cursor: 'pointer',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: 6
                   }}
                   title="Share Document on WhatsApp"
                 >
-                  <WhatsAppIcon size={14} color="#059669" />
+                  <WhatsAppIcon size={14} color="#15803d" />
                   <span>WhatsApp</span>
                 </button>
 
@@ -2955,19 +2933,20 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                   style={{
                     padding: '8px 14px',
                     borderRadius: 8,
-                    border: '1px solid #e2e8f0',
-                    backgroundColor: '#f8fafc',
-                    color: '#0f172a',
-                    fontSize: 13,
+                    border: '1px solid #bfdbfe',
+                    backgroundColor: '#eff6ff',
+                    color: '#1d4ed8',
+                    fontSize: 12.5,
                     fontWeight: 700,
                     cursor: 'pointer',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
+                    justifyContent: 'center',
                     gap: 6
                   }}
                   title="Share with Client or External Contact"
                 >
-                  <ShareIcon size={14} color="#0f172a" />
+                  <ShareIcon size={14} color="#1d4ed8" />
                   <span>Share</span>
                 </button>
 
@@ -2980,12 +2959,14 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                     borderRadius: 8,
                     backgroundColor: '#0f172a',
                     color: '#ffffff',
-                    fontSize: 13,
+                    fontSize: 12.5,
                     fontWeight: 700,
                     textDecoration: 'none',
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 7
+                    justifyContent: 'center',
+                    gap: 6,
+                    border: 'none'
                   }}
                   title="Download File"
                 >

@@ -1420,16 +1420,73 @@ export default function LeadsPage() {
                     Inquiry Status *
                     <InfoTooltip text="Pipeline stage for this inquiry, from initial inbound to qualified, site visit, negotiation, or won." />
                   </label>
-                  <select 
-                    value={formData.status} 
-                    onChange={e => setFormData({...formData, status: e.target.value})}
-                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #cbd5e1', borderRadius: 8, fontSize: 14, fontWeight: 600, outline: 'none', backgroundColor: '#f8fafc', color: '#0f172a', cursor: 'pointer' }}
-                  >
-                    <option value="">Select Inquiry Status</option>
-                    {leadStatuses.map(st => (
-                      <option key={st} value={st}>{st}</option>
-                    ))}
-                  </select>
+                  {(() => {
+                    const sc = formData.status ? getStatusColorStyle(formData.status) : null;
+                    return (
+                      <>
+                        <select 
+                          value={formData.status} 
+                          onChange={e => setFormData({...formData, status: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '10px 12px',
+                            border: sc ? `1.5px solid ${sc.border}` : '1.5px solid #cbd5e1',
+                            borderRadius: 8,
+                            fontSize: 14,
+                            fontWeight: 700,
+                            outline: 'none',
+                            backgroundColor: sc ? sc.bg : '#f8fafc',
+                            color: sc ? sc.text : '#0f172a',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <option value="">Select Inquiry Status</option>
+                          {leadStatuses.map(st => {
+                            const optSc = getStatusColorStyle(st);
+                            return (
+                              <option key={st} value={st} style={{ backgroundColor: optSc.bg, color: optSc.text, fontWeight: 600 }}>
+                                {`● ${st}`}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', padding: '6px 0 2px 0', width: '100%' }}>
+                          {leadStatuses.map(st => {
+                            const isSelected = formData.status === st;
+                            const optSc = getStatusColorStyle(st);
+                            return (
+                              <button
+                                key={st}
+                                type="button"
+                                onClick={() => setFormData(prev => ({ ...prev, status: st }))}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 5,
+                                  padding: '4px 10px',
+                                  borderRadius: 16,
+                                  fontSize: 11.5,
+                                  fontWeight: isSelected ? 700 : 500,
+                                  backgroundColor: isSelected ? optSc.bg : '#ffffff',
+                                  color: isSelected ? optSc.text : '#64748b',
+                                  border: isSelected ? `1.5px solid ${optSc.border}` : '1px solid #e2e8f0',
+                                  cursor: 'pointer',
+                                  whiteSpace: 'nowrap',
+                                  flexShrink: 0,
+                                  boxShadow: isSelected ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                                  transition: 'all 0.15s ease'
+                                }}
+                              >
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: optSc.dot }} />
+                                <span>{st}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div>

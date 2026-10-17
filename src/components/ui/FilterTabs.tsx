@@ -253,6 +253,9 @@ export function FilterTabs<T extends string = string>({
         alignItems: 'center',
         gap: '10px',
         flexWrap: 'wrap',
+        width: '100%',
+        minWidth: 0,
+        maxWidth: '100%',
         ...style
       }}
     >
@@ -275,7 +278,7 @@ export function FilterTabs<T extends string = string>({
 
       <div
         className={`filter-tabs-container filter-tabs-${variant}`}
-        style={{ ...getContainerStyle(), minWidth: 0, flex: '1 1 auto' }}
+        style={{ ...getContainerStyle(), minWidth: 0, width: '100%', maxWidth: '100%', flex: '1 1 auto' }}
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
