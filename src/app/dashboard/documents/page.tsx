@@ -1081,11 +1081,7 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
     setCurrentPage(1);
   }, [search, activeCategory, sortBy]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-      setViewMode('grid');
-    }
-  }, []);
+
 
   const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
   const paginatedData = useMemo(() => {
@@ -1203,9 +1199,9 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div className="responsive-header-action-row">
             {/* View Mode Switcher: List View vs Cards View (Default: List View) */}
-            <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '10px', gap: '3px' }}>
+            <div className="segmented-view-control">
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
@@ -1249,27 +1245,6 @@ p { font-size: 11pt; margin-bottom: 8pt; text-align: justify; }
                 <span>Cards View</span>
               </button>
             </div>
-
-            <Link
-              href="/dashboard/design-lab"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 14px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                textDecoration: 'none',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-              }}
-            >
-              <span>🎨</span>
-              <span>UI Variations Studio</span>
-            </Link>
 
             <button
               type="button"

@@ -1557,12 +1557,12 @@ export default function InvoicesPage() {
       {showModal && (
         <div
           onClick={() => setShowModal(false)}
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
+          className="invoice-modal-backdrop"
+          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="invoice-editor-modal animate-enter"
-            style={{ backgroundColor: '#ffffff', borderRadius: 16, overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', maxWidth: 880, width: '100%', maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}
+            className="invoice-modal-container invoice-editor-modal animate-enter"
           >
             {/* Modal Header */}
             <div className="invoice-modal-header">
@@ -1618,7 +1618,7 @@ export default function InvoicesPage() {
             </div>
 
             {/* Modal Form Body: Single comfortable, spacious flow */}
-            <form onSubmit={handleSubmit} style={{ overflowY: 'auto', flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <form onSubmit={handleSubmit} className="invoice-modal-form">
               
               {/* SECTION 1: BILLED CLIENT DETAILS */}
               <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 12, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
@@ -1776,7 +1776,7 @@ export default function InvoicesPage() {
                 <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                   
                   {/* Top row: Deal Value input + Target Line Item Selector */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, alignItems: 'center' }}>
+                  <div className="invoice-calculator-top-grid">
                     <div>
                       <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>
                         Deal / Transaction Value (₹)
@@ -1831,31 +1831,33 @@ export default function InvoicesPage() {
 
                   {/* Second row: Preset buttons + Custom Percentage Input */}
                   <div className="invoice-calculator-row">
-                    <div className="invoice-calculator-presets" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#166534', marginRight: 4 }}>
-                        Presets:
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
+                      <span style={{ fontSize: 11.5, fontWeight: 700, color: '#166534' }}>
+                        Brokerage Presets:
                       </span>
-                      {[
-                        { label: '1% Brokerage', pct: 1 },
-                        { label: '2% Brokerage', pct: 2 },
-                        { label: '3% Brokerage', pct: 3 }
-                      ].map(item => (
+                      <div className="invoice-calculator-presets-grid">
+                        {[
+                          { label: '1% Brokerage', pct: 1 },
+                          { label: '2% Brokerage', pct: 2 },
+                          { label: '3% Brokerage', pct: 3 }
+                        ].map(item => (
+                          <button
+                            key={item.label}
+                            type="button"
+                            onClick={() => applyCommission(item.pct)}
+                            className="invoice-preset-btn"
+                          >
+                            {item.label}
+                          </button>
+                        ))}
                         <button
-                          key={item.label}
                           type="button"
-                          onClick={() => applyCommission(item.pct)}
-                          style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: '1px solid #16a34a', backgroundColor: '#ffffff', color: '#166534', whiteSpace: 'nowrap' }}
+                          onClick={applyRentalCommission}
+                          className="invoice-preset-btn"
                         >
-                          {item.label}
+                          1 Month Rent
                         </button>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={applyRentalCommission}
-                        style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: '1px solid #16a34a', backgroundColor: '#ffffff', color: '#166534', whiteSpace: 'nowrap' }}
-                      >
-                        1 Month Rent
-                      </button>
+                      </div>
                     </div>
 
                     {/* Custom Percentage Input & Apply */}
@@ -2047,7 +2049,7 @@ export default function InvoicesPage() {
                       <span>Invoice Schedule &amp; Status</span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+                    <div className="invoice-dates-grid">
                       <div>
                         <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Issue Date *</label>
                         <input
@@ -2055,7 +2057,7 @@ export default function InvoicesPage() {
                           type="date"
                           value={form.issueDate}
                           onChange={e => setForm({ ...form, issueDate: e.target.value })}
-                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                          style={{ width: '100%', padding: '7px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12.5, outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                       <div>
@@ -2065,23 +2067,23 @@ export default function InvoicesPage() {
                           type="date"
                           value={form.dueDate}
                           onChange={e => setForm({ ...form, dueDate: e.target.value })}
-                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                          style={{ width: '100%', padding: '7px 8px', border: '1px solid #cbd5e1', borderRadius: 6, fontSize: 12.5, outline: 'none', boxSizing: 'border-box' }}
                         />
                       </div>
                     </div>
 
                     {/* Quick Due Date Presets */}
-                    <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-                      <button type="button" onClick={() => setDueDatePreset(0)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>Today</button>
-                      <button type="button" onClick={() => setDueDatePreset(7)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>+7 Days</button>
-                      <button type="button" onClick={() => setDueDatePreset(14)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>+14 Days</button>
-                      <button type="button" onClick={() => setDueDatePreset(30)} style={{ flex: 1, fontSize: 11, padding: '4px 6px', borderRadius: 5, border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer', color: '#475569', fontWeight: 600 }}>+30 Days</button>
+                    <div className="invoice-due-presets-grid">
+                      <button type="button" onClick={() => setDueDatePreset(0)} className="invoice-due-preset-btn">Today</button>
+                      <button type="button" onClick={() => setDueDatePreset(7)} className="invoice-due-preset-btn">+7 Days</button>
+                      <button type="button" onClick={() => setDueDatePreset(14)} className="invoice-due-preset-btn">+14 Days</button>
+                      <button type="button" onClick={() => setDueDatePreset(30)} className="invoice-due-preset-btn">+30 Days</button>
                     </div>
 
                     {/* Status Pill Buttons */}
                     <div>
-                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 5 }}>Payment Status</label>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: '#334155', marginBottom: 6 }}>Payment Status</label>
+                      <div className="invoice-status-grid">
                         {invoiceStatuses.map(s => {
                           const isSel = form.status === s;
                           const col = getStatusColorStyle(s);
@@ -2091,11 +2093,10 @@ export default function InvoicesPage() {
                               type="button"
                               onClick={() => setForm(prev => ({ ...prev, status: s }))}
                               style={{
-                                flex: '1 1 auto',
-                                minWidth: 70,
-                                padding: '6px 10px',
+                                height: 36,
+                                padding: '0 6px',
                                 borderRadius: 7,
-                                fontSize: 12,
+                                fontSize: 11.5,
                                 fontWeight: 700,
                                 cursor: 'pointer',
                                 border: isSel ? `2px solid ${col.text}` : '1px solid #cbd5e1',
@@ -2105,11 +2106,13 @@ export default function InvoicesPage() {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 gap: 5,
-                                whiteSpace: 'nowrap'
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
                               }}
                             >
-                              <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: col.dot }} />
-                              {s}
+                              <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: col.dot, flexShrink: 0 }} />
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{s}</span>
                             </button>
                           );
                         })}
@@ -2218,7 +2221,7 @@ export default function InvoicesPage() {
                     </div>
                   ) : (
                     /* Supply Type & Tax Rate */
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 8 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
                       <div>
                         <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#334155', marginBottom: 3 }}>Supply Type</label>
                         <select

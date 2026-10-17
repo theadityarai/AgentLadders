@@ -649,11 +649,7 @@ export default function PropertiesPage() {
     setCurrentPage(1);
   }, [search, filter, purposeFilter, sortBy]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
-      setViewMode('grid');
-    }
-  }, []);
+
 
   const isPropertyRent = useCallback((p: Property) => {
     return p.purpose === 'For Rent' || p.listingType === 'For Rent';
@@ -1506,9 +1502,9 @@ export default function PropertiesPage() {
             )}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <div className="responsive-header-action-row">
           {/* View Mode Switcher: List Table vs Grid Cards */}
-          <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '10px', gap: '3px' }}>
+          <div className="segmented-view-control">
             <button
               type="button"
               onClick={() => setViewMode('list')}

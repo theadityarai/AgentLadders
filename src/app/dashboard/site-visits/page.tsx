@@ -747,9 +747,9 @@ export default function SiteVisitsPage() {
             )}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <div className="responsive-header-action-row">
           {/* View Mode Switcher: List View vs Calendar View */}
-          <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '10px', gap: '3px' }}>
+          <div className="segmented-view-control">
             <button
               type="button"
               onClick={() => setViewMode('list')}
