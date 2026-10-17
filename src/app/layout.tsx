@@ -16,9 +16,70 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL.startsWith('http')
+  ? process.env.NEXTAUTH_URL
+  : 'https://agent-ladders.vercel.app';
+
 export const metadata: Metadata = {
-  title: "AgentLadders | Real Estate CRM",
-  description: "The fastest, cleanest CRM built exclusively for Indian Real Estate Brokers.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "AgentLadders — India Real Estate OS & Broker CRM",
+    template: "%s | AgentLadders"
+  },
+  description: "The modern operating system built for Indian real estate brokers and property agencies. Manage high-intent inquiries, live inventory, WhatsApp matching, site visits, and RERA-compliant deal pipelines.",
+  keywords: [
+    "Real Estate CRM India",
+    "Indian Real Estate Broker Software",
+    "RERA Compliant CRM",
+    "Property Broker Management System",
+    "Real Estate WhatsApp Automation",
+    "Brokerage Commission Tracker",
+    "Site Visit Scheduler Real Estate",
+    "Indian Property Listings Manager",
+    "Delhi NCR Mumbai Bangalore Real Estate CRM"
+  ],
+  authors: [{ name: "AgentLadders Technologies" }],
+  creator: "AgentLadders",
+  publisher: "AgentLadders",
+  applicationName: "AgentLadders",
+  category: "Business & Productivity",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: siteUrl,
+    siteName: "AgentLadders Real Estate OS",
+    title: "AgentLadders — India Real Estate OS & Broker CRM",
+    description: "The modern operating system built for Indian real estate brokers and agencies. Close more deals faster.",
+    images: [
+      {
+        url: `${siteUrl}/favicon.ico`,
+        width: 120,
+        height: 120,
+        alt: "AgentLadders Real Estate Operating System",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "AgentLadders — India Real Estate OS & Broker CRM",
+    description: "Manage inquiries, inventory, WhatsApp pitches, site visits, and deals on the fastest real estate OS.",
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {
