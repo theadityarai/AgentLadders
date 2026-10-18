@@ -40,6 +40,8 @@ export interface ModalShowcaseItem {
   modalTitle: string;
   triggerButton: string;
   purpose: string;
+  actionType: 'create' | 'edit';
+  stepByStep: string[];
   keyFields: { fieldName: string; inputType: string; guidance: string }[];
   operatorTip: string;
 }
@@ -89,7 +91,7 @@ export interface ModuleTutorial {
   };
 }
 
-// ─── Complete 12-Module Tutorial Dataset (Easy Words Edition) ────────────────
+// ─── Complete 12-Module Tutorial Dataset (Easy Words & Full Create/Edit) ──────
 
 export const MODULE_TUTORIALS: ModuleTutorial[] = [
   // ── 1. TODAY DASHBOARD ──────────────────────────────────────────────────────
@@ -179,27 +181,63 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Book Site Visit Popup',
-        triggerButton: '🏎️ Book Site Visit (Top Right)',
-        purpose: 'Set up a property showing with the client name, property name, date, and time.',
-        keyFields: [
-          { fieldName: 'Client Name', inputType: 'Dropdown Picker', guidance: 'Choose buyer from your list' },
-          { fieldName: 'Property', inputType: 'Dropdown Picker', guidance: 'Select the apartment or villa to visit' },
-          { fieldName: 'Visit Type', inputType: 'Pill Toggle', guidance: 'Pick "Buy" or "Rent"' },
-          { fieldName: 'Date & Time', inputType: 'Date/Time Picker', guidance: 'Pick a clear 1-hour slot (e.g. 10:00 AM)' }
+        modalTitle: 'Book Site Visit (Quick Scheduler)',
+        triggerButton: '🏎️ Book Site Visit Button (Top Right Header)',
+        purpose: 'Create a property visit appointment directly from your home screen in 30 seconds.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the "🏎️ Book Site Visit" button in the top right header.',
+          'Select the buyer name from your registered leads list.',
+          'Pick the matching luxury property from your available inventory.',
+          'Choose the date and set a 1-hour time window (e.g. 10:00 AM - 11:00 AM).',
+          'Hit "Schedule Visit" — it sends an instant WhatsApp invitation with the Google Maps pin.'
         ],
-        operatorTip: 'Turn on the "Send WhatsApp Confirmation" toggle so both buyer and caretaker get the address pin immediately.'
+        keyFields: [
+          { fieldName: 'Client Name', inputType: 'Dropdown Picker', guidance: 'Select qualified buyer from your active list' },
+          { fieldName: 'Property', inputType: 'Dropdown Picker', guidance: 'Select the apartment or villa to visit' },
+          { fieldName: 'Visit Type', inputType: 'Pill Toggle', guidance: 'Pick "Buy Showing" or "Rent Showing"' },
+          { fieldName: 'Date & Time Slot', inputType: 'Date/Time Picker', guidance: 'Pick an unhurried 1-hour slot (e.g. 10:00 AM)' },
+          { fieldName: 'Gate / Meeting Point', inputType: 'Text', guidance: 'Meeting spot (e.g. Gate 1 Security Lobby)' }
+        ],
+        operatorTip: 'Keep the "Send WhatsApp Invitation" switch ON so both buyer and caretaker get the address pin immediately.'
       },
       {
-        modalTitle: 'Add New Buyer Popup',
-        triggerButton: '➕ Add New Buyer (Top Right)',
-        purpose: 'Save a new client\'s name, phone, budget in Crores, and preferred area.',
-        keyFields: [
-          { fieldName: 'Full Name & Mobile', inputType: 'Text & Number', guidance: 'Client name and 10-digit phone number' },
-          { fieldName: 'Budget (Min & Max)', inputType: 'Rupee Currency Input', guidance: 'Enter budget in Crores (e.g., ₹5.0 Cr to ₹8.0 Cr)' },
-          { fieldName: 'Preferred Area & BHK', inputType: 'Multi-select', guidance: 'Choose areas like Worli, Bandra, Gurgaon' }
+        modalTitle: 'Add New Buyer (Quick Lead Form)',
+        triggerButton: '➕ Add New Buyer Button (Top Right Header)',
+        purpose: 'Capture incoming client criteria, budget range in Crores, and immediate area preferences.',
+        actionType: 'create',
+        stepByStep: [
+          'Click "+ Add New Buyer" as soon as a prospective buyer calls or WhatsApps you.',
+          'Type their full name and 10-digit phone number with WhatsApp.',
+          'Enter their minimum and maximum budget in Crores (e.g. ₹5.0 Cr to ₹8.0 Cr).',
+          'Pick their preferred BHK size (3 BHK, 4 BHK) and locality (Worli, Bandra, Gurgaon).',
+          'Click "Save Buyer" to store them in your CRM and auto-match them against active inventory.'
         ],
-        operatorTip: 'Tag the buyer as "Hot" if they already have approved bank funds and want to buy this month.'
+        keyFields: [
+          { fieldName: 'Full Name & Mobile', inputType: 'Text & Tel (+91)', guidance: 'Client full name and 10-digit mobile number' },
+          { fieldName: 'Budget (Min & Max)', inputType: 'Rupee Currency Input', guidance: 'Budget in Crores (e.g. ₹6.0 Cr to ₹9.0 Cr)' },
+          { fieldName: 'Preferred Area & BHK', inputType: 'Multi-select Dropdown', guidance: 'Target micro-markets and bedroom configurations' },
+          { fieldName: 'Lead Temperature', inputType: 'Dropdown Picker', guidance: 'Choose Hot (buying now), Warm (60 days), or Cold' }
+        ],
+        operatorTip: 'Always mark lead temperature as "Hot" if the buyer has cash ready or an approved bank loan.'
+      },
+      {
+        modalTitle: 'Quick Follow-up & Status Update',
+        triggerButton: 'Quick Note / Checkmark Icon on Inquiry Card',
+        purpose: 'Edit a buyer\'s follow-up status, log call remarks, or mark an urgent inquiry resolved.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click the edit or note icon on any buyer card in the left column.',
+          'Change status from "New Inbound" to "Contacted", "Call Back Later", or "Showing Booked".',
+          'Write a quick 1-line note (e.g. "Spoke with client, prefers higher floor above 20th").',
+          'Click "Update Status" to refresh the card and move it out of the urgent morning queue.'
+        ],
+        keyFields: [
+          { fieldName: 'Inquiry Status', inputType: 'Dropdown Picker', guidance: 'Switch to Contacted, Follow-Up Scheduled, or Closed' },
+          { fieldName: 'Call Notes', inputType: 'Textarea', guidance: 'Write down specific client preferences or objections' },
+          { fieldName: 'Next Follow-up Date', inputType: 'Date Picker', guidance: 'Set date for next scheduled outreach' }
+        ],
+        operatorTip: 'Log notes immediately after ending a call so you never forget specific buyer comments.'
       }
     ],
     whatsAppVault: [
@@ -326,26 +364,46 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Add New Lead Popup',
-        triggerButton: '+ Add Lead (Top Right)',
-        purpose: 'Create a new buyer record with contact info, budget in Crores, and BHK requirement.',
+        modalTitle: 'Create New Lead (Buyer Registration Form)',
+        triggerButton: '+ Add Lead Button (Top Right Header)',
+        purpose: 'Create a permanent client record with contact info, budget range in Crores, and BHK preferences.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the blue "+ Add Lead" button in the top right.',
+          'Enter client full name, 10-digit WhatsApp phone, and email address.',
+          'Set minimum and maximum budget in Crores (e.g. ₹5.0 Cr to ₹8.5 Cr).',
+          'Select configuration (2 BHK, 3 BHK, 4 BHK, Penthouse) and preferred neighborhoods.',
+          'Select lead source (Instagram Ad, MagicBricks, Referral, Walk-in) and lead temperature.',
+          'Click "Create Lead" — the client is immediately added to your active database.'
+        ],
         keyFields: [
-          { fieldName: 'Full Name', inputType: 'Text', guidance: 'Client full name' },
-          { fieldName: 'Mobile Number', inputType: 'Tel (+91)', guidance: '10-digit WhatsApp phone number' },
-          { fieldName: 'Budget Range', inputType: 'Number / Currency', guidance: 'Min and max budget (e.g. ₹5 Cr - ₹8 Cr)' },
+          { fieldName: 'Full Name', inputType: 'Text', guidance: 'Client full name (e.g. Vikram Malhotra)' },
+          { fieldName: 'WhatsApp Phone', inputType: 'Tel (+91)', guidance: '10-digit mobile number for WhatsApp brochures' },
+          { fieldName: 'Budget Min & Max', inputType: 'Rupee Currency Input', guidance: 'Budget in Crores (e.g. ₹7.0 Cr - ₹9.5 Cr)' },
+          { fieldName: 'Preferred Localities', inputType: 'Multi-select Dropdown', guidance: 'Target areas like Worli, Bandra West, Lower Parel' },
           { fieldName: 'Lead Temperature', inputType: 'Dropdown Picker', guidance: 'Select Hot, Warm, or Cold' }
         ],
-        operatorTip: 'Check the "Loan Approved" box if the client has cash in hand or bank sanction ready.'
+        operatorTip: 'Check the "Pre-Approved Loan" toggle if the client has cash in hand or bank sanction letter ready.'
       },
       {
-        modalTitle: 'Edit Buyer Preferences',
-        triggerButton: 'Edit Icon on Buyer Card',
-        purpose: 'Update buyer budget or preferred localities after they give you feedback on a visit.',
-        keyFields: [
-          { fieldName: 'Status', inputType: 'Dropdown Picker', guidance: 'Move from "Inquiry" to "Showing Scheduled" or "Negotiation"' },
-          { fieldName: 'Notes / Remarks', inputType: 'Textarea', guidance: 'Write down client comments like "needs sea view" or "higher floor only"' }
+        modalTitle: 'Edit Buyer Profile & Update Preferences',
+        triggerButton: 'Edit Pencil Icon on any Buyer Card / Row',
+        purpose: 'Edit a buyer\'s budget, change their stage, update locality criteria, or add visit feedback.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click the Edit pencil icon on the buyer\'s card.',
+          'Update their budget if they decided to stretch for a better tower.',
+          'Change status from "New Inbound" to "Showing Scheduled", "Under Negotiation", or "Closed".',
+          'Add detailed client feedback in the private notes box (e.g., "Loved the balcony, wants sea view only").',
+          'Click "Save Changes" to update the client profile across your entire system.'
         ],
-        operatorTip: 'Add notes immediately after a visit so you remember exactly what the buyer loved or disliked.'
+        keyFields: [
+          { fieldName: 'Revised Budget', inputType: 'Rupee Currency Input', guidance: 'Updated budget in Crores if client modified range' },
+          { fieldName: 'Lead Status', inputType: 'Dropdown Picker', guidance: 'Move between New, Contacted, Visit Done, Negotiating, Won, Lost' },
+          { fieldName: 'Lead Temperature', inputType: 'Dropdown Picker', guidance: 'Upgrade to Hot if they made an offer or downgrade to Cold' },
+          { fieldName: 'Notes / Remarks', inputType: 'Textarea', guidance: 'Private advisor notes on client requirements and objections' }
+        ],
+        operatorTip: 'Update buyer notes immediately after every site visit so you never forget their feedback.'
       }
     ],
     whatsAppVault: [
@@ -472,27 +530,46 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Add New Property Popup',
-        triggerButton: '+ Add Property (Top Right)',
-        purpose: 'Upload a new listing with photos, carpet area, price in Crores, and RERA number.',
-        keyFields: [
-          { fieldName: 'Project & Tower Name', inputType: 'Text', guidance: 'Building name (e.g. Oberoi 360)' },
-          { fieldName: 'Configuration & Floor', inputType: 'Dropdown Picker', guidance: 'Select 2 BHK, 3 BHK, 4 BHK or Penthouse' },
-          { fieldName: 'RERA Carpet Area', inputType: 'Number', guidance: 'Exact carpet area in square feet' },
-          { fieldName: 'Asking Price', inputType: 'Rupee Currency Input', guidance: 'Total price in Crores (e.g. ₹8.5 Cr)' },
-          { fieldName: 'Owner / Caretaker Contact', inputType: 'Tel', guidance: 'Phone number for keys and access' }
+        modalTitle: 'Add New Property (Listing Creation Form)',
+        triggerButton: '+ Add Property Button (Top Right Header)',
+        purpose: 'Create a new property listing with photos, carpet area in sq.ft., price in Crores, and owner info.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the purple "+ Add Property" button at the top right.',
+          'Enter the building or project name (e.g. Oberoi 360, Lodha Park).',
+          'Select configuration (3 BHK, 4 BHK, Villa) and input verified RERA carpet area in sq.ft.',
+          'Enter the total asking price in Crores (e.g. ₹8.5 Cr) and maintenance charges.',
+          'Enter owner or caretaker name and phone number for key access.',
+          'Upload 3-6 clear photos (living room, view, bedrooms) and hit "Publish Listing".'
         ],
-        operatorTip: 'Add key handover instructions in the private notes box (e.g., "Keys with security guard at tower B lobby").'
+        keyFields: [
+          { fieldName: 'Project & Tower Name', inputType: 'Text', guidance: 'Building name (e.g. Lodha World Towers)' },
+          { fieldName: 'Configuration & Floor', inputType: 'Dropdown Picker', guidance: 'Select 2 BHK, 3 BHK, 4 BHK, or Penthouse' },
+          { fieldName: 'RERA Carpet Area', inputType: 'Number (sq.ft.)', guidance: 'Exact usable carpet area in square feet' },
+          { fieldName: 'Asking Price', inputType: 'Rupee Currency Input', guidance: 'Total asking price in Crores (e.g. ₹8.5 Cr)' },
+          { fieldName: 'Owner / Caretaker Contact', inputType: 'Tel (+91)', guidance: 'Phone number for keys and site inspection' }
+        ],
+        operatorTip: 'Add key handover notes (e.g. "Keys with caretaker at Gate 1 lobby") so showing advisors know how to get in.'
       },
       {
-        modalTitle: 'Edit Listing & Price Update',
+        modalTitle: 'Edit Listing & Price Revision Form',
         triggerButton: 'Edit Button on Property Card',
-        purpose: 'Adjust the price or change status when the seller agrees to negotiate.',
-        keyFields: [
-          { fieldName: 'Updated Asking Price', inputType: 'Rupee Currency Input', guidance: 'Enter revised asking price' },
-          { fieldName: 'Listing Status', inputType: 'Dropdown Picker', guidance: 'Switch to Available, Under Offer, or Sold' }
+        purpose: 'Edit a property\'s asking price, update availability status, or update caretaker contact.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click the Edit button on the property card.',
+          'Change the asking price if the seller agrees to lower expectations for a quick closing.',
+          'Change status from "Available" to "Under Offer" as soon as a token is paid.',
+          'Update photos if professional photoshoot images are now available.',
+          'Click "Update Listing" to save changes and notify all matching active buyers.'
         ],
-        operatorTip: 'When an owner lowers the price, immediately notify all buyers who viewed the property in the last 30 days.'
+        keyFields: [
+          { fieldName: 'Revised Price', inputType: 'Rupee Currency Input', guidance: 'Enter revised asking price in Crores' },
+          { fieldName: 'Listing Status', inputType: 'Dropdown Picker', guidance: 'Switch between Available, Under Offer, Sold, or Rented' },
+          { fieldName: 'Caretaker Phone', inputType: 'Tel (+91)', guidance: 'Update phone number if security staff changes' },
+          { fieldName: 'Internal Remarks', inputType: 'Textarea', guidance: 'Seller negotiation room and payment term requirements' }
+        ],
+        operatorTip: 'Whenever an owner drops their price, immediately message all buyers who visited the property in the last 30 days.'
       }
     ],
     whatsAppVault: [
@@ -619,26 +696,45 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Book Site Visit Popup',
-        triggerButton: '+ Book Visit (Top Right)',
-        purpose: 'Create a property visit appointment linking a registered buyer and property.',
+        modalTitle: 'Book Site Visit (Appointment Scheduler)',
+        triggerButton: '+ Book Visit Button (Top Right Header)',
+        purpose: 'Create a property tour appointment linking a registered buyer, listing, and time slot.',
+        actionType: 'create',
+        stepByStep: [
+          'Click "+ Book Visit" in the top right corner.',
+          'Choose the buyer from the dropdown list.',
+          'Select the property to be shown.',
+          'Pick the date and set a fixed 1-hour interval (e.g. 10:00 AM - 11:00 AM).',
+          'Specify the meeting gate (e.g. Gate 1 Main Visitor Lobby).',
+          'Click "Confirm Booking" to schedule and dispatch WhatsApp invitations.'
+        ],
         keyFields: [
           { fieldName: 'Select Buyer', inputType: 'Dropdown Picker', guidance: 'Choose buyer from your active leads list' },
           { fieldName: 'Select Property', inputType: 'Dropdown Picker', guidance: 'Pick the verified apartment or villa' },
           { fieldName: 'Showing Date & Time Slot', inputType: 'Date/Time Picker', guidance: 'Set date and fixed 1-hour interval (e.g. 10:00 AM - 11:00 AM)' },
           { fieldName: 'Meeting Point / Gate', inputType: 'Text', guidance: 'Specify entrance (e.g. Gate 1, Visitor Lobby)' }
         ],
-        operatorTip: 'Add special notes like "Client is bringing interior designer" to prepare the caretaker in advance.'
+        operatorTip: 'Add special notes like "Client is bringing family and interior designer" so the caretaker is ready.'
       },
       {
-        modalTitle: 'Log Visit Feedback & Outcome',
-        triggerButton: 'Feedback Icon on Visit Card',
-        purpose: 'Record whether the buyer liked the flat, wants to make an offer, or needs other options.',
-        keyFields: [
-          { fieldName: 'Visit Outcome', inputType: 'Dropdown Picker', guidance: 'Pick: "Liked & Making Offer", "Needs Other Options", or "Price Too High"' },
-          { fieldName: 'Client Counter-Offer', inputType: 'Rupee Currency Input', guidance: 'Enter offered amount if buyer made an on-the-spot offer' }
+        modalTitle: 'Reschedule Visit & Log Tour Outcome',
+        triggerButton: 'Edit / Feedback Icon on Visit Card',
+        purpose: 'Edit visit date/time, reschedule for delayed clients, mark Completed, and log buyer counter-offers.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click the edit or feedback button on the scheduled visit card.',
+          'If the client is stuck in traffic, select a new time slot or change date.',
+          'When the visit finishes, change status from "Scheduled" to "Completed" or "Cancelled".',
+          'Pick the visit outcome: "Loved it & making offer", "Needs other options", or "Price too high".',
+          'If buyer made an offer, type the counter-offer amount in Crores and hit "Save Outcome".'
         ],
-        operatorTip: 'Log feedback within 30 minutes of the visit while the conversation is fresh in your memory.'
+        keyFields: [
+          { fieldName: 'Reschedule Date/Time', inputType: 'Date/Time Picker', guidance: 'New time slot if visit is postponed' },
+          { fieldName: 'Visit Status', inputType: 'Dropdown Picker', guidance: 'Switch to Scheduled, Completed, No-Show, or Cancelled' },
+          { fieldName: 'Visit Outcome', inputType: 'Dropdown Picker', guidance: 'Select client reaction: Making Offer, Loved Layout, Rejected' },
+          { fieldName: 'Client Counter-Offer', inputType: 'Rupee Currency Input', guidance: 'Amount in Crores if client made a verbal offer on-site' }
+        ],
+        operatorTip: 'Log visit feedback within 30 minutes of the walkthrough while the conversation is still fresh.'
       }
     ],
     whatsAppVault: [
@@ -765,27 +861,64 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Create Deal Popup',
-        triggerButton: '+ Create Deal (Top Right)',
-        purpose: 'Record a new property transaction with buyer, seller, agreed price, and commission terms.',
-        keyFields: [
-          { fieldName: 'Deal Title', inputType: 'Text', guidance: 'e.g. Oberoi 360 4 BHK Sale' },
-          { fieldName: 'Agreed Price', inputType: 'Rupee Currency Input', guidance: 'Total deal consideration in Crores (e.g. ₹7.5 Cr)' },
-          { fieldName: 'Token Advance Paid', inputType: 'Rupee Currency Input', guidance: 'Token amount paid (e.g. ₹10 Lakhs)' },
-          { fieldName: 'Brokerage Rate', inputType: 'Percentage Input', guidance: 'Your commission rate (e.g. 2% = ₹15 Lakhs)' },
-          { fieldName: 'Target Registration Date', inputType: 'Date Picker', guidance: 'Agreed date for government registration' }
+        modalTitle: 'Create Deal (Transaction Onboarding Form)',
+        triggerButton: '+ Create Deal Button (Top Right Header)',
+        purpose: 'Create a new closing record linking buyer, seller, property, agreed price in Crores, and brokerage commission.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the green "+ Create Deal" button in the top right.',
+          'Type the deal title (e.g. "Oberoi 360 4 BHK Sale").',
+          'Select the buyer and property from the dropdowns.',
+          'Enter total agreed consideration in Crores (e.g. ₹8.5 Cr) and token advance paid (e.g. ₹10 Lakhs).',
+          'Set your advisory brokerage commission (e.g. 2% = ₹17 Lakhs).',
+          'Pick the target registration date and click "Create Deal".'
         ],
-        operatorTip: 'Attach the bank RTGS confirmation screenshot so there is never any confusion about the token payment date.'
+        keyFields: [
+          { fieldName: 'Deal Title', inputType: 'Text', guidance: 'Short deal description (e.g. Worli Penthouse Sale)' },
+          { fieldName: 'Agreed Price', inputType: 'Rupee Currency Input', guidance: 'Total price in Crores (e.g. ₹7.5 Cr)' },
+          { fieldName: 'Token Advance Paid', inputType: 'Rupee Currency Input', guidance: 'Earnest deposit received (e.g. ₹10 Lakhs)' },
+          { fieldName: 'Brokerage Rate %', inputType: 'Percentage Input', guidance: 'Commission rate (e.g. 1% or 2%)' },
+          { fieldName: 'Target Registration Date', inputType: 'Date Picker', guidance: 'Agreed deadline for government registration' }
+        ],
+        operatorTip: 'Attach the bank RTGS confirmation screenshot so there is never any question about the token date.'
       },
       {
-        modalTitle: 'Issue Token Advance Receipt',
-        triggerButton: 'Issue Token Receipt Button inside Deal',
-        purpose: 'Generate an official receipt confirming token money received towards the property.',
-        keyFields: [
-          { fieldName: 'Payment Mode', inputType: 'Dropdown Picker', guidance: 'Select RTGS, NEFT, Cheque, or Bank Transfer' },
-          { fieldName: 'Transaction / UTR Reference', inputType: 'Text', guidance: 'Bank reference number from the payment receipt' }
+        modalTitle: 'Issue Token Advance Receipt (PDF Generator)',
+        triggerButton: 'Issue Token Receipt Button (Inside Deal Card)',
+        purpose: 'Create an official receipt acknowledging earnest token advance money paid for a property.',
+        actionType: 'create',
+        stepByStep: [
+          'Open the deal card in the "Token Received" stage.',
+          'Click "Issue Token Receipt".',
+          'Enter the bank payment method (RTGS / NEFT / Cheque) and the bank UTR reference number.',
+          'Confirm token amount received and token validity period (e.g. 15 days).',
+          'Click "Generate Receipt" — creates a branded PDF you can send on WhatsApp to both parties.'
         ],
-        operatorTip: 'Send this receipt to both buyer and seller in a joint WhatsApp group to lock in the commitment.'
+        keyFields: [
+          { fieldName: 'Payment Mode', inputType: 'Dropdown Picker', guidance: 'Select RTGS, NEFT, Cheque, or Wire Transfer' },
+          { fieldName: 'Bank Reference / UTR', inputType: 'Text', guidance: 'Transaction reference code from the bank receipt' },
+          { fieldName: 'Token Validity (Days)', inputType: 'Number', guidance: 'Days allowed for agreement drafting (standard: 15-21 days)' }
+        ],
+        operatorTip: 'Send this receipt to both buyer and seller in a joint WhatsApp group to lock in commitment.'
+      },
+      {
+        modalTitle: 'Edit Deal & Advance Stage Milestone',
+        triggerButton: 'Click Deal Card or Drag to Next Column',
+        purpose: 'Edit deal details, update agreed terms, log title search completion, or advance to next closing stage.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click on any active deal card to open its full details drawer.',
+          'Change the stage dropdown from "Token Received" to "Document Verification", "Agreement", or "Registration".',
+          'Update agreed registration date if the bank loan approval required an extra week.',
+          'Log checklist items completed (e.g. Society NOC received, Stamp duty challan verified).',
+          'Click "Save Milestone" to update the card and alert your operations team.'
+        ],
+        keyFields: [
+          { fieldName: 'Current Pipeline Stage', inputType: 'Dropdown Picker', guidance: 'Move card to next stage column' },
+          { fieldName: 'Revised Registration Date', inputType: 'Date Picker', guidance: 'Updated date for registrar office appointment' },
+          { fieldName: 'Milestone Notes', inputType: 'Textarea', guidance: 'Legal status, loan sanction progress, and NOC updates' }
+        ],
+        operatorTip: 'Never advance a deal to "Agreement Signed" until the stamp duty payment challan has been verified.'
       }
     ],
     whatsAppVault: [
@@ -912,24 +1045,40 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Revenue Target Planner',
-        triggerButton: 'Set Targets Button (Top Right)',
-        purpose: 'Set monthly or quarterly brokerage goals for yourself or your agency team.',
+        modalTitle: 'Set Revenue & Sales Targets Form',
+        triggerButton: 'Set Targets Button (Top Right Header)',
+        purpose: 'Set monthly or quarterly brokerage commission goals and sales volume targets.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the "Set Targets" button in the top right.',
+          'Choose the target period (e.g. Q3 2026 or Current Month).',
+          'Input your agency brokerage target in Lakhs (e.g. ₹50 Lakhs).',
+          'Input target transaction volume in Crores (e.g. ₹25.0 Cr).',
+          'Click "Save Target" — updates the progress bar on your analytics screen.'
+        ],
         keyFields: [
+          { fieldName: 'Target Period', inputType: 'Dropdown Picker', guidance: 'Select Month or Quarter' },
           { fieldName: 'Quarterly Brokerage Target', inputType: 'Rupee Currency Input', guidance: 'Target commission in Lakhs (e.g. ₹50 Lakhs)' },
           { fieldName: 'Target Deal Volume', inputType: 'Number / Currency', guidance: 'Total sales volume in Crores (e.g. ₹25 Cr)' }
         ],
-        operatorTip: 'Divide your quarterly target by 3 to set clear weekly site visit goals for your team.'
+        operatorTip: 'Divide your quarterly commission target by 3 to set clear weekly site visit goals for your advisors.'
       },
       {
-        modalTitle: 'Export Analytics Summary',
-        triggerButton: 'Export Report Button',
-        purpose: 'Download a clean 1-page summary chart to share with partners or investors.',
-        keyFields: [
-          { fieldName: 'Export Format', inputType: 'Dropdown Picker', guidance: 'Pick PDF Summary or Excel CSV' },
-          { fieldName: 'Include Commission Breakdown', inputType: 'Toggle', guidance: 'Check to include exact agent payouts' }
+        modalTitle: 'Edit Target & Micro-Market Strategy',
+        triggerButton: 'Edit Strategy Button / Target Progress Bar',
+        purpose: 'Edit quarterly revenue targets and re-allocate marketing focus across luxury localities.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click the Edit icon next to the Target Progress bar.',
+          'Adjust your brokerage goal if market momentum accelerated.',
+          'Select your 2 priority micro-markets to allocate marketing spend (e.g. Worli & Bandra).',
+          'Click "Update Strategy" to refresh pacing charts and team targets.'
         ],
-        operatorTip: 'Export this at the end of every month for your tax accountant.'
+        keyFields: [
+          { fieldName: 'Revised Target', inputType: 'Rupee Currency Input', guidance: 'Updated commission goal in Lakhs' },
+          { fieldName: 'Priority Localities', inputType: 'Multi-select Dropdown', guidance: 'Top 2 neighborhoods to prioritize' }
+        ],
+        operatorTip: 'Review your pacing at the mid-point of every quarter to course-correct marketing spend.'
       }
     ],
     whatsAppVault: [
@@ -1056,9 +1205,17 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Upload Document Popup',
-        triggerButton: '+ Upload Document (Top Right)',
-        purpose: 'Upload a document, choose its category, and link it to an active client or property.',
+        modalTitle: 'Upload New Document (File Ingestion Form)',
+        triggerButton: '+ Upload Document Button (Top Right Header)',
+        purpose: 'Upload and encrypt a contract, title deed, or client identity document.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the blue "+ Upload Document" button in the top right.',
+          'Drag and drop the PDF or scanned image (up to 25MB).',
+          'Type a clear document name (e.g. "Registered Sale Agreement - Flat 1402").',
+          'Select category (Agreement, KYC & Identity, Title Deed, Tax Receipt).',
+          'Link the file to the active client or property listing, then click "Upload & Encrypt".'
+        ],
         keyFields: [
           { fieldName: 'Choose File', inputType: 'File Upload (Drag & Drop)', guidance: 'PDF, JPG, or PNG up to 25MB' },
           { fieldName: 'Document Name', inputType: 'Text', guidance: 'Clear title (e.g. Registered Sale Agreement)' },
@@ -1068,14 +1225,24 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
         operatorTip: 'Tagging the document to an active deal means it automatically appears on your deal timeline.'
       },
       {
-        modalTitle: 'Fullscreen Document Viewer Modal',
-        triggerButton: 'View Button on any Document',
-        purpose: 'Inspect multi-page contracts, check signatures, and download verified copies.',
-        keyFields: [
-          { fieldName: 'Page Navigation', inputType: 'Control Bar', guidance: 'Next / previous page controls and zoom (+/-)' },
-          { fieldName: 'Download Copy', inputType: 'Button', guidance: 'Download watermarked or verified PDF' }
+        modalTitle: 'Edit Document Details & Security Tags',
+        triggerButton: 'Edit Icon on Document Row',
+        purpose: 'Edit document title, re-assign linked deal/client, update category, or toggle privacy masking.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click the edit icon on any document row in the table.',
+          'Rename the file if the original upload had a messy filename.',
+          'Re-assign to a different deal if the client booked a different apartment.',
+          'Toggle "Aadhaar Masking" ON to hide the first 8 digits of identity numbers.',
+          'Click "Save Changes" to update the file records.'
         ],
-        operatorTip: 'Use the zoom tool to verify registration numbers and official stamps on the last page.'
+        keyFields: [
+          { fieldName: 'Document Name', inputType: 'Text', guidance: 'Edit file title' },
+          { fieldName: 'Category', inputType: 'Dropdown Picker', guidance: 'Re-categorize document' },
+          { fieldName: 'Linked Client / Deal', inputType: 'Dropdown Picker', guidance: 'Re-link to different transaction' },
+          { fieldName: 'Privacy Masking', inputType: 'Toggle', guidance: 'Turn ON to mask first 8 digits of Aadhaar/PAN' }
+        ],
+        operatorTip: 'Keep privacy masking enabled for all client KYC documents to comply with privacy laws.'
       }
     ],
     whatsAppVault: [
@@ -1202,9 +1369,17 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Generate Tax Invoice Popup',
-        triggerButton: '+ Create Invoice (Top Right)',
-        purpose: 'Create a formal real estate brokerage invoice with GST and bank account details.',
+        modalTitle: 'Generate Tax Invoice (Brokerage Bill Form)',
+        triggerButton: '+ Create Invoice Button (Top Right Header)',
+        purpose: 'Create a formal GST tax invoice with SAC code 997222, TDS deduction, and your bank details.',
+        actionType: 'create',
+        stepByStep: [
+          'Click "+ Create Invoice" in the top right.',
+          'Select the closed deal or enter client/developer name.',
+          'Enter agreed consideration in Crores and base commission percentage or amount (e.g. ₹15,00,000).',
+          'System automatically adds 18% GST and shows 5% TDS under Section 194H.',
+          'Verify your bank account number and IFSC code, then click "Generate Tax Invoice".'
+        ],
         keyFields: [
           { fieldName: 'Client / Developer Name', inputType: 'Dropdown / Text', guidance: 'Name of the party paying your commission' },
           { fieldName: 'Deal Consideration', inputType: 'Rupee Currency Input', guidance: 'Agreed deal value (e.g. ₹7.5 Cr)' },
@@ -1215,13 +1390,22 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
         operatorTip: 'Check the "Split Commission" box if co-brokering the deal with an external partner.'
       },
       {
-        modalTitle: 'Record Payment Received',
-        triggerButton: 'Mark as Paid Button on Invoice',
-        purpose: 'Log when money hits your bank account and mark the invoice as settled.',
+        modalTitle: 'Record Payment Received & Settle Invoice',
+        triggerButton: 'Record Payment / Mark as Paid Button on Invoice',
+        purpose: 'Log incoming bank transfers, record bank UTR number, handle partial payments, and mark invoice settled.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click "Record Payment" on the pending invoice row.',
+          'Enter the amount received in your bank account (net of 5% TDS).',
+          'Type the bank RTGS / NEFT transaction UTR reference number.',
+          'If partial payment was received, enter the amount and the remaining balance stays pending.',
+          'Click "Save Payment" — the invoice status updates to Paid and updates your revenue stats.'
+        ],
         keyFields: [
           { fieldName: 'Amount Received', inputType: 'Rupee Currency Input', guidance: 'Net amount received after TDS deduction' },
           { fieldName: 'Payment Reference / UTR', inputType: 'Text', guidance: 'Bank transaction ID' },
-          { fieldName: 'Payment Date', inputType: 'Date Picker', guidance: 'Date funds cleared in your account' }
+          { fieldName: 'Payment Date', inputType: 'Date Picker', guidance: 'Date funds cleared in your account' },
+          { fieldName: 'Invoice Status', inputType: 'Dropdown Picker', guidance: 'Switch to Fully Paid, Partially Paid, or Disputed' }
         ],
         operatorTip: 'Always verify the net amount against your bank statement before marking as fully paid.'
       }
@@ -1350,9 +1534,17 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Add New Task Popup',
-        triggerButton: '+ Add Task (Top Right)',
-        purpose: 'Create a to-do item with deadline, priority level, and assigned team member.',
+        modalTitle: 'Add New Task (To-Do Creator Form)',
+        triggerButton: '+ Add Task Button (Top Right Header)',
+        purpose: 'Create a specific action item with due date, priority flag, and assigned team member.',
+        actionType: 'create',
+        stepByStep: [
+          'Click "+ Add Task" in the top right.',
+          'Type a clear, actionable title (e.g. "Collect Society NOC from Secretary").',
+          'Select priority (High Priority in Red, Medium in Yellow, Low in Grey).',
+          'Pick due date and time deadline.',
+          'Assign to yourself or a team member, link to the property/deal, and click "Create Task".'
+        ],
         keyFields: [
           { fieldName: 'Task Title', inputType: 'Text', guidance: 'Short, clear action (e.g. Collect Society NOC)' },
           { fieldName: 'Priority Level', inputType: 'Dropdown Picker', guidance: 'Select High, Medium, or Low' },
@@ -1362,12 +1554,21 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
         operatorTip: 'Assign operational tasks like key pickups to junior associates so you can focus on client calls.'
       },
       {
-        modalTitle: 'Edit Task & Add Notes',
-        triggerButton: 'Task Row Click',
-        purpose: 'Add updates or change deadlines when a client asks for extra time.',
+        modalTitle: 'Edit Task, Reschedule & Update Status',
+        triggerButton: 'Task Row Click / Edit Button',
+        purpose: 'Edit task deadlines, re-assign team members, add progress notes, or mark as finished.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click on any task row in the checklist.',
+          'Change status from "To Do" to "In Progress" or "Completed".',
+          'Reschedule due date if the bank requested additional time for loan processing.',
+          'Add a progress note (e.g. "Spoke with Secretary, NOC will be signed tomorrow at 5 PM").',
+          'Click "Save Changes" to update the task status.'
+        ],
         keyFields: [
-          { fieldName: 'Status', inputType: 'Dropdown Picker', guidance: 'Switch between To Do, In Progress, and Completed' },
-          { fieldName: 'Progress Notes', inputType: 'Textarea', guidance: 'Write what happened (e.g. Caretaker delayed by 30 mins)' }
+          { fieldName: 'Task Status', inputType: 'Dropdown Picker', guidance: 'Switch between To Do, In Progress, and Completed' },
+          { fieldName: 'Reschedule Due Date', inputType: 'Date/Time Picker', guidance: 'New deadline if postponed' },
+          { fieldName: 'Progress Notes', inputType: 'Textarea', guidance: 'Write what happened or why it was delayed' }
         ],
         operatorTip: 'Always leave a quick note if you reschedule a task so your team knows why.'
       }
@@ -1496,9 +1697,17 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Custom Report Builder',
-        triggerButton: 'Custom Report Button (Top Right)',
-        purpose: 'Create a tailored report selecting specific metrics, dates, and agent filters.',
+        modalTitle: 'Custom Report Builder (Filter & Export)',
+        triggerButton: 'Custom Report Button (Top Right Header)',
+        purpose: 'Create a tailored business report selecting custom dates, micro-markets, and specific metrics.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the "Custom Report" button in the top right.',
+          'Select start date and end date.',
+          'Check the metrics to include (Deal Volume, Brokerage Collected, Site Visits, Lost Reasons).',
+          'Filter by specific locality or property developer.',
+          'Click "Generate Report" — preview immediately on screen or download as PDF/Excel.'
+        ],
         keyFields: [
           { fieldName: 'Metrics to Include', inputType: 'Checkboxes', guidance: 'Check Volume, Commission, Site Visits, or Lead Sources' },
           { fieldName: 'Date Range', inputType: 'Date Pickers', guidance: 'Pick custom start and end dates' },
@@ -1507,12 +1716,21 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
         operatorTip: 'Filter by a specific developer when presenting sales progress to their board.'
       },
       {
-        modalTitle: 'Schedule Automated Email Reports',
-        triggerButton: 'Automate Report Button',
-        purpose: 'Have monthly summary reports sent automatically to your email every month.',
+        modalTitle: 'Configure Automated Scheduled Reports',
+        triggerButton: 'Automate / Email Schedule Button',
+        purpose: 'Edit automated email delivery settings so leadership and accountants get reports automatically.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click the "Automate Reports" button in the header.',
+          'Enter the email addresses of agency partners and your tax accountant.',
+          'Choose the frequency: Weekly on Monday or Monthly on the 1st.',
+          'Choose the format: PDF Executive Summary or Excel Spreadsheet.',
+          'Click "Save Schedule" — automated reports are sent automatically without manual work.'
+        ],
         keyFields: [
           { fieldName: 'Recipient Emails', inputType: 'Email Input', guidance: 'Add partner and accountant email addresses' },
-          { fieldName: 'Frequency', inputType: 'Dropdown Picker', guidance: 'Select Weekly or Monthly on 1st' }
+          { fieldName: 'Delivery Frequency', inputType: 'Dropdown Picker', guidance: 'Select Weekly or Monthly on 1st' },
+          { fieldName: 'Report Format', inputType: 'Pill Toggle', guidance: 'Pick PDF Summary or Excel CSV' }
         ],
         operatorTip: 'Send this automatically to agency partners so everyone stays aligned on revenue numbers.'
       }
@@ -1641,11 +1859,19 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Submit Support Ticket Popup',
-        triggerButton: '+ Raise Support Ticket (Help Desk Tab)',
-        purpose: 'Submit a question, feature request, or technical issue to the engineering team.',
+        modalTitle: 'Raise Support Ticket (Issue Submission Form)',
+        triggerButton: '+ Raise Support Ticket Button (Help Desk Tab)',
+        purpose: 'Create a tracked support ticket sent directly to our technical engineering team.',
+        actionType: 'create',
+        stepByStep: [
+          'Click the blue "+ Raise Support Ticket" button in the Help Desk tab.',
+          'Type a short subject describing the question or issue.',
+          'Select the category (Technical, Billing, Feature Request, or Legal / RERA).',
+          'Choose the priority level: Low, Medium, or Urgent.',
+          'Write a brief explanation, attach a screenshot if helpful, and click "Submit Ticket".'
+        ],
         keyFields: [
-          { fieldName: 'Ticket Subject', inputType: 'Text', guidance: 'Short summary of what you need' },
+          { fieldName: 'Ticket Subject', inputType: 'Text', guidance: 'Short summary of what you need (e.g. Can\'t upload PDF)' },
           { fieldName: 'Category', inputType: 'Dropdown Picker', guidance: 'Pick: Billing, Feature Request, Technical, or Legal' },
           { fieldName: 'Priority Level', inputType: 'Dropdown Picker', guidance: 'Select Low, Medium, or Urgent' },
           { fieldName: 'Description & Screenshot', inputType: 'Textarea & File', guidance: 'Explain what happened and attach a screenshot' }
@@ -1653,13 +1879,21 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
         operatorTip: 'Tickets marked Urgent are routed directly to our on-call tech team.'
       },
       {
-        modalTitle: 'Search Knowledge Base FAQs',
-        triggerButton: 'Search Box in FAQs Tab',
-        purpose: 'Find instant answers to questions about WhatsApp setup, RERA rules, or invoice taxes.',
-        keyFields: [
-          { fieldName: 'Search Question', inputType: 'Text', guidance: 'Type keyword like "GST", "2FA", or "WhatsApp"' }
+        modalTitle: 'Update Ticket & Reply to Support Thread',
+        triggerButton: 'Click any Ticket Row in Help Desk Tab',
+        purpose: 'Add extra details requested by our engineers or mark the support ticket as resolved.',
+        actionType: 'edit',
+        stepByStep: [
+          'Click on your active support ticket to view the conversation thread.',
+          'Type your reply in the text box if the team asked for clarification.',
+          'Attach additional screenshots if requested.',
+          'Click "Send Reply" or click "Mark as Resolved" once your question is answered.'
         ],
-        operatorTip: 'Type "RERA" to see instant answers on carpet area mandates and commission norms.'
+        keyFields: [
+          { fieldName: 'Reply Message', inputType: 'Textarea', guidance: 'Type your message to the support specialist' },
+          { fieldName: 'Ticket Status', inputType: 'Dropdown Picker', guidance: 'Switch to Open, In Progress, or Resolved' }
+        ],
+        operatorTip: 'Mark tickets as Resolved once satisfied so your help desk stays clean and focused.'
       }
     ],
     whatsAppVault: [
@@ -1786,25 +2020,79 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     ],
     modalShowcase: [
       {
-        modalTitle: 'Setup Two-Factor Authentication Popup',
-        triggerButton: 'Turn On 2FA Toggle (Security Tab)',
-        purpose: 'Connect Google Authenticator or SMS to lock down your broker account.',
+        modalTitle: 'Add Team Member (User Invitation Form)',
+        triggerButton: '+ Add Team Member Button (Team Tab)',
+        purpose: 'Create and invite a new property advisor, sales executive, or showing assistant to your agency.',
+        actionType: 'create',
+        stepByStep: [
+          'Navigate to Settings and click the "Team" tab.',
+          'Click the "+ Add Team Member" button.',
+          'Enter their full name, mobile number, and work email address.',
+          'Select their role: Admin (full access), Senior Advisor (deals & leads), or Showing Assistant (visits only).',
+          'Click "Send Invitation" — sends an email login link with their temporary password.'
+        ],
+        keyFields: [
+          { fieldName: 'Full Name', inputType: 'Text', guidance: 'Team member full name' },
+          { fieldName: 'Email Address', inputType: 'Email', guidance: 'Official login email address' },
+          { fieldName: 'Mobile Number', inputType: 'Tel (+91)', guidance: 'Phone number for WhatsApp notifications' },
+          { fieldName: 'Role & Permissions', inputType: 'Dropdown Picker', guidance: 'Select: Admin, Senior Advisor, or Showing Assistant' }
+        ],
+        operatorTip: 'Assign junior associates the "Showing Assistant" role so they can view visits without editing sensitive commission data.'
+      },
+      {
+        modalTitle: 'Edit Agency Profile, Logo & Office Address',
+        triggerButton: 'Edit Profile Button / Form (Profile Tab)',
+        purpose: 'Edit agency company name, upload high-res logo with transparent background, and update phone/email.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Settings, stay on the "Agency Profile" tab.',
+          'Click "Upload Logo" to replace your current branding image.',
+          'Edit your official business name, public customer hotline, and head office address.',
+          'Click "Save Profile" — your updated logo immediately appears on all outgoing brochures and tax invoices.'
+        ],
+        keyFields: [
+          { fieldName: 'Agency Logo', inputType: 'Image Upload (PNG/JPG)', guidance: 'Upload transparent PNG logo for clean invoices' },
+          { fieldName: 'Agency Legal Name', inputType: 'Text', guidance: 'Official registered entity name' },
+          { fieldName: 'Customer Support Phone', inputType: 'Tel (+91)', guidance: 'Direct public phone number shown on brochures' },
+          { fieldName: 'Office Address', inputType: 'Textarea', guidance: 'Registered office address shown in invoice footer' }
+        ],
+        operatorTip: 'Use a high-resolution transparent PNG logo so it looks crisp on both mobile screens and printed PDFs.'
+      },
+      {
+        modalTitle: 'Edit RERA Agent License & GSTIN Numbers',
+        triggerButton: 'Save Compliance Button (Statutory Tab)',
+        purpose: 'Edit your verified state RERA agent license number and 15-digit GSTIN tax number.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Settings, click on the "RERA & Legal" section.',
+          'Enter or edit your state RERA Agent Registration Number (e.g. MAHARERA / A51900024890).',
+          'Enter your valid 15-digit GSTIN number for tax compliance.',
+          'Click "Update Compliance" — embeds verified license tags on all brochures and bills.'
+        ],
+        keyFields: [
+          { fieldName: 'RERA Registration Number', inputType: 'Text', guidance: 'State real estate agent license number' },
+          { fieldName: 'GSTIN Number', inputType: 'Text (15 chars)', guidance: 'Official 15-character GST registration code' }
+        ],
+        operatorTip: 'Double check your RERA expiration date annually to ensure uninterrupted license validity.'
+      },
+      {
+        modalTitle: 'Setup / Reconfigure Two-Factor Authentication (2FA)',
+        triggerButton: '2FA Toggle Switch (Security Tab)',
+        purpose: 'Turn on or reconfigure Google Authenticator to keep your buyer lists and deals 100% safe.',
+        actionType: 'create',
+        stepByStep: [
+          'In Settings, click the "Security" tab.',
+          'Toggle "Two-Factor Authentication" to ON.',
+          'Open Google Authenticator on your phone and scan the QR code displayed on screen.',
+          'Type the 6-digit verification code generated on your phone screen.',
+          'Click "Verify & Enable 2FA" and write down your 16-character backup recovery key.'
+        ],
         keyFields: [
           { fieldName: 'QR Code Scanner', inputType: 'QR Code Display', guidance: 'Scan using Google Authenticator on your phone' },
           { fieldName: '6-Digit Verification Code', inputType: 'Number (6 digits)', guidance: 'Type the 6-digit code shown on your phone screen' },
           { fieldName: 'Backup Recovery Key', inputType: 'Read-only String', guidance: 'Write this key down in case you change phones' }
         ],
-        operatorTip: 'Take a screenshot of your backup key and save it securely.'
-      },
-      {
-        modalTitle: 'Add Team Member Popup',
-        triggerButton: '+ Add Team Member (Team Tab)',
-        purpose: 'Invite an associate broker or assistant with customized view/edit permissions.',
-        keyFields: [
-          { fieldName: 'Full Name & Email', inputType: 'Text & Email', guidance: 'Associate name and company email address' },
-          { fieldName: 'Role & Permissions', inputType: 'Dropdown Picker', guidance: 'Select: Admin, Senior Advisor, or Showing Assistant' }
-        ],
-        operatorTip: 'Assign junior associates the "Showing Assistant" role so they can view visits without editing sensitive commission data.'
+        operatorTip: 'Take a screenshot of your backup key and store it in a safe place.'
       }
     ],
     whatsAppVault: [

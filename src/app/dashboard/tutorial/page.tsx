@@ -22,6 +22,7 @@ export default function PlaybookAndTutorialPage() {
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [lightboxActiveHotspotId, setLightboxActiveHotspotId] = useState<number | null>(null);
+  const [modalActionFilter, setModalActionFilter] = useState<'all' | 'create' | 'edit'>('all');
 
   // Filter modules
   const filteredModules = useMemo(() => {
@@ -734,7 +735,7 @@ export default function PlaybookAndTutorialPage() {
             {[
               { id: 'steps', label: '⚡ Step-by-Step Operator Guide' },
               { id: 'visual', label: '📸 Live Screenshot & Hotspots' },
-              { id: 'modals', label: '🪟 Key Modals & Form Blueprints' },
+              { id: 'modals', label: '🛠️ Create & Edit Modals (Blueprints)' },
               { id: 'scripts', label: '💬 WhatsApp Closing Scripts' },
               { id: 'tactics', label: '💡 Top 1% Broker Tactics & Legal' }
             ].map(tab => (
@@ -1277,127 +1278,208 @@ export default function PlaybookAndTutorialPage() {
           )}
 
           {/* ─────────────────────────────────────────────────────────────────
-              TAB 3: KEY MODALS & FORM BLUEPRINTS (NEW)
+              TAB 3: CREATE & EDIT MODALS (FORM BLUEPRINTS)
           ───────────────────────────────────────────────────────────────── */}
           {activeTab === 'modals' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div className="tutorial-card">
-                <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>
-                  Modal Workflows & Form Input Blueprints: {activeModule.shortName}
-                </div>
-                <div style={{ fontSize: 13.5, color: '#64748b', marginBottom: 24 }}>
-                  Comprehensive guides for every modal window triggered from this screen. Learn exact field requirements, CustomSelect dropdown choices, and data entry best practices.
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>
+                      Create & Edit Workflows: {activeModule.shortName}
+                    </div>
+                    <div style={{ fontSize: 13.5, color: '#64748b' }}>
+                      Step-by-step guides for every Create and Edit action on this screen. Learn what buttons to click, required fields, and pro tips.
+                    </div>
+                  </div>
+
+                  {/* Filter Pills for Create vs Edit */}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {[
+                      { id: 'all', label: `All Actions (${activeModule.modalShowcase?.length || 0})` },
+                      { id: 'create', label: `✨ Create Forms (${activeModule.modalShowcase?.filter(m => m.actionType === 'create').length || 0})` },
+                      { id: 'edit', label: `✏️ Edit & Update Forms (${activeModule.modalShowcase?.filter(m => m.actionType === 'edit').length || 0})` }
+                    ].map(f => (
+                      <button
+                        key={f.id}
+                        onClick={() => setModalActionFilter(f.id as any)}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: 8,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          backgroundColor: modalActionFilter === f.id ? '#0f172a' : '#f1f5f9',
+                          color: modalActionFilter === f.id ? '#ffffff' : '#475569',
+                          border: modalActionFilter === f.id ? '1px solid #0f172a' : '1px solid #cbd5e1',
+                          transition: 'all 0.15s ease'
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                   {activeModule.modalShowcase && activeModule.modalShowcase.length > 0 ? (
-                    activeModule.modalShowcase.map((m, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          backgroundColor: '#f8fafc',
-                          borderRadius: 16,
-                          border: '1px solid #cbd5e1',
-                          overflow: 'hidden',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
-                        }}
-                      >
-                        {/* Modal Header Badge */}
-                        <div style={{
-                          backgroundColor: '#ffffff',
-                          padding: '16px 20px',
-                          borderBottom: '1px solid #e2e8f0',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          flexWrap: 'wrap',
-                          gap: 10
-                        }}>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <span style={{ fontSize: 18 }}>🪟</span>
-                              <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
-                                {m.modalTitle}
-                              </span>
-                            </div>
-                            <div style={{ fontSize: 13, color: '#475569', marginTop: 4 }}>
-                              {m.purpose}
-                            </div>
-                          </div>
-
+                    activeModule.modalShowcase
+                      .filter(m => modalActionFilter === 'all' || m.actionType === modalActionFilter)
+                      .map((m, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            backgroundColor: '#f8fafc',
+                            borderRadius: 16,
+                            border: m.actionType === 'create' ? '1px solid #a7f3d0' : '1px solid #bfdbfe',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.04)'
+                          }}
+                        >
+                          {/* Modal Header */}
                           <div style={{
-                            backgroundColor: '#ecfdf5',
-                            border: '1px solid #a7f3d0',
-                            borderRadius: 8,
-                            padding: '6px 12px',
-                            fontSize: 12,
-                            fontWeight: 700,
-                            color: '#065f46'
-                          }}>
-                            Trigger: <strong>{m.triggerButton}</strong>
-                          </div>
-                        </div>
-
-                        {/* Fields Breakdown Table */}
-                        <div style={{ padding: '20px' }}>
-                          <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 12 }}>
-                            Key Input Fields & CustomSelect Formats:
-                          </div>
-
-                          <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                              <thead>
-                                <tr style={{ backgroundColor: '#f1f5f9', textAlign: 'left' }}>
-                                  <th style={{ padding: '8px 12px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Field Name</th>
-                                  <th style={{ padding: '8px 12px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Input Type</th>
-                                  <th style={{ padding: '8px 12px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Operational Guidance & Constraints</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {m.keyFields.map((f, fIdx) => (
-                                  <tr key={fIdx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                    <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0f172a' }}>{f.fieldName}</td>
-                                    <td style={{ padding: '10px 12px' }}>
-                                      <span style={{
-                                        backgroundColor: f.inputType.includes('CustomSelect') ? '#dbeafe' : '#f1f5f9',
-                                        color: f.inputType.includes('CustomSelect') ? '#1e40af' : '#475569',
-                                        padding: '3px 8px',
-                                        borderRadius: 6,
-                                        fontSize: 11.5,
-                                        fontWeight: 600
-                                      }}>
-                                        {f.inputType}
-                                      </span>
-                                    </td>
-                                    <td style={{ padding: '10px 12px', color: '#334155' }}>{f.guidance}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-
-                          {/* Operator Pro Tip */}
-                          <div style={{
-                            marginTop: 16,
-                            backgroundColor: '#ecfdf5',
-                            padding: '10px 14px',
-                            borderRadius: 10,
-                            border: '1px solid #a7f3d0',
-                            fontSize: 12.5,
-                            color: '#065f46',
+                            backgroundColor: '#ffffff',
+                            padding: '16px 20px',
+                            borderBottom: '1px solid #e2e8f0',
                             display: 'flex',
+                            justifyContent: 'space-between',
                             alignItems: 'center',
-                            gap: 8
+                            flexWrap: 'wrap',
+                            gap: 12
                           }}>
-                            <span>💡</span>
-                            <span><strong>Operator Tip:</strong> {m.operatorTip}</span>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                                <span style={{
+                                  backgroundColor: m.actionType === 'create' ? '#ecfdf5' : '#eff6ff',
+                                  color: m.actionType === 'create' ? '#065f46' : '#1e40af',
+                                  border: m.actionType === 'create' ? '1px solid #a7f3d0' : '1px solid #bfdbfe',
+                                  padding: '3px 10px',
+                                  borderRadius: 20,
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  letterSpacing: '0.04em'
+                                }}>
+                                  {m.actionType === 'create' ? '✨ CREATE WORKFLOW' : '✏️ EDIT & UPDATE WORKFLOW'}
+                                </span>
+                                <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+                                  {m.modalTitle}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: 13, color: '#475569', marginTop: 5 }}>
+                                {m.purpose}
+                              </div>
+                            </div>
+
+                            <div style={{
+                              backgroundColor: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: 8,
+                              padding: '6px 12px',
+                              fontSize: 12,
+                              color: '#334155'
+                            }}>
+                              Trigger: <strong>{m.triggerButton}</strong>
+                            </div>
+                          </div>
+
+                          <div style={{ padding: '20px' }}>
+                            {/* Step-by-Step Execution Checklist */}
+                            {m.stepByStep && m.stepByStep.length > 0 && (
+                              <div style={{
+                                marginBottom: 20,
+                                backgroundColor: '#ffffff',
+                                borderRadius: 12,
+                                padding: '14px 16px',
+                                border: '1px solid #e2e8f0'
+                              }}>
+                                <div style={{ fontSize: 11.5, fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6, letterSpacing: '0.04em' }}>
+                                  <span>⚡</span>
+                                  <span>Step-by-Step How to Use:</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                  {m.stepByStep.map((step, sIdx) => (
+                                    <div key={sIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: '#1e293b', lineHeight: 1.5 }}>
+                                      <span style={{
+                                        minWidth: 20,
+                                        height: 20,
+                                        borderRadius: '50%',
+                                        backgroundColor: m.actionType === 'create' ? '#10b981' : '#3b82f6',
+                                        color: '#ffffff',
+                                        fontSize: 11,
+                                        fontWeight: 800,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        marginTop: 1,
+                                        flexShrink: 0
+                                      }}>
+                                        {sIdx + 1}
+                                      </span>
+                                      <span>{step}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Fields Breakdown Table */}
+                            <div style={{ fontSize: 11.5, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 10, letterSpacing: '0.04em' }}>
+                              Required Fields & Form Controls:
+                            </div>
+
+                            <div style={{ overflowX: 'auto', backgroundColor: '#ffffff', borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 16 }}>
+                              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                                <thead>
+                                  <tr style={{ backgroundColor: '#f8fafc', textAlign: 'left' }}>
+                                    <th style={{ padding: '10px 14px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Field Name</th>
+                                    <th style={{ padding: '10px 14px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Input Type</th>
+                                    <th style={{ padding: '10px 14px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>What to Enter / Pick</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {m.keyFields.map((f, fIdx) => (
+                                    <tr key={fIdx} style={{ borderBottom: fIdx === m.keyFields.length - 1 ? 'none' : '1px solid #f1f5f9' }}>
+                                      <td style={{ padding: '10px 14px', fontWeight: 700, color: '#0f172a' }}>{f.fieldName}</td>
+                                      <td style={{ padding: '10px 14px' }}>
+                                        <span style={{
+                                          backgroundColor: f.inputType.includes('Dropdown') || f.inputType.includes('Picker') ? '#dbeafe' : '#f1f5f9',
+                                          color: f.inputType.includes('Dropdown') || f.inputType.includes('Picker') ? '#1e40af' : '#475569',
+                                          padding: '3px 8px',
+                                          borderRadius: 6,
+                                          fontSize: 11.5,
+                                          fontWeight: 600
+                                        }}>
+                                          {f.inputType}
+                                        </span>
+                                      </td>
+                                      <td style={{ padding: '10px 14px', color: '#334155' }}>{f.guidance}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Operator Pro Tip */}
+                            <div style={{
+                              backgroundColor: m.actionType === 'create' ? '#ecfdf5' : '#eff6ff',
+                              padding: '12px 16px',
+                              borderRadius: 10,
+                              border: m.actionType === 'create' ? '1px solid #a7f3d0' : '1px solid #bfdbfe',
+                              fontSize: 12.5,
+                              color: m.actionType === 'create' ? '#065f46' : '#1e40af',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 10
+                            }}>
+                              <span style={{ fontSize: 16 }}>💡</span>
+                              <span><strong>Pro Tip:</strong> {m.operatorTip}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      ))
                   ) : (
-                    <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
-                      No modal workflows defined for this module.
+                    <div style={{ padding: '32px', textAlign: 'center', color: '#64748b', backgroundColor: '#f8fafc', borderRadius: 12, border: '1px dashed #cbd5e1' }}>
+                      No modal workflows defined for this filter.
                     </div>
                   )}
                 </div>
