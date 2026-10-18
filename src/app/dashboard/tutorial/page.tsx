@@ -23,6 +23,7 @@ export default function PlaybookAndTutorialPage() {
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [lightboxActiveHotspotId, setLightboxActiveHotspotId] = useState<number | null>(null);
   const [modalActionFilter, setModalActionFilter] = useState<'all' | 'create' | 'edit'>('all');
+  const [modalPreviewImage, setModalPreviewImage] = useState<{ url: string; title: string; actionType?: string } | null>(null);
 
   // Filter modules
   const filteredModules = useMemo(() => {
@@ -51,6 +52,10 @@ export default function PlaybookAndTutorialPage() {
   // Handle keyboard shortcuts when lightbox is open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (modalPreviewImage && e.key === 'Escape') {
+        setModalPreviewImage(null);
+        return;
+      }
       if (!isLightboxOpen) return;
       if (e.key === 'Escape') {
         setIsLightboxOpen(false);
@@ -69,7 +74,7 @@ export default function PlaybookAndTutorialPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isLightboxOpen, activeModule]);
+  }, [isLightboxOpen, modalPreviewImage, activeModule]);
 
   const handleCopy = useCallback((text: string, label: string) => {
     if (navigator.clipboard) {
@@ -373,6 +378,123 @@ export default function PlaybookAndTutorialPage() {
               <div style={{ fontSize: 11.5, color: '#64748b' }}>
                 💡 Press <strong>1-4</strong> to inspect pins • <strong>+/-</strong> to zoom • <strong>Esc</strong> to close
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────────
+          MODAL SCREENSHOT FULLSCREEN LIGHTBOX
+      ───────────────────────────────────────────────────────────────────── */}
+      {modalPreviewImage && (
+        <div
+          onClick={() => setModalPreviewImage(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(2, 6, 23, 0.94)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 10000,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: 1120,
+              width: '100%',
+              maxHeight: '94vh',
+              backgroundColor: '#0f172a',
+              borderRadius: 16,
+              overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.18)',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 60px -15px rgba(0,0,0,0.85)'
+            }}
+          >
+            {/* Lightbox Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '14px 20px',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: '#1e293b'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  backgroundColor: modalPreviewImage.actionType === 'create' ? '#ecfdf5' : '#eff6ff',
+                  color: modalPreviewImage.actionType === 'create' ? '#065f46' : '#1e40af',
+                  padding: '3px 10px',
+                  borderRadius: 20,
+                  fontSize: 11,
+                  fontWeight: 800
+                }}>
+                  {modalPreviewImage.actionType === 'create' ? '✨ CREATE FORM' : '✏️ EDIT FORM'}
+                </span>
+                <span style={{ color: '#ffffff', fontSize: 15, fontWeight: 700 }}>
+                  {modalPreviewImage.title} — Real Screen Preview
+                </span>
+              </div>
+              <button
+                onClick={() => setModalPreviewImage(null)}
+                style={{
+                  background: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#ffffff',
+                  padding: '6px 14px',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                ✕ Close Preview (Esc)
+              </button>
+            </div>
+
+            {/* Lightbox Image Viewport */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: '20px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              backgroundColor: '#020617'
+            }}>
+              <img
+                src={modalPreviewImage.url}
+                alt={modalPreviewImage.title}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  boxShadow: '0 12px 36px rgba(0,0,0,0.6)'
+                }}
+              />
+            </div>
+
+            {/* Lightbox Footer */}
+            <div style={{
+              padding: '12px 20px',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: '#1e293b',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              fontSize: 12,
+              color: '#94a3b8'
+            }}>
+              <span>📸 Authentic Live UI Screenshot from AgentLadders</span>
+              <span>Press <strong>Esc</strong> or click outside to close</span>
             </div>
           </div>
         </div>
@@ -1383,6 +1505,98 @@ export default function PlaybookAndTutorialPage() {
                           </div>
 
                           <div style={{ padding: '20px' }}>
+                            {/* Live Modal Screenshot Preview Card */}
+                            {m.screenshotUrl && (
+                              <div style={{
+                                marginBottom: 20,
+                                backgroundColor: '#0f172a',
+                                borderRadius: 12,
+                                overflow: 'hidden',
+                                border: '1px solid #cbd5e1',
+                                boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
+                              }}>
+                                <div style={{
+                                  backgroundColor: '#1e293b',
+                                  padding: '9px 14px',
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  borderBottom: '1px solid rgba(255,255,255,0.08)'
+                                }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5, fontWeight: 700, color: '#e2e8f0', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                    <span>📸</span>
+                                    <span>Live {m.actionType === 'create' ? 'Create' : 'Edit'} Form / Modal Screenshot</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setModalPreviewImage({ url: m.screenshotUrl!, title: m.modalTitle, actionType: m.actionType })}
+                                    style={{
+                                      background: 'rgba(255,255,255,0.12)',
+                                      border: '1px solid rgba(255,255,255,0.22)',
+                                      color: '#ffffff',
+                                      fontSize: 11.5,
+                                      fontWeight: 700,
+                                      padding: '4px 12px',
+                                      borderRadius: 6,
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 4
+                                    }}
+                                  >
+                                    <span>🔍 Click to Enlarge / Full Screen</span>
+                                  </button>
+                                </div>
+
+                                <div
+                                  onClick={() => setModalPreviewImage({ url: m.screenshotUrl!, title: m.modalTitle, actionType: m.actionType })}
+                                  style={{
+                                    position: 'relative',
+                                    cursor: 'zoom-in',
+                                    maxHeight: 340,
+                                    overflow: 'hidden',
+                                    backgroundColor: '#020617',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'flex-start'
+                                  }}
+                                  title="Click to view full screen preview"
+                                >
+                                  <img
+                                    src={m.screenshotUrl}
+                                    alt={m.modalTitle}
+                                    style={{
+                                      width: '100%',
+                                      height: 'auto',
+                                      maxHeight: 340,
+                                      objectFit: 'cover',
+                                      objectPosition: 'top',
+                                      display: 'block',
+                                      transition: 'transform 0.2s ease'
+                                    }}
+                                  />
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: 10,
+                                    right: 10,
+                                    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+                                    backdropFilter: 'blur(4px)',
+                                    color: '#ffffff',
+                                    padding: '5px 12px',
+                                    borderRadius: 6,
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 5,
+                                    border: '1px solid rgba(255,255,255,0.2)'
+                                  }}>
+                                    <span>🔍 Click to Enlarge</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
                             {/* Step-by-Step Execution Checklist */}
                             {m.stepByStep && m.stepByStep.length > 0 && (
                               <div style={{

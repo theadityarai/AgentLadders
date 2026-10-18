@@ -41,6 +41,7 @@ export interface ModalShowcaseItem {
   triggerButton: string;
   purpose: string;
   actionType: 'create' | 'edit';
+  screenshotUrl?: string;
   stepByStep: string[];
   keyFields: { fieldName: string; inputType: string; guidance: string }[];
   operatorTip: string;
@@ -182,6 +183,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Book Site Visit (Quick Scheduler)',
+        screenshotUrl: '/images/tutorials/modals/site-visits-create.png',
         triggerButton: '🏎️ Book Site Visit Button (Top Right Header)',
         purpose: 'Create a property visit appointment directly from your home screen in 30 seconds.',
         actionType: 'create',
@@ -203,6 +205,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Add New Buyer (Quick Lead Form)',
+        screenshotUrl: '/images/tutorials/modals/today-create.png',
         triggerButton: '➕ Add New Buyer Button (Top Right Header)',
         purpose: 'Capture incoming client criteria, budget range in Crores, and immediate area preferences.',
         actionType: 'create',
@@ -223,6 +226,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Quick Follow-up & Status Update',
+        screenshotUrl: '/images/tutorials/modals/today-edit.png',
         triggerButton: 'Quick Note / Checkmark Icon on Inquiry Card',
         purpose: 'Edit a buyer\'s follow-up status, log call remarks, or mark an urgent inquiry resolved.',
         actionType: 'edit',
@@ -365,6 +369,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Create New Lead (Buyer Registration Form)',
+        screenshotUrl: '/images/tutorials/modals/leads-create.png',
         triggerButton: '+ Add Lead Button (Top Right Header)',
         purpose: 'Create a permanent client record with contact info, budget range in Crores, and BHK preferences.',
         actionType: 'create',
@@ -387,6 +392,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit Buyer Profile & Update Preferences',
+        screenshotUrl: '/images/tutorials/modals/leads-edit.png',
         triggerButton: 'Edit Pencil Icon on any Buyer Card / Row',
         purpose: 'Edit a buyer\'s budget, change their stage, update locality criteria, or add visit feedback.',
         actionType: 'edit',
@@ -531,6 +537,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Add New Property (Listing Creation Form)',
+        screenshotUrl: '/images/tutorials/modals/properties-create.png',
         triggerButton: '+ Add Property Button (Top Right Header)',
         purpose: 'Create a new property listing with photos, carpet area in sq.ft., price in Crores, and owner info.',
         actionType: 'create',
@@ -553,6 +560,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit Listing & Price Revision Form',
+        screenshotUrl: '/images/tutorials/modals/properties-edit.png',
         triggerButton: 'Edit Button on Property Card',
         purpose: 'Edit a property\'s asking price, update availability status, or update caretaker contact.',
         actionType: 'edit',
@@ -697,6 +705,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Book Site Visit (Appointment Scheduler)',
+        screenshotUrl: '/images/tutorials/modals/site-visits-create.png',
         triggerButton: '+ Book Visit Button (Top Right Header)',
         purpose: 'Create a property tour appointment linking a registered buyer, listing, and time slot.',
         actionType: 'create',
@@ -718,6 +727,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Reschedule Visit & Log Tour Outcome',
+        screenshotUrl: '/images/tutorials/modals/site-visits-edit.png',
         triggerButton: 'Edit / Feedback Icon on Visit Card',
         purpose: 'Edit visit date/time, reschedule for delayed clients, mark Completed, and log buyer counter-offers.',
         actionType: 'edit',
@@ -862,6 +872,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Create Deal (Transaction Onboarding Form)',
+        screenshotUrl: '/images/tutorials/modals/deals-create.png',
         triggerButton: '+ Create Deal Button (Top Right Header)',
         purpose: 'Create a new closing record linking buyer, seller, property, agreed price in Crores, and brokerage commission.',
         actionType: 'create',
@@ -884,6 +895,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Issue Token Advance Receipt (PDF Generator)',
+        screenshotUrl: '/images/tutorials/modals/deals-create.png',
         triggerButton: 'Issue Token Receipt Button (Inside Deal Card)',
         purpose: 'Create an official receipt acknowledging earnest token advance money paid for a property.',
         actionType: 'create',
@@ -903,6 +915,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit Deal & Advance Stage Milestone',
+        screenshotUrl: '/images/tutorials/modals/deals-edit.png',
         triggerButton: 'Click Deal Card or Drag to Next Column',
         purpose: 'Edit deal details, update agreed terms, log title search completion, or advance to next closing stage.',
         actionType: 'edit',
@@ -1046,6 +1059,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Set Revenue & Sales Targets Form',
+        screenshotUrl: '/images/tutorials/modals/insights-create.png',
         triggerButton: 'Set Targets Button (Top Right Header)',
         purpose: 'Set monthly or quarterly brokerage commission goals and sales volume targets.',
         actionType: 'create',
@@ -1065,6 +1079,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit Target & Micro-Market Strategy',
+        screenshotUrl: '/images/tutorials/modals/insights-edit.png',
         triggerButton: 'Edit Strategy Button / Target Progress Bar',
         purpose: 'Edit quarterly revenue targets and re-allocate marketing focus across luxury localities.',
         actionType: 'edit',
@@ -1206,6 +1221,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Upload New Document (File Ingestion Form)',
+        screenshotUrl: '/images/tutorials/modals/documents-create.png',
         triggerButton: '+ Upload Document Button (Top Right Header)',
         purpose: 'Upload and encrypt a contract, title deed, or client identity document.',
         actionType: 'create',
@@ -1226,6 +1242,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit Document Details & Security Tags',
+        screenshotUrl: '/images/tutorials/modals/documents-edit.png',
         triggerButton: 'Edit Icon on Document Row',
         purpose: 'Edit document title, re-assign linked deal/client, update category, or toggle privacy masking.',
         actionType: 'edit',
@@ -1370,6 +1387,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Generate Tax Invoice (Brokerage Bill Form)',
+        screenshotUrl: '/images/tutorials/modals/invoices-create.png',
         triggerButton: '+ Create Invoice Button (Top Right Header)',
         purpose: 'Create a formal GST tax invoice with SAC code 997222, TDS deduction, and your bank details.',
         actionType: 'create',
@@ -1391,6 +1409,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Record Payment Received & Settle Invoice',
+        screenshotUrl: '/images/tutorials/modals/invoices-edit.png',
         triggerButton: 'Record Payment / Mark as Paid Button on Invoice',
         purpose: 'Log incoming bank transfers, record bank UTR number, handle partial payments, and mark invoice settled.',
         actionType: 'edit',
@@ -1535,6 +1554,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Add New Task (To-Do Creator Form)',
+        screenshotUrl: '/images/tutorials/modals/tasks-create.png',
         triggerButton: '+ Add Task Button (Top Right Header)',
         purpose: 'Create a specific action item with due date, priority flag, and assigned team member.',
         actionType: 'create',
@@ -1555,6 +1575,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit Task, Reschedule & Update Status',
+        screenshotUrl: '/images/tutorials/modals/tasks-edit.png',
         triggerButton: 'Task Row Click / Edit Button',
         purpose: 'Edit task deadlines, re-assign team members, add progress notes, or mark as finished.',
         actionType: 'edit',
@@ -1610,169 +1631,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     }
   },
 
-  // ── 10. EXECUTIVE REPORTS ───────────────────────────────────────────────────
-  {
-    id: 'reports',
-    name: 'Executive Reports (Your Business Summary)',
-    shortName: 'Reports & Exports',
-    category: 'operations',
-    icon: BarChartIcon,
-    url: '/dashboard/reports',
-    screenshotUrl: '/images/tutorials/reports.png',
-    badge: 'BOARD-READY EXPORTS',
-    badgeColor: '#7c3aed',
-    reraComplianceTag: 'Agency Performance & Audit Reports',
-    primaryGoal: 'Generate clean monthly summaries and Excel/PDF reports to review your agency\'s growth.',
-    frequency: 'Run at the end of every month and quarterly planning',
-    targetRole: 'Agency Owners, Managing Partners & Accountants',
-    closingImpact: 'Sharing clean quarterly reports with property developers proves your closing ability and wins exclusive mandates.',
-    tagline: 'Create board-ready business reports, lead conversion summaries, and Excel downloads in 1 click.',
-    overview: 'This is where you get big-picture summaries of your business. Whether you need an Excel file of all deals closed this year, a breakdown of where your leads came from, or a PDF report to show property developers how fast you sell homes, you can generate and download it here in seconds.',
-    whenToUse: [
-      'At the end of every month to see total commission earned and agent performance.',
-      'When pitching a luxury builder to win exclusive sole-selling rights for a new tower.',
-      'To export sales data to Excel for your chartered accountant (CA) and tax filing.'
-    ],
-    steps: [
-      {
-        number: 1,
-        title: 'Choose Report Type (Sales, Leads, or Deals)',
-        action: 'Select the report you want from the left selector: Sales Summary, Lead Source Performance, or Closed Transactions.',
-        exactFieldOrButton: 'Report Type Selector (Sales, Leads, Inventory, Transactions)',
-        sampleInput: 'Select "Quarterly Sales & Commission Summary"',
-        result: 'Loads the relevant summary charts and data tables on your screen.',
-        proTip: 'Use "Lead Source ROI" to see which advertising channel brings you the most profitable buyers.',
-        hotspotIndex: 1
-      },
-      {
-        number: 2,
-        title: 'Select Your Date Range (Month, Quarter, Year)',
-        action: 'Click the date range dropdown to choose: "This Month", "Last 90 Days", or "Current Financial Year".',
-        exactFieldOrButton: 'Date Range Selector Dropdown (Month / Quarter / Year)',
-        sampleInput: 'Pick "Current Financial Year (2025-26)"',
-        result: 'Filters all transaction numbers and metrics for that exact time frame.',
-        proTip: 'Review quarterly performance rather than single months for a true picture of luxury sales.',
-        hotspotIndex: 2
-      },
-      {
-        number: 3,
-        title: 'Inspect Summary Charts and Key Numbers',
-        action: 'Review the visual graphs: monthly deal volume, top-performing agents, and average commission percentage.',
-        exactFieldOrButton: 'Executive Summary Cards & Revenue Charts',
-        sampleInput: 'Total Volume: ₹48.05 Cr • Brokerage: ₹96.1 Lakhs • Average Ticket: ₹8.0 Cr',
-        result: 'Gives you clear facts and figures for partner meetings or builder pitches.',
-        proTip: 'Save screenshots of these charts to include in your agency\'s credentials deck.',
-        hotspotIndex: 3
-      },
-      {
-        number: 4,
-        title: 'Click "Export to Excel" or "Download PDF"',
-        action: 'Click the download buttons in the top-right corner to export clean spreadsheets or formatted PDF reports.',
-        exactFieldOrButton: 'Top-Right Buttons ("📥 Export CSV / Excel" & "📄 Download PDF")',
-        sampleInput: 'Click "Export CSV" to get all client and deal rows in Excel',
-        result: 'Downloads a clean file ready to email to your accountant or leadership team.',
-        proTip: 'Keep a monthly folder on your computer with these exported reports for smooth annual auditing.',
-        hotspotIndex: 4
-      }
-    ],
-    keyControls: [
-      {
-        name: 'Report Type Selector',
-        type: 'filter',
-        description: 'Switches between Sales Performance, Lead Source ROI, and Inventory Velocity.',
-        bestPractice: 'Run the Lead Source report before deciding where to spend your next marketing budget.'
-      },
-      {
-        name: 'Date Range Dropdown',
-        type: 'filter',
-        description: 'Filters numbers by Custom Dates, Last Quarter, or Financial Year.',
-        bestPractice: 'Select April to March for Indian financial year tax planning.'
-      },
-      {
-        name: 'One-Click Excel / CSV Export',
-        type: 'export',
-        description: 'Downloads clean spreadsheets with every deal, date, client name, and commission amount.',
-        bestPractice: 'Share this directly with your CA for quarterly GST and tax filings.'
-      }
-    ],
-    modalShowcase: [
-      {
-        modalTitle: 'Custom Report Builder (Filter & Export)',
-        triggerButton: 'Custom Report Button (Top Right Header)',
-        purpose: 'Create a tailored business report selecting custom dates, micro-markets, and specific metrics.',
-        actionType: 'create',
-        stepByStep: [
-          'Click the "Custom Report" button in the top right.',
-          'Select start date and end date.',
-          'Check the metrics to include (Deal Volume, Brokerage Collected, Site Visits, Lost Reasons).',
-          'Filter by specific locality or property developer.',
-          'Click "Generate Report" — preview immediately on screen or download as PDF/Excel.'
-        ],
-        keyFields: [
-          { fieldName: 'Metrics to Include', inputType: 'Checkboxes', guidance: 'Check Volume, Commission, Site Visits, or Lead Sources' },
-          { fieldName: 'Date Range', inputType: 'Date Pickers', guidance: 'Pick custom start and end dates' },
-          { fieldName: 'Filter by Micro-Market', inputType: 'Dropdown Picker', guidance: 'Select specific areas (e.g. Worli & Bandra only)' }
-        ],
-        operatorTip: 'Filter by a specific developer when presenting sales progress to their board.'
-      },
-      {
-        modalTitle: 'Configure Automated Scheduled Reports',
-        triggerButton: 'Automate / Email Schedule Button',
-        purpose: 'Edit automated email delivery settings so leadership and accountants get reports automatically.',
-        actionType: 'edit',
-        stepByStep: [
-          'Click the "Automate Reports" button in the header.',
-          'Enter the email addresses of agency partners and your tax accountant.',
-          'Choose the frequency: Weekly on Monday or Monthly on the 1st.',
-          'Choose the format: PDF Executive Summary or Excel Spreadsheet.',
-          'Click "Save Schedule" — automated reports are sent automatically without manual work.'
-        ],
-        keyFields: [
-          { fieldName: 'Recipient Emails', inputType: 'Email Input', guidance: 'Add partner and accountant email addresses' },
-          { fieldName: 'Delivery Frequency', inputType: 'Dropdown Picker', guidance: 'Select Weekly or Monthly on 1st' },
-          { fieldName: 'Report Format', inputType: 'Pill Toggle', guidance: 'Pick PDF Summary or Excel CSV' }
-        ],
-        operatorTip: 'Send this automatically to agency partners so everyone stays aligned on revenue numbers.'
-      }
-    ],
-    whatsAppVault: [
-      {
-        title: 'Sharing Sales Performance with Luxury Developer',
-        useCase: 'Send to developer showing how fast your firm sells units',
-        hinglishScript: 'Namaste {DeveloperName} ji! Please find our agency\'s Q3 Sales & Velocity Report attached: {ReportLink}. In the last 90 days, we successfully transacted ₹{Volume} Cr in {Locality} with an average closing time of 28 days. Would love to present our mandate strategy for your upcoming tower.',
-        englishScript: 'Dear {DeveloperName}, please find our firm\'s Q3 Performance & Velocity Report attached: {ReportLink}. Over the past 90 days, we completed ₹{Volume} Cr in luxury transactions in {Locality}. We would be thrilled to present our sole-selling strategy for your new development.'
-      },
-      {
-        title: 'Monthly Performance Summary to Agency Partners',
-        useCase: 'Share in leadership group on the 1st of every month',
-        hinglishScript: 'Partners, hamara {Month} summary ready hai: Total Closed Volume ₹{Volume} Cr, Net Commission ₹{Commission} Lakhs across {DealsCount} deals. Detailed Excel report download link: {ReportLink}. Great closing month!',
-        englishScript: 'Partners, our {Month} summary is ready: Total Closed Volume ₹{Volume} Cr, Net Brokerage ₹{Commission} Lakhs across {DealsCount} transactions. Detailed report link: {ReportLink}. Exceptional effort all around!'
-      }
-    ],
-    closingTactics: {
-      proTip: 'When competing for sole-selling rights on a luxury building, bring a bound copy of your past reports. Real numbers win exclusive mandates over empty promises every single time.',
-      legalTrapToAvoid: 'Never share client-identifying confidential data in public presentations; always anonymize buyer names when showcasing past closings.',
-      statOrMetric: 'Agencies that present data-backed reports win 65% more exclusive builder mandates than those presenting basic pitch decks.'
-    },
-    mockPreview: {
-      windowTitle: 'AgentLadders • Executive Reports (/dashboard/reports)',
-      subtitle: 'Board-Ready Reports • Deal Volume • Lead Source ROI • CSV/PDF Exports',
-      stats: [
-        { label: 'YTD Volume', value: '₹48.05 Cr', color: '#7c3aed' },
-        { label: 'Closed Deals', value: '8 Deals', color: '#059669' },
-        { label: 'Avg Deal Size', value: '₹8.0 Cr', color: '#2563eb' },
-        { label: 'Total Brokerage', value: '₹96.1 Lakhs', color: '#059669' }
-      ],
-      hotspots: [
-        { id: 1, x: 25, y: 14, title: 'Report Type Selector', description: 'Switch between Sales Summary, Lead Source ROI, and Transaction Lists.', actionHint: 'Choose report type' },
-        { id: 2, x: 55, y: 14, title: 'Date Range Selector', description: 'Pick This Month, Last 90 Days, or Financial Year to filter your numbers.', actionHint: 'Select time period' },
-        { id: 3, x: 45, y: 40, title: 'Visual Revenue Charts', description: 'Review volume trends, top localities, and commission velocity graphs.', actionHint: 'Inspect performance graphs' },
-        { id: 4, x: 86, y: 14, title: 'Excel / PDF Export Buttons', description: 'Download clean spreadsheets or formatted PDF summaries in 1 click.', actionHint: 'Click to export report' }
-      ]
-    }
-  },
-
-  // ── 11. HELP & SUPPORT ──────────────────────────────────────────────────────
+  // ── 10. HELP & SUPPORT ──────────────────────────────────────────────────────
   {
     id: 'support',
     name: 'Help & Support (Answers, Hotline & Privacy Terms)',
@@ -1860,6 +1719,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Raise Support Ticket (Issue Submission Form)',
+        screenshotUrl: '/images/tutorials/modals/support-create.png',
         triggerButton: '+ Raise Support Ticket Button (Help Desk Tab)',
         purpose: 'Create a tracked support ticket sent directly to our technical engineering team.',
         actionType: 'create',
@@ -1880,6 +1740,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Update Ticket & Reply to Support Thread',
+        screenshotUrl: '/images/tutorials/modals/support-edit.png',
         triggerButton: 'Click any Ticket Row in Help Desk Tab',
         purpose: 'Add extra details requested by our engineers or mark the support ticket as resolved.',
         actionType: 'edit',
@@ -1933,7 +1794,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     }
   },
 
-  // ── 12. AGENCY SETTINGS & SECURITY ──────────────────────────────────────────
+  // ── 11. AGENCY SETTINGS & SECURITY ──────────────────────────────────────────
   {
     id: 'settings',
     name: 'Agency Settings & Security (Branding & Account Safe)',
@@ -2069,6 +1930,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     modalShowcase: [
       {
         modalTitle: 'Add Team Member (User Invitation Form)',
+        screenshotUrl: '/images/tutorials/modals/settings-add-user.png',
         triggerButton: '+ Add User Button (Users & Roles Tab)',
         purpose: 'Create and invite a new property advisor, sales executive, or showing assistant to your agency.',
         actionType: 'create',
@@ -2089,6 +1951,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit User Role & Permissions Matrix',
+        screenshotUrl: '/images/tutorials/modals/settings-add-user.png',
         triggerButton: 'Edit Icon on any User Row (Users & Roles Tab)',
         purpose: 'Edit an existing team member\'s access level, change their assigned role, or deactivate access.',
         actionType: 'edit',
@@ -2107,6 +1970,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Edit Agency Profile, Logo & WhatsApp Number',
+        screenshotUrl: '/images/tutorials/modals/settings-agency.png',
         triggerButton: 'Save Profile Button (Agency Profile Tab)',
         purpose: 'Edit agency legal name, upload high-resolution transparent logo, and update customer support contact.',
         actionType: 'edit',
@@ -2127,6 +1991,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Theme, Typography & Color Palette Customizer',
+        screenshotUrl: '/images/tutorials/modals/settings-theme.png',
         triggerButton: 'Apply Theme Button (Theme & Typography Tab)',
         purpose: 'Customize the visual style of your CRM by picking modern Google Fonts and luxury color schemes.',
         actionType: 'edit',
@@ -2146,6 +2011,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Configure Tax, GSTIN, RERA & Bank RTGS Details',
+        screenshotUrl: '/images/tutorials/modals/settings-invoice.png',
         triggerButton: 'Save Invoice Settings Button (Invoice Settings Tab)',
         purpose: 'Edit your tax identification numbers, State RERA agent license, and Bank RTGS details for commission payouts.',
         actionType: 'edit',
@@ -2168,6 +2034,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Setup / Reconfigure Two-Factor Authentication (2FA)',
+        screenshotUrl: '/images/tutorials/modals/settings-2fa.png',
         triggerButton: '2FA Toggle Switch (Profile & Security Tab)',
         purpose: 'Create or reconfigure Google Authenticator TOTP security to lock down your broker database.',
         actionType: 'create',
@@ -2188,6 +2055,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Change Account Password & Update User Avatar',
+        screenshotUrl: '/images/tutorials/modals/settings-agency.png',
         triggerButton: 'Update Password / Save Avatar Button (Profile & Security Tab)',
         purpose: 'Edit personal login password and upload your personal broker profile picture.',
         actionType: 'edit',
@@ -2206,6 +2074,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Active Login Sessions & Remote Device Logout',
+        screenshotUrl: '/images/tutorials/modals/settings-2fa.png',
         triggerButton: 'Revoke Other Sessions Button (Profile & Security Tab)',
         purpose: 'Monitor all logged-in computers and smartphones, inspect IP locations, and log out old devices.',
         actionType: 'edit',
@@ -2224,6 +2093,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Add New Custom CRM Option (BHK, Source, Stage)',
+        screenshotUrl: '/images/tutorials/modals/settings-config.png',
         triggerButton: '+ Add Option Input Box (Configuration Tab)',
         purpose: 'Create new custom dropdown choices for BHK options, property types, lead sources, and deal stages.',
         actionType: 'create',
@@ -2242,6 +2112,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Customize Status Color Palette (Emerald, Blue, Amber)',
+        screenshotUrl: '/images/tutorials/modals/settings-theme.png',
         triggerButton: 'Color Dot / Palette Picker (Configuration Tab)',
         purpose: 'Edit and customize the badge colors assigned to each status across properties, leads, visits, and deals.',
         actionType: 'edit',
@@ -2260,6 +2131,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Notification Preferences & Alert Toggles',
+        screenshotUrl: '/images/tutorials/modals/settings-config.png',
         triggerButton: 'Save Preferences Button (Notifications Tab)',
         purpose: 'Edit when and where you receive alerts for new leads, site visits, token payments, and overdue bills.',
         actionType: 'edit',
@@ -2278,6 +2150,7 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       },
       {
         modalTitle: 'Subscription Plan, Invoices & Billing Management',
+        screenshotUrl: '/images/tutorials/modals/settings-invoice.png',
         triggerButton: 'Manage Subscription Button (Subscription & Billing Tab)',
         purpose: 'Review subscription tier, view seat allocation, update payment details, and download tax receipts.',
         actionType: 'edit',
