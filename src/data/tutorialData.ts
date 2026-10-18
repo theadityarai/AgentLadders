@@ -1942,157 +1942,357 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
     icon: SettingsIcon,
     url: '/dashboard/settings',
     screenshotUrl: '/images/tutorials/settings.png',
-    badge: '2FA & SECURITY SAFE',
+    badge: 'ALL 8 SETTINGS TABS',
     badgeColor: '#059669',
-    reraComplianceTag: 'Agency RERA ID & Account Protection',
-    primaryGoal: 'Set up your agency branding, enter your RERA registration number, and turn on Two-Factor Authentication (2FA) to keep your account safe.',
-    frequency: 'Configure once during setup and check monthly for security',
-    targetRole: 'Agency Owners, Managing Partners & System Admins',
-    closingImpact: 'Displaying an official state RERA number on your brochures and invoices establishes instant credibility with luxury buyers.',
-    tagline: 'Manage your agency logo, RERA number, GSTIN, team permissions, and Two-Factor Authentication.',
-    overview: 'This is the master control room for your agency. You can customize your company logo, enter your state RERA license number and GSTIN, manage team members, and keep your business safe with Two-Factor Authentication (2FA) and device login tracking.',
+    reraComplianceTag: 'Agency Profile, RERA & Bank Security',
+    primaryGoal: 'Master all 8 settings sections: Agency Profile, Theme & Fonts, Invoice & Taxes, Team Roles, Billing, Alerts, Security & 2FA, and Custom CRM Statuses.',
+    frequency: 'Set up once during onboarding and review monthly for security & team access',
+    targetRole: 'Agency Owners, Managing Partners, Operations Heads & Admins',
+    closingImpact: 'A fully configured agency profile with verified RERA, branded invoices, and 2FA security establishes immediate trust with luxury clients and developers.',
+    tagline: 'Your complete master control center: Branding, Themes, Invoices, Team Roles, Alerts, 2FA Security, and Custom CRM Dropdowns.',
+    overview: 'The Settings hub is the master engine room of AgentLadders. It is organized into 8 powerful tabs: 1. Agency Profile (logo, company info, WhatsApp hotline), 2. Theme & Typography (Google Fonts like Outfit/Roboto and luxury color palettes), 3. Invoice Settings (GSTIN, RERA license, bank RTGS details), 4. Users & Roles (invite team members and assign permissions), 5. Subscription & Billing (manage plans and download billing receipts), 6. Notifications (in-app and email alert preferences), 7. Profile & Security (change password, Two-Factor Authentication 2FA, active login sessions), and 8. Configuration (customize your own BHK options, lead sources, and color-coded status badges).',
     whenToUse: [
-      'During your first week to upload your agency logo and official contact info.',
-      'To turn on Two-Factor Authentication (2FA) using Google Authenticator for maximum security.',
-      'To review active logged-in computers and log out unfamiliar devices with 1 click.'
+      'During your first week to upload your agency logo, enter your state RERA license, and save bank RTGS details.',
+      'Whenever hiring a new property advisor or assistant to send them an invitation and assign role permissions.',
+      'To switch your app theme color (e.g. Emerald Prosperity or Sapphire Blue) and typography.',
+      'To turn on Two-Factor Authentication (2FA) with Google Authenticator to keep client phone numbers safe.',
+      'To add custom lead sources (e.g. "NRI Event Dubai") or custom deal stages in the Configuration tab.'
     ],
     steps: [
       {
         number: 1,
-        title: 'Upload Your Agency Logo and Business Info',
-        action: 'In the Profile tab, upload your high-resolution company logo, enter your agency name, official email, phone, and office address.',
-        exactFieldOrButton: 'Agency Profile Form (Logo Upload, Name, Email, Office Address)',
-        sampleInput: 'Agency: "Vance Realty Luxury Advisors" • Email: contact@vancerealty.com • Worli, Mumbai',
-        result: 'Your logo and address will automatically appear on all brochures and invoices.',
-        proTip: 'Upload a logo with a transparent background for the cleanest look on PDF brochures.',
+        title: 'Tab 1: Agency Profile & Logo Upload',
+        action: 'In the "Agency Profile" tab, upload your high-resolution company logo, enter your agency name, official email, public customer WhatsApp phone, and registered office address.',
+        exactFieldOrButton: 'Agency Profile Tab ("Upload Logo", "Agency Name", "WhatsApp Phone", "Office Address")',
+        sampleInput: 'Agency: "Vance Realty Luxury Advisors" • WhatsApp: +91 98201 55555 • Worli, Mumbai',
+        result: 'Your logo and contact details automatically appear in the header and footer of all PDF brochures and invoices.',
+        proTip: 'Upload a logo with a transparent background (.PNG) so it looks crisp on both dark and light documents.',
         hotspotIndex: 1
       },
       {
         number: 2,
-        title: 'Enter RERA License & GSTIN Numbers',
-        action: 'Fill in your state RERA Registration Number (e.g., A51900001234) and 15-digit GSTIN number.',
-        exactFieldOrButton: 'Statutory Compliance Fields (RERA Registration #, GSTIN Number)',
-        sampleInput: 'RERA ID: "MAHARERA / A51900024890" • GSTIN: "27AAAAA0000A1Z5"',
-        result: 'Embeds your verified license number on all client proposals and tax invoices.',
-        proTip: 'Double-check your RERA expiry date so your license never lapses unnoticed.',
+        title: 'Tab 2: Theme & Typography Customization',
+        action: 'Click the "Theme & Typography" tab. Pick your agency\'s signature Google Font (Roboto, Outfit, Inter, Plus Jakarta Sans, Playfair Display) and Color Palette (Emerald Prosperity, Sapphire Blue, Amethyst Purple, Royal Amber, Slate Graphite).',
+        exactFieldOrButton: 'Theme & Typography Tab (Font Selector & Color Scheme Palette)',
+        sampleInput: 'Font: "Outfit" • Theme Color: "Emerald Prosperity" (Luxury Green)',
+        result: 'Instantly restyles the entire application interface, buttons, and badges in real-time.',
+        proTip: 'Outfit and Inter provide the cleanest reading experience on high-resolution laptop and mobile screens.',
         hotspotIndex: 2
       },
       {
         number: 3,
-        title: 'Turn on Two-Factor Authentication (2FA)',
-        action: 'In the Security tab, toggle on Two-Factor Authentication. Scan the QR code with Google Authenticator or Microsoft Authenticator.',
-        exactFieldOrButton: 'Security Settings (Two-Factor Authentication Toggle & QR Scanner)',
-        sampleInput: 'Toggle 2FA to ON • Enter 6-digit verification code from Google Authenticator',
-        result: 'Protects your client database so nobody can log in without your phone approval.',
-        proTip: 'Always save your 16-character backup recovery key in a safe notebook.',
+        title: 'Tab 3: Invoice Settings, GSTIN, RERA & Bank Details',
+        action: 'Click "Invoice Settings". Enter your legal registered entity name, 15-digit GSTIN, State RERA agent license number, and Bank Account / IFSC code for receiving RTGS commissions.',
+        exactFieldOrButton: 'Invoice Settings Tab (GSTIN, RERA ID, Bank Account Number, IFSC Code)',
+        sampleInput: 'GSTIN: "27AAAAA0000A1Z5" • RERA: "MAHARERA / A51900024890" • Bank: HDFC Bank RTGS',
+        result: 'Automatically prints verified tax compliance and bank transfer information on every generated bill.',
+        proTip: 'Double-check your IFSC code to avoid delayed commission payments from developers.',
         hotspotIndex: 3
       },
       {
         number: 4,
-        title: 'Inspect Active Login Sessions and Devices',
-        action: 'Scroll down to "Active Sessions". See which computers and phones are logged into your account with browser name and IP location.',
-        exactFieldOrButton: 'Active Sessions Table & "Revoke Other Sessions" Button',
-        sampleInput: 'Review: "Google Chrome on Windows 11 (Mumbai, India)" • Click "Revoke"',
-        result: 'Instantly logs out any old, stolen, or unfamiliar computers.',
-        proTip: 'Click "Revoke Other Sessions" if you ever leave an office computer or cyber café logged in.',
+        title: 'Tab 4: Users & Roles (Team Management)',
+        action: 'Click "Users & Roles". Click "+ Add User" to invite a new advisor. Type their name, email, and pick their role: Admin, Senior Advisor, or Showing Assistant.',
+        exactFieldOrButton: 'Users & Roles Tab ("+ Add User" Button & Role Selector)',
+        sampleInput: 'Name: Ananya Patel • Email: ananya@vancerealty.com • Role: Senior Advisor',
+        result: 'Sends an email invitation with login credentials and activates their seat in your agency workspace.',
+        proTip: 'Give junior coordinators the "Showing Assistant" role so they can manage visits without editing commission rates.',
+        hotspotIndex: 4
+      },
+      {
+        number: 5,
+        title: 'Tab 5: Subscription, Plan & Invoices',
+        action: 'Click "Subscription & Billing". View your active plan tier (Professional / Enterprise), monthly or annual renewal date, and download official AgentLadders subscription invoices.',
+        exactFieldOrButton: 'Subscription & Billing Tab (Plan Badge, Invoices History, "Manage Plan")',
+        sampleInput: 'Plan: "Professional Tier" • Active Seats: 5 • Next Renewal: Annual',
+        result: 'Keeps your agency account in good standing and provides tax receipts for business expense write-offs.',
+        proTip: 'Annual billing includes two months free and locks in premium VIP WhatsApp concierge support.',
+        hotspotIndex: 1
+      },
+      {
+        number: 6,
+        title: 'Tab 6: Notification Preferences & Alerts',
+        action: 'Click "Notifications". Toggle In-App and Email alerts for: New Buyer Leads, 2-Hour Site Visit Reminders, Token Payments Received, and Overdue Invoices.',
+        exactFieldOrButton: 'Notifications Tab (In-App & Email Toggle Matrix)',
+        sampleInput: 'Turn ON In-App & Email for "New Inbound Leads" and "Site Visit 2-Hour Alert"',
+        result: 'Ensures you never miss an urgent client callback or scheduled property walkthrough.',
+        proTip: 'Turn on email alerts for "Token Advance Received" so leadership is immediately notified of closings.',
+        hotspotIndex: 2
+      },
+      {
+        number: 7,
+        title: 'Tab 7: Profile, Password & 2FA Security',
+        action: 'Click "Profile & Security". Update your personal avatar, change your account password, toggle ON Two-Factor Authentication (2FA) with Google Authenticator, and audit active device logins.',
+        exactFieldOrButton: 'Profile & Security Tab (Avatar Upload, Change Password, 2FA Switch, Active Sessions Table)',
+        sampleInput: 'Toggle 2FA ON • Scan QR code with Google Authenticator • Enter 6-digit code',
+        result: 'Protects your client database so nobody can access your buyers without your phone approval.',
+        proTip: 'Click "Revoke Other Sessions" once a month to log out old or unused office laptops.',
+        hotspotIndex: 3
+      },
+      {
+        number: 8,
+        title: 'Tab 8: Configuration & Custom Status Colors',
+        action: 'Click "Configuration". Use the 4 sub-tabs (Statuses, Property, Sourcing, All) to add custom BHK options (e.g. 5+ BHK Duplex), custom lead sources, and assign custom color badges (Emerald, Sapphire, Amber).',
+        exactFieldOrButton: 'Configuration Tab (Sub-tabs, "Add Option" Input, Status Color Picker)',
+        sampleInput: 'Category: "Lead Sources" • Add: "HNI Golf Club Referral" • Color: "Emerald"',
+        result: 'Adds your custom dropdown option across all lead and property forms in the CRM.',
+        proTip: 'Assign distinct colors to deal stages so your Kanban board is instantly readable from across the room.',
         hotspotIndex: 4
       }
     ],
     keyControls: [
       {
-        name: 'Agency Branding Profile',
+        name: '8 Top Navigation Tabs',
+        type: 'filter',
+        description: 'Switches seamlessly between Agency, Appearance, Invoices, Users, Billing, Alerts, Security, and Config.',
+        bestPractice: 'Review each tab during agency onboarding to complete your 100% setup score.'
+      },
+      {
+        name: 'Live Theme & Font Switcher',
         type: 'button',
-        description: 'Customizes your agency name, logo, phone number, and office address across the app.',
-        bestPractice: 'Keep your agency details up to date so outgoing invoices look 100% professional.'
+        description: 'Applies luxury typography and color schemes across all screens without reloading.',
+        bestPractice: 'Choose Emerald Prosperity for traditional wealth branding or Sapphire Blue for modern commercial agencies.'
       },
       {
         name: 'Two-Factor Authentication (2FA)',
         type: 'toggle',
-        description: 'Requires a 6-digit phone code whenever signing into your account from a new computer.',
-        bestPractice: 'Mandate 2FA for all team members to protect your confidential buyer lists.'
+        description: 'Requires a 6-digit TOTP phone code whenever signing into your account from an unverified computer.',
+        bestPractice: 'Mandate 2FA for all team members to protect your confidential client lists.'
       },
       {
-        name: 'Active Sessions Security Monitor',
-        type: 'filter',
-        description: 'Shows live device logins with city location, IP address, and 1-click logout buttons.',
-        bestPractice: 'Check this table once a month to ensure only your authorized devices are active.'
+        name: 'Custom Status Color Palette',
+        type: 'button',
+        description: 'Assigns Emerald, Blue, Amber, Purple, Red, or Slate to custom workflow statuses.',
+        bestPractice: 'Use Green/Emerald for won deals, Amber for negotiations, and Red for urgent follow-ups.'
       }
     ],
     modalShowcase: [
       {
         modalTitle: 'Add Team Member (User Invitation Form)',
-        triggerButton: '+ Add Team Member Button (Team Tab)',
+        triggerButton: '+ Add User Button (Users & Roles Tab)',
         purpose: 'Create and invite a new property advisor, sales executive, or showing assistant to your agency.',
         actionType: 'create',
         stepByStep: [
-          'Navigate to Settings and click the "Team" tab.',
-          'Click the "+ Add Team Member" button.',
-          'Enter their full name, mobile number, and work email address.',
-          'Select their role: Admin (full access), Senior Advisor (deals & leads), or Showing Assistant (visits only).',
-          'Click "Send Invitation" — sends an email login link with their temporary password.'
+          'Navigate to Settings and click the "Users & Roles" tab.',
+          'Click the blue "+ Add User" button in the top right.',
+          'Type the advisor\'s full name, work email address, and 10-digit mobile number.',
+          'Pick their role: Admin (full access), Senior Advisor (deals & leads), or Showing Assistant (visits only).',
+          'Click "Send Invitation" — sends an email invite with a secure temporary login password.'
         ],
         keyFields: [
-          { fieldName: 'Full Name', inputType: 'Text', guidance: 'Team member full name' },
-          { fieldName: 'Email Address', inputType: 'Email', guidance: 'Official login email address' },
-          { fieldName: 'Mobile Number', inputType: 'Tel (+91)', guidance: 'Phone number for WhatsApp notifications' },
+          { fieldName: 'Full Name', inputType: 'Text', guidance: 'Advisor full legal name' },
+          { fieldName: 'Email Address', inputType: 'Email', guidance: 'Company email address for logging in' },
+          { fieldName: 'Mobile Number', inputType: 'Tel (+91)', guidance: '10-digit phone number for WhatsApp alerts' },
           { fieldName: 'Role & Permissions', inputType: 'Dropdown Picker', guidance: 'Select: Admin, Senior Advisor, or Showing Assistant' }
         ],
         operatorTip: 'Assign junior associates the "Showing Assistant" role so they can view visits without editing sensitive commission data.'
       },
       {
-        modalTitle: 'Edit Agency Profile, Logo & Office Address',
-        triggerButton: 'Edit Profile Button / Form (Profile Tab)',
-        purpose: 'Edit agency company name, upload high-res logo with transparent background, and update phone/email.',
+        modalTitle: 'Edit User Role & Permissions Matrix',
+        triggerButton: 'Edit Icon on any User Row (Users & Roles Tab)',
+        purpose: 'Edit an existing team member\'s access level, change their assigned role, or deactivate access.',
         actionType: 'edit',
         stepByStep: [
-          'In Settings, stay on the "Agency Profile" tab.',
-          'Click "Upload Logo" to replace your current branding image.',
-          'Edit your official business name, public customer hotline, and head office address.',
-          'Click "Save Profile" — your updated logo immediately appears on all outgoing brochures and tax invoices.'
+          'In the Users & Roles tab, locate the team member and click the Edit pencil icon.',
+          'Promote an associate from "Showing Assistant" to "Senior Advisor" when they begin handling negotiations.',
+          'Toggle account status between Active and Inactive if an agent leaves the agency.',
+          'Click "Save Permissions" to immediately apply access rule updates.'
+        ],
+        keyFields: [
+          { fieldName: 'Assigned Role', inputType: 'Dropdown Picker', guidance: 'Switch between Admin, Senior Advisor, or Showing Assistant' },
+          { fieldName: 'Account Status', inputType: 'Pill Toggle', guidance: 'Active or Inactive (revokes login access immediately)' },
+          { fieldName: 'Reset Password Link', inputType: 'Button Action', guidance: 'Sends a secure password reset email to the user' }
+        ],
+        operatorTip: 'Deactivating a user instantly terminates all their active login sessions while keeping historical deal records intact.'
+      },
+      {
+        modalTitle: 'Edit Agency Profile, Logo & WhatsApp Number',
+        triggerButton: 'Save Profile Button (Agency Profile Tab)',
+        purpose: 'Edit agency legal name, upload high-resolution transparent logo, and update customer support contact.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Settings, stay on the first tab: "Agency Profile".',
+          'Click "Upload Logo" to pick your transparent PNG logo file (under 5MB).',
+          'Update your registered agency name, official support email, and 10-digit WhatsApp phone.',
+          'Type your registered office address shown in the footer of brochures and invoices.',
+          'Click "Save Profile" — your updated branding appears instantly across all reports and PDF exports.'
         ],
         keyFields: [
           { fieldName: 'Agency Logo', inputType: 'Image Upload (PNG/JPG)', guidance: 'Upload transparent PNG logo for clean invoices' },
           { fieldName: 'Agency Legal Name', inputType: 'Text', guidance: 'Official registered entity name' },
-          { fieldName: 'Customer Support Phone', inputType: 'Tel (+91)', guidance: 'Direct public phone number shown on brochures' },
-          { fieldName: 'Office Address', inputType: 'Textarea', guidance: 'Registered office address shown in invoice footer' }
+          { fieldName: 'Customer WhatsApp Phone', inputType: 'PhoneInput (+91)', guidance: '10-digit public WhatsApp number shown on brochures' },
+          { fieldName: 'Registered Office Address', inputType: 'Textarea', guidance: 'Complete office address for invoice compliance' }
         ],
-        operatorTip: 'Use a high-resolution transparent PNG logo so it looks crisp on both mobile screens and printed PDFs.'
+        operatorTip: 'Use a transparent PNG logo with at least 600px width so it renders crisply on both mobile screens and printed PDFs.'
       },
       {
-        modalTitle: 'Edit RERA Agent License & GSTIN Numbers',
-        triggerButton: 'Save Compliance Button (Statutory Tab)',
-        purpose: 'Edit your verified state RERA agent license number and 15-digit GSTIN tax number.',
+        modalTitle: 'Theme, Typography & Color Palette Customizer',
+        triggerButton: 'Apply Theme Button (Theme & Typography Tab)',
+        purpose: 'Customize the visual style of your CRM by picking modern Google Fonts and luxury color schemes.',
         actionType: 'edit',
         stepByStep: [
-          'In Settings, click on the "RERA & Legal" section.',
-          'Enter or edit your state RERA Agent Registration Number (e.g. MAHARERA / A51900024890).',
-          'Enter your valid 15-digit GSTIN number for tax compliance.',
-          'Click "Update Compliance" — embeds verified license tags on all brochures and bills.'
+          'In Settings, click the "Theme & Typography" tab.',
+          'Select your preferred Google Font: Roboto, Outfit, Inter, Plus Jakarta Sans, or Playfair Display.',
+          'Click on a luxury color palette card: Emerald Prosperity, Sapphire Blue, Amethyst Purple, or Royal Amber.',
+          'Review the live preview card on screen to see how buttons and badges will look.',
+          'Click "Apply Theme" — updates the CSS theme tokens across your entire browser session.'
         ],
         keyFields: [
-          { fieldName: 'RERA Registration Number', inputType: 'Text', guidance: 'State real estate agent license number' },
-          { fieldName: 'GSTIN Number', inputType: 'Text (15 chars)', guidance: 'Official 15-character GST registration code' }
+          { fieldName: 'Google Font Family', inputType: 'Radio Card Picker', guidance: 'Choose modern sans-serif typography' },
+          { fieldName: 'Color Scheme Palette', inputType: 'Color Card Grid', guidance: 'Pick primary branding accent color' },
+          { fieldName: 'Live Style Preview', inputType: 'Interactive Preview Box', guidance: 'Inspect buttons, badges, and text styles before saving' }
         ],
-        operatorTip: 'Double check your RERA expiration date annually to ensure uninterrupted license validity.'
+        operatorTip: 'Emerald Prosperity is the industry-standard luxury real estate color representing wealth and stability.'
+      },
+      {
+        modalTitle: 'Configure Tax, GSTIN, RERA & Bank RTGS Details',
+        triggerButton: 'Save Invoice Settings Button (Invoice Settings Tab)',
+        purpose: 'Edit your tax identification numbers, State RERA agent license, and Bank RTGS details for commission payouts.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Settings, click the "Invoice Settings" tab.',
+          'Enter your legal entity name as registered on your GST certificate.',
+          'Type your 15-character GSTIN number and State RERA license (e.g. MAHARERA / A51900024890).',
+          'Input your agency Bank Name, Account Holder Name, Account Number, and IFSC Code.',
+          'Set your default brokerage rate (e.g. 2%), GST (18%), and TDS deduction (5%).',
+          'Click "Save Invoice Settings" — these details will now auto-fill on every new tax invoice.'
+        ],
+        keyFields: [
+          { fieldName: 'GSTIN Number', inputType: 'Text (15 chars)', guidance: 'Official 15-character GST tax code' },
+          { fieldName: 'RERA License Number', inputType: 'Text', guidance: 'State real estate agent license number' },
+          { fieldName: 'Bank Name & Account #', inputType: 'Text & Number', guidance: 'Official agency bank account for RTGS receipts' },
+          { fieldName: 'IFSC Code', inputType: 'Text (11 chars)', guidance: 'Bank branch IFSC code for RTGS/NEFT' },
+          { fieldName: 'Default Commission %', inputType: 'Percentage (e.g. 2%)', guidance: 'Standard advisory brokerage percentage' }
+        ],
+        operatorTip: 'Having your bank RTGS details saved in settings prevents manual typing errors on invoice bills.'
       },
       {
         modalTitle: 'Setup / Reconfigure Two-Factor Authentication (2FA)',
-        triggerButton: '2FA Toggle Switch (Security Tab)',
-        purpose: 'Turn on or reconfigure Google Authenticator to keep your buyer lists and deals 100% safe.',
+        triggerButton: '2FA Toggle Switch (Profile & Security Tab)',
+        purpose: 'Create or reconfigure Google Authenticator TOTP security to lock down your broker database.',
         actionType: 'create',
         stepByStep: [
-          'In Settings, click the "Security" tab.',
-          'Toggle "Two-Factor Authentication" to ON.',
-          'Open Google Authenticator on your phone and scan the QR code displayed on screen.',
-          'Type the 6-digit verification code generated on your phone screen.',
-          'Click "Verify & Enable 2FA" and write down your 16-character backup recovery key.'
+          'In Settings, click the "Profile & Security" tab.',
+          'Scroll down to "Two-Factor Authentication (2FA)" and toggle the switch to ON.',
+          'Open Google Authenticator or Microsoft Authenticator on your smartphone.',
+          'Scan the QR code displayed on screen or manually type the secret alphanumeric key.',
+          'Type the 6-digit verification code generated by the app and click "Verify & Enable 2FA".',
+          'Write down your 16-character backup recovery key in a secure location.'
         ],
         keyFields: [
-          { fieldName: 'QR Code Scanner', inputType: 'QR Code Display', guidance: 'Scan using Google Authenticator on your phone' },
-          { fieldName: '6-Digit Verification Code', inputType: 'Number (6 digits)', guidance: 'Type the 6-digit code shown on your phone screen' },
-          { fieldName: 'Backup Recovery Key', inputType: 'Read-only String', guidance: 'Write this key down in case you change phones' }
+          { fieldName: 'QR Code Display', inputType: 'QR Code Scanner', guidance: 'Scan with smartphone authenticator app' },
+          { fieldName: '6-Digit TOTP Code', inputType: 'Number (6 digits)', guidance: 'Type code currently displayed on phone' },
+          { fieldName: 'Backup Recovery Key', inputType: 'Read-only String', guidance: 'Save this 16-character key in a safe notebook' }
         ],
-        operatorTip: 'Take a screenshot of your backup key and store it in a safe place.'
+        operatorTip: 'Take a screenshot of your backup key and store it securely in your password manager.'
+      },
+      {
+        modalTitle: 'Change Account Password & Update User Avatar',
+        triggerButton: 'Update Password / Save Avatar Button (Profile & Security Tab)',
+        purpose: 'Edit personal login password and upload your personal broker profile picture.',
+        actionType: 'edit',
+        stepByStep: [
+          'In the Profile & Security tab, click "Upload Avatar" to set your personal profile photo.',
+          'Under "Change Password", type your current existing password.',
+          'Enter your new strong password (at least 8 characters with numbers and symbols).',
+          'Confirm the new password and click "Update Password".'
+        ],
+        keyFields: [
+          { fieldName: 'Profile Avatar', inputType: 'Image Upload (PNG/JPG)', guidance: 'Professional headshot photo' },
+          { fieldName: 'Current Password', inputType: 'Password Field', guidance: 'Verify existing login password' },
+          { fieldName: 'New Password & Confirm', inputType: 'Password Field', guidance: 'Minimum 8 characters with numbers and symbols' }
+        ],
+        operatorTip: 'Update your password every 90 days to maintain maximum security across your team.'
+      },
+      {
+        modalTitle: 'Active Login Sessions & Remote Device Logout',
+        triggerButton: 'Revoke Other Sessions Button (Profile & Security Tab)',
+        purpose: 'Monitor all logged-in computers and smartphones, inspect IP locations, and log out old devices.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Profile & Security, scroll down to the "Active Sessions" table.',
+          'Inspect all connected devices: browser name, operating system (Windows, Mac, iPhone), and IP city.',
+          'If you see an unfamiliar computer or old device, click the red "Revoke" button next to it.',
+          'Click "Revoke All Other Sessions" to immediately log out all devices except the one you are currently using.'
+        ],
+        keyFields: [
+          { fieldName: 'Connected Devices List', inputType: 'Data Table', guidance: 'Displays browser, OS, IP address, and last active time' },
+          { fieldName: 'Revoke Single Device', inputType: 'Button Action', guidance: 'Immediately invalidates session token for that device' },
+          { fieldName: 'Revoke All Other Sessions', inputType: 'Button Action', guidance: 'Forces logout across all external computers and phones' }
+        ],
+        operatorTip: 'Always click "Revoke Other Sessions" if you ever accessed your CRM from a hotel business center or client laptop.'
+      },
+      {
+        modalTitle: 'Add New Custom CRM Option (BHK, Source, Stage)',
+        triggerButton: '+ Add Option Input Box (Configuration Tab)',
+        purpose: 'Create new custom dropdown choices for BHK options, property types, lead sources, and deal stages.',
+        actionType: 'create',
+        stepByStep: [
+          'In Settings, click the "Configuration" tab.',
+          'Pick the relevant sub-tab: Statuses, Property, Sourcing, or All.',
+          'Find the category you want to expand (e.g. "BHK Options" or "Lead Sources").',
+          'Type the new option in the input box (e.g. "5+ BHK Duplex Penthouse" or "Dubai Roadshow").',
+          'Click the "+ Add" button — the option is immediately available in all dropdowns across your CRM.'
+        ],
+        keyFields: [
+          { fieldName: 'Configuration Category', inputType: 'Category Selector', guidance: 'Pick BHK, Property Type, Lead Source, or Stage' },
+          { fieldName: 'Option Label', inputType: 'Text Input', guidance: 'Type the exact name to appear in dropdowns' }
+        ],
+        operatorTip: 'Add specific lead sources like "Instagram Campaign Q3" to track marketing campaign ROI accurately.'
+      },
+      {
+        modalTitle: 'Customize Status Color Palette (Emerald, Blue, Amber)',
+        triggerButton: 'Color Dot / Palette Picker (Configuration Tab)',
+        purpose: 'Edit and customize the badge colors assigned to each status across properties, leads, visits, and deals.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Configuration, stay on the "Statuses" sub-tab.',
+          'Locate the status you want to color-code (e.g. "Under Offer" or "Hot Lead").',
+          'Click the colored dot next to the status name to open the quick color picker.',
+          'Choose your preferred color: Emerald (Green), Sapphire (Blue), Royal Amber (Yellow), Amethyst (Purple), or Ruby (Red).',
+          'Click "Save Color" — badge styling updates instantly across all tables and cards.'
+        ],
+        keyFields: [
+          { fieldName: 'Target Status Name', inputType: 'Status Item', guidance: 'Select status to re-color' },
+          { fieldName: 'Color Palette Choice', inputType: 'Color Swatch (6 Palettes)', guidance: 'Pick Emerald, Sapphire, Amber, Purple, Red, or Slate' }
+        ],
+        operatorTip: 'Keep high-priority tags like "Hot Lead" in Red or Ruby so they catch your eye immediately on morning review.'
+      },
+      {
+        modalTitle: 'Notification Preferences & Alert Toggles',
+        triggerButton: 'Save Preferences Button (Notifications Tab)',
+        purpose: 'Edit when and where you receive alerts for new leads, site visits, token payments, and overdue bills.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Settings, click the "Notifications" tab.',
+          'Review the alert matrix with rows for: New Inbound Leads, 2-Hour Site Visit Alert, Token Received, and Overdue Invoices.',
+          'Use the toggle switches to turn In-App and Email notifications ON or OFF for each event.',
+          'Click "Save Notification Preferences" — your notification routing is updated immediately.'
+        ],
+        keyFields: [
+          { fieldName: 'Event Triggers', inputType: 'Event Rows', guidance: 'Leads, Site Visits, Token Payments, Overdue Invoices' },
+          { fieldName: 'In-App Alerts', inputType: 'Toggle Switch', guidance: 'Shows popup bell badge inside the app' },
+          { fieldName: 'Email Dispatch', inputType: 'Toggle Switch', guidance: 'Sends an email notification to your registered address' }
+        ],
+        operatorTip: 'Keep "Site Visit 2-Hour Reminder" enabled so you get an alert in time to check caretaker keys.'
+      },
+      {
+        modalTitle: 'Subscription Plan, Invoices & Billing Management',
+        triggerButton: 'Manage Subscription Button (Subscription & Billing Tab)',
+        purpose: 'Review subscription tier, view seat allocation, update payment details, and download tax receipts.',
+        actionType: 'edit',
+        stepByStep: [
+          'In Settings, click the "Subscription & Billing" tab.',
+          'Inspect your active plan details (e.g. Professional Plan with 5 Advisor Seats).',
+          'Under "Billing History", click "Download Receipt" next to any past monthly or annual charge.',
+          'Click "Manage Subscription" to upgrade seats as your sales team expands.'
+        ],
+        keyFields: [
+          { fieldName: 'Active Plan Tier', inputType: 'Plan Badge', guidance: 'Professional or Enterprise Tier' },
+          { fieldName: 'Advisor Seats Count', inputType: 'Number Display', guidance: 'Number of active team user licenses' },
+          { fieldName: 'Billing Invoices', inputType: 'Receipts Table', guidance: '1-click PDF download for accounting expense claims' }
+        ],
+        operatorTip: 'Download your annual subscription tax invoice to claim input GST credit on your agency tax return.'
       }
     ],
     whatsAppVault: [
@@ -2115,8 +2315,8 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
       statOrMetric: 'Agencies with full 2FA security and verified RERA credentials win 80% more high-value sole-selling mandates.'
     },
     mockPreview: {
-      windowTitle: 'AgentLadders • Agency Settings & Security (/dashboard/settings)',
-      subtitle: 'Agency Branding • RERA/GSTIN Profile • Two-Factor Authentication • Session Tracking',
+      windowTitle: 'AgentLadders • Agency Settings & Master Control (/dashboard/settings)',
+      subtitle: '8 Tabs: Profile • Theme & Fonts • Invoices • Users • Billing • Alerts • Security & 2FA • Config',
       stats: [
         { label: 'Security Level', value: 'High (2FA On)', color: '#059669' },
         { label: 'Active Sessions', value: '2 Devices', color: '#2563eb' },
@@ -2124,10 +2324,10 @@ export const MODULE_TUTORIALS: ModuleTutorial[] = [
         { label: 'Team Members', value: '4 Active', color: '#7c3aed' }
       ],
       hotspots: [
-        { id: 1, x: 25, y: 22, title: 'Agency Profile & Branding', description: 'Upload company logo, agency name, contact phone, and official office address.', actionHint: 'Edit agency branding' },
-        { id: 2, x: 60, y: 22, title: 'RERA & GSTIN Numbers', description: 'Enter state real estate license number and GSTIN for automatic invoice branding.', actionHint: 'Update license numbers' },
-        { id: 3, x: 25, y: 55, title: 'Two-Factor Authentication (2FA)', description: 'Toggle on 2FA and scan QR code with your phone to secure your account.', actionHint: 'Enable 2FA security' },
-        { id: 4, x: 65, y: 65, title: 'Active Sessions Table', description: 'View all logged-in computers and phones with 1-click logout buttons.', actionHint: 'Review logged-in devices' }
+        { id: 1, x: 25, y: 15, title: '8 Master Settings Navigation Tabs', description: 'Switch between Agency Profile, Theme, Invoice Settings, Users, Billing, Alerts, Security, and Config.', actionHint: 'Click to switch settings tab' },
+        { id: 2, x: 50, y: 35, title: 'Branding & Theme Customizer', description: 'Upload company logo, pick Google Fonts (Outfit, Roboto), and luxury color schemes in real-time.', actionHint: 'Customize fonts and colors' },
+        { id: 3, x: 25, y: 65, title: 'Two-Factor Authentication & Sessions', description: 'Toggle ON 2FA with Google Authenticator and monitor connected devices with 1-click logout.', actionHint: 'Lock down account security' },
+        { id: 4, x: 75, y: 65, title: 'CRM Dropdown Configuration', description: 'Add your own custom BHK options, lead sources, and customize badge colors across the CRM.', actionHint: 'Add custom dropdown options' }
       ]
     }
   }
