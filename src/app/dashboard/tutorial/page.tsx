@@ -8,19 +8,20 @@ import {
   CopyIcon
 } from '@/components/icons/NavIcons';
 import { Toast } from '@/components/ui/Toast';
-import { MODULE_TUTORIALS, Hotspot, StepItem, ModuleTutorial } from '@/data/tutorialData';
+import { MODULE_TUTORIALS, Hotspot, StepItem, ModuleTutorial, ModalShowcaseItem } from '@/data/tutorialData';
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function PlaybookAndTutorialPage() {
   const [selectedModuleId, setSelectedModuleId] = useState<string>('today');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'visual' | 'steps' | 'scripts' | 'tactics'>('steps');
+  const [activeTab, setActiveTab] = useState<'steps' | 'visual' | 'modals' | 'scripts' | 'tactics'>('steps');
   const [activeHotspotId, setActiveHotspotId] = useState<number | null>(null);
   const [activeStepNumber, setActiveStepNumber] = useState<number>(1);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [lightboxActiveHotspotId, setLightboxActiveHotspotId] = useState<number | null>(null);
 
   // Filter modules
   const filteredModules = useMemo(() => {
@@ -43,18 +44,31 @@ export default function PlaybookAndTutorialPage() {
   useEffect(() => {
     setActiveStepNumber(1);
     setActiveHotspotId(null);
+    setLightboxActiveHotspotId(null);
   }, [selectedModuleId]);
 
-  // Handle escape key to close lightbox
+  // Handle keyboard shortcuts when lightbox is open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isLightboxOpen) return;
       if (e.key === 'Escape') {
         setIsLightboxOpen(false);
+      } else if (e.key === '+' || e.key === '=') {
+        setZoomLevel(prev => Math.min(2.5, prev + 0.25));
+      } else if (e.key === '-' || e.key === '_') {
+        setZoomLevel(prev => Math.max(0.75, prev - 0.25));
+      } else if (e.key === '0') {
+        setZoomLevel(1);
+      } else if (['1', '2', '3', '4'].includes(e.key)) {
+        const pinId = parseInt(e.key, 10);
+        if (activeModule.mockPreview.hotspots.some(h => h.id === pinId)) {
+          setLightboxActiveHotspotId(pinId);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isLightboxOpen, activeModule]);
 
   const handleCopy = useCallback((text: string, label: string) => {
     if (navigator.clipboard) {
@@ -71,6 +85,10 @@ export default function PlaybookAndTutorialPage() {
     return activeModule.steps.find(s => s.number === activeStepNumber) || activeModule.steps[0];
   }, [activeModule, activeStepNumber]);
 
+  const currentLightboxHotspot = useMemo(() => {
+    return activeModule.mockPreview.hotspots.find(h => h.id === lightboxActiveHotspotId) || null;
+  }, [activeModule, lightboxActiveHotspotId]);
+
   return (
     <div style={{ maxWidth: 1440, margin: '0 auto', paddingBottom: 100, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
       {toastMessage && (
@@ -81,7 +99,7 @@ export default function PlaybookAndTutorialPage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────────────
-          LIGHTBOX FULLSCREEN SCREENSHOT MODAL
+          INTERACTIVE FULLSCREEN SCREENSHOT LIGHTBOX MODAL
       ───────────────────────────────────────────────────────────────────── */}
       {isLightboxOpen && (
         <div
@@ -89,30 +107,30 @@ export default function PlaybookAndTutorialPage() {
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(2, 6, 23, 0.92)',
-            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(2, 6, 23, 0.94)',
+            backdropFilter: 'blur(12px)',
             zIndex: 9999,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '24px'
+            padding: '16px'
           }}
         >
           <div
             onClick={e => e.stopPropagation()}
             style={{
               position: 'relative',
-              width: '94vw',
-              maxWidth: 1440,
-              maxHeight: '90vh',
+              width: '96vw',
+              maxWidth: 1480,
+              height: '92vh',
               display: 'flex',
               flexDirection: 'column',
               backgroundColor: '#0f172a',
               borderRadius: 20,
               border: '1px solid #334155',
               overflow: 'hidden',
-              boxShadow: '0 25px 60px -15px rgba(0,0,0,0.8)'
+              boxShadow: '0 25px 70px -15px rgba(0,0,0,0.85)'
             }}
           >
             {/* Modal Header Bar */}
@@ -120,36 +138,69 @@ export default function PlaybookAndTutorialPage() {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              padding: '14px 20px',
+              padding: '12px 20px',
               backgroundColor: '#1e293b',
-              borderBottom: '1px solid #334155'
+              borderBottom: '1px solid #334155',
+              flexWrap: 'wrap',
+              gap: 12
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 18 }}>📸</span>
-                <span style={{ fontSize: 14.5, fontWeight: 700, color: '#ffffff' }}>
-                  {activeModule.name} • Live Screen Preview
-                </span>
-                <span style={{ fontSize: 12, color: '#94a3b8', fontFamily: 'monospace' }}>
-                  {activeModule.url}
-                </span>
+                <span style={{ fontSize: 20 }}>📸</span>
+                <div>
+                  <div style={{ fontSize: 14.5, fontWeight: 800, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>{activeModule.name}</span>
+                    <span style={{ fontSize: 11, backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>
+                      Live Preview
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11.5, color: '#94a3b8', fontFamily: 'monospace' }}>
+                    app.agentladders.com{activeModule.url}
+                  </div>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              {/* Module Selector Inside Lightbox */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <select
+                  value={activeModule.id}
+                  onChange={e => {
+                    setSelectedModuleId(e.target.value);
+                    setLightboxActiveHotspotId(null);
+                  }}
+                  style={{
+                    backgroundColor: '#0f172a',
+                    color: '#e2e8f0',
+                    border: '1px solid #334155',
+                    borderRadius: 8,
+                    padding: '6px 12px',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  {MODULE_TUTORIALS.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.shortName}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Zoom Controls */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, backgroundColor: '#0f172a', padding: '4px 8px', borderRadius: 8, border: '1px solid #334155' }}>
                   <button
                     onClick={() => setZoomLevel(prev => Math.max(0.75, prev - 0.25))}
-                    style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: 14, fontWeight: 700, padding: '2px 8px' }}
-                    title="Zoom out"
+                    style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: 15, fontWeight: 800, padding: '2px 8px' }}
+                    title="Zoom out (-)"
                   >
                     -
                   </button>
-                  <span style={{ fontSize: 12, color: '#38bdf8', minWidth: 42, textAlign: 'center' }}>
+                  <span style={{ fontSize: 12, color: '#38bdf8', minWidth: 42, textAlign: 'center', fontWeight: 700 }}>
                     {Math.round(zoomLevel * 100)}%
                   </span>
                   <button
                     onClick={() => setZoomLevel(prev => Math.min(2.5, prev + 0.25))}
-                    style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: 14, fontWeight: 700, padding: '2px 8px' }}
-                    title="Zoom in"
+                    style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: 15, fontWeight: 800, padding: '2px 8px' }}
+                    title="Zoom in (+)"
                   >
                     +
                   </button>
@@ -157,7 +208,7 @@ export default function PlaybookAndTutorialPage() {
                     onClick={() => setZoomLevel(1)}
                     style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 11, padding: '2px 6px', borderLeft: '1px solid #334155' }}
                   >
-                    Reset
+                    100%
                   </button>
                 </div>
 
@@ -179,47 +230,147 @@ export default function PlaybookAndTutorialPage() {
               </div>
             </div>
 
-            {/* Modal Image Body with Zoom */}
-            <div style={{ overflow: 'auto', flex: 1, padding: '20px', display: 'flex', justifyContent: 'center', backgroundColor: '#020617' }}>
-              <div style={{ position: 'relative', transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.15s ease' }}>
+            {/* Modal Image Body with Interactive Pins */}
+            <div style={{ overflow: 'auto', flex: 1, padding: '20px', display: 'flex', justifyContent: 'center', backgroundColor: '#020617', position: 'relative' }}>
+              <div style={{ position: 'relative', transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.15s ease', display: 'inline-block' }}>
                 <img
                   src={activeModule.screenshotUrl}
                   alt={activeModule.name}
                   style={{ maxWidth: '100%', height: 'auto', borderRadius: 12, display: 'block', border: '1px solid #334155' }}
                 />
 
-                {/* Hotspot pins on lightbox */}
-                {activeModule.mockPreview.hotspots.map((spot) => (
-                  <div
-                    key={spot.id}
-                    style={{
-                      position: 'absolute',
-                      left: `${spot.x}%`,
-                      top: `${spot.y}%`,
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: 10
-                    }}
-                  >
+                {/* Hotspot Pins on Lightbox Screenshot */}
+                {activeModule.mockPreview.hotspots.map((spot) => {
+                  const isSelected = lightboxActiveHotspotId === spot.id;
+                  return (
                     <div
+                      key={spot.id}
                       style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        backgroundColor: '#059669',
-                        color: '#ffffff',
-                        border: '2px solid #ffffff',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 12,
-                        fontWeight: 800
+                        position: 'absolute',
+                        left: `${spot.x}%`,
+                        top: `${spot.y}%`,
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 25
                       }}
                     >
-                      {spot.id}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLightboxActiveHotspotId(isSelected ? null : spot.id);
+                        }}
+                        style={{
+                          width: isSelected ? 38 : 30,
+                          height: isSelected ? 38 : 30,
+                          borderRadius: '50%',
+                          backgroundColor: isSelected ? '#10b981' : '#dc2626',
+                          color: '#ffffff',
+                          border: '3px solid #ffffff',
+                          boxShadow: isSelected ? '0 0 20px #10b981' : '0 4px 14px rgba(0,0,0,0.7)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: isSelected ? 15 : 12,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                          animation: isSelected ? 'none' : 'pulse 1.8s infinite'
+                        }}
+                        title={`Pin #${spot.id}: ${spot.title}`}
+                      >
+                        {spot.id}
+                      </button>
+
+                      {/* Tooltip Card Overlay directly next to Pin */}
+                      {isSelected && (
+                        <div
+                          onClick={e => e.stopPropagation()}
+                          style={{
+                            position: 'absolute',
+                            top: spot.y > 60 ? 'auto' : 44,
+                            bottom: spot.y > 60 ? 44 : 'auto',
+                            left: spot.x > 70 ? 'auto' : 0,
+                            right: spot.x > 70 ? 0 : 'auto',
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            backdropFilter: 'blur(10px)',
+                            color: '#ffffff',
+                            borderRadius: 14,
+                            padding: '16px 18px',
+                            width: 320,
+                            boxShadow: '0 20px 45px rgba(0,0,0,0.8)',
+                            zIndex: 40,
+                            border: '1px solid #34d399',
+                            fontSize: 12.5,
+                            lineHeight: 1.45
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                            <div style={{ fontWeight: 800, color: '#34d399', fontSize: 13 }}>
+                              Pin #{spot.id} • {spot.title}
+                            </div>
+                            <button
+                              onClick={() => setLightboxActiveHotspotId(null)}
+                              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+
+                          <div style={{ color: '#cbd5e1', marginBottom: 10 }}>
+                            {spot.description}
+                          </div>
+
+                          <div style={{ fontSize: 11.5, color: '#38bdf8', fontWeight: 600, backgroundColor: 'rgba(56, 189, 248, 0.1)', padding: '6px 10px', borderRadius: 8, border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+                            👉 <strong>Operator Action:</strong> {spot.actionHint}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Lightbox Footer Bar with Clickable Hotspots & Key Hints */}
+            <div style={{
+              padding: '12px 20px',
+              backgroundColor: '#1e293b',
+              borderTop: '1px solid #334155',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 12
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>
+                  Inspect Hotspots:
+                </span>
+                {activeModule.mockPreview.hotspots.map(h => {
+                  const isSel = lightboxActiveHotspotId === h.id;
+                  return (
+                    <button
+                      key={h.id}
+                      onClick={() => setLightboxActiveHotspotId(isSel ? null : h.id)}
+                      style={{
+                        padding: '5px 12px',
+                        borderRadius: 8,
+                        backgroundColor: isSel ? '#10b981' : '#0f172a',
+                        color: '#ffffff',
+                        border: isSel ? '1px solid #34d399' : '1px solid #334155',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      Pin #{h.id}: {h.title}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div style={{ fontSize: 11.5, color: '#64748b' }}>
+                💡 Press <strong>1-4</strong> to inspect pins • <strong>+/-</strong> to zoom • <strong>Esc</strong> to close
               </div>
             </div>
           </div>
@@ -257,7 +408,7 @@ export default function PlaybookAndTutorialPage() {
             </h1>
 
             <p style={{ fontSize: 15.5, color: '#cbd5e1', margin: 0, lineHeight: 1.6 }}>
-              In-depth operational guide for every page in AgentLadders. Explore high-resolution live application screenshots, annotated visual hotspots, step-by-step checklists with exact data inputs, ready WhatsApp closing scripts, and legal closing secrets.
+              In-depth operational guide for all 12 modules in AgentLadders. Explore high-resolution live application screenshots, interactive visual hotspot pins, step-by-step checklists with exact data inputs, modal blueprints, ready WhatsApp closing scripts, and legal closing secrets.
             </p>
           </div>
 
@@ -324,7 +475,8 @@ export default function PlaybookAndTutorialPage() {
                 type="button"
                 onClick={() => {
                   setSelectedModuleId(mod.id);
-                  setActiveHotspotId(mod.mockPreview.hotspots[0]?.id || null);
+                  setActiveHotspotId(null);
+                  setActiveStepNumber(1);
                 }}
                 style={{
                   display: 'inline-flex',
@@ -367,7 +519,7 @@ export default function PlaybookAndTutorialPage() {
           <div style={{ padding: '18px 18px 14px', borderBottom: '1px solid #f1f5f9' }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10, display: 'flex', justifyContent: 'space-between' }}>
               <span>Module Directory</span>
-              <span style={{ fontSize: 11, color: '#059669', fontWeight: 600 }}>12 Modules</span>
+              <span style={{ fontSize: 11, color: '#059669', fontWeight: 600 }}>{filteredModules.length} Modules</span>
             </div>
             <div style={{ position: 'relative' }}>
               <input
@@ -395,7 +547,7 @@ export default function PlaybookAndTutorialPage() {
             {[
               { catId: 'core', label: '🏆 Core Dealflow' },
               { catId: 'operations', label: '📑 Operations & Legal' },
-              { catId: 'admin', label: '⚙️ Agency Setup' }
+              { catId: 'admin', label: '⚙️ Agency Setup & Support' }
             ].map(group => {
               const groupModules = filteredModules.filter(m => m.category === group.catId);
               if (groupModules.length === 0) return null;
@@ -580,10 +732,11 @@ export default function PlaybookAndTutorialPage() {
           {/* Tab Navigation Switcher */}
           <div className="tutorial-tab-nav touch-scroll-container">
             {[
-              { id: 'steps', label: '⚡ Step-by-Step Operator Guide', emoji: '⚡' },
-              { id: 'visual', label: '📸 Live Screenshot & Hotspots', emoji: '📸' },
-              { id: 'scripts', label: '💬 WhatsApp Closing Scripts', emoji: '💬' },
-              { id: 'tactics', label: '💡 Top 1% Broker Tactics & Legal', emoji: '💡' }
+              { id: 'steps', label: '⚡ Step-by-Step Operator Guide' },
+              { id: 'visual', label: '📸 Live Screenshot & Hotspots' },
+              { id: 'modals', label: '🪟 Key Modals & Form Blueprints' },
+              { id: 'scripts', label: '💬 WhatsApp Closing Scripts' },
+              { id: 'tactics', label: '💡 Top 1% Broker Tactics & Legal' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -753,15 +906,26 @@ export default function PlaybookAndTutorialPage() {
                     right: 14,
                     maxWidth: 'calc(100% - 28px)',
                     boxSizing: 'border-box',
-                    backgroundColor: 'rgba(15, 23, 42, 0.85)',
-                    padding: '6px 14px',
+                    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+                    padding: '8px 16px',
                     borderRadius: 20,
-                    backdropFilter: 'blur(6px)',
-                    fontSize: 12,
+                    backdropFilter: 'blur(8px)',
+                    fontSize: 12.5,
                     color: '#e2e8f0',
-                    border: '1px solid rgba(255,255,255,0.1)'
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 8
                   }}>
-                    🎯 Active Step Focal Point: Pin #{currentStep.hotspotIndex} on screenshot • Click image to zoom
+                    <span>🎯 <strong>Active Step Focus:</strong> Pin #{currentStep.hotspotIndex} on screenshot</span>
+                    <button
+                      onClick={() => setIsLightboxOpen(true)}
+                      style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}
+                    >
+                      Enlarge Screenshot ↗
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1022,7 +1186,8 @@ export default function PlaybookAndTutorialPage() {
                       {isHotspotActive && (
                         <div style={{
                           position: 'absolute',
-                          top: 42,
+                          top: spot.y > 60 ? 'auto' : 42,
+                          bottom: spot.y > 60 ? 42 : 'auto',
                           left: '50%',
                           transform: 'translateX(-50%)',
                           backgroundColor: '#0f172a',
@@ -1112,7 +1277,136 @@ export default function PlaybookAndTutorialPage() {
           )}
 
           {/* ─────────────────────────────────────────────────────────────────
-              TAB 3: WHATSAPP CLOSING SCRIPTS VAULT
+              TAB 3: KEY MODALS & FORM BLUEPRINTS (NEW)
+          ───────────────────────────────────────────────────────────────── */}
+          {activeTab === 'modals' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div className="tutorial-card">
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>
+                  Modal Workflows & Form Input Blueprints: {activeModule.shortName}
+                </div>
+                <div style={{ fontSize: 13.5, color: '#64748b', marginBottom: 24 }}>
+                  Comprehensive guides for every modal window triggered from this screen. Learn exact field requirements, CustomSelect dropdown choices, and data entry best practices.
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                  {activeModule.modalShowcase && activeModule.modalShowcase.length > 0 ? (
+                    activeModule.modalShowcase.map((m, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          backgroundColor: '#f8fafc',
+                          borderRadius: 16,
+                          border: '1px solid #cbd5e1',
+                          overflow: 'hidden',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+                        }}
+                      >
+                        {/* Modal Header Badge */}
+                        <div style={{
+                          backgroundColor: '#ffffff',
+                          padding: '16px 20px',
+                          borderBottom: '1px solid #e2e8f0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: 10
+                        }}>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{ fontSize: 18 }}>🪟</span>
+                              <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+                                {m.modalTitle}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: 13, color: '#475569', marginTop: 4 }}>
+                              {m.purpose}
+                            </div>
+                          </div>
+
+                          <div style={{
+                            backgroundColor: '#ecfdf5',
+                            border: '1px solid #a7f3d0',
+                            borderRadius: 8,
+                            padding: '6px 12px',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: '#065f46'
+                          }}>
+                            Trigger: <strong>{m.triggerButton}</strong>
+                          </div>
+                        </div>
+
+                        {/* Fields Breakdown Table */}
+                        <div style={{ padding: '20px' }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 12 }}>
+                            Key Input Fields & CustomSelect Formats:
+                          </div>
+
+                          <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                              <thead>
+                                <tr style={{ backgroundColor: '#f1f5f9', textAlign: 'left' }}>
+                                  <th style={{ padding: '8px 12px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Field Name</th>
+                                  <th style={{ padding: '8px 12px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Input Type</th>
+                                  <th style={{ padding: '8px 12px', borderBottom: '1px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>Operational Guidance & Constraints</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {m.keyFields.map((f, fIdx) => (
+                                  <tr key={fIdx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '10px 12px', fontWeight: 700, color: '#0f172a' }}>{f.fieldName}</td>
+                                    <td style={{ padding: '10px 12px' }}>
+                                      <span style={{
+                                        backgroundColor: f.inputType.includes('CustomSelect') ? '#dbeafe' : '#f1f5f9',
+                                        color: f.inputType.includes('CustomSelect') ? '#1e40af' : '#475569',
+                                        padding: '3px 8px',
+                                        borderRadius: 6,
+                                        fontSize: 11.5,
+                                        fontWeight: 600
+                                      }}>
+                                        {f.inputType}
+                                      </span>
+                                    </td>
+                                    <td style={{ padding: '10px 12px', color: '#334155' }}>{f.guidance}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Operator Pro Tip */}
+                          <div style={{
+                            marginTop: 16,
+                            backgroundColor: '#ecfdf5',
+                            padding: '10px 14px',
+                            borderRadius: 10,
+                            border: '1px solid #a7f3d0',
+                            fontSize: 12.5,
+                            color: '#065f46',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8
+                          }}>
+                            <span>💡</span>
+                            <span><strong>Operator Tip:</strong> {m.operatorTip}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#64748b' }}>
+                      No modal workflows defined for this module.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ─────────────────────────────────────────────────────────────────
+              TAB 4: WHATSAPP CLOSING SCRIPTS VAULT
           ───────────────────────────────────────────────────────────────── */}
           {activeTab === 'scripts' && (
             <div className="tutorial-card">
@@ -1178,7 +1472,7 @@ export default function PlaybookAndTutorialPage() {
           )}
 
           {/* ─────────────────────────────────────────────────────────────────
-              TAB 4: TOP 1% BROKER TACTICS & LEGAL SECRETS
+              TAB 5: TOP 1% BROKER TACTICS & LEGAL SECRETS
           ───────────────────────────────────────────────────────────────── */}
           {activeTab === 'tactics' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

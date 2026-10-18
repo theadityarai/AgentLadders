@@ -16,6 +16,8 @@ import {
   ReceiptIcon,
   CheckSquareIcon,
   BarChartIcon,
+  TrendingUpIcon,
+  MessageCircleIcon,
   SettingsIcon,
   SparklesIcon,
   ArrowRightIcon,
@@ -154,6 +156,51 @@ const PAGE_GUIDES: QuickGuideItem[] = [
       'Check off items as completed to keep your deal progress on track.'
     ],
     keyActionName: 'Check Off Priority Deal Tasks'
+  },
+  {
+    id: 'insights',
+    name: 'Performance Insights',
+    path: '/dashboard/analytics',
+    icon: TrendingUpIcon,
+    accentColor: '#059669',
+    badge: 'REVENUE INTEL',
+    tagline: 'Track brokerage velocity, conversion funnels, and top micro-markets.',
+    threeSteps: [
+      'Monitor Brokerage Earned in Lakhs and active pipeline value in Crores.',
+      'Analyze the stage-by-stage conversion funnel from Inquiry to Closed Won.',
+      'Export high-resolution executive PDF reports for monthly partner meetings.'
+    ],
+    keyActionName: 'Inspect Revenue Intelligence'
+  },
+  {
+    id: 'reports',
+    name: 'Intelligence Reports',
+    path: '/dashboard/reports',
+    icon: BarChartIcon,
+    accentColor: '#059669',
+    badge: 'AUDIT & EXPORT',
+    tagline: 'Generate audit-ready CSV ledgers for GST SAC 997222 tax filings.',
+    threeSteps: [
+      'Select statement template: Commission Ledger, Portals ROI, or Absorption.',
+      'Configure date range and verify gross deal considerations against commissions.',
+      'Export formatted CSV files directly for your Chartered Accountant or Tally.'
+    ],
+    keyActionName: 'Export Audit-Ready CSV'
+  },
+  {
+    id: 'support',
+    name: 'Help & Support Hub',
+    path: '/dashboard/support',
+    icon: MessageCircleIcon,
+    accentColor: '#2563eb',
+    badge: 'SUPPORT & LEGAL',
+    tagline: 'Broker FAQs, model RERA agreements, and in-app Terms & Privacy reader.',
+    threeSteps: [
+      'Switch between FAQs, Legal Contracts, Terms & Privacy, and Support Tickets.',
+      'Review DPDP Act 2023 compliance, data ownership, and RERA carpet area rules.',
+      'Submit priority tickets or connect with real estate specialists on WhatsApp.'
+    ],
+    keyActionName: 'Open Terms, Contracts & Support'
   },
   {
     id: 'settings',
